@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Configuration;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -22,7 +23,18 @@ public class MainViewModel : IDisposable
 
     public MainViewModel()
     {
+        // Load settings from TOML
+        var config = ConfigurationLoader.Load();
+        
         _inventory = new Inventory();
+        foreach (var item in config.Inventory.InitialCounts)
+        {
+            if (int.TryParse(item.Key, out int denom))
+            {
+                _inventory.SetCount(denom, item.Value);
+            }
+        }
+
         _history = new TransactionHistory();
         _manager = new CashChangerManager(_inventory, _history);
 
@@ -34,8 +46,11 @@ public class MainViewModel : IDisposable
             var vm = new DenominationViewModel(_inventory, d);
             Denominations.Add(vm);
             
-            // For status monitoring
-            return new CashStatusMonitor(_inventory, d, 5, 90, 100);
+            // For status monitoring using thresholds from config
+            return new CashStatusMonitor(_inventory, d, 
+                nearEmptyThreshold: config.Thresholds.NearEmpty, 
+                nearFullThreshold: config.Thresholds.NearFull, 
+                fullThreshold: config.Thresholds.Full);
         }).ToList();
 
         _statusAggregator = new OverallStatusAggregator(monitors);
