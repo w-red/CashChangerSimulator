@@ -1,14 +1,17 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Configuration;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-public class MainViewModel : IDisposable
+public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErrorInfo
 {
     private readonly Inventory _inventory;
     private readonly TransactionHistory _history;
@@ -21,11 +24,63 @@ public class MainViewModel : IDisposable
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = new();
 
-    // 双方向バインディング用のプロパティ
+    // 双方向バインディング用のプロパティ（バリデーション付き）
+    private string _dispenseAmountInput = "";
+    public string DispenseAmountInput
+    {
+        get => _dispenseAmountInput;
+        set
+        {
+            if (_dispenseAmountInput != value)
+            {
+                _dispenseAmountInput = value;
+                OnPropertyChanged();
+                ValidateDispenseAmount(value);
+                DispenseAmountText.Value = value;
+            }
+        }
+    }
+
+    // 内部ロジック用
     public ReactiveProperty<string> DispenseAmountText { get; }
 
     // コマンド
     public ReactiveCommand DispenseCommand { get; }
+
+    // INotifyDataErrorInfo
+    private readonly Dictionary<string, List<string>> _errors = new();
+    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    public bool HasErrors => _errors.Count > 0;
+    public System.Collections.IEnumerable GetErrors(string? propertyName) => 
+        _errors.GetValueOrDefault(propertyName ?? "") ?? Enumerable.Empty<string>();
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? name = null) 
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void ValidateDispenseAmount(string text)
+    {
+        var propertyName = nameof(DispenseAmountInput);
+        if (_errors.ContainsKey(propertyName))
+        {
+            _errors.Remove(propertyName);
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        }
+
+        var errors = new List<string>();
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+             if (!int.TryParse(text, out var val)) errors.Add("Enter a valid number");
+             else if (val <= 0) errors.Add("Amount must be positive");
+             else if (val > TotalAmount.CurrentValue) errors.Add("Insufficient funds");
+        }
+        
+        if (errors.Count > 0)
+        {
+            _errors[propertyName] = errors;
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        }
+    }
 
     public MainViewModel()
     {
@@ -51,8 +106,6 @@ public class MainViewModel : IDisposable
         {
             var vm = new DenominationViewModel(_inventory, d);
             Denominations.Add(vm);
-            
-            // For status monitoring using thresholds from config
             return new CashStatusMonitor(_inventory, d, 
                 nearEmptyThreshold: config.Thresholds.NearEmpty, 
                 nearFullThreshold: config.Thresholds.NearFull, 
@@ -68,12 +121,9 @@ public class MainViewModel : IDisposable
             .ToReadOnlyReactiveProperty(_inventory.CalculateTotal())
             .AddTo(_disposables);
 
-        // Experience: Subscribe to history to show in UI
         _history.Added
             .Subscribe(entry =>
             {
-                // UIスレッドでの更新が必要な場合、SynchronizationContext経由で行われることを期待
-                // R3 の ObserveOn を使うか、App.xaml.cs で Provider を設定する
                  App.Current.Dispatcher.Invoke(() =>
                 {
                     RecentTransactions.Insert(0, entry);
@@ -86,8 +136,18 @@ public class MainViewModel : IDisposable
         DispenseAmountText = new ReactiveProperty<string>("")
             .AddTo(_disposables);
 
-        DispenseCommand = DispenseAmountText
-            .Select(text => decimal.TryParse(text, out var val) && val > 0)
+        // エラー状態の変更を監視してコマンドの有効状態を制御
+        var errorsChangedObservable = Observable.FromEvent<EventHandler<DataErrorsChangedEventArgs>, DataErrorsChangedEventArgs>(
+            h => (s, e) => h(e),
+            h => ErrorsChanged += h,
+            h => ErrorsChanged -= h);
+
+        var canDispense = errorsChangedObservable
+            .Select(_ => !HasErrors)
+            .Prepend(!HasErrors)
+            .CombineLatest(DispenseAmountText, (noError, text) => noError && !string.IsNullOrEmpty(text));
+
+        DispenseCommand = canDispense
             .ToReactiveCommand()
             .AddTo(_disposables);
             
@@ -96,7 +156,7 @@ public class MainViewModel : IDisposable
             if (decimal.TryParse(DispenseAmountText.Value, out var amount))
             {
                 DispenseCash(amount);
-                DispenseAmountText.Value = ""; // Clear after dispense
+                DispenseAmountInput = ""; // Clear via wrapper to trigger notification
             }
         });
     }
