@@ -1,0 +1,17 @@
+  蠕ｩ蜈・ｯｾ雎｡縺ｮ繝励Ο繧ｸ繧ｧ繧ｯ繝医ｒ豎ｺ螳壹＠縺ｦ縺・∪縺・..
+  蠕ｩ蜈・ｯｾ雎｡縺ｮ縺吶∋縺ｦ縺ｮ繝励Ο繧ｸ繧ｧ繧ｯ繝医・譛譁ｰ縺ｧ縺吶・
+  CashChangerSimulator.Core -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Core\bin\Debug\net10.0\CashChangerSimulator.Core.dll
+  CashChangerSimulator.Core -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Core\bin\Debug\net9.0\CashChangerSimulator.Core.dll
+  CashChangerSimulator.Device -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\bin\Debug\net10.0\CashChangerSimulator.Device.dll
+  CashChangerSimulator.Device -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\bin\Debug\net9.0\CashChangerSimulator.Device.dll
+C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\Core\InventoryTests.cs(3,33): error CS0234: 蝙九∪縺溘・蜷榊燕遨ｺ髢薙・蜷榊燕 'Models' 縺悟錐蜑咲ｩｺ髢・'CashChangerSimulator.Core' 縺ｫ蟄伜惠縺励∪縺帙ｓ (繧｢繧ｻ繝ｳ繝悶Μ蜿ら・縺後≠繧九％縺ｨ繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞) [C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\CashChangerSimulator.Tests.csproj::TargetFramework=net10.0]
+C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\Core\InventoryTests.cs(3,33): error CS0234: 蝙九∪縺溘・蜷榊燕遨ｺ髢薙・蜷榊燕 'Models' 縺悟錐蜑咲ｩｺ髢・'CashChangerSimulator.Core' 縺ｫ蟄伜惠縺励∪縺帙ｓ (繧｢繧ｻ繝ｳ繝悶Μ蜿ら・縺後≠繧九％縺ｨ繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞) [C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\CashChangerSimulator.Tests.csproj::TargetFramework=net9.0]
+
+繝薙Ν繝峨↓螟ｱ謨励＠縺ｾ縺励◆縲・
+
+C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\Core\InventoryTests.cs(3,33): error CS0234: 蝙九∪縺溘・蜷榊燕遨ｺ髢薙・蜷榊燕 'Models' 縺悟錐蜑咲ｩｺ髢・'CashChangerSimulator.Core' 縺ｫ蟄伜惠縺励∪縺帙ｓ (繧｢繧ｻ繝ｳ繝悶Μ蜿ら・縺後≠繧九％縺ｨ繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞) [C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\CashChangerSimulator.Tests.csproj::TargetFramework=net10.0]
+C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\Core\InventoryTests.cs(3,33): error CS0234: 蝙九∪縺溘・蜷榊燕遨ｺ髢薙・蜷榊燕 'Models' 縺悟錐蜑咲ｩｺ髢・'CashChangerSimulator.Core' 縺ｫ蟄伜惠縺励∪縺帙ｓ (繧｢繧ｻ繝ｳ繝悶Μ蜿ら・縺後≠繧九％縺ｨ繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞) [C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\CashChangerSimulator.Tests.csproj::TargetFramework=net9.0]
+    0 蛟九・隴ｦ蜻・
+    2 繧ｨ繝ｩ繝ｼ
+
+邨碁℃譎る俣 00:00:04.43

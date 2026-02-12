@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CashChangerSimulator.Core/CashChangerSimulator.Core.csproj" />
+    <Project Path="src/CashChangerSimulator.Device/CashChangerSimulator.Device.csproj" />
+    <Project Path="src/CashChangerSimulator.UI.Wpf/CashChangerSimulator.UI.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj" />
+  </Folder>
+</Solution>
