@@ -21,6 +21,12 @@ public class MainViewModel : IDisposable
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = new();
 
+    // 双方向バインディング用のプロパティ
+    public ReactiveProperty<string> DispenseAmountText { get; }
+
+    // コマンド
+    public ReactiveCommand DispenseCommand { get; }
+
     public MainViewModel()
     {
         // Load settings from TOML
@@ -66,21 +72,36 @@ public class MainViewModel : IDisposable
         _history.Added
             .Subscribe(entry =>
             {
-                App.Current.Dispatcher.Invoke(() =>
+                // UIスレッドでの更新が必要な場合、SynchronizationContext経由で行われることを期待
+                // R3 の ObserveOn を使うか、App.xaml.cs で Provider を設定する
+                 App.Current.Dispatcher.Invoke(() =>
                 {
                     RecentTransactions.Insert(0, entry);
                     if (RecentTransactions.Count > 50) RecentTransactions.RemoveAt(50);
                 });
             })
             .AddTo(_disposables);
+            
+        // Dispense Logic
+        DispenseAmountText = new ReactiveProperty<string>("")
+            .AddTo(_disposables);
+
+        DispenseCommand = DispenseAmountText
+            .Select(text => decimal.TryParse(text, out var val) && val > 0)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+            
+        DispenseCommand.Subscribe(_ =>
+        {
+            if (decimal.TryParse(DispenseAmountText.Value, out var amount))
+            {
+                DispenseCash(amount);
+                DispenseAmountText.Value = ""; // Clear after dispense
+            }
+        });
     }
 
-    public void AddCash(int denomination, int count)
-    {
-        _manager.Deposit(new Dictionary<int, int> { { denomination, count } });
-    }
-
-    public void DispenseCash(decimal amount)
+    private void DispenseCash(decimal amount)
     {
         try
         {
@@ -88,7 +109,6 @@ public class MainViewModel : IDisposable
         }
         catch (Exception ex)
         {
-            // Error handling will be caught by UI or a property
             System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
@@ -106,6 +126,9 @@ public class DenominationViewModel
     public int Value { get; }
     public string Name => Value >= 1000 ? $"{Value / 1000}千円札" : $"{Value}円玉";
     public ReadOnlyReactiveProperty<int> Count { get; }
+    
+    public ReactiveCommand AddCommand { get; }
+    public ReactiveCommand RemoveCommand { get; }
 
     public DenominationViewModel(Inventory inventory, int value)
     {
@@ -115,5 +138,11 @@ public class DenominationViewModel
             .Where(d => d == value)
             .Select(_ => _inventory.GetCount(value))
             .ToReadOnlyReactiveProperty(_inventory.GetCount(value));
+            
+        AddCommand = new ReactiveCommand();
+        AddCommand.Subscribe(_ => _inventory.Add(Value, 1));
+        
+        RemoveCommand = new ReactiveCommand();
+        RemoveCommand.Subscribe(_ => _inventory.Add(Value, -1));
     }
 }

@@ -74,9 +74,9 @@
                                 <TextBlock Text="{Binding Name}" Foreground="#888" FontSize="14" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{Binding Count.Value}" FontSize="36" FontWeight="SemiBold" Margin="0,10" HorizontalAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="+" Width="40" Click="AddCash_Click" Tag="{Binding Value}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
+                                    <Button Content="+" Width="40" Command="{Binding AddCommand}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
                                     <Separator Width="10" Visibility="Hidden"/>
-                                    <Button Content="-" Width="40" Click="RemoveCash_Click" Tag="{Binding Value}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
+                                    <Button Content="-" Width="40" Command="{Binding RemoveCommand}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -97,8 +97,8 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="DispenseTargetBox" Background="#2C2C2C" Foreground="White" BorderThickness="0" Padding="8" VerticalContentAlignment="Center"/>
-                        <Button Grid.Column="1" Content="GO" Click="Dispense_Click" Width="50" Margin="5,0,0,0" Background="#BB86FC" Foreground="Black" FontWeight="Bold" BorderThickness="0"/>
+                        <TextBox Text="{Binding DispenseAmountText.Value, UpdateSourceTrigger=PropertyChanged}" Background="#2C2C2C" Foreground="White" BorderThickness="0" Padding="8" VerticalContentAlignment="Center"/>
+                        <Button Grid.Column="1" Content="GO" Command="{Binding DispenseCommand}" Width="50" Margin="5,0,0,0" Background="#BB86FC" Foreground="Black" FontWeight="Bold" BorderThickness="0"/>
                     </Grid>
                 </StackPanel>
 
