@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Configuration;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -82,37 +81,24 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
-    public MainViewModel()
+    public MainViewModel(
+        Inventory inventory,
+        TransactionHistory history,
+        CashChangerManager manager,
+        MonitorsProvider monitorsProvider,
+        OverallStatusAggregatorProvider aggregatorProvider)
     {
-        // Load settings from TOML
-        var config = ConfigurationLoader.Load();
-        
-        _inventory = new Inventory();
-        foreach (var item in config.Inventory.InitialCounts)
+        _inventory = inventory;
+        _history = history;
+        _manager = manager;
+        _statusAggregator = aggregatorProvider.Aggregator;
+
+        // Initialize Denominations
+        foreach (var monitor in monitorsProvider.Monitors)
         {
-            if (int.TryParse(item.Key, out int denom))
-            {
-                _inventory.SetCount(denom, item.Value);
-            }
+            Denominations.Add(new DenominationViewModel(_inventory, monitor.Denomination));
         }
 
-        _history = new TransactionHistory();
-        _manager = new CashChangerManager(_inventory, _history);
-
-        // Define JPY denominations
-        var denominationValues = new[] { 10000, 5000, 2000, 1000, 500, 100, 50, 10, 5, 1 };
-        
-        var monitors = denominationValues.Select(d =>
-        {
-            var vm = new DenominationViewModel(_inventory, d);
-            Denominations.Add(vm);
-            return new CashStatusMonitor(_inventory, d, 
-                nearEmptyThreshold: config.Thresholds.NearEmpty, 
-                nearFullThreshold: config.Thresholds.NearFull, 
-                fullThreshold: config.Thresholds.Full);
-        }).ToList();
-
-        _statusAggregator = new OverallStatusAggregator(monitors);
         OverallStatus = _statusAggregator.OverallStatus;
 
         // Reactive Total Amount

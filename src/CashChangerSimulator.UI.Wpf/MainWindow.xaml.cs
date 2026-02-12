@@ -11,8 +11,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        _viewModel = new MainViewModel();
-        this.DataContext = _viewModel;
+        _viewModel = DIContainer.Resolve<MainViewModel>();
+        DataContext = _viewModel;
     }
 
     protected override void OnClosed(EventArgs e)
