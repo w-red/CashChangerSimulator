@@ -6,27 +6,19 @@
         xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
         xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
         mc:Ignorable="d"
-        Title="Cash Changer Simulator" Height="700" Width="1000"
-        Background="#121212" Foreground="#E0E0E0"
+        Title="Cash Changer Simulator" Height="720" Width="1080"
+        Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource OnBackgroundBrush}"
         WindowStartupLocation="CenterScreen">
     
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <conv:CashStatusToBrushConverter x:Key="StatusBrushConv" />
         <conv:TransactionTypeToSymbolConverter x:Key="TypeSymbolConv" />
-        
-        <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="Background" Value="#1E1E1E"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="15"/>
-            <Setter Property="Margin" Value="5"/>
-        </Style>
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="320" />
         </Grid.ColumnDefinitions>
         
         <Grid.RowDefinitions>
@@ -35,33 +27,33 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="0,0,0,20">
+        <Border Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="0,0,0,24">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 
-                <StackPanel>
-                    <TextBlock Text="CASH CHANGER SIMULATOR" FontSize="12" Foreground="#888" FontWeight="Bold"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="¥" FontSize="24" VerticalAlignment="Bottom" Margin="0,0,5,5" Foreground="#BB86FC"/>
-                        <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Light"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="TOTAL AMOUNT" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="¥" FontSize="28" VerticalAlignment="Bottom" Margin="0,0,4,6" Foreground="{StaticResource PrimaryBrush}" FontWeight="Light"/>
+                        <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="56" FontWeight="Light" Foreground="{StaticResource OnBackgroundBrush}"/>
                     </StackPanel>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="DEVICE STATUS" FontSize="11" Foreground="#888" HorizontalAlignment="Right"/>
+                    <TextBlock Text="DEVICE STATUS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right"/>
                     <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" 
-                            CornerRadius="4" Padding="12,5" Margin="0,5,0,0">
-                        <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                            CornerRadius="6" Padding="16,6" Margin="0,8,0,0">
+                        <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="14"/>
                     </Border>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Inventory Grid -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,24,0">
             <ItemsControl ItemsSource="{Binding Denominations}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -70,67 +62,124 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Width="150" Height="140">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}" Foreground="#888" FontSize="14" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding Count.Value}" FontSize="36" FontWeight="SemiBold" Margin="0,10" HorizontalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="+" Width="40" Command="{Binding AddCommand}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
-                                    <Separator Width="10" Visibility="Hidden"/>
-                                    <Button Content="-" Width="40" Command="{Binding RemoveCommand}" Background="#2C2C2C" BorderThickness="0" Foreground="White" Padding="5"/>
+                        <Border Style="{StaticResource CardStyle}" Width="160" Height="150" Margin="0,0,16,16" Padding="0">
+                            <Grid>
+                                <!-- Status Indicator Bar -->
+                                <Border Height="4" VerticalAlignment="Top" Background="#333" CornerRadius="4,4,0,0">
+                                   <!-- Binding to individual status if exposed in ViewModel... currently using generic fallback or could add converter later -->
+                                </Border>
+                                
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Count.Value}" FontSize="40" FontWeight="SemiBold" Margin="0,12" HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="+" Width="40" Height="40" Command="{Binding AddCommand}" Style="{StaticResource IconButtonStyle}" FontSize="18"/>
+                                        <Separator Width="12" Visibility="Hidden"/>
+                                        <Button Content="-" Width="40" Height="40" Command="{Binding RemoveCommand}" Style="{StaticResource IconButtonStyle}" FontSize="18"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
 
-        <!-- Transaction History -->
-        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardStyle}" Margin="20,0,0,0">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="RECENT TRANSACTIONS" FontSize="12" Foreground="#888" FontWeight="Bold" Margin="0,0,0,15"/>
-                
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,15,0,0">
-                    <TextBlock Text="DISPENSE AMOUNT" Foreground="#888" FontSize="11"/>
-                    <Grid Margin="0,5,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+        <!-- Sidebar -->
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Dispense Area -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="DISPENSE CASH" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Bold" Margin="0,0,0,12"/>
+                    
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Row="0" x:Name="DispenseBox" Text="{Binding DispenseAmountInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Background="#2C2C2C" Foreground="White" BorderThickness="0" Padding="8" VerticalContentAlignment="Center"/>
-                        <Button Grid.Row="0" Grid.Column="1" Content="GO" Command="{Binding DispenseCommand}" Width="50" Margin="5,0,0,0" Background="#BB86FC" Foreground="Black" FontWeight="Bold" BorderThickness="0"/>
-                        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" 
-                                   Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=DispenseBox}"
-                                   Foreground="#CF6679" FontSize="10" Margin="0,2,0,0"
-                                   Visibility="{Binding (Validation.HasError), ElementName=DispenseBox, Converter={StaticResource BoolToVis}}"/>
+                        
+                        <TextBox Grid.Column="0" x:Name="DispenseBox" 
+                                 Text="{Binding DispenseAmountInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" 
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 FontSize="16" Height="44" VerticalContentAlignment="Center"/>
+                        
+                        <Button Grid.Column="1" Content="GO" Command="{Binding DispenseCommand}" 
+                                Style="{StaticResource PrimaryButtonStyle}" 
+                                Width="60" Height="44" Margin="8,0,0,0"/>
                     </Grid>
+                    
+                    <!-- Error Message -->
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
+                                Visibility="{Binding (Validation.HasError), ElementName=DispenseBox, Converter={StaticResource BoolToVis}}">
+                        <!-- Simple Icon -->
+                        <TextBlock Text="!" Foreground="{StaticResource ErrorBrush}" FontWeight="Bold" Margin="0,0,6,0"/>
+                        <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=DispenseBox}"
+                                   Foreground="{StaticResource ErrorBrush}" FontSize="11" TextWrapping="Wrap"/>
+                    </StackPanel>
                 </StackPanel>
+            </Border>
 
-                <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Type, Converter={StaticResource TypeSymbolConv}}" FontSize="14"/>
-                                <StackPanel Grid.Column="1" Margin="5,0">
-                                    <TextBlock Text="{Binding Type}" FontSize="12" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="10" Foreground="#666"/>
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat={}{0:N0}}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </DockPanel>
-        </Border>
+            <!-- Transaction History -->
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="HISTORY" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Bold" Margin="0,0,0,12"/>
+                    
+                    <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8"/>
+                                <Setter Property="Margin" Value="0,0,0,4"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#2A2A2A"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Border Background="#2C2C2C" Width="32" Height="32" CornerRadius="16" Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding Type, Converter={StaticResource TypeSymbolConv}}" 
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                                   Foreground="{StaticResource PrimaryBrush}" FontSize="16"/>
+                                    </Border>
+                                    
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Type}" FontSize="13" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="11" Foreground="#666"/>
+                                    </StackPanel>
+                                    
+                                    <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat={}{0:N0}}" 
+                                               VerticalAlignment="Center" FontWeight="Bold" FontSize="14"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
