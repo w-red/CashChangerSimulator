@@ -26,8 +26,8 @@ public static class DIContainer
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
 
-        // ViewModels (Transient)
-        resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Transient);
+        // ViewModels (Singleton - to ensure consistency between UI and Logic)
+        resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
 
         // Compilation
         resolver.Compile();

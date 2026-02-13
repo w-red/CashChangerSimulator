@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Windows.Threading;
 using CashChangerSimulator.Core.Models;
 using R3;
 
@@ -19,7 +21,9 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     private readonly CompositeDisposable _disposables = new();
 
     public ObservableCollection<DenominationViewModel> Denominations { get; } = new();
+    private readonly ReactiveProperty<decimal> _totalAmount;
     public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
+    public decimal TotalAmountCurrency => _totalAmount.Value;
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = new();
 
@@ -88,6 +92,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         MonitorsProvider monitorsProvider,
         OverallStatusAggregatorProvider aggregatorProvider)
     {
+        Console.WriteLine($"[MainViewModel] Constructor Called. Hash: {this.GetHashCode()}");
         _inventory = inventory;
         _history = history;
         _manager = manager;
@@ -102,19 +107,55 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         OverallStatus = _statusAggregator.OverallStatus;
 
         // Reactive Total Amount
-        TotalAmount = _inventory.Changed
-            .Select(_ => _inventory.CalculateTotal())
-            .ToReadOnlyReactiveProperty(_inventory.CalculateTotal())
+        _totalAmount = new ReactiveProperty<decimal>(_inventory.CalculateTotal()).AddTo(_disposables);
+        TotalAmount = _totalAmount;
+
+        _inventory.Changed
+            .Subscribe(denom =>
+            {
+                var total = _inventory.CalculateTotal();
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => 
+                    {
+                        _totalAmount.Value = total;
+                        OnPropertyChanged(nameof(TotalAmountCurrency));
+                    });
+                }
+                else
+                {
+                    _totalAmount.Value = total;
+                    OnPropertyChanged(nameof(TotalAmountCurrency));
+                }
+            })
             .AddTo(_disposables);
+
+        _inventory.ChangedLegacy += denom =>
+        {
+            var total = _inventory.CalculateTotal();
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() => {
+                _totalAmount.Value = total;
+                OnPropertyChanged(nameof(TotalAmountCurrency));
+            });
+        };
 
         _history.Added
             .Subscribe(entry =>
             {
-                 App.Current.Dispatcher.Invoke(() =>
+                Action action = () =>
                 {
                     RecentTransactions.Insert(0, entry);
                     if (RecentTransactions.Count > 50) RecentTransactions.RemoveAt(50);
-                });
+                };
+
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(action);
+                }
+                else
+                {
+                    action();
+                }
             })
             .AddTo(_disposables);
             
@@ -141,6 +182,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         {
             if (decimal.TryParse(DispenseAmountText.Value, out var amount))
             {
+                System.Diagnostics.Debug.WriteLine($"[MainViewModel] DispenseCommand triggered for: {amount}");
                 DispenseCash(amount);
                 DispenseAmountInput = ""; // Clear via wrapper to trigger notification
             }
@@ -171,6 +213,7 @@ public class DenominationViewModel
     private readonly Inventory _inventory;
     public int Value { get; }
     public string Name => Value >= 1000 ? $"{Value / 1000}千円札" : $"{Value}円玉";
+    private readonly ReactiveProperty<int> _count;
     public ReadOnlyReactiveProperty<int> Count { get; }
     
     public ReactiveCommand AddCommand { get; }
@@ -180,10 +223,29 @@ public class DenominationViewModel
     {
         _inventory = inventory;
         Value = value;
-        Count = _inventory.Changed
+        _count = new ReactiveProperty<int>(_inventory.GetCount(value));
+        Count = _count;
+        _inventory.Changed
             .Where(d => d == value)
-            .Select(_ => _inventory.GetCount(value))
-            .ToReadOnlyReactiveProperty(_inventory.GetCount(value));
+            .Subscribe(_ =>
+            {
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => _count.Value = _inventory.GetCount(value));
+                }
+                else
+                {
+                    _count.Value = _inventory.GetCount(value);
+                }
+            });
+
+        _inventory.ChangedLegacy += denom =>
+        {
+            if (denom == Value)
+            {
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() => _count.Value = _inventory.GetCount(Value));
+            }
+        };
             
         AddCommand = new ReactiveCommand();
         AddCommand.Subscribe(_ => _inventory.Add(Value, 1));
