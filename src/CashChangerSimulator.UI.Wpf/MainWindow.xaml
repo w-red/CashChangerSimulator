@@ -6,8 +6,9 @@
         xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
         xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
         mc:Ignorable="d"
-        Title="Cash Changer Simulator" Height="720" Width="1080"
-        Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource OnBackgroundBrush}"
+        Title="Cash Changer Simulator v1.1.0" Height="800" Width="1200"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource OnBackgroundBrush}"
         WindowStartupLocation="CenterScreen">
     
     <Window.Resources>
@@ -38,7 +39,8 @@
                     <TextBlock Text="TOTAL AMOUNT" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <TextBlock Text="¥" FontSize="28" VerticalAlignment="Bottom" Margin="0,0,4,6" Foreground="{StaticResource PrimaryBrush}" FontWeight="Light"/>
-                        <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="56" FontWeight="Light" Foreground="{StaticResource OnBackgroundBrush}"/>
+                        <TextBlock Text="{Binding TotalAmountCurrency, StringFormat={}{0:N0}}" FontSize="56" FontWeight="Light" Foreground="{StaticResource OnBackgroundBrush}"
+                                   AutomationProperties.AutomationId="TotalAmountText"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -46,7 +48,8 @@
                     <TextBlock Text="DEVICE STATUS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right"/>
                     <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" 
                             CornerRadius="6" Padding="16,6" Margin="0,8,0,0">
-                        <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                        <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="14"
+                                   AutomationProperties.AutomationId="DeviceStatusText"/>
                     </Border>
                 </StackPanel>
             </Grid>
@@ -106,11 +109,13 @@
                         <TextBox Grid.Column="0" x:Name="DispenseBox" 
                                  Text="{Binding DispenseAmountInput, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" 
                                  Style="{StaticResource ModernTextBoxStyle}"
-                                 FontSize="16" Height="44" VerticalContentAlignment="Center"/>
+                                 FontSize="16" Height="44" VerticalContentAlignment="Center"
+                                 AutomationProperties.AutomationId="DispenseBox"/>
                         
                         <Button Grid.Column="1" Content="GO" Command="{Binding DispenseCommand}" 
                                 Style="{StaticResource PrimaryButtonStyle}" 
-                                Width="60" Height="44" Margin="8,0,0,0"/>
+                                Width="60" Height="44" Margin="8,0,0,0"
+                                AutomationProperties.AutomationId="DispenseButton"/>
                     </Grid>
                     
                     <!-- Error Message -->
@@ -129,7 +134,7 @@
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="HISTORY" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Bold" Margin="0,0,0,12"/>
                     
-                    <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0" 
+                    <ListBox ItemsSource="{Binding RecentTransactions}" AutomationProperties.AutomationId="HistoryListBox" Background="Transparent" BorderThickness="0" 
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
