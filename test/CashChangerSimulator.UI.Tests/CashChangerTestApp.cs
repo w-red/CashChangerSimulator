@@ -3,7 +3,6 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
 using FlaUI.Core.Tools;
-using System.Diagnostics;
 using System.Reflection;
 using System.IO;
 

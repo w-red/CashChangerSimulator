@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
@@ -35,27 +32,25 @@ public static class DIContainer
         resolver.Compile();
         _resolver = resolver;
         
-        // Initialize Inventory with Config
+        // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
         
-        // 新しい金種別設定から読み込み
-        foreach (var item in configProvider.Config.Inventory.Denominations)
+        // 1. 保存された状態があれば最優先
+        var state = ConfigurationLoader.LoadInventoryState();
+        if (state.Counts.Count > 0)
         {
-            if (DenominationKey.TryParse(item.Key, out var key) && key != null)
-            {
-                inventory.SetCount(key, item.Value.InitialCount);
-            }
+            inventory.LoadFromDictionary(state.Counts);
         }
-
-        // 互換性のためのフォールバック（Denominations にない場合のみ）
-        foreach (var item in configProvider.Config.Inventory.InitialCounts)
+        else
         {
-            if (DenominationKey.TryParse(item.Key, out var key) && key != null)
+            // 2. 保存された状態がない場合は設定の初期値を使用
+            // 新しい金種別設定から読み込み
+            foreach (var item in configProvider.Config.Inventory.Denominations)
             {
-                if (inventory.GetCount(key) == 0) // まだ設定されていない場合
+                if (DenominationKey.TryParse(item.Key, out var key) && key != null)
                 {
-                    inventory.SetCount(key, item.Value);
+                    inventory.SetCount(key, item.Value.InitialCount);
                 }
             }
         }
