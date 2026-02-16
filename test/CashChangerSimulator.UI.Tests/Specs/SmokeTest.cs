@@ -1,6 +1,3 @@
-using FlaUI.Core.AutomationElements;
-using Xunit;
-
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>アプリケーションの起動と基本表示を検証するスモークテスト。</summary>

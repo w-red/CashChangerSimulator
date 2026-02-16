@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using MoneyKind4Opos.Codes;
 using MoneyKind4Opos.Currencies.Interfaces;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Configuration;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
@@ -54,10 +50,9 @@ public class CurrencyMetadataProvider
         }
 
         // 額面の降順、同じ額面なら紙幣優先でソート
-        SupportedDenominations = denominations
+        SupportedDenominations = [.. denominations
             .OrderByDescending(d => d.Value)
-            .ThenByDescending(d => d.Type)
-            .ToList();
+            .ThenByDescending(d => d.Type)];
     }
 
     /// <summary>指定された金種の表示名を取得する。</summary>
@@ -69,7 +64,7 @@ public class CurrencyMetadataProvider
         if (face != null)
         {
             // MoneyKind4Opos の Name を使用（例: "100 Yen Coin", "1 Dollar Bill"）
-            return face.Name;
+            return face.Name ?? $"{key.Value} ({key.Type})";
         }
 
         return $"{key.Value} ({key.Type})";

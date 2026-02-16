@@ -1,7 +1,5 @@
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using CashChangerSimulator.Core.Configuration;
@@ -15,7 +13,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
-    private readonly Dictionary<string, List<string>> _errors = new();
+    private readonly Dictionary<string, List<string>> _errors = [];
 
     /// <summary>プロパティ値が変更されたときに発生するイベント。</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -31,7 +29,8 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     }
 
     /// <summary>利用可能な通貨コードのリスト。</summary>
-    public string[] AvailableCurrencyCodes { get; } = { "JPY", "USD" };
+    public string[] AvailableCurrencyCodes { get; } =
+        ["JPY", "USD"];
 
     /// <summary>NearEmpty と判定するデフォルト枚数。</summary>
     private int _nearEmpty;
@@ -58,7 +57,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     }
 
     /// <summary>各金種の詳細設定リスト。</summary>
-    public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = new();
+    public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
 
     /// <summary>設定を保存するコマンド。</summary>
     public ICommand SaveCommand { get; }
@@ -70,9 +69,9 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     /// <summary>指定したプロパティのエラー一覧を取得する。</summary>
     public System.Collections.IEnumerable GetErrors(string? propertyName)
     {
-        if (propertyName != null && _errors.TryGetValue(propertyName, out var errors))
-            return errors;
-        return Array.Empty<string>();
+        return propertyName != null
+            && _errors.TryGetValue(propertyName, out var errors)
+            ? errors : Array.Empty<string>();
     }
 
     /// <summary>直前の保存処理が成功したかどうか。</summary>
@@ -118,13 +117,10 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
             }
             else
             {
-                // 互換性維持: 旧 InitialCounts に値があるか確認
-                int count = config.Inventory.InitialCounts.TryGetValue(keyStr, out var c) ? c : 0;
-                
                 DenominationSettings.Add(new DenominationSettingItem(
                     key, 
                     _metadataProvider.GetDenominationName(key),
-                    count,
+                    0,
                     NearEmpty,
                     NearFull,
                     Full));
@@ -167,8 +163,10 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     /// <summary>設定をデフォルト値（初期値）に戻す。</summary>
     private void ResetToDefault()
     {
-        var defaultConfig = new SimulatorConfiguration();
-        defaultConfig.CurrencyCode = CurrencyCode; 
+        var defaultConfig = new SimulatorConfiguration
+        {
+            CurrencyCode = CurrencyCode
+        };
         LoadFromConfig(defaultConfig);
     }
 
@@ -193,7 +191,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     private void AddError(string propertyName, string error)
     {
         if (!_errors.ContainsKey(propertyName))
-            _errors[propertyName] = new List<string>();
+            _errors[propertyName] = [];
         _errors[propertyName].Add(error);
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
     }
@@ -211,50 +209,41 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 }
 
 /// <summary>金種ごとの詳細設定を保持・管理するデータ項目。</summary>
-public class DenominationSettingItem : INotifyPropertyChanged
+public class DenominationSettingItem(
+    DenominationKey key,
+    string displayName,
+    int count,
+    int nearEmpty,
+    int nearFull,
+    int full) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public DenominationKey Key { get; }
-    
-    private string _displayName;
+    public DenominationKey Key { get; } = key;
+
     public string DisplayName {
-        get => _displayName;
-        set { _displayName = value; OnPropertyChanged(); }
+        get => displayName;
+        set { displayName = value; OnPropertyChanged(); }
     }
 
-    private int _count;
     public int Count {
-        get => _count;
-        set { _count = value; OnPropertyChanged(); }
+        get => count;
+        set { count = value; OnPropertyChanged(); }
     }
 
-    private int _nearEmpty;
     public int NearEmpty {
-        get => _nearEmpty;
-        set { _nearEmpty = value; OnPropertyChanged(); }
+        get => nearEmpty;
+        set { nearEmpty = value; OnPropertyChanged(); }
     }
 
-    private int _nearFull;
     public int NearFull {
-        get => _nearFull;
-        set { _nearFull = value; OnPropertyChanged(); }
+        get => nearFull;
+        set { nearFull = value; OnPropertyChanged(); }
     }
 
-    private int _full;
     public int Full {
-        get => _full;
-        set { _full = value; OnPropertyChanged(); }
-    }
-
-    public DenominationSettingItem(DenominationKey key, string displayName, int count, int nearEmpty, int nearFull, int full)
-    {
-        Key = key;
-        _displayName = displayName;
-        _count = count;
-        _nearEmpty = nearEmpty;
-        _nearFull = nearFull;
-        _full = full;
+        get => full;
+        set { full = value; OnPropertyChanged(); }
     }
 
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
@@ -262,10 +251,9 @@ public class DenominationSettingItem : INotifyPropertyChanged
 }
 
 /// <summary>アクションを実行するための ICommand 実装クラス。</summary>
-public class RelayCommand : ICommand
+/// <remarks>実行ロジックと実行可能条件を指定して初期化する。</remarks>
+public class RelayCommand(Action execute, Func<bool>? canExecute = null) : ICommand
 {
-    private readonly Action _execute;
-    private readonly Func<bool>? _canExecute;
 
     /// <summary>コマンドの実行可能性が変更されたときに発生するイベント。</summary>
     public event EventHandler? CanExecuteChanged
@@ -274,15 +262,8 @@ public class RelayCommand : ICommand
         remove => CommandManager.RequerySuggested -= value;
     }
 
-    /// <summary>実行ロジックと実行可能条件を指定して初期化する。</summary>
-    public RelayCommand(Action execute, Func<bool>? canExecute = null)
-    {
-        _execute = execute;
-        _canExecute = canExecute;
-    }
-
     /// <summary>コマンドが実行可能かどうかを判断する。</summary>
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
+    public bool CanExecute(object? parameter) => canExecute?.Invoke() ?? true;
     /// <summary>コマンドを実行する。</summary>
-    public void Execute(object? parameter) => _execute();
+    public void Execute(object? parameter) => execute();
 }

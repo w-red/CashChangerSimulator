@@ -1,13 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Windows.Threading;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Configuration;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -25,10 +20,10 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
-    private readonly CompositeDisposable _disposables = new();
+    private readonly CompositeDisposable _disposables = [];
 
     /// <summary>画面に表示する金種別情報のリスト。</summary>
-    public ObservableCollection<DenominationViewModel> Denominations { get; } = new();
+    public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
     private readonly ReactiveProperty<decimal> _totalAmount;
     /// <summary>在庫の合計金額（ReactiveProperty 版）。</summary>
     public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
@@ -37,7 +32,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     /// <summary>全金種のステータスを統合したデバイス全体のステータス。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     /// <summary>最近の取引履歴のリスト。</summary>
-    public ObservableCollection<TransactionEntry> RecentTransactions { get; } = new();
+    public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
     public RelayCommand OpenSettingsCommand { get; }
 
@@ -64,7 +59,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     /// <summary>払出処理を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
 
-    private readonly Dictionary<string, List<string>> _errors = new();
+    private readonly Dictionary<string, List<string>> _errors = [];
 
     /// <summary>バリデーションエラーが変更されたときに発生するイベント。</summary>
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
@@ -162,6 +157,16 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
                     _totalAmount.Value = total;
                     OnPropertyChanged(nameof(TotalAmountCurrency));
                 }
+            })
+            .AddTo(_disposables);
+
+        // Auto-save inventory changes (throttle to avoid excessive I/O)
+        _inventory.Changed
+            .ThrottleLast(TimeSpan.FromSeconds(1))
+            .Subscribe(_ =>
+            {
+                var state = new InventoryState { Counts = _inventory.ToDictionary() };
+                ConfigurationLoader.SaveInventoryState(state);
             })
             .AddTo(_disposables);
 

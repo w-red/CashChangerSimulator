@@ -1,7 +1,4 @@
 using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Definitions;
-using Xunit;
-using System.Threading;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -136,7 +133,7 @@ public class DispenseTest : IDisposable
     {
         if (string.IsNullOrEmpty(text)) return 0;
         // Strip everything but digits
-        var cleaned = new string(text.Where(char.IsDigit).ToArray());
+        var cleaned = new string([.. text.Where(char.IsDigit)]);
         if (decimal.TryParse(cleaned, out var result))
             return result;
         return 0;
