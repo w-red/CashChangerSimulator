@@ -5,46 +5,51 @@ using System.Threading;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+/// <summary>払出機能の UI 動作を検証するテスト。</summary>
 public class DispenseTest : IDisposable
 {
     private readonly CashChangerTestApp _app;
 
+    /// <summary>テストアプリを起動し、初期状態をセットアップする。</summary>
     public DispenseTest()
     {
         _app = new CashChangerTestApp();
         _app.Launch();
     }
 
+    /// <summary>Add ボタンクリック時に合計金額が増加することを検証する。</summary>
     [Fact]
     public void ShouldIncreaseAmountWhenClickingAddButton()
     {
         var window = _app.MainWindow;
         Assert.NotNull(window);
-        Thread.Sleep(1000);
+        window.SetForeground();
+        Thread.Sleep(500);
 
         var totalAmountText = (Label)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(5));
         Assert.NotNull(totalAmountText);
 
         decimal initialAmount = ParseAmount(totalAmountText.Text);
         
-        // Find the "+" button
-        var addButton = (Button)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByName("+"))?.AsButton(), TimeSpan.FromSeconds(5));
+        // Find the "+" button by AutomationId
+        var addButton = (Button)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("AddButton"))?.AsButton(), TimeSpan.FromSeconds(5));
         Assert.NotNull(addButton);
 
         Console.WriteLine($"Initial Total: {initialAmount} (Raw: '{totalAmountText.Text}')");
         addButton.Click();
         
         decimal newAmount = 0;
-        FlaUI.Core.Tools.Retry.WhileTrue(() => {
+        bool success = FlaUI.Core.Tools.Retry.WhileFalse(() => {
             var el = window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel();
             newAmount = ParseAmount(el?.Text ?? "");
             return newAmount > initialAmount;
-        }, TimeSpan.FromSeconds(10));
+        }, TimeSpan.FromSeconds(10)).Result;
 
-        Console.WriteLine($"After '+' click: Total={newAmount}");
+        Console.WriteLine($"After '+' click: Success={success}, Total={newAmount}");
         Assert.True(newAmount > initialAmount, $"Global total should increase. Initial: {initialAmount}, Final: {newAmount}");
     }
 
+    /// <summary>払出実行後に合計金額が減少し、履歴に追加されることを検証する。</summary>
     [Fact]
     public void ShouldDispenseCashAndReduceTotalAmount()
     {
@@ -113,11 +118,12 @@ public class DispenseTest : IDisposable
         Assert.Equal(expectedAmount, finalAmount);
     }
     
+    /// <summary>払出金額入力欄のバリデーションを検証する。</summary>
     [Fact]
     public void ShouldValidateInput()
     {
         var window = _app.MainWindow;
-        var dispenseBox = (TextBox)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(5));
+        var dispenseBox = (TextBox)Retry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(5));
         Assert.NotNull(dispenseBox);
 
         dispenseBox.Focus();

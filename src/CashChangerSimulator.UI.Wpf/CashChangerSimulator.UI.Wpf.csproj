@@ -6,6 +6,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="MoneyKind4Opos">
+      <HintPath>..\..\..\MoneyKind4Opos\src\MoneyKind4Opos\bin\Debug\net10.0\MoneyKind4Opos.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MicroResolver" Version="2.3.5" />
     <PackageReference Include="PolySharp" Version="1.15.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -16,7 +22,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net10.0-windows;net9.0-windows</TargetFrameworks>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

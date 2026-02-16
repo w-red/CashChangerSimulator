@@ -4,6 +4,7 @@ using System.Linq;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Wpf.Services;
 using MicroResolver;
 
 namespace CashChangerSimulator.UI.Wpf;
@@ -18,6 +19,7 @@ public static class DIContainer
 
         // Providers (Singleton)
         resolver.Register<ConfigurationProvider, ConfigurationProvider>(Lifestyle.Singleton);
+        resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
 
         // Core Services (Singleton)
@@ -37,11 +39,24 @@ public static class DIContainer
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
         
+        // 新しい金種別設定から読み込み
+        foreach (var item in configProvider.Config.Inventory.Denominations)
+        {
+            if (DenominationKey.TryParse(item.Key, out var key) && key != null)
+            {
+                inventory.SetCount(key, item.Value.InitialCount);
+            }
+        }
+
+        // 互換性のためのフォールバック（Denominations にない場合のみ）
         foreach (var item in configProvider.Config.Inventory.InitialCounts)
         {
-             if (int.TryParse(item.Key, out int denom))
+            if (DenominationKey.TryParse(item.Key, out var key) && key != null)
             {
-                inventory.SetCount(denom, item.Value);
+                if (inventory.GetCount(key) == 0) // まだ設定されていない場合
+                {
+                    inventory.SetCount(key, item.Value);
+                }
             }
         }
     }

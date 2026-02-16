@@ -2,6 +2,7 @@ using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
+using FlaUI.Core.Tools;
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
@@ -12,7 +13,7 @@ public class CashChangerTestApp : IDisposable
 {
     public Application Application { get; private set; } = null!;
     public UIA3Automation Automation { get; private set; } = null!;
-    public Window MainWindow { get; private set; } = null!;
+    public Window? MainWindow { get; private set; }
     
     private readonly string _executablePath;
 
@@ -39,41 +40,63 @@ public class CashChangerTestApp : IDisposable
     {
         string fullPath = Path.GetFullPath(_executablePath);
         Console.WriteLine($"[CashChangerTestApp] Launching: {fullPath}");
-        Application = Application.Launch(_executablePath);
+        
+        // Start fresh
         Automation = new UIA3Automation();
+        Application = Application.Launch(_executablePath);
         
-        // Use standard way first with longer timeout
-        MainWindow = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(20));
-        
-        // Fallback: Robust search on desktop
-        if (MainWindow == null)
+        // Use a more robust wait for the window
+        MainWindow = Retry.WhileNull(() =>
         {
+            var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(5));
+            if (win != null) return win;
+
+            // Fallback: Robust search on desktop if Application object fails
             var desktop = Automation.GetDesktop();
             var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-            foreach (var win in windows)
+            foreach (var w in windows)
             {
-                try {
-                    if (win.Name.Contains("Cash Changer Simulator"))
+                try
+                {
+                    if (w.Name.Contains("Cash Changer Simulator"))
                     {
-                        MainWindow = win.AsWindow();
-                        break;
+                        return w.AsWindow();
                     }
-                } catch { }
+                }
+                catch { }
             }
-        }
+            return null;
+        }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500)).Result;
 
         if (MainWindow == null)
         {
-             throw new Exception("Main window 'Cash Changer Simulator' not found.");
+            throw new Exception("Main window 'Cash Changer Simulator' not found after 30 seconds.");
         }
 
         MainWindow.WaitUntilClickable(TimeSpan.FromSeconds(10));
+        MainWindow.SetForeground();
     }
 
     public void Dispose()
     {
+        try
+        {
+            // Close window explicitly if possible
+            MainWindow?.Close();
+        }
+        catch { }
+
+        // Dispose Automation BEFORE closing the Application to avoid COM issues
         Automation?.Dispose();
-        Application?.Close();
-        Application?.Dispose();
+
+        try
+        {
+            if (Application != null && !Application.HasExited)
+            {
+                Application.Close();
+                Application.Dispose();
+            }
+        }
+        catch { }
     }
 }
