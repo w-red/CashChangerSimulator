@@ -12,22 +12,36 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
+/// <summary>
+/// アプリケーションのメイン画面を制御する ViewModel。
+/// 在庫表示、払出操作、履歴管理、設定画面の起動などを担当する。
+/// </summary>
 public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErrorInfo
 {
     private readonly Inventory _inventory;
     private readonly TransactionHistory _history;
     private readonly CashChangerManager _manager;
     private readonly OverallStatusAggregator _statusAggregator;
+    private readonly ConfigurationProvider _configProvider;
+    private readonly MonitorsProvider _monitorsProvider;
+    private readonly Services.CurrencyMetadataProvider _metadataProvider;
     private readonly CompositeDisposable _disposables = new();
 
+    /// <summary>画面に表示する金種別情報のリスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = new();
     private readonly ReactiveProperty<decimal> _totalAmount;
+    /// <summary>在庫の合計金額（ReactiveProperty 版）。</summary>
     public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
+    /// <summary>在庫の合計金額（WPF バインディング用の プレーンプロパティ）。</summary>
     public decimal TotalAmountCurrency => _totalAmount.Value;
+    /// <summary>全金種のステータスを統合したデバイス全体のステータス。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
+    /// <summary>最近の取引履歴のリスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = new();
+    /// <summary>設定画面を開くコマンド。</summary>
+    public RelayCommand OpenSettingsCommand { get; }
 
-    // 双方向バインディング用のプロパティ（バリデーション付き）
+    /// <summary>ユーザーが入力した払出金額（文字列）。</summary>
     private string _dispenseAmountInput = "";
     public string DispenseAmountInput
     {
@@ -44,23 +58,29 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
-    // 内部ロジック用
+    /// <summary>払出処理用の内部状態を保持する ReactiveProperty。</summary>
     public ReactiveProperty<string> DispenseAmountText { get; }
 
-    // コマンド
+    /// <summary>払出処理を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
 
-    // INotifyDataErrorInfo
     private readonly Dictionary<string, List<string>> _errors = new();
+
+    /// <summary>バリデーションエラーが変更されたときに発生するイベント。</summary>
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    /// <summary>現在バリデーションエラーが存在するかどうか。</summary>
     public bool HasErrors => _errors.Count > 0;
+    /// <summary>指定したプロパティのエラー一覧を取得する。</summary>
     public System.Collections.IEnumerable GetErrors(string? propertyName) => 
         _errors.GetValueOrDefault(propertyName ?? "") ?? Enumerable.Empty<string>();
 
+    /// <summary>プロパティ値が変更されたときに発生するイベント。</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
+    /// <summary>プロパティ変更通知を発生させる。</summary>
     protected void OnPropertyChanged([CallerMemberName] string? name = null) 
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+    /// <summary>指定されたテキストを元に払出金額の妥当性を検証する。</summary>
     private void ValidateDispenseAmount(string text)
     {
         var propertyName = nameof(DispenseAmountInput);
@@ -70,38 +90,53 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
 
-        var errors = new List<string>();
+        var validationErrors = new List<string>();
         if (!string.IsNullOrWhiteSpace(text))
         {
-             if (!int.TryParse(text, out var val)) errors.Add("Enter a valid number");
-             else if (val <= 0) errors.Add("Amount must be positive");
-             else if (val > TotalAmount.CurrentValue) errors.Add("Insufficient funds");
+             if (!decimal.TryParse(text, out var val)) validationErrors.Add("Enter a valid number");
+             else if (val <= 0) validationErrors.Add("Amount must be positive");
+             else if (val > TotalAmount.CurrentValue) validationErrors.Add("Insufficient funds");
         }
         
-        if (errors.Count > 0)
+        if (validationErrors.Count > 0)
         {
-            _errors[propertyName] = errors;
+            _errors[propertyName] = validationErrors;
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
     }
 
+    /// <summary>
+    /// 各種プロバイダーを注入して MainViewModel を初期化する。
+    /// </summary>
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,
         CashChangerManager manager,
         MonitorsProvider monitorsProvider,
-        OverallStatusAggregatorProvider aggregatorProvider)
+        OverallStatusAggregatorProvider aggregatorProvider,
+        ConfigurationProvider configProvider,
+        Services.CurrencyMetadataProvider metadataProvider)
     {
-        Console.WriteLine($"[MainViewModel] Constructor Called. Hash: {this.GetHashCode()}");
         _inventory = inventory;
         _history = history;
         _manager = manager;
         _statusAggregator = aggregatorProvider.Aggregator;
+        _configProvider = configProvider;
+        _monitorsProvider = monitorsProvider;
+        _metadataProvider = metadataProvider;
 
         // Initialize Denominations
         foreach (var monitor in monitorsProvider.Monitors)
         {
-            Denominations.Add(new DenominationViewModel(_inventory, monitor.Denomination));
+            var key = monitor.Key;
+            var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
+            string? displayName = null;
+            if (_configProvider.Config.Inventory.Denominations.TryGetValue(keyStr, out var setting))
+            {
+                displayName = setting.DisplayName;
+            }
+
+            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, displayName));
         }
 
         OverallStatus = _statusAggregator.OverallStatus;
@@ -111,7 +146,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         TotalAmount = _totalAmount;
 
         _inventory.Changed
-            .Subscribe(denom =>
+            .Subscribe(_ =>
             {
                 var total = _inventory.CalculateTotal();
                 if (System.Windows.Application.Current?.Dispatcher != null)
@@ -129,15 +164,6 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
                 }
             })
             .AddTo(_disposables);
-
-        _inventory.ChangedLegacy += denom =>
-        {
-            var total = _inventory.CalculateTotal();
-            System.Windows.Application.Current?.Dispatcher?.Invoke(() => {
-                _totalAmount.Value = total;
-                OnPropertyChanged(nameof(TotalAmountCurrency));
-            });
-        };
 
         _history.Added
             .Subscribe(entry =>
@@ -182,13 +208,21 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         {
             if (decimal.TryParse(DispenseAmountText.Value, out var amount))
             {
-                System.Diagnostics.Debug.WriteLine($"[MainViewModel] DispenseCommand triggered for: {amount}");
                 DispenseCash(amount);
                 DispenseAmountInput = ""; // Clear via wrapper to trigger notification
             }
         });
+
+        // Settings Command
+        OpenSettingsCommand = new RelayCommand(() =>
+        {
+            var settingsWindow = new SettingsWindow(_configProvider, _monitorsProvider, _metadataProvider);
+            settingsWindow.Owner = System.Windows.Application.Current.MainWindow;
+            settingsWindow.ShowDialog();
+        });
     }
 
+    /// <summary>指定された金額を在庫から排出し、例外が発生した場合はダイアログを表示する。</summary>
     private void DispenseCash(decimal amount)
     {
         try
@@ -201,6 +235,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
+    /// <summary>リソースと購読を解放する。</summary>
     public void Dispose()
     {
         _disposables.Dispose();
@@ -208,49 +243,49 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     }
 }
 
+/// <summary>各金種の表示と操作を管理する ViewModel。</summary>
 public class DenominationViewModel
 {
     private readonly Inventory _inventory;
-    public int Value { get; }
-    public string Name => Value >= 1000 ? $"{Value / 1000}千円札" : $"{Value}円玉";
+    /// <summary>この ViewModel が表す金種キー。</summary>
+    public DenominationKey Key { get; }
+    /// <summary>表示用の金種名。</summary>
+    public string Name { get; }
     private readonly ReactiveProperty<int> _count;
+    /// <summary>この金種の現在枚数。</summary>
     public ReadOnlyReactiveProperty<int> Count { get; }
     
+    /// <summary>枚数を1枚増やすコマンド。</summary>
     public ReactiveCommand AddCommand { get; }
+    /// <summary>枚数を1枚減らすコマンド。</summary>
     public ReactiveCommand RemoveCommand { get; }
 
-    public DenominationViewModel(Inventory inventory, int value)
+    /// <summary>金種キー、在庫、メタデータプロバイダー、表示名を元にインスタンスを初期化する。</summary>
+    public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, string? displayName = null)
     {
         _inventory = inventory;
-        Value = value;
-        _count = new ReactiveProperty<int>(_inventory.GetCount(value));
+        Key = key;
+        Name = !string.IsNullOrEmpty(displayName) ? displayName : metadataProvider.GetDenominationName(key);
+        _count = new ReactiveProperty<int>(_inventory.GetCount(key));
         Count = _count;
         _inventory.Changed
-            .Where(d => d == value)
+            .Where(k => k == key)
             .Subscribe(_ =>
             {
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => _count.Value = _inventory.GetCount(value));
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => _count.Value = _inventory.GetCount(key));
                 }
                 else
                 {
-                    _count.Value = _inventory.GetCount(value);
+                    _count.Value = _inventory.GetCount(key);
                 }
             });
-
-        _inventory.ChangedLegacy += denom =>
-        {
-            if (denom == Value)
-            {
-                System.Windows.Application.Current?.Dispatcher?.Invoke(() => _count.Value = _inventory.GetCount(Value));
-            }
-        };
             
         AddCommand = new ReactiveCommand();
-        AddCommand.Subscribe(_ => _inventory.Add(Value, 1));
+        AddCommand.Subscribe(_ => _inventory.Add(Key, 1));
         
         RemoveCommand = new ReactiveCommand();
-        RemoveCommand.Subscribe(_ => _inventory.Add(Value, -1));
+        RemoveCommand.Subscribe(_ => _inventory.Add(Key, -1));
     }
 }
