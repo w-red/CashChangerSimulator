@@ -2,8 +2,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using Microsoft.Extensions.Logging;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -13,6 +16,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
+    private readonly ILogger<SettingsViewModel> _logger;
     private readonly Dictionary<string, List<string>> _errors = [];
 
     /// <summary>プロパティ値が変更されたときに発生するイベント。</summary>
@@ -56,6 +60,46 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         set { _full = value; OnPropertyChanged(); Validate(); }
     }
 
+    /// <summary>シミュレーション遅延を有効にするか。</summary>
+    private bool _useDelay;
+    public bool UseDelay
+    {
+        get => _useDelay;
+        set { _useDelay = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>最小遅延時間 (ms)。</summary>
+    private int _minDelay;
+    public int MinDelay
+    {
+        get => _minDelay;
+        set { _minDelay = value; OnPropertyChanged(); Validate(); }
+    }
+
+    /// <summary>最大遅延時間 (ms)。</summary>
+    private int _maxDelay;
+    public int MaxDelay
+    {
+        get => _maxDelay;
+        set { _maxDelay = value; OnPropertyChanged(); Validate(); }
+    }
+
+    /// <summary>ランダムエラーを有効にするか。</summary>
+    private bool _useRandomErrors;
+    public bool UseRandomErrors
+    {
+        get => _useRandomErrors;
+        set { _useRandomErrors = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>エラー発生確率 (0-100)。</summary>
+    private int _errorRate;
+    public int ErrorRate
+    {
+        get => _errorRate;
+        set { _errorRate = value; OnPropertyChanged(); Validate(); }
+    }
+
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
 
@@ -83,6 +127,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
+        _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
         LoadFromConfig(configProvider.Config);
 
@@ -97,6 +142,12 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         NearEmpty = config.Thresholds.NearEmpty;
         NearFull = config.Thresholds.NearFull;
         Full = config.Thresholds.Full;
+
+        UseDelay = config.Simulation.DelayEnabled;
+        MinDelay = config.Simulation.MinDelayMs;
+        MaxDelay = config.Simulation.MaxDelayMs;
+        UseRandomErrors = config.Simulation.RandomErrorsEnabled;
+        ErrorRate = config.Simulation.ErrorRate;
 
         DenominationSettings.Clear();
         
@@ -137,6 +188,12 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         config.Thresholds.NearFull = NearFull;
         config.Thresholds.Full = Full;
 
+        config.Simulation.DelayEnabled = UseDelay;
+        config.Simulation.MinDelayMs = MinDelay;
+        config.Simulation.MaxDelayMs = MaxDelay;
+        config.Simulation.RandomErrorsEnabled = UseRandomErrors;
+        config.Simulation.ErrorRate = ErrorRate;
+
         config.Inventory.Denominations.Clear();
         foreach (var item in DenominationSettings)
         {
@@ -154,8 +211,9 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         ConfigurationLoader.Save(config);
         _configProvider.Reload();
 
-        // ホットリロード: 全モニターの閾値を構成に従って即時更新
         _monitorsProvider.UpdateThresholdsFromConfig(config);
+
+        _logger.ZLogInformation($"Simulator configuration saved and reloaded.");
 
         SaveSucceeded = true;
     }
@@ -176,6 +234,9 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         ClearErrors(nameof(NearEmpty));
         ClearErrors(nameof(NearFull));
         ClearErrors(nameof(Full));
+        ClearErrors(nameof(MinDelay));
+        ClearErrors(nameof(MaxDelay));
+        ClearErrors(nameof(ErrorRate));
 
         if (NearEmpty <= 0)
             AddError(nameof(NearEmpty), "NearEmpty は 1 以上にしてください。");
@@ -183,6 +244,13 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
             AddError(nameof(NearFull), "NearFull は NearEmpty より大きくしてください。");
         if (Full <= NearFull)
             AddError(nameof(Full), "Full は NearFull より大きくしてください。");
+
+        if (MinDelay < 0)
+            AddError(nameof(MinDelay), "最小遅延は 0 以上にしてください。");
+        if (MaxDelay < MinDelay)
+            AddError(nameof(MaxDelay), "最大遅延は最小遅延以上にしてください。");
+        if (ErrorRate < 0 || ErrorRate > 100)
+            AddError(nameof(ErrorRate), "エラー率は 0-100 の範囲にしてください。");
 
         OnPropertyChanged(nameof(HasErrors));
     }

@@ -1,8 +1,10 @@
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Wpf.Services;
 using MicroResolver;
+using Microsoft.Extensions.Logging;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -23,6 +25,7 @@ public static class DIContainer
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
         resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
+        resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
 
         // ViewModels (Singleton - to ensure consistency between UI and Logic)
@@ -53,6 +56,14 @@ public static class DIContainer
                     inventory.SetCount(key, item.Value.InitialCount);
                 }
             }
+        }
+
+        // Initialize Transaction History
+        var history = _resolver.Resolve<TransactionHistory>();
+        var historyState = ConfigurationLoader.LoadHistoryState();
+        if (historyState.Entries.Count > 0)
+        {
+            history.FromState(historyState);
         }
     }
 

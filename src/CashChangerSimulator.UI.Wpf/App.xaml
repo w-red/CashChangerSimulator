@@ -1,166 +1,97 @@
 ﻿<Application x:Class="CashChangerSimulator.UI.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CashChangerSimulator.UI.Wpf">
+             xmlns:local="clr-namespace:CashChangerSimulator.UI.Wpf"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Application.Resources>
-        <!-- Color Palette -->
-        <Color x:Key="BackgroundColor">#121212</Color>
-        <Color x:Key="SurfaceColor">#1E1E1E</Color>
-        <Color x:Key="PrimaryColor">#BB86FC</Color>
-        <Color x:Key="SecondaryColor">#03DAC6</Color>
-        <Color x:Key="ErrorColor">#CF6679</Color>
-        <Color x:Key="OnBackgroundColor">#FFFFFF</Color>
-        <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.Lime.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-        <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
-        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
-        <SolidColorBrush x:Key="OnBackgroundBrush" Color="{StaticResource OnBackgroundColor}"/>
-        <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A0A0A0"/>
+            <materialDesign:SnackbarMessageQueue x:Key="MainMessageQueue" />
 
-        <!-- Converters -->
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        
-        <!-- Styles -->
-        <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="15"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="10" ShadowDepth="2"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Color Palette -->
+            <Color x:Key="BackgroundColor">#121212</Color>
+            <Color x:Key="SurfaceColor">#1E1E1E</Color>
+            <Color x:Key="PrimaryColor">#BB86FC</Color>
+            <Color x:Key="SecondaryColor">#03DAC6</Color>
+            <Color x:Key="ErrorColor">#CF6679</Color>
+            <Color x:Key="OnBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
 
-        <Style TargetType="Button" x:Key="PrimaryButtonStyle">
-            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#D0A0FF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#9965D6"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#333333"/>
-                                <Setter Property="Foreground" Value="#666666"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+            <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+            <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+            <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+            <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+            <SolidColorBrush x:Key="OnBackgroundBrush" Color="{StaticResource OnBackgroundColor}"/>
+            <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A0A0A0"/>
 
-        <Style TargetType="Button" x:Key="IconButtonStyle">
-            <Setter Property="Background" Value="#2C2C2C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="15" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3E3E3E"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1A1A1A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Converters -->
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            
+            <!-- Styles -->
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="15"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="15" ShadowDepth="4"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
-        <Style TargetType="TextBox" x:Key="ModernTextBoxStyle">
-            <Setter Property="Background" Value="#2C2C2C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4,4,0,0">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                            </Trigger>
-                            <Trigger Property="Validation.HasError" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Padding" Value="24,8"/>
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
+            </Style>
 
-        <Style TargetType="ComboBox" x:Key="ModernComboBoxStyle">
-            <Setter Property="Background" Value="#2C2C2C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton x:Name="ToggleButton" 
-                                          BorderBrush="{TemplateBinding BorderBrush}" 
-                                          BorderThickness="{TemplateBinding BorderThickness}" 
-                                          Background="{TemplateBinding Background}" 
-                                          Grid.Column="2" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
-                                          Focusable="false">
-                                <ToggleButton.Template>
-                                    <ControlTemplate TargetType="ToggleButton">
-                                        <Border x:Name="Border" CornerRadius="4,4,0,0" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                            <Path x:Name="Arrow" Fill="White" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="#3E3E3E"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </ToggleButton.Template>
-                            </ToggleButton>
-                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="8,3,23,3" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
-                                <Grid x:Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                    <Border x:Name="DropDownBorder" Background="#1E1E1E" BorderThickness="1" BorderBrush="#333333" CornerRadius="0,0,4,4"/>
-                                    <ScrollViewer Margin="4" SnapsToDevicePixels="True">
-                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Popup>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Aliases for robustness against library changes -->
+            <Style x:Key="ModernFlatButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatMidPrimaryButton}">
+                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="4"/>
+            </Style>
 
+            <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+            </Style>
+
+            <Style x:Key="ModernToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionSecondaryToggleButton}">
+            </Style>
+
+            <Style TargetType="Button" x:Key="IconButtonStyle" BasedOn="{StaticResource MaterialDesignIconButton}">
+                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="40"/>
+            </Style>
+
+            <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                <Setter Property="Margin" Value="0,8,0,8"/>
+                <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
+                <Setter Property="materialDesign:TextFieldAssist.PrefixText" Value="¥"/>
+            </Style>
+
+            <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+                <Setter Property="Margin" Value="0,8,0,8"/>
+            </Style>
+
+            <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
+                <Setter Property="Background" Value="#333333"/>
+                <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+            </Style>
+
+            <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionLightCheckBox}">
+                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            </Style>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
