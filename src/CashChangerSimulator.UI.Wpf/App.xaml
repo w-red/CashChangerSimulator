@@ -6,10 +6,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.Lime.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <materialDesign:SnackbarMessageQueue x:Key="MainMessageQueue" />
@@ -45,9 +43,18 @@
                         <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="15" ShadowDepth="4"/>
                     </Setter.Value>
                 </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="Black" Opacity="0.6" BlurRadius="25" ShadowDepth="6"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
             </Style>
 
-            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource MaterialDesignFilledButton}">
                 <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
                 <Setter Property="Foreground" Value="Black"/>
                 <Setter Property="FontWeight" Value="Bold"/>
@@ -56,15 +63,15 @@
                 <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
             </Style>
 
-            <!-- Aliases for robustness against library changes -->
-            <Style x:Key="ModernFlatButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatMidPrimaryButton}">
+            <!-- Aliases for robustness against library changes (Updated for MD3 / MDIX 5.x) -->
+            <Style x:Key="ModernFlatButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
                 <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="4"/>
             </Style>
 
-            <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+            <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
             </Style>
 
-            <Style x:Key="ModernToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionSecondaryToggleButton}">
+            <Style x:Key="ModernToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
             </Style>
 
             <Style TargetType="Button" x:Key="IconButtonStyle" BasedOn="{StaticResource MaterialDesignIconButton}">
