@@ -32,18 +32,22 @@ public class ViewModelTest
 
         // Managerのメソッドがvirtualなのでモック可能です
         var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object);
+
+        var realHardware = new HardwareStatusManager();
         
         var vm = new MainViewModel(
-            mockInventory.Object, 
-            mockHistory.Object, 
-            mockManager.Object, 
-            realMonitors, 
+            mockInventory.Object,
+            mockHistory.Object,
+            mockManager.Object,
+            realMonitors,
             realAggregator,
             realConfig,
-            realMetadata);
-        
-        // Dispense 1000
-        vm.DispenseAmountInput = "1000";
+            realMetadata,
+            realHardware)
+        {
+            // Dispense 1000
+            DispenseAmountInput = "1000"
+        };
         vm.DispenseCommand.Execute(Unit.Default);
         
         // Verify

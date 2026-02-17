@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 using CashChangerSimulator.Core.Models;
+using MaterialDesignThemes.Wpf;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
@@ -35,15 +36,15 @@ public class TransactionTypeToSymbolConverter : IValueConverter
         {
             return type switch
             {
-                TransactionType.Deposit => "📥",
-                TransactionType.Dispense => "📤",
-                TransactionType.Refill => "➕",
-                TransactionType.Collection => "➖",
-                TransactionType.Adjustment => "🔧",
-                _ => "❓"
+                TransactionType.Deposit => PackIconKind.ArrowDownBoldCircleOutline,
+                TransactionType.Dispense => PackIconKind.ArrowUpBoldCircleOutline,
+                TransactionType.Refill => PackIconKind.TrayArrowDown,
+                TransactionType.Collection => PackIconKind.TrayArrowUp,
+                TransactionType.Adjustment => PackIconKind.Tools,
+                _ => PackIconKind.HelpCircleOutline
             };
         }
-        return "❓";
+        return PackIconKind.HelpCircleOutline;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();

@@ -20,7 +20,11 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
+    private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly CompositeDisposable _disposables = [];
+
+    /// <summary>ジャムが発生しているかどうかを制御する ReactiveProperty。</summary>
+    public BindableReactiveProperty<bool> IsJammed { get; }
 
     /// <summary>画面に表示する金種別情報のリスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
@@ -29,8 +33,10 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
     /// <summary>在庫の合計金額（WPF バインディング用の プレーンプロパティ）。</summary>
     public decimal TotalAmountCurrency => _totalAmount.Value;
-    /// <summary>全金種のステータスを統合したデバイス全体のステータス。</summary>
+    /// <summary>全金種のステータスを統合したデバイス全体のステータス (空・ニアエンプティ)。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
+    /// <summary>全金種のステータスを統合したデバイス全体のステータス (満杯・ニアフル)。</summary>
+    public ReadOnlyReactiveProperty<CashStatus> FullStatus { get; }
     /// <summary>最近の取引履歴のリスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
@@ -110,7 +116,8 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         MonitorsProvider monitorsProvider,
         OverallStatusAggregatorProvider aggregatorProvider,
         ConfigurationProvider configProvider,
-        Services.CurrencyMetadataProvider metadataProvider)
+        Services.CurrencyMetadataProvider metadataProvider,
+        HardwareStatusManager hardwareStatusManager)
     {
         _inventory = inventory;
         _history = history;
@@ -119,6 +126,9 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
+        _hardwareStatusManager = hardwareStatusManager;
+
+        IsJammed = _hardwareStatusManager.IsJammed;
 
         // Initialize Denominations
         foreach (var monitor in monitorsProvider.Monitors)
@@ -134,7 +144,8 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
             Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, displayName));
         }
 
-        OverallStatus = _statusAggregator.OverallStatus;
+        OverallStatus = _statusAggregator.DeviceStatus;
+        FullStatus = _statusAggregator.FullStatus;
 
         // Reactive Total Amount
         _totalAmount = new ReactiveProperty<decimal>(_inventory.CalculateTotal()).AddTo(_disposables);
@@ -221,8 +232,10 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         // Settings Command
         OpenSettingsCommand = new RelayCommand(() =>
         {
-            var settingsWindow = new SettingsWindow(_configProvider, _monitorsProvider, _metadataProvider);
-            settingsWindow.Owner = System.Windows.Application.Current.MainWindow;
+            var settingsWindow = new SettingsWindow(_configProvider, _monitorsProvider, _metadataProvider)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
             settingsWindow.ShowDialog();
         });
     }
