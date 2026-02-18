@@ -66,7 +66,7 @@
 
             <!-- Aliases for robustness against library changes (Updated for MD3 / MDIX 5.x) -->
             <Style x:Key="ModernFlatButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
-                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="4"/>
+                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
             </Style>
 
             <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">

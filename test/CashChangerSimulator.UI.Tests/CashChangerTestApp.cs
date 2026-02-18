@@ -38,6 +38,19 @@ public class CashChangerTestApp : IDisposable
     public void Launch()
     {
         string fullPath = Path.GetFullPath(_executablePath);
+        string? appDir = Path.GetDirectoryName(fullPath);
+        
+        // Clean up state files to ensure a fresh start for each test
+        if (appDir != null)
+        {
+            var filesToClean = new[] { "inventory.toml", "history.bin", "config.toml", "history.bin" };
+            foreach (var file in filesToClean)
+            {
+                var filePath = Path.Combine(appDir, file);
+                try { if (File.Exists(filePath)) File.Delete(filePath); } catch { }
+            }
+        }
+
         Console.WriteLine($"[CashChangerTestApp] Launching: {fullPath}");
         
         // Start fresh

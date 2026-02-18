@@ -1,0 +1,53 @@
+<Window x:Class="CashChangerSimulator.UI.Wpf.BulkDispenseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="BULK CASH DISPENSE" Height="500" Width="400"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.AutomationId="BulkDispenseWindow"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource OnBackgroundBrush}"
+        TextElement.Foreground="{StaticResource OnBackgroundBrush}">
+    <Border Padding="24">
+        <StackPanel>
+            <TextBlock Text="BULK CASH DISPENSE" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,16"/>
+            <ScrollViewer MaxHeight="350" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding BulkDispenseItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Column="1" 
+                                         Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.AutomationId="BulkDispenseQuantityBox"
+                                         materialDesign:TextFieldAssist.HasClearButton="True"
+                                         materialDesign:HintAssist.Hint="0"
+                                         HorizontalContentAlignment="Right"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="CANCEL" Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding CancelBulkDispenseCommand}" Margin="0,0,8,0"
+                        AutomationProperties.AutomationId="BulkDispenseCancelButton"/>
+                <Button Grid.Column="1" Content="DISPENSE" Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding DispenseBulkCommand}"
+                        AutomationProperties.AutomationId="BulkDispenseExecuteButton"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

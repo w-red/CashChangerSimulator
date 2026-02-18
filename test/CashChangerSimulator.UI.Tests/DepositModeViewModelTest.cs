@@ -29,15 +29,16 @@ public class DepositModeViewModelTest
         _mockHistory = new Mock<TransactionHistory>();
         _mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
 
-        _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object);
-        _depositController = new DepositController(_mockInventory.Object, _mockManager.Object);
-
         var configProvider = new ConfigurationProvider();
         configProvider.Config.CurrencyCode = "JPY";
+
+        _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object);
+        var hardwareManager = new HardwareStatusManager();
+        _depositController = new DepositController(_mockInventory.Object, _mockManager.Object, configProvider.Config.Simulation, hardwareManager);
+
         _metadataProvider = new CashChangerSimulator.UI.Wpf.Services.CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        var hardwareManager = new HardwareStatusManager();
 
         _mainViewModel = new MainViewModel(
             _mockInventory.Object,
@@ -56,7 +57,9 @@ public class DepositModeViewModelTest
     public void DenominationViewModel_IsAcceptingCash_ShouldReflectPausedState()
     {
         // Arrange
-        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, "1000");
+        var config = new CashChangerSimulator.Core.Configuration.DenominationSettings();
+        var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
+        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, "1000");
         _depositController.BeginDeposit();
 
         // Assert: Running

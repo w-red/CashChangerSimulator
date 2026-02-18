@@ -38,32 +38,35 @@ public class DispenseTest : IDisposable
         showBulkDispenseButton.ShouldNotBeNull();
         showBulkDispenseButton.IsEnabled.ShouldBeTrue($"ShowBulkDispenseButton is disabled! Mode: {modeText}");
         
-        showBulkDispenseButton.Click();
-        Thread.Sleep(2000); // Increased wait for dialog animation
+        if (showBulkDispenseButton.Patterns.Invoke.IsSupported)
+        {
+            showBulkDispenseButton.Patterns.Invoke.Pattern.Invoke();
+        }
+        else
+        {
+            showBulkDispenseButton.Click();
+        }
+        Thread.Sleep(2000); // Wait for window to open
 
-        // Check if Dialog Title exists
-        var dialogTitle = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByText("BULK DISPENSE")), TimeSpan.FromSeconds(30));
-        dialogTitle.ShouldNotBeNull();
-
+        // Find the BulkDispenseWindow
+        var bulkDispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH DISPENSE", TimeSpan.FromSeconds(15));
+        bulkDispenseWindow.ShouldNotBeNull();
+        
         // Enter dispense quantity
         var firstQuantityBox = (TextBox)UiTestRetry.Find(() => {
-            var box = window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseQuantityBox"))?.AsTextBox();
+            var box = bulkDispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseQuantityBox"))?.AsTextBox();
             if (box != null && !box.IsOffscreen) return box;
             return null;
         }, TimeSpan.FromSeconds(10));
         
-        if (firstQuantityBox == null)
-        {
-             Console.WriteLine("Could not find BulkDispenseQuantityBox. Dumping window descendants:");
-             // (Optional: dump tree)
-        }
         firstQuantityBox.ShouldNotBeNull();
         firstQuantityBox.Text = "1";
 
         // Execute Dispense
-        var executeButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseExecuteButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        var executeButton = (Button)UiTestRetry.Find(() => bulkDispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseExecuteButton"))?.AsButton(), TimeSpan.FromSeconds(10));
         executeButton.ShouldNotBeNull();
         executeButton.Click();
+        Thread.Sleep(1000); // Allow window to close and logic to execute
 
         // Verify total decreased
         decimal newAmount = 0;
@@ -147,6 +150,7 @@ public class DispenseTest : IDisposable
     }
     
     /// <summary>払出金額入力欄のバリデーションを検証する。</summary>
+    /// <summary>無効な払出金額（文字やマイナス値）が入力された場合に、払出ボタンが適切に制御されることを検証する。</summary>
     [Fact]
     public void ShouldValidateInput()
     {
