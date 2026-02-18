@@ -9,6 +9,9 @@
     <Reference Include="MoneyKind4Opos">
       <HintPath>..\..\..\MoneyKind4Opos\src\MoneyKind4Opos\bin\Debug\net10.0\MoneyKind4Opos.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.PointOfService">
+      <HintPath>C:\Program Files (x86)\Microsoft Point Of Service\SDK\Microsoft.PointOfService.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

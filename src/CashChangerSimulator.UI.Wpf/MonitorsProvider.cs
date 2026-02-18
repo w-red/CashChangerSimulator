@@ -22,7 +22,8 @@ public class MonitorsProvider
             var keyStr = (k.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + k.Value.ToString();
             
             // 個別設定があるか確認
-            if (config.Inventory.Denominations.TryGetValue(keyStr, out var setting))
+            if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventorySettings) &&
+                inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
             {
                 return new CashStatusMonitor(
                     inventory, 
@@ -50,7 +51,8 @@ public class MonitorsProvider
             var k = monitor.Key;
             var keyStr = (k.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + k.Value.ToString();
 
-            if (config.Inventory.Denominations.TryGetValue(keyStr, out var setting))
+            if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventorySettings) &&
+                inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
             {
                 monitor.UpdateThresholds(
                     setting.NearEmpty,

@@ -3,6 +3,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Device;
 using MicroResolver;
 using Microsoft.Extensions.Logging;
 
@@ -27,6 +28,7 @@ public static class DIContainer
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
+        resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
 
         // ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
@@ -41,19 +43,23 @@ public static class DIContainer
         
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();
-        if (state.Counts.Count > 0)
+        if (state?.Counts != null && state.Counts.Count > 0)
         {
             inventory.LoadFromDictionary(state.Counts);
         }
         else
         {
             // 2. 保存された状態がない場合は設定の初期値を使用
-            // 新しい金種別設定から読み込み
-            foreach (var item in configProvider.Config.Inventory.Denominations)
+            // 新しい金種別設定から読み込み（すべての通貨を対象に）
+            foreach (var currencyEntry in configProvider.Config.Inventory)
             {
-                if (DenominationKey.TryParse(item.Key, out var key) && key != null)
+                var currencyCode = currencyEntry.Key;
+                foreach (var item in currencyEntry.Value.Denominations)
                 {
-                    inventory.SetCount(key, item.Value.InitialCount);
+                    if (DenominationKey.TryParse(item.Key, currencyCode, out var key) && key != null)
+                    {
+                        inventory.SetCount(key, item.Value.InitialCount);
+                    }
                 }
             }
         }
@@ -61,7 +67,7 @@ public static class DIContainer
         // Initialize Transaction History
         var history = _resolver.Resolve<TransactionHistory>();
         var historyState = ConfigurationLoader.LoadHistoryState();
-        if (historyState.Entries.Count > 0)
+        if (historyState?.Entries != null && historyState.Entries.Count > 0)
         {
             history.FromState(historyState);
         }

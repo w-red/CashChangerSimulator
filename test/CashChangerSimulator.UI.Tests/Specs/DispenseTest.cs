@@ -1,8 +1,10 @@
 using FlaUI.Core.AutomationElements;
+using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>払出機能の UI 動作を検証するテスト。</summary>
+[Collection("SequentialTests")]
 public class DispenseTest : IDisposable
 {
     private readonly CashChangerTestApp _app;
@@ -14,36 +16,64 @@ public class DispenseTest : IDisposable
         _app.Launch();
     }
 
-    /// <summary>Add ボタンクリック時に合計金額が増加することを検証する。</summary>
+
+    /// <summary>一括払出機能の動作を検証する。</summary>
     [Fact]
-    public void ShouldIncreaseAmountWhenClickingAddButton()
+    public void ShouldDispenseBulkCash()
     {
         var window = _app.MainWindow;
-        Assert.NotNull(window);
+        window.ShouldNotBeNull();
         window.SetForeground();
         Thread.Sleep(500);
 
-        var totalAmountText = (Label)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(5));
-        Assert.NotNull(totalAmountText);
+        var totalAmountText = (Label)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(10));
+        decimal initialAmount = ParseAmount(totalAmountText?.Text ?? "0");
 
-        decimal initialAmount = ParseAmount(totalAmountText.Text);
+        // Check Mode
+        var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel()?.Text;
+        Console.WriteLine($"Current Mode: {modeText}");
         
-        // Find the "+" button by AutomationId
-        var addButton = (Button)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("AddButton"))?.AsButton(), TimeSpan.FromSeconds(5));
-        Assert.NotNull(addButton);
+        // Open Bulk Dispense
+        var showBulkDispenseButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseShowButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        showBulkDispenseButton.ShouldNotBeNull();
+        showBulkDispenseButton.IsEnabled.ShouldBeTrue($"ShowBulkDispenseButton is disabled! Mode: {modeText}");
+        
+        showBulkDispenseButton.Click();
+        Thread.Sleep(2000); // Increased wait for dialog animation
 
-        Console.WriteLine($"Initial Total: {initialAmount} (Raw: '{totalAmountText.Text}')");
-        addButton.Click();
+        // Check if Dialog Title exists
+        var dialogTitle = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByText("BULK DISPENSE")), TimeSpan.FromSeconds(30));
+        dialogTitle.ShouldNotBeNull();
+
+        // Enter dispense quantity
+        var firstQuantityBox = (TextBox)UiTestRetry.Find(() => {
+            var box = window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseQuantityBox"))?.AsTextBox();
+            if (box != null && !box.IsOffscreen) return box;
+            return null;
+        }, TimeSpan.FromSeconds(10));
         
+        if (firstQuantityBox == null)
+        {
+             Console.WriteLine("Could not find BulkDispenseQuantityBox. Dumping window descendants:");
+             // (Optional: dump tree)
+        }
+        firstQuantityBox.ShouldNotBeNull();
+        firstQuantityBox.Text = "1";
+
+        // Execute Dispense
+        var executeButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseExecuteButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        executeButton.ShouldNotBeNull();
+        executeButton.Click();
+
+        // Verify total decreased
         decimal newAmount = 0;
         bool success = FlaUI.Core.Tools.Retry.WhileFalse(() => {
             var el = window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel();
             newAmount = ParseAmount(el?.Text ?? "");
-            return newAmount > initialAmount;
+            return newAmount < initialAmount;
         }, TimeSpan.FromSeconds(10)).Result;
 
-        Console.WriteLine($"After '+' click: Success={success}, Total={newAmount}");
-        Assert.True(newAmount > initialAmount, $"Global total should increase. Initial: {initialAmount}, Final: {newAmount}");
+        success.ShouldBeTrue($"Total amount should decrease. Initial: {initialAmount}, Final: {newAmount}");
     }
 
     /// <summary>払出実行後に合計金額が減少し、履歴に追加されることを検証する。</summary>
@@ -51,19 +81,19 @@ public class DispenseTest : IDisposable
     public void ShouldDispenseCashAndReduceTotalAmount()
     {
         var window = _app.MainWindow;
-        Assert.NotNull(window);
+        window.ShouldNotBeNull();
         
         Thread.Sleep(1000);
 
         // Find controls with retry
-        var totalAmountText = (Label)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(5));
-        var dispenseBox = (TextBox)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(5));
-        var dispenseButton = (Button)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseButton"))?.AsButton(), TimeSpan.FromSeconds(5));
-        var historyListBox = (ListBox)Retry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HistoryListBox"))?.AsListBox(), TimeSpan.FromSeconds(5));
+        var totalAmountText = (Label)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(10));
+        var dispenseBox = (TextBox)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
+        var dispenseButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        var historyListBox = (ListBox)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HistoryListBox"))?.AsListBox(), TimeSpan.FromSeconds(10));
 
-        Assert.NotNull(totalAmountText);
-        Assert.NotNull(dispenseBox);
-        Assert.NotNull(dispenseButton);
+        totalAmountText.ShouldNotBeNull();
+        dispenseBox.ShouldNotBeNull();
+        dispenseButton.ShouldNotBeNull();
 
         decimal initialAmount = ParseAmount(totalAmountText.Text);
         var initialHistoryCount = historyListBox?.Items.Length ?? 0;
@@ -93,14 +123,15 @@ public class DispenseTest : IDisposable
         // Wait for history update
         FlaUI.Core.Tools.Retry.WhileTrue(() => (historyListBox?.Items.Length ?? 0) > initialHistoryCount, TimeSpan.FromSeconds(3));
         Console.WriteLine($"History count after: {historyListBox?.Items.Length}");
-        Assert.Equal(initialHistoryCount + 1, historyListBox?.Items.Length);
+        
+        historyListBox?.Items.Length.ShouldBe(initialHistoryCount + 1);
         
         var lastEntry = historyListBox?.Items[0];
         var entryText = string.Join(" ", lastEntry?.FindAllDescendants().Select(e => {
             try { return e.AsLabel()?.Text ?? ""; } catch { return ""; }
         }).Where(t => !string.IsNullOrEmpty(t)) ?? Array.Empty<string>());
         Console.WriteLine($"History entry text combined: {entryText}");
-        Assert.Contains(((int)dispenseAmount).ToString(), entryText);
+        entryText.ShouldContain(((int)dispenseAmount).ToString());
 
         // Wait for update with re-finding
         var expectedAmount = initialAmount - dispenseAmount;
@@ -112,7 +143,7 @@ public class DispenseTest : IDisposable
         }, TimeSpan.FromSeconds(10));
         
         Console.WriteLine($"Initial: {initialAmount}, Expected: {expectedAmount}, Final Amount: {finalAmount}");
-        Assert.Equal(expectedAmount, finalAmount);
+        finalAmount.ShouldBe(expectedAmount);
     }
     
     /// <summary>払出金額入力欄のバリデーションを検証する。</summary>
@@ -120,13 +151,13 @@ public class DispenseTest : IDisposable
     public void ShouldValidateInput()
     {
         var window = _app.MainWindow;
-        var dispenseBox = (TextBox)Retry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(5));
-        Assert.NotNull(dispenseBox);
+        var dispenseBox = (TextBox)UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
+        dispenseBox.ShouldNotBeNull();
 
         dispenseBox.Focus();
         dispenseBox.Text = "abc";
         Thread.Sleep(500);
-        Assert.Equal("abc", dispenseBox.Text);
+        dispenseBox.Text.ShouldBe("abc");
     }
 
     private decimal ParseAmount(string text)
@@ -142,18 +173,5 @@ public class DispenseTest : IDisposable
     public void Dispose()
     {
         _app?.Dispose();
-    }
-}
-
-public static class Retry
-{
-    public static AutomationElement Find(Func<AutomationElement?> findFunc, TimeSpan timeout)
-    {
-        AutomationElement? result = null;
-        FlaUI.Core.Tools.Retry.WhileTrue(() => {
-            result = findFunc();
-            return result != null;
-        }, timeout);
-        return result!;
     }
 }

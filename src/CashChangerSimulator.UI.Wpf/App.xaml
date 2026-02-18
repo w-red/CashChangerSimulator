@@ -28,6 +28,7 @@
             <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
             <SolidColorBrush x:Key="OnBackgroundBrush" Color="{StaticResource OnBackgroundColor}"/>
             <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource OnSurfaceColor}"/>
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A0A0A0"/>
 
             <!-- Converters -->
@@ -54,7 +55,7 @@
                 </Style.Triggers>
             </Style>
 
-            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource MaterialDesignFilledButton}">
+            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
                 <Setter Property="Foreground" Value="Black"/>
                 <Setter Property="FontWeight" Value="Bold"/>
