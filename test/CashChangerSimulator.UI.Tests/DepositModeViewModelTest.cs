@@ -52,7 +52,6 @@ public class DepositModeViewModelTest
             _depositController);
     }
 
-
     [Fact]
     public void DenominationViewModel_IsAcceptingCash_ShouldReflectPausedState()
     {

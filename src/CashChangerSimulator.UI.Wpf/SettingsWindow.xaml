@@ -26,22 +26,45 @@
 
         <!-- Title -->
         <StackPanel Margin="0,0,0,32">
-            <TextBlock Text="SYSTEM SETTINGS" FontSize="24" FontWeight="Black" Foreground="{StaticResource PrimaryBrush}"/>
-            <TextBlock Text="Configure device behavior and currency parameters" FontSize="12" Opacity="0.6" Margin="0,4,0,0"/>
+            <TextBlock 
+                Text="SYSTEM SETTINGS"
+                FontSize="24"
+                FontWeight="Black"
+                Foreground="{StaticResource PrimaryBrush}"/>
+            <TextBlock
+                Text="Configure device behavior and currency parameters"
+                FontSize="12"
+                Opacity="0.6"
+                Margin="0,4,0,0"/>
         </StackPanel>
 
         <!-- Main Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
+        <ScrollViewer
+            Grid.Row="1"
+            VerticalScrollBarVisibility="Auto"
+            materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
             <StackPanel Margin="0,0,16,0">
                 <!-- Currency Section -->
-                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,24">
+                <Border 
+                    Style="{StaticResource CardStyle}" 
+                    Margin="0,0,0,24">
                     <StackPanel>
-                        <TextBlock Text="CORE PARAMETERS" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,20"/>
-                        <ComboBox materialDesign:HintAssist.Hint="Active Currency"
-                                  ItemsSource="{Binding AvailableCurrencyCodes}"
-                                  SelectedItem="{Binding CurrencyCode}"
-                                  Style="{StaticResource ModernComboBoxStyle}"/>
-                        <TextBlock Text="* Requires restart for inventory recalibration." FontSize="10" Foreground="{StaticResource SecondaryBrush}" Margin="4,4,0,0"/>
+                        <TextBlock
+                            Text="CORE PARAMETERS"
+                            FontSize="11"
+                            FontWeight="Black"
+                            Foreground="{StaticResource TextSecondaryBrush}"
+                            Margin="0,0,0,20"/>
+                        <ComboBox
+                            materialDesign:HintAssist.Hint="Active Currency"
+                            ItemsSource="{Binding AvailableCurrencyCodes}"
+                            SelectedItem="{Binding CurrencyCode}"
+                            Style="{StaticResource ModernComboBoxStyle}"/>
+                        <TextBlock
+                            Text="* Requires restart for inventory recalibration."
+                            FontSize="10"
+                            Foreground="{StaticResource SecondaryBrush}"
+                            Margin="4,4,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -53,63 +76,152 @@
                     </Grid.ColumnDefinitions>
                     
                     <!-- Thresholds -->
-                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,12,24">
+                    <Border
+                        Grid.Column="0"
+                        Style="{StaticResource CardStyle}"
+                        Margin="0,0,12,24">
                         <StackPanel>
-                            <TextBlock Text="GLOBAL THRESHOLDS" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,20"/>
-                            <TextBox materialDesign:HintAssist.Hint="Near Empty" Text="{Binding NearEmpty, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBox materialDesign:HintAssist.Hint="Near Full" Text="{Binding NearFull, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBox materialDesign:HintAssist.Hint="Full Limit" Text="{Binding Full, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBlock
+                                Text="GLOBAL THRESHOLDS"
+                                FontSize="11"
+                                FontWeight="Black"
+                                Foreground="{StaticResource TextSecondaryBrush}"
+                                Margin="0,0,0,20"/>
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Near Empty"
+                                Text="{Binding NearEmpty, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Near Full"
+                                Text="{Binding NearFull, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Full Limit"
+                                Text="{Binding Full, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Simulation -->
-                    <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="12,0,0,24">
+                    <Border
+                        Grid.Column="1"
+                        Style="{StaticResource CardStyle}"
+                        Margin="12,0,0,24">
                         <StackPanel>
-                            <TextBlock Text="ENGINE SIMULATION" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,20"/>
-                            <CheckBox Content="Enable Latency" IsChecked="{Binding UseDelay}" Style="{StaticResource ToggleSwitchStyle}" Margin="0,0,0,16"/>
-                            <StackPanel Orientation="Horizontal" IsEnabled="{Binding UseDelay}">
-                                <TextBox materialDesign:HintAssist.Hint="Min (ms)" Width="80" Text="{Binding MinDelay}" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,16,0"/>
-                                <TextBox materialDesign:HintAssist.Hint="Max (ms)" Width="80" Text="{Binding MaxDelay}" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBlock
+                                Text="ENGINE SIMULATION"
+                                FontSize="11"
+                                FontWeight="Black"
+                                Foreground="{StaticResource TextSecondaryBrush}"
+                                Margin="0,0,0,20"/>
+                            <CheckBox
+                                Content="Enable Latency"
+                                IsChecked="{Binding UseDelay}"
+                                Style="{StaticResource ToggleSwitchStyle}"
+                                Margin="0,0,0,16"/>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                IsEnabled="{Binding UseDelay}">
+                                <TextBox
+                                    materialDesign:HintAssist.Hint="Min (ms)"
+                                    Width="80"
+                                    Text="{Binding MinDelay}"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    Margin="0,0,16,0"/>
+                                <TextBox
+                                    materialDesign:HintAssist.Hint="Max (ms)"
+                                    Width="80"
+                                    Text="{Binding MaxDelay}"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    Margin="0,0,16,0"/>
                             </StackPanel>
-                            <Separator Background="#1AFFFFFF" Margin="0,16"/>
-                            <CheckBox Content="Fault Injection" IsChecked="{Binding UseRandomErrors}" Style="{StaticResource ToggleSwitchStyle}" Margin="0,0,0,16"/>
-                            <TextBox materialDesign:HintAssist.Hint="Error Rate (%)" Text="{Binding ErrorRate}" IsEnabled="{Binding UseRandomErrors}" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <Separator
+                                Background="#1AFFFFFF"
+                                Margin="0,16"/>
+                            <CheckBox
+                                Content="Fault Injection"
+                                IsChecked="{Binding UseRandomErrors}"
+                                Style="{StaticResource ToggleSwitchStyle}"
+                                Margin="0,0,0,16"/>
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Error Rate (%)"
+                                Text="{Binding ErrorRate}"
+                                IsEnabled="{Binding UseRandomErrors}"
+                                Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
 
                 <!-- DataGrid Section -->
-                <Border Style="{StaticResource CardStyle}" Padding="0">
+                <Border
+                    Style="{StaticResource CardStyle}"
+                    Padding="0">
                     <DockPanel>
-                        <Border DockPanel.Dock="Top" Padding="15,15,15,10">
-                            <TextBlock Text="DENOMINATION CALIBRATION" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Border
+                            DockPanel.Dock="Top"
+                            Padding="15,15,15,10">
+                            <TextBlock
+                                Text="DENOMINATION CALIBRATION"
+                                FontSize="11"
+                                FontWeight="Black"
+                                Foreground="{StaticResource TextSecondaryBrush}"/>
                         </Border>
                         
-                        <DataGrid ItemsSource="{Binding DenominationSettings}" 
-                                  AutoGenerateColumns="False" CanUserAddRows="False" 
-                                  Background="Transparent" BorderThickness="0"
-                                  materialDesign:DataGridAssist.CellPadding="12,8"
-                                  materialDesign:DataGridAssist.ColumnHeaderPadding="12,8"
-                                  materialDesign:DataGridAssist.SelectedCellBorderBrush="{StaticResource PrimaryBrush}">
+                        <DataGrid
+                            ItemsSource="{Binding DenominationSettings}"
+                            AutoGenerateColumns="False"
+                            CanUserAddRows="False"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            materialDesign:DataGridAssist.CellPadding="12,8"
+                            materialDesign:DataGridAssist.ColumnHeaderPadding="12,8"
+                            materialDesign:DataGridAssist.SelectedCellBorderBrush="{StaticResource PrimaryBrush}">
                             <DataGrid.Resources>
-                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                                    <Setter Property="Background" Value="#15FFFFFF"/>
-                                    <Setter Property="FontSize" Value="10"/>
-                                    <Setter Property="FontWeight" Value="Black"/>
+                                <Style
+                                    TargetType="DataGridColumnHeader"
+                                    BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter
+                                        Property="Background"
+                                        Value="#15FFFFFF"/>
+                                    <Setter
+                                        Property="FontSize"
+                                        Value="10"/>
+                                    <Setter
+                                        Property="FontWeight"
+                                        Value="Black"/>
                                 </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="IDENTIFIER" Binding="{Binding DisplayName}" Width="*">
+                                <DataGridTextColumn
+                                    Header="IDENTIFIER"
+                                    Binding="{Binding DisplayName}"
+                                    Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                            <Setter Property="FontWeight" Value="Bold" />
+                                        <Style
+                                            TargetType="TextBlock"
+                                            BasedOn="{StaticResource {x:Type TextBlock}}">
+                                            <Setter
+                                                Property="FontWeight"
+                                                Value="Bold" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="BASE QTY" Binding="{Binding Count}" Width="80"/>
-                                <DataGridTextColumn Header="N.EMPTY" Binding="{Binding NearEmpty}" Width="80"/>
-                                <DataGridTextColumn Header="N.FULL" Binding="{Binding NearFull}" Width="80"/>
-                                <DataGridTextColumn Header="MAX CAP" Binding="{Binding Full}" Width="80"/>
+                                <DataGridTextColumn
+                                    Header="BASE QTY"
+                                    Binding="{Binding Count}"
+                                    Width="80"/>
+                                <DataGridTextColumn
+                                    Header="N.EMPTY"
+                                    Binding="{Binding NearEmpty}"
+                                    Width="80"/>
+                                <DataGridTextColumn
+                                    Header="N.FULL"
+                                    Binding="{Binding NearFull}"
+                                    Width="80"/>
+                                <DataGridTextColumn
+                                    Header="MAX CAP"
+                                    Binding="{Binding Full}"
+                                    Width="80"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>
@@ -118,7 +230,9 @@
         </ScrollViewer>
 
         <!-- Footer Actions -->
-        <Grid Grid.Row="2" Margin="0,32,0,0">
+        <Grid
+            Grid.Row="2"
+            Margin="0,32,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -126,18 +240,28 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Content="DEFAULT" Command="{Binding ResetToDefaultCommand}" 
-                    Style="{StaticResource MaterialDesignOutlinedButton}" 
-                    BorderBrush="#33FFFFFF" Foreground="{StaticResource OnSurfaceBrush}"
-                    materialDesign:ButtonAssist.CornerRadius="12"/>
+            <Button
+                Content="DEFAULT"
+                Command="{Binding ResetToDefaultCommand}"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                BorderBrush="#33FFFFFF"
+                Foreground="{StaticResource OnSurfaceBrush}"
+                materialDesign:ButtonAssist.CornerRadius="12"/>
 
-            <Button Grid.Column="2" Content="CANCEL" IsCancel="True" 
-                    Style="{StaticResource ModernFlatButtonStyle}" 
-                    Margin="0,0,16,0"/>
+            <Button
+                Grid.Column="2"
+                Content="CANCEL"
+                IsCancel="True"
+                Style="{StaticResource ModernFlatButtonStyle}"
+                Margin="0,0,16,0"/>
 
-            <Button Grid.Column="3" Content="COMMIT CHANGES" Command="{Binding SaveCommand}" 
-                    Style="{StaticResource PrimaryButtonStyle}" 
-                    Width="180" Click="SaveButton_Click"/>
+            <Button
+                Grid.Column="3"
+                Content="COMMIT CHANGES"
+                Command="{Binding SaveCommand}"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Width="180"
+                Click="SaveButton_Click"/>
         </Grid>
     </Grid>
 </Window>

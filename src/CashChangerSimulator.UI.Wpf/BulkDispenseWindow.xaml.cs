@@ -4,8 +4,11 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf;
 
+/// <summary>一括払出（Bulk Dispense）を行うためのウィンドウ。</summary>
 public partial class BulkDispenseWindow : Window
 {
+    /// <summary>BulkDispenseWindow の新しいインスタンスを初期化する。</summary>
+    /// <param name="viewModel">メインビューモデル。</param>
     public BulkDispenseWindow(MainViewModel viewModel)
     {
         InitializeComponent();

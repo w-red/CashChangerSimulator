@@ -13,7 +13,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// アプリケーションのメイン画面を制御する ViewModel。
 /// 在庫表示、払出操作、履歴管理、設定画面の起動などを担当する。
 /// </summary>
-public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErrorInfo
+public class MainViewModel : IDisposable
 {
     private readonly Inventory _inventory;
     private readonly TransactionHistory _history;
@@ -24,7 +24,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
     private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly DepositController _depositController;
-    private readonly CompositeDisposable _disposables = new();
+    private readonly CompositeDisposable _disposables = [];
 
     /// <summary>ジャムが発生しているかどうかを制御する ReactiveProperty。</summary>
     public BindableReactiveProperty<bool> IsJammed { get; }
@@ -37,8 +37,6 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     private readonly ReactiveProperty<decimal> _totalAmount;
     /// <summary>在庫の合計金額（ReactiveProperty 版）。</summary>
     public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
-    /// <summary>在庫の合計金額（WPF バインディング用の プレーンプロパティ）。</summary>
-    public decimal TotalAmountCurrency => _totalAmount.Value;
     /// <summary>全金種のステータスを統合したデバイス全体のステータス (空・ニアエンプティ)。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     /// <summary>全金種のステータスを統合したデバイス全体のステータス (満杯・ニアフル)。</summary>
@@ -49,112 +47,64 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     public RelayCommand OpenSettingsCommand { get; }
 
     /// <summary>ユーザーが入力した払出金額（文字列）。</summary>
-    private string _dispenseAmountInput = "";
-    public string DispenseAmountInput
-    {
-        get => _dispenseAmountInput;
-        set
-        {
-            if (_dispenseAmountInput != value)
-            {
-                _dispenseAmountInput = value;
-                OnPropertyChanged();
-                ValidateDispenseAmount(value);
-                DispenseAmountText.Value = value;
-            }
-        }
-    }
-
-    /// <summary>払出処理用の内部状態を保持する ReactiveProperty。</summary>
-    public ReactiveProperty<string> DispenseAmountText { get; }
+    public BindableReactiveProperty<string> DispenseAmountInput { get; }
 
     /// <summary>払出処理を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
 
     // Deposit Mode Properties
+    /// <summary>現在入金モード（入金セッション中）かどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsInDepositMode { get; }
+    /// <summary>現在の入金セッションにおける合計投入金額。</summary>
     public ReadOnlyReactiveProperty<decimal> CurrentDepositAmount { get; }
+    /// <summary>入金が確定（Fix）された状態かどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsDepositFixed { get; }
+    /// <summary>入金処理が一時停止されているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsDepositPaused { get; }
+    /// <summary>現在の入金ステータス（Start, Count, End など）。</summary>
     public ReadOnlyReactiveProperty<CashDepositStatus> DepositStatus { get; }
+    /// <summary>現在のモード名（表示用）。</summary>
     public ReadOnlyReactiveProperty<string> CurrentModeName { get; }
 
-    // WPF plain properties for binding
-    public bool IsInDepositModePlain => IsInDepositMode.CurrentValue;
-    public decimal CurrentDepositAmountPlain => CurrentDepositAmount.CurrentValue;
-    public bool IsDepositFixedPlain => IsDepositFixed.CurrentValue;
-    public bool IsDepositPausedPlain => IsDepositPaused.CurrentValue;
-    public string CurrentModeNamePlain => CurrentModeName.CurrentValue;
-    public CashStatus OverallStatusPlain => OverallStatus.CurrentValue;
-    public CashStatus FullStatusPlain => FullStatus.CurrentValue;
-    public bool IsOverlappedPlain => IsOverlapped.Value;
-
+    // WPF plain properties for binding (Removed)
 
     // Deposit Mode Commands
+    /// <summary>新規入金を開始するコマンド。</summary>
     public ReactiveCommand BeginDepositCommand { get; }
+    /// <summary>入金を一時停止するコマンド。</summary>
     public ReactiveCommand PauseDepositCommand { get; }
+    /// <summary>入金を再開するコマンド。</summary>
     public ReactiveCommand ResumeDepositCommand { get; }
+    /// <summary>入金を確定するコマンド。</summary>
     public ReactiveCommand FixDepositCommand { get; }
+    /// <summary>入金を格納（預かり入れ）して終了するコマンド。</summary>
     public ReactiveCommand StoreDepositCommand { get; }
+    /// <summary>入金をキャンセル（返却）して終了するコマンド。</summary>
     public ReactiveCommand CancelDepositCommand { get; }
+    /// <summary>紙幣重なりエラーをシミュレーションするためのコマンド。</summary>
     public ReactiveCommand SimulateOverlapCommand { get; }
 
     // Bulk Deposit
+    /// <summary>一括投入画面に表示するアイテムリスト。</summary>
     public ObservableCollection<BulkInsertItemViewModel> BulkInsertItems { get; } = [];
+    /// <summary>一括投入画面を表示するコマンド。</summary>
     public ReactiveCommand ShowBulkInsertCommand { get; }
+    /// <summary>一括投入を実行するコマンド。</summary>
     public ReactiveCommand InsertBulkCommand { get; }
+    /// <summary>一括投入をキャンセルするコマンド。</summary>
     public ReactiveCommand CancelBulkInsertCommand { get; }
     
     // Bulk Dispense
+    /// <summary>一括払出画面に表示するアイテムリスト。</summary>
     public ObservableCollection<BulkInsertItemViewModel> BulkDispenseItems { get; } = [];
+    /// <summary>一括払出画面を表示するコマンド。</summary>
     public ReactiveCommand ShowBulkDispenseCommand { get; }
+    /// <summary>一括払出を実行するコマンド。</summary>
     public ReactiveCommand DispenseBulkCommand { get; }
+    /// <summary>一括払出をキャンセルするコマンド。</summary>
     public ReactiveCommand CancelBulkDispenseCommand { get; }
 
-    private readonly Dictionary<string, List<string>> _errors = [];
-
-    /// <summary>バリデーションエラーが変更されたときに発生するイベント。</summary>
-    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
-    /// <summary>現在バリデーションエラーが存在するかどうか。</summary>
-    public bool HasErrors => _errors.Count > 0;
-    /// <summary>指定したプロパティのエラー一覧を取得する。</summary>
-    public System.Collections.IEnumerable GetErrors(string? propertyName) => 
-        _errors.GetValueOrDefault(propertyName ?? "") ?? Enumerable.Empty<string>();
-
-    /// <summary>プロパティ値が変更されたときに発生するイベント。</summary>
-    public event PropertyChangedEventHandler? PropertyChanged;
-    /// <summary>プロパティ変更通知を発生させる。</summary>
-    protected void OnPropertyChanged([CallerMemberName] string? name = null) 
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-    /// <summary>指定されたテキストを元に払出金額の妥当性を検証する。</summary>
-    private void ValidateDispenseAmount(string text)
-    {
-        var propertyName = nameof(DispenseAmountInput);
-        if (_errors.ContainsKey(propertyName))
-        {
-            _errors.Remove(propertyName);
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-        }
-
-        var validationErrors = new List<string>();
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-             if (!decimal.TryParse(text, out var val)) validationErrors.Add("Enter a valid number");
-             else if (val <= 0) validationErrors.Add("Amount must be positive");
-             else if (val > TotalAmount.CurrentValue) validationErrors.Add("Insufficient funds");
-        }
-        
-        if (validationErrors.Count > 0)
-        {
-            _errors[propertyName] = validationErrors;
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-        }
-    }
-
-    /// <summary>
-    /// 各種プロバイダーを注入して MainViewModel を初期化する。
-    /// </summary>
+    /// <summary>各種プロバイダーを注入して MainViewModel を初期化する。</summary>
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,
@@ -212,17 +162,6 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
 
         OverallStatus = _statusAggregator.DeviceStatus;
         FullStatus = _statusAggregator.FullStatus;
-
-        // Plain property subscriptions (Safe now as all properties are initialized above)
-        IsInDepositMode.Subscribe(_ => OnPropertyChanged(nameof(IsInDepositModePlain))).AddTo(_disposables);
-        CurrentDepositAmount.Subscribe(_ => OnPropertyChanged(nameof(CurrentDepositAmountPlain))).AddTo(_disposables);
-        IsDepositFixed.Subscribe(_ => OnPropertyChanged(nameof(IsDepositFixedPlain))).AddTo(_disposables);
-        IsDepositPaused.Subscribe(_ => OnPropertyChanged(nameof(IsDepositPausedPlain))).AddTo(_disposables);
-        CurrentModeName.Subscribe(_ => OnPropertyChanged(nameof(CurrentModeNamePlain))).AddTo(_disposables);
-        OverallStatus.Subscribe(_ => OnPropertyChanged(nameof(OverallStatusPlain))).AddTo(_disposables);
-        FullStatus.Subscribe(_ => OnPropertyChanged(nameof(FullStatusPlain))).AddTo(_disposables);
-        IsOverlapped.Subscribe(_ => OnPropertyChanged(nameof(IsOverlappedPlain))).AddTo(_disposables);
-
 
         // Deposit Commands
         BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand().AddTo(_disposables);
@@ -302,13 +241,11 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
                     System.Windows.Application.Current.Dispatcher.Invoke(() => 
                     {
                         _totalAmount.Value = total;
-                        OnPropertyChanged(nameof(TotalAmountCurrency));
                     });
                 }
                 else
                 {
                     _totalAmount.Value = total;
-                    OnPropertyChanged(nameof(TotalAmountCurrency));
                 }
             })
             .AddTo(_disposables);
@@ -326,37 +263,48 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         _history.Added
             .Subscribe(entry =>
             {
-                Action action = () =>
+                void AddEntry()
                 {
                     RecentTransactions.Insert(0, entry);
                     if (RecentTransactions.Count > 50) RecentTransactions.RemoveAt(50);
-                };
+                }
 
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(action);
+                    System.Windows.Application.Current.Dispatcher.Invoke(AddEntry);
                 }
                 else
                 {
-                    action();
+                    AddEntry();
                 }
             })
             .AddTo(_disposables);
             
         // Dispense Logic
-        DispenseAmountText = new ReactiveProperty<string>("")
+        DispenseAmountInput = new BindableReactiveProperty<string>("")
+            .EnableValidation(text =>
+                string.IsNullOrWhiteSpace(text)
+                    ? null
+                    : !decimal.TryParse(text, out var val)
+                    ? new Exception("Enter a valid number")
+                    : val <= 0
+                    ? new Exception("Amount must be positive")
+                    : val > TotalAmount.CurrentValue
+                    ? new Exception("Insufficient funds")
+                    : null
+            )
             .AddTo(_disposables);
 
-        // エラー状態の変更を監視してコマンドの有効状態を制御
-        var errorsChangedObservable = Observable.FromEvent<EventHandler<DataErrorsChangedEventArgs>, DataErrorsChangedEventArgs>(
-            h => (s, e) => h(e),
-            h => ErrorsChanged += h,
-            h => ErrorsChanged -= h);
+        var hasDispenseErrors = Observable.FromEvent<EventHandler<DataErrorsChangedEventArgs>, DataErrorsChangedEventArgs>(
+                h => (s, e) => h(e),
+                h => DispenseAmountInput.ErrorsChanged += h,
+                h => DispenseAmountInput.ErrorsChanged -= h)
+            .Select(_ => DispenseAmountInput.HasErrors)
+            .Prepend(DispenseAmountInput.HasErrors);
 
-        var canDispense = errorsChangedObservable
-            .Select(_ => !HasErrors)
-            .Prepend(!HasErrors)
-            .CombineLatest(DispenseAmountText, (noError, text) => noError && !string.IsNullOrEmpty(text));
+        var canDispense = hasDispenseErrors
+            .Select(x => !x)
+            .CombineLatest(DispenseAmountInput, (noError, text) => noError && !string.IsNullOrEmpty(text));
 
         DispenseCommand = canDispense
             .ToReactiveCommand()
@@ -364,10 +312,10 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
             
         DispenseCommand.Subscribe(_ =>
         {
-            if (decimal.TryParse(DispenseAmountText.Value, out var amount))
+            if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
             {
                 DispenseCash(amount);
-                DispenseAmountInput = ""; // Clear via wrapper to trigger notification
+                DispenseAmountInput.Value = "";
             }
         });
 
@@ -418,6 +366,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     {
         _disposables.Dispose();
         _statusAggregator.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void PrepareBulkDispenseItems()
@@ -430,6 +379,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
+    /// <summary>一括払出を実行し、結果をハンドリングする。</summary>
     private void ExecuteBulkDispense()
     {
         var counts = BulkDispenseItems
@@ -449,6 +399,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
+    /// <summary>一括投入用のアイテムリストを初期化する。</summary>
     private void PrepareBulkInsertItems()
     {
         BulkInsertItems.Clear();
@@ -458,6 +409,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
+    /// <summary>一括投入を実行し、入金コントローラーに通知する。</summary>
     private void ExecuteBulkInsert()
     {
         var counts = BulkInsertItems
@@ -470,30 +422,22 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         }
     }
 
+    /// <summary>現在の入金状態に応じた表示用モード名を取得する。</summary>
     private string GetModeName()
     {
-        if (!_depositController.IsDepositInProgress && _depositController.DepositStatus != CashDepositStatus.End)
-        {
-            return "IDLE (待機中)";
-        }
-
-        if (_depositController.IsPaused)
-        {
-            return "PAUSED (一時停止中)";
-        }
-
-        if (_depositController.IsFixed)
-        {
-            return "DEPOSIT FIXED (確定済み)";
-        }
-
-        return _depositController.DepositStatus switch
-        {
-            CashDepositStatus.Start => "STARTING (開始中)",
-            CashDepositStatus.Count => "COUNTING (計数中)",
-            CashDepositStatus.End => "IDLE (待機中)",
-            _ => "UNKNOWN"
-        };
+        return !_depositController.IsDepositInProgress && _depositController.DepositStatus != CashDepositStatus.End
+            ? "IDLE (待機中)"
+            : _depositController.IsPaused
+                ? "PAUSED (一時停止中)"
+                : _depositController.IsFixed
+                    ? "DEPOSIT FIXED (確定済み)"
+                    : _depositController.DepositStatus switch
+                    {
+                        CashDepositStatus.Start => "STARTING (開始中)",
+                        CashDepositStatus.Count => "COUNTING (計数中)",
+                        CashDepositStatus.End => "IDLE (待機中)",
+                        _ => "UNKNOWN"
+                    };
     }
 }
 
@@ -516,11 +460,6 @@ public class DenominationViewModel
 
     /// <summary>入金を現在受け付けているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsAcceptingCash { get; }
-
-    // WPF plain properties
-    public int CountPlain => Count.CurrentValue;
-    public bool IsAcceptingCashPlain => IsAcceptingCash.CurrentValue;
-    public CashStatus StatusPlain => Status.CurrentValue;
 
     /// <summary>金種キー、在庫、メタデータプロバイダー、表示名を元にインスタンスを初期化する。</summary>
     public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
@@ -556,23 +495,10 @@ public class DenominationViewModel
 
         // Individual Add/Remove commands are removed to enforce Bulk Insert usage.
 
-        // Subscribe for WPF updates
-        Count.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(CountPlain))));
-        IsAcceptingCash.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(IsAcceptingCashPlain))));
-        Status.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(StatusPlain))));
-    }
-
-    // Helper for INotifyPropertyChanged
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void INotifyPropertyChanged_OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+}
 }
 
-/// <summary>
-/// バルク投入（一括投入）用の一時アイテム ViewModel。
-/// </summary>
+/// <summary>バルク投入（一括投入）用の一時アイテム ViewModel。</summary>
 public class BulkInsertItemViewModel(DenominationKey key, string name)
 {
     public DenominationKey Key { get; } = key;
