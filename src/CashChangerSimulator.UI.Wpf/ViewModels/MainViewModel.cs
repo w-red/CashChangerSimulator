@@ -29,6 +29,9 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     /// <summary>ジャムが発生しているかどうかを制御する ReactiveProperty。</summary>
     public BindableReactiveProperty<bool> IsJammed { get; }
 
+    /// <summary>紙幣などの重なりが発生しているかどうかを制御する ReactiveProperty。</summary>
+    public BindableReactiveProperty<bool> IsOverlapped { get; }
+
     /// <summary>画面に表示する金種別情報のリスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
     private readonly ReactiveProperty<decimal> _totalAmount;
@@ -84,16 +87,8 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     public string CurrentModeNamePlain => CurrentModeName.CurrentValue;
     public CashStatus OverallStatusPlain => OverallStatus.CurrentValue;
     public CashStatus FullStatusPlain => FullStatus.CurrentValue;
-    public bool IsBulkInsertDialogOpenPlain
-    {
-        get => IsBulkInsertDialogOpen.Value;
-        set => IsBulkInsertDialogOpen.Value = value;
-    }
-    public bool IsBulkDispenseDialogOpenPlain
-    {
-        get => IsBulkDispenseDialogOpen.Value;
-        set => IsBulkDispenseDialogOpen.Value = value;
-    }
+    public bool IsOverlappedPlain => IsOverlapped.Value;
+
 
     // Deposit Mode Commands
     public ReactiveCommand BeginDepositCommand { get; }
@@ -102,17 +97,16 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
     public ReactiveCommand FixDepositCommand { get; }
     public ReactiveCommand StoreDepositCommand { get; }
     public ReactiveCommand CancelDepositCommand { get; }
+    public ReactiveCommand SimulateOverlapCommand { get; }
 
     // Bulk Deposit
     public ObservableCollection<BulkInsertItemViewModel> BulkInsertItems { get; } = [];
-    public ReactiveProperty<bool> IsBulkInsertDialogOpen { get; } = new(false);
     public ReactiveCommand ShowBulkInsertCommand { get; }
     public ReactiveCommand InsertBulkCommand { get; }
     public ReactiveCommand CancelBulkInsertCommand { get; }
     
     // Bulk Dispense
     public ObservableCollection<BulkInsertItemViewModel> BulkDispenseItems { get; } = [];
-    public ReactiveProperty<bool> IsBulkDispenseDialogOpen { get; } = new(false);
     public ReactiveCommand ShowBulkDispenseCommand { get; }
     public ReactiveCommand DispenseBulkCommand { get; }
     public ReactiveCommand CancelBulkDispenseCommand { get; }
@@ -183,6 +177,7 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         _depositController = depositController;
 
         IsJammed = _hardwareStatusManager.IsJammed;
+        IsOverlapped = _hardwareStatusManager.IsOverlapped;
         
         // Initialize ALL properties before any subscriptions
         IsInDepositMode = _depositController.Changed
@@ -226,8 +221,8 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         CurrentModeName.Subscribe(_ => OnPropertyChanged(nameof(CurrentModeNamePlain))).AddTo(_disposables);
         OverallStatus.Subscribe(_ => OnPropertyChanged(nameof(OverallStatusPlain))).AddTo(_disposables);
         FullStatus.Subscribe(_ => OnPropertyChanged(nameof(FullStatusPlain))).AddTo(_disposables);
-        IsBulkInsertDialogOpen.Subscribe(_ => OnPropertyChanged(nameof(IsBulkInsertDialogOpenPlain))).AddTo(_disposables);
-        IsBulkDispenseDialogOpen.Subscribe(_ => OnPropertyChanged(nameof(IsBulkDispenseDialogOpenPlain))).AddTo(_disposables);
+        IsOverlapped.Subscribe(_ => OnPropertyChanged(nameof(IsOverlappedPlain))).AddTo(_disposables);
+
 
         // Deposit Commands
         BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand().AddTo(_disposables);
@@ -261,18 +256,22 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         ShowBulkInsertCommand.Subscribe(_ => 
         {
             PrepareBulkInsertItems();
-            IsBulkInsertDialogOpen.Value = true;
+            var window = new BulkInsertWindow(this) { Owner = System.Windows.Application.Current.MainWindow };
+            window.ShowDialog();
         });
 
         InsertBulkCommand = new ReactiveCommand().AddTo(_disposables);
-        InsertBulkCommand.Subscribe(_ => 
-        {
-            ExecuteBulkInsert();
-            IsBulkInsertDialogOpen.Value = false;
-        });
+        InsertBulkCommand.Subscribe(_ => ExecuteBulkInsert());
 
         CancelBulkInsertCommand = new ReactiveCommand().AddTo(_disposables);
-        CancelBulkInsertCommand.Subscribe(_ => IsBulkInsertDialogOpen.Value = false);
+        CancelBulkInsertCommand.Subscribe(_ => { });
+
+        // Overlap Simulation Command
+        SimulateOverlapCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => mode && !fixed_ && !overlapped)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+        SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
 
         // Initialize Denominations
         foreach (var monitor in monitorsProvider.Monitors)
@@ -280,14 +279,14 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
             var key = monitor.Key;
             var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
             string? displayName = null;
-            var config = _configProvider.Config;
-            if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventorySettings) &&
+            var currentConfig = _configProvider.Config;
+            if (currentConfig.Inventory.TryGetValue(currentConfig.CurrencyCode, out var inventorySettings) &&
                 inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
             {
                 displayName = setting.DisplayName;
             }
 
-            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, displayName));
+            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, monitor, displayName));
         }
 
         // Reactive Total Amount
@@ -380,18 +379,15 @@ public class MainViewModel : IDisposable, INotifyPropertyChanged, INotifyDataErr
         ShowBulkDispenseCommand.Subscribe(_ =>
         {
             PrepareBulkDispenseItems();
-            IsBulkDispenseDialogOpen.Value = true;
+            var window = new BulkDispenseWindow(this) { Owner = System.Windows.Application.Current.MainWindow };
+            window.ShowDialog();
         });
 
         DispenseBulkCommand = new ReactiveCommand().AddTo(_disposables);
-        DispenseBulkCommand.Subscribe(_ =>
-        {
-            ExecuteBulkDispense();
-            IsBulkDispenseDialogOpen.Value = false;
-        });
+        DispenseBulkCommand.Subscribe(_ => ExecuteBulkDispense());
 
         CancelBulkDispenseCommand = new ReactiveCommand().AddTo(_disposables);
-        CancelBulkDispenseCommand.Subscribe(_ => IsBulkDispenseDialogOpen.Value = false);
+        CancelBulkDispenseCommand.Subscribe(_ => { });
 
         // Settings Command
         OpenSettingsCommand = new RelayCommand(() =>
@@ -513,6 +509,9 @@ public class DenominationViewModel
     /// <summary>この金種の現在枚数。</summary>
     public ReadOnlyReactiveProperty<int> Count { get; }
     
+    /// <summary>この金種の在庫状態（Full/NearFull/Normal/NearEmpty/Empty）。</summary>
+    public ReadOnlyReactiveProperty<CashStatus> Status { get; }
+
     // Commands removed as per UI simplification (Bulk Insert/Dispense only)
 
     /// <summary>入金を現在受け付けているかどうか。</summary>
@@ -521,13 +520,15 @@ public class DenominationViewModel
     // WPF plain properties
     public int CountPlain => Count.CurrentValue;
     public bool IsAcceptingCashPlain => IsAcceptingCash.CurrentValue;
+    public CashStatus StatusPlain => Status.CurrentValue;
 
     /// <summary>金種キー、在庫、メタデータプロバイダー、表示名を元にインスタンスを初期化する。</summary>
-    public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, string? displayName = null)
+    public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
     {
         _inventory = inventory;
         Key = key;
         Name = !string.IsNullOrEmpty(displayName) ? displayName : metadataProvider.GetDenominationName(key);
+        Status = monitor.Status;
         _count = new ReactiveProperty<int>(_inventory.GetCount(key));
         Count = _count;
         _inventory.Changed
@@ -558,6 +559,7 @@ public class DenominationViewModel
         // Subscribe for WPF updates
         Count.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(CountPlain))));
         IsAcceptingCash.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(IsAcceptingCashPlain))));
+        Status.Skip(1).Subscribe(_ => System.Windows.Application.Current?.Dispatcher?.Invoke(() => INotifyPropertyChanged_OnPropertyChanged(nameof(StatusPlain))));
     }
 
     // Helper for INotifyPropertyChanged

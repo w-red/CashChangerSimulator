@@ -63,6 +63,11 @@
                     
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+                            <Border Background="OrangeRed" 
+                                    CornerRadius="12" Padding="12,4" Margin="0,0,8,0"
+                                    Visibility="{Binding IsOverlappedPlain, Converter={StaticResource VisibilityConv}}">
+                                <TextBlock Text="VAL ERROR" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                            </Border>
                             <Border Background="{Binding OverallStatusPlain, Converter={StaticResource StatusBrushConv}}" 
                                     CornerRadius="12" Padding="12,4" Margin="0,0,8,0">
                                 <TextBlock Text="{Binding OverallStatusPlain}" Foreground="White" FontWeight="Bold" FontSize="11"/>
@@ -174,9 +179,12 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Grid.Row="0" Margin="16,16,16,0">
-                                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <Grid>
+                                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding StatusPlain}" Foreground="{Binding StatusPlain, Converter={StaticResource StatusBrushConv}}" FontSize="10" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                        </Grid>
                                         <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="8" 
-                                                     Foreground="{StaticResource PrimaryBrush}" Background="#15FFFFFF" BorderThickness="0"
+                                                     Foreground="{Binding StatusPlain, Converter={StaticResource StatusBrushConv}}" Background="#15FFFFFF" BorderThickness="0"
                                                      materialDesign:TransitionAssist.DisableTransitions="False"/>
                                     </StackPanel>
                                     
@@ -237,13 +245,14 @@
                 </Border>
 
                 <!-- Deposit Area -->
-                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16" Background="{Binding IsInDepositModePlain, Converter={StaticResource DepositModeBackgroundConv}}">
+                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16" Background="{StaticResource SurfaceBrush}">
                     <StackPanel>
                         <TextBlock Text="DEPOSIT TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                         
                         <Grid>
                             <!-- View Before Deposit -->
-                            <Button Style="{StaticResource ModernActionButtonStyle}" 
+                            <!-- ... (BeginDepositButton etc) ... -->
+                            <Button Style="{StaticResource PrimaryButtonStyle}" 
                                     Command="{Binding BeginDepositCommand}"
                                     Width="180" Height="40"
                                     Visibility="{Binding IsInDepositModePlain, Converter={StaticResource InvertedVisibilityConv}}"
@@ -261,10 +270,6 @@
                                            FontSize="32" FontWeight="Thin" HorizontalAlignment="Center" Margin="0,0,0,8"
                                            AutomationProperties.AutomationId="CurrentDepositText"/>
 
-                                <TextBlock Text="Click [+] on cards to insert cash" 
-                                           FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
-                                           HorizontalAlignment="Center" Margin="0,0,0,16"
-                                           Visibility="{Binding IsDepositFixedPlain, Converter={StaticResource InvertedVisibilityConv}}"/>
                                 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -283,6 +288,18 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,4,0" />
                                                 <TextBlock Text="BULK INSERT" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Style="{StaticResource ModernFlatButtonStyle}" 
+                                                Command="{Binding SimulateOverlapCommand}"
+                                                HorizontalAlignment="Stretch" Margin="4"
+                                                Foreground="Orange"
+                                                AutomationProperties.AutomationId="SimulateOverlapButton"
+                                                AutomationProperties.Name="SIMULATE OVERLAP">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,4,0" />
+                                                <TextBlock Text="OVERLAP (ERR)" />
                                             </StackPanel>
                                         </Button>
 
@@ -320,7 +337,7 @@
                                         </StackPanel>
                                     </Button>
 
-                                    <Button Grid.Column="0" Style="{StaticResource ModernActionButtonStyle}" 
+                                    <Button Grid.Column="0" Style="{StaticResource PrimaryButtonStyle}" 
                                             Command="{Binding ResumeDepositCommand}"
                                             Visibility="{Binding IsDepositPausedPlain, Converter={StaticResource VisibilityConv}}"
                                             HorizontalAlignment="Stretch" Margin="4"
@@ -340,7 +357,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Step 2: Store -->
-                                    <Button Grid.Column="0" Style="{StaticResource ModernActionButtonStyle}" 
+                                    <Button Grid.Column="0" Style="{StaticResource PrimaryButtonStyle}" 
                                             Command="{Binding StoreDepositCommand}"
                                             Visibility="{Binding IsDepositFixedPlain, Converter={StaticResource VisibilityConv}}"
                                             HorizontalAlignment="Stretch" Margin="4"
@@ -412,96 +429,6 @@
             </Grid>
         </Grid>
 
-        <!-- DialogHost overlay (Bulk Insert dialog only) -->
-        <materialDesign:DialogHost Identifier="RootDialog" 
-                                   IsOpen="{Binding IsBulkInsertDialogOpenPlain, Mode=TwoWay}">
-            <materialDesign:DialogHost.DialogContent>
-                <Border Padding="24" Width="360" Background="{StaticResource BackgroundBrush}">
-                    <StackPanel>
-                        <TextBlock Text="BULK CASH INSERT" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,16"/>
-                        <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding BulkInsertItems}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="80" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            <TextBox Grid.Column="1" 
-                                                     Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}"
-                                                     AutomationProperties.AutomationId="BulkInsertQuantityBox"
-                                                     materialDesign:TextFieldAssist.HasClearButton="True"
-                                                     materialDesign:HintAssist.Hint="0"
-                                                     HorizontalContentAlignment="Right"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                        
-                        <Grid Margin="0,24,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="CANCEL" Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{Binding CancelBulkInsertCommand}" Margin="0,0,8,0"
-                                    AutomationProperties.AutomationId="BulkInsertCancelButton"/>
-                            <Button Grid.Column="1" Content="INSERT ALL" Style="{StaticResource PrimaryButtonStyle}"
-                                    Command="{Binding InsertBulkCommand}"
-                                    AutomationProperties.AutomationId="BulkInsertExecuteButton"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-            </materialDesign:DialogHost.DialogContent>
-        </materialDesign:DialogHost>
-
-        <!-- DialogHost overlay (Bulk Dispense dialog) -->
-        <materialDesign:DialogHost Identifier="DispenseDialog" 
-                                   IsOpen="{Binding IsBulkDispenseDialogOpenPlain, Mode=TwoWay}">
-            <materialDesign:DialogHost.DialogContent>
-                <Border Padding="24" Width="360" Background="{StaticResource BackgroundBrush}">
-                    <StackPanel>
-                        <TextBlock Text="BULK DISPENSE" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,16"/>
-                        <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding BulkDispenseItems}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="80" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            <TextBox Grid.Column="1" 
-                                                     Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}"
-                                                     AutomationProperties.AutomationId="BulkDispenseQuantityBox"
-                                                     materialDesign:TextFieldAssist.HasClearButton="True"
-                                                     materialDesign:HintAssist.Hint="0"
-                                                     HorizontalContentAlignment="Right"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                        
-                        <Grid Margin="0,24,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="CANCEL" Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{Binding CancelBulkDispenseCommand}" Margin="0,0,8,0"
-                                    AutomationProperties.AutomationId="BulkDispenseCancelButton"/>
-                            <Button Grid.Column="1" Content="DISPENSE" Style="{StaticResource PrimaryButtonStyle}"
-                                    Command="{Binding DispenseBulkCommand}"
-                                    AutomationProperties.AutomationId="BulkDispenseExecuteButton"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-            </materialDesign:DialogHost.DialogContent>
-        </materialDesign:DialogHost>
+        <!-- DialogHost containers removed. Bulk operations now use independent windows. -->
     </Grid>
 </Window>
