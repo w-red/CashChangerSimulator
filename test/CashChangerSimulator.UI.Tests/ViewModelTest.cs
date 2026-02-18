@@ -4,6 +4,7 @@ using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Device;
 using Moq;
 using R3;
+using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
@@ -49,13 +50,13 @@ public class ViewModelTest
             depositController)
         {
             // Dispense 1000
-            DispenseAmountInput = "1000"
+            DispenseAmountInput = { Value = "1000" }
         };
         vm.DispenseCommand.Execute(Unit.Default);
         
         // Verify
         mockManager.Verify(m => m.Dispense(1000m), Times.Once);
-        Assert.Equal("", vm.DispenseAmountInput);
+        vm.DispenseAmountInput.Value.ShouldBe("");
     }
 
 }

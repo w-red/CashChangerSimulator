@@ -4,8 +4,15 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf;
 
+/// <summary>
+/// 一括投入（Bulk Insert）を行うためのウィンドウ。
+/// </summary>
 public partial class BulkInsertWindow : Window
 {
+    /// <summary>
+    /// BulkInsertWindow の新しいインスタンスを初期化する。
+    /// </summary>
+    /// <param name="viewModel">メインビューモデル。</param>
     public BulkInsertWindow(MainViewModel viewModel)
     {
         InitializeComponent();

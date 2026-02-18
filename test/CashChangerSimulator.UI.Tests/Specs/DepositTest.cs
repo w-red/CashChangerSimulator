@@ -37,7 +37,6 @@ public class DepositTest : IDisposable
         beginButton.Click();
         Thread.Sleep(2000); // Allow UI to transition and elements to appear in tree
 
-        // 3. Add some cash
         // 3. Add some cash via Bulk Insert
         var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
         bulkButton.ShouldNotBeNull();
@@ -45,10 +44,24 @@ public class DepositTest : IDisposable
         Thread.Sleep(1000);
 
         // Find the BulkInsertWindow
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(15));
+        var bulkInsertWindow =
+            UiTestRetry
+            .FindWindow(
+                _app.Application,
+                _app.Automation,
+                "BULK CASH INSERT",
+                TimeSpan.FromSeconds(15));
         bulkInsertWindow.ShouldNotBeNull();
 
-        var firstTextBox = (TextBox)UiTestRetry.Find(() => bulkInsertWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkInsertQuantityBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
+        var firstTextBox =
+            UiTestRetry
+            .Find(
+                () => bulkInsertWindow
+                    .FindFirstDescendant(
+                        cf => cf.ByAutomationId("BulkInsertQuantityBox")
+                )?.AsTextBox(),
+                TimeSpan.FromSeconds(10))
+            as TextBox;
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Text = "2";
 
@@ -60,7 +73,7 @@ public class DepositTest : IDisposable
         // 4. Verify Current Deposit Amount updates
         var currentDepositText = FindElement(window, "CurrentDepositText", null)?.AsLabel();
         currentDepositText.ShouldNotBeNull();
-        FlaUI.Core.Tools.Retry.WhileTrue(() => ParseAmount(currentDepositText.Text ?? "0") == 0, TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => ParseAmount(currentDepositText.Text ?? "0") == 0, TimeSpan.FromSeconds(10));
         decimal deposited = ParseAmount(currentDepositText.Text ?? "0");
         deposited.ShouldBeGreaterThan(0);
 
@@ -76,7 +89,7 @@ public class DepositTest : IDisposable
         storeButton.Click();
 
         // 7. Verify Global Total updated
-        FlaUI.Core.Tools.Retry.WhileTrue(() => ParseAmount(totalAmountText.Text) == initialTotal, TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => ParseAmount(totalAmountText.Text) == initialTotal, TimeSpan.FromSeconds(10));
         decimal finalTotal = ParseAmount(totalAmountText.Text);
         finalTotal.ShouldBe(initialTotal + deposited);
     }
@@ -91,7 +104,13 @@ public class DepositTest : IDisposable
         window.SetForeground();
         
         // Start Deposit
-        var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
+        var beginButton =
+            FindElement(
+                window,
+                "BeginDepositButton",
+                "NEW DEPOSIT")
+            ?.AsButton() as Button;
+        beginButton.ShouldNotBeNull();
         beginButton?.Click();
         
         // Wait for state transition to Deposit Mode
@@ -109,11 +128,22 @@ public class DepositTest : IDisposable
         Thread.Sleep(2000); // Wait for Dialog window to pop up
 
         // Find the BulkInsertWindow
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(15));
+        var bulkInsertWindow = 
+            UiTestRetry
+            .FindWindow(
+                _app.Application,
+                _app.Automation,
+                "BULK CASH INSERT",
+                TimeSpan.FromSeconds(15));
         bulkInsertWindow.ShouldNotBeNull();
 
         // Find the first TextBox
-        var firstTextBox = (TextBox)UiTestRetry.Find(() => bulkInsertWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkInsertQuantityBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
+        var firstTextBox = 
+            UiTestRetry.Find(
+                () => bulkInsertWindow
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("BulkInsertQuantityBox"))
+                ?.AsTextBox(), TimeSpan.FromSeconds(10)) as TextBox;
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Text = "10";
 
@@ -125,7 +155,7 @@ public class DepositTest : IDisposable
 
         // Verify Current Deposit Amount
         var currentDepositText = FindElement(window, "CurrentDepositText", null)?.AsLabel();
-        FlaUI.Core.Tools.Retry.WhileTrue(() => ParseAmount(currentDepositText?.Text ?? "0") == 0, TimeSpan.FromSeconds(5));
+        Retry.WhileTrue(() => ParseAmount(currentDepositText?.Text ?? "0") == 0, TimeSpan.FromSeconds(5));
         ParseAmount(currentDepositText?.Text ?? "0").ShouldBeGreaterThan(0);
     }
 
@@ -145,27 +175,42 @@ public class DepositTest : IDisposable
         // 2. Wait for Mode Indicator to become COUNTING
         var modeIndicator = FindElement(window, "ModeIndicatorText", null)?.AsLabel();
         modeIndicator.ShouldNotBeNull();
-        FlaUI.Core.Tools.Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), TimeSpan.FromSeconds(10));
         modeIndicator.Text.ShouldContain("COUNTING");
 
         // 3. Click PAUSE
-        var pauseButton = (Button)UiTestRetry.Find(() => FindElement(window, "PauseDepositButton", "PAUSE")?.AsButton(), TimeSpan.FromSeconds(10));
+        var pauseButton =
+            UiTestRetry
+            .Find(
+                () => FindElement(
+                    window,
+                    "PauseDepositButton",
+                    "PAUSE")
+                ?.AsButton(),
+                TimeSpan.FromSeconds(10)) as Button;
         pauseButton.ShouldNotBeNull();
         pauseButton.Click();
         Thread.Sleep(500);
 
         // 4. Wait for Mode Indicator to become PAUSED
-        FlaUI.Core.Tools.Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("PAUSED") ?? false), TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("PAUSED") ?? false), TimeSpan.FromSeconds(10));
         modeIndicator.Text.ShouldContain("PAUSED");
 
         // 5. Click RESUME
-        var resumeButton = (Button)UiTestRetry.Find(() => FindElement(window, "ResumeDepositButton", "RESUME")?.AsButton(), TimeSpan.FromSeconds(10));
+        var resumeButton =
+            UiTestRetry
+            .Find(
+                () => FindElement(
+                    window,
+                    "ResumeDepositButton",
+                    "RESUME")?.AsButton(),
+                TimeSpan.FromSeconds(10)) as Button;
         resumeButton.ShouldNotBeNull();
         resumeButton.Click();
         Thread.Sleep(500);
 
         // 6. Wait for Mode Indicator to return to COUNTING
-        FlaUI.Core.Tools.Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), TimeSpan.FromSeconds(10));
         modeIndicator.Text.ShouldContain("COUNTING");
     }
 
@@ -185,37 +230,51 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton?.Click();
 
-        // Add some cash
         // Add some cash via Bulk Insert
         Thread.Sleep(500);
         var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        if (bulkButton != null)
-        {
-            bulkButton.Click();
-            Thread.Sleep(1000);
-            var firstTextBox = (TextBox)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("BulkInsertQuantityBox"))?.AsTextBox(), TimeSpan.FromSeconds(5));
-            if (firstTextBox != null)
-            {
-                firstTextBox.Text = "1";
-                var executeButton = FindElement(window, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
-                executeButton?.Click();
-                Thread.Sleep(500);
-            }
-        }
+        bulkButton.ShouldNotBeNull();
+        bulkButton.Click();
+        Thread.Sleep(1000);
+        var firstTextBox = 
+            UiTestRetry
+            .Find(
+                    () => window
+                    .FindFirstDescendant(
+                        cf => cf.ByAutomationId("BulkInsertQuantityBox"))
+                    ?.AsTextBox(),
+                    TimeSpan.FromSeconds(5)) as TextBox;
+        firstTextBox.ShouldNotBeNull();
+        firstTextBox.Text = "1";
+        var executeButton =
+            FindElement(
+                window,
+                "BulkInsertExecuteButton",
+                "INSERT ALL")
+            ?.AsButton();
+        executeButton.ShouldNotBeNull();
+        executeButton.Click();
+        Thread.Sleep(500);
 
         // Click "RETURN"
-        var repayButton = FindElement(window, "RepayDepositButton", "RETURN")?.AsButton();
+        var repayButton =
+            FindElement(
+                window,
+                "RepayDepositButton",
+                "RETURN")
+            ?.AsButton();
         repayButton.ShouldNotBeNull();
         repayButton.Click();
 
         // Total should stay same
         Thread.Sleep(1000);
-        decimal finalTotal = ParseAmount(totalAmountText?.Text ?? "0");
+        decimal finalTotal =
+            ParseAmount(
+                totalAmountText?.Text ?? "0");
         finalTotal.ShouldBe(initialTotal);
     }
 
     /// <summary>紙幣重なりエラーが発生した際に、入金確定がブロックされることを検証する。</summary>
-    /// <summary>紙幣重なり（Overlap）エラーが発生した際の挙動を検証する。</summary>
     [Fact]
     public void ShouldPreventFixWhenOverlapped()
     {
@@ -225,51 +284,87 @@ public class DepositTest : IDisposable
         Thread.Sleep(500);
 
         // 1. Begin Deposit
-        var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
+        var beginButton =
+            FindElement(
+                window,
+                "BeginDepositButton",
+                "NEW DEPOSIT")
+            ?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
         Thread.Sleep(1000);
 
         // 2. Click "SIMULATE OVERLAP"
-        var overlapButton = FindElement(window, "SimulateOverlapButton", "OVERLAP (ERR)")?.AsButton();
+        var overlapButton =
+            FindElement(
+                window,
+                "SimulateOverlapButton",
+                "OVERLAP (ERR)")
+            ?.AsButton();
         overlapButton.ShouldNotBeNull();
         overlapButton.Click();
         Thread.Sleep(1000);
 
         // 3. Verify VAL ERROR indicator appears
-        var errorIndicator = window.FindFirstDescendant(cf => cf.ByText("VAL ERROR"));
+        var errorIndicator =
+            window
+            .FindFirstDescendant(
+                cf => cf.ByText("VAL ERROR"));
         errorIndicator.ShouldNotBeNull();
         errorIndicator.IsOffscreen.ShouldBeFalse();
 
         // 4. Try to click FINISH (FixDeposit) -> Should fail or show error
-        // 3. Try to fix (should NOW set Fixed=true but NOT clear error)
-        var finishButton = window.FindFirstDescendant(cf => cf.ByAutomationId("FixDepositButton"));
+        var finishButton = 
+            window
+            .FindFirstDescendant(
+                cf => cf.ByAutomationId("FixDepositButton"));
+        finishButton.ShouldNotBeNull();
         finishButton.Click();
         Thread.Sleep(500);
 
         // Verify VAL ERROR indicator still exists
-        window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldNotBeNull();
+        window
+            .FindFirstDescendant(cf => cf.ByText("VAL ERROR"))
+            .ShouldNotBeNull();
 
         // 5. Cancel (RETURN) should work and clear error
-        var repayButton = FindElement(window, "RepayDepositButton", "RETURN")?.AsButton();
+        var repayButton = FindElement(
+            window,
+            "RepayDepositButton",
+            "RETURN")
+            ?.AsButton();
         repayButton.ShouldNotBeNull();
         repayButton.Click();
         Thread.Sleep(1000);
 
         // Error indicator should be gone
-        window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldBeNull();
+        window
+            .FindFirstDescendant(
+            cf => cf.ByText("VAL ERROR"))
+            .ShouldBeNull();
     }
 
-    private AutomationElement? FindElement(Window? window, string automationId, string? text)
+    /// <summary>指定した AutomationId またはテキストを持つ要素を、リトライしながら検索するヘルパーメソッド。</summary>
+    private static AutomationElement? FindElement(Window? window, string automationId, string? text)
     {
         if (window == null) return null;
         var result = UiTestRetry.Find(() => {
-            var el = window.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
-            if (el != null) return el;
+            var el = window
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId(automationId));
+            if (el != null)
+            {
+                return el;
+            }
             if (!string.IsNullOrEmpty(text))
             {
-                var elByText = window.FindFirstDescendant(cf => cf.ByText(text));
-                if (elByText != null) return elByText;
+                var elByText = window
+                .FindFirstDescendant(
+                    cf => cf.ByText(text));
+                if (elByText != null)
+                {
+                    return elByText;
+                }
             }
             return null;
         }, TimeSpan.FromSeconds(10));
@@ -277,17 +372,23 @@ public class DepositTest : IDisposable
         return result;
     }
 
-    private decimal ParseAmount(string text)
+    /// <summary>金額テキストから数値を抽出して decimal 型で返すヘルパーメソッド。</summary>
+    private static decimal ParseAmount(string text)
     {
-        if (string.IsNullOrEmpty(text)) return 0;
-        var cleaned = new string([.. text.Where(char.IsDigit)]);
-        if (decimal.TryParse(cleaned, out var result))
-            return result;
-        return 0;
+        if (string.IsNullOrEmpty(text))
+        {
+            return 0;
+        }
+        var cleaned =
+            new string([.. text.Where(char.IsDigit)]);
+        return decimal
+            .TryParse(cleaned, out var result)
+            ? result : 0;
     }
 
     public void Dispose()
     {
         _app?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

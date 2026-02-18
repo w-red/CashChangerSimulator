@@ -16,7 +16,6 @@ public class DispenseTest : IDisposable
         _app.Launch();
     }
 
-
     /// <summary>一括払出機能の動作を検証する。</summary>
     [Fact]
     public void ShouldDispenseBulkCash()
@@ -26,15 +25,29 @@ public class DispenseTest : IDisposable
         window.SetForeground();
         Thread.Sleep(500);
 
-        var totalAmountText = (Label)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(10));
-        decimal initialAmount = ParseAmount(totalAmountText?.Text ?? "0");
+        var totalAmountText = 
+            UiTestRetry.Find(
+                () => window
+                    .FindFirstDescendant(
+                        cf => cf.ByAutomationId("TotalAmountText")
+                )?.AsLabel(), TimeSpan.FromSeconds(10))
+            as Label;
+        decimal initialAmount =
+            ParseAmount(totalAmountText?.Text ?? "0");
 
         // Check Mode
         var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel()?.Text;
         Console.WriteLine($"Current Mode: {modeText}");
         
         // Open Bulk Dispense
-        var showBulkDispenseButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseShowButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        var showBulkDispenseButton = 
+            UiTestRetry
+            .Find(
+                () => window
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("BulkDispenseShowButton"))
+                ?.AsButton(),
+                TimeSpan.FromSeconds(10)) as Button;
         showBulkDispenseButton.ShouldNotBeNull();
         showBulkDispenseButton.IsEnabled.ShouldBeTrue($"ShowBulkDispenseButton is disabled! Mode: {modeText}");
         
@@ -53,17 +66,29 @@ public class DispenseTest : IDisposable
         bulkDispenseWindow.ShouldNotBeNull();
         
         // Enter dispense quantity
-        var firstQuantityBox = (TextBox)UiTestRetry.Find(() => {
-            var box = bulkDispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseQuantityBox"))?.AsTextBox();
-            if (box != null && !box.IsOffscreen) return box;
-            return null;
-        }, TimeSpan.FromSeconds(10));
+        var firstQuantityBox = UiTestRetry.Find(() =>
+        {
+            var box =
+                bulkDispenseWindow
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("BulkDispenseQuantityBox"))
+                ?.AsTextBox();
+            return box != null && !box.IsOffscreen
+                ? box : (AutomationElement?)null;
+        }, TimeSpan.FromSeconds(10)) as TextBox;
         
         firstQuantityBox.ShouldNotBeNull();
         firstQuantityBox.Text = "1";
 
         // Execute Dispense
-        var executeButton = (Button)UiTestRetry.Find(() => bulkDispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseExecuteButton"))?.AsButton(), TimeSpan.FromSeconds(10));
+        var executeButton = 
+            UiTestRetry
+            .Find(
+                () => bulkDispenseWindow
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("BulkDispenseExecuteButton"))
+                ?.AsButton(),
+                TimeSpan.FromSeconds(10)) as Button;
         executeButton.ShouldNotBeNull();
         executeButton.Click();
         Thread.Sleep(1000); // Allow window to close and logic to execute
@@ -89,10 +114,38 @@ public class DispenseTest : IDisposable
         Thread.Sleep(1000);
 
         // Find controls with retry
-        var totalAmountText = (Label)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel(), TimeSpan.FromSeconds(10));
-        var dispenseBox = (TextBox)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
-        var dispenseButton = (Button)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseButton"))?.AsButton(), TimeSpan.FromSeconds(10));
-        var historyListBox = (ListBox)UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HistoryListBox"))?.AsListBox(), TimeSpan.FromSeconds(10));
+        var totalAmountText = 
+            UiTestRetry.Find(
+                () => window
+                .FindFirstDescendant(
+                    cf => cf
+                    .ByAutomationId("TotalAmountText"))
+                ?.AsLabel(),
+                TimeSpan.FromSeconds(10)) as Label;
+        var dispenseBox = 
+            UiTestRetry
+            .Find(
+                () => window
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("DispenseBox"))
+                ?.AsTextBox(),
+                TimeSpan.FromSeconds(10)) as TextBox;
+        var dispenseButton =
+            UiTestRetry
+            .Find(
+                () => window
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("DispenseButton"))
+                ?.AsButton(),
+                TimeSpan.FromSeconds(10)) as Button;
+        var historyListBox =
+            UiTestRetry
+            .Find(
+                () => window
+                .FindFirstDescendant(
+                    cf => cf.ByAutomationId("HistoryListBox"))
+                ?.AsListBox(),
+                TimeSpan.FromSeconds(10)) as ListBox;
 
         totalAmountText.ShouldNotBeNull();
         dispenseBox.ShouldNotBeNull();
@@ -130,9 +183,15 @@ public class DispenseTest : IDisposable
         historyListBox?.Items.Length.ShouldBe(initialHistoryCount + 1);
         
         var lastEntry = historyListBox?.Items[0];
-        var entryText = string.Join(" ", lastEntry?.FindAllDescendants().Select(e => {
-            try { return e.AsLabel()?.Text ?? ""; } catch { return ""; }
-        }).Where(t => !string.IsNullOrEmpty(t)) ?? Array.Empty<string>());
+        var entryText =
+            string
+            .Join(" ",
+                lastEntry?.FindAllDescendants()
+                .Select(e => {
+                    try { return e.AsLabel()?.Text ?? ""; }
+                    catch { return ""; }
+                })
+                .Where(t => !string.IsNullOrEmpty(t)) ?? []);
         Console.WriteLine($"History entry text combined: {entryText}");
         entryText.ShouldContain(((int)dispenseAmount).ToString());
 
@@ -155,7 +214,7 @@ public class DispenseTest : IDisposable
     public void ShouldValidateInput()
     {
         var window = _app.MainWindow;
-        var dispenseBox = (TextBox)UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10));
+        var dispenseBox = UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10)) as TextBox;
         dispenseBox.ShouldNotBeNull();
 
         dispenseBox.Focus();
@@ -164,18 +223,21 @@ public class DispenseTest : IDisposable
         dispenseBox.Text.ShouldBe("abc");
     }
 
-    private decimal ParseAmount(string text)
+    private static decimal ParseAmount(string text)
     {
-        if (string.IsNullOrEmpty(text)) return 0;
+        if (string.IsNullOrEmpty(text))
+        {
+            return 0;
+        }
         // Strip everything but digits
         var cleaned = new string([.. text.Where(char.IsDigit)]);
-        if (decimal.TryParse(cleaned, out var result))
-            return result;
-        return 0;
+        return decimal.TryParse(cleaned, out var result)
+            ? result : 0;
     }
 
     public void Dispose()
     {
         _app?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
