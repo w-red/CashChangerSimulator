@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
@@ -12,15 +13,24 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
-        base.OnStartup(e);
+        try 
+        {
+            base.OnStartup(e);
 
-        // Load configuration and initialize logger
-        var config = ConfigurationLoader.Load();
-        LogProvider.Initialize(config.Logging);
+            // Load configuration and initialize logger
+            var config = ConfigurationLoader.Load();
+            LogProvider.Initialize(config.Logging);
 
-        DIContainer.Initialize();
-        var mainWindow = new MainWindow();
-        mainWindow.Show();
+            DIContainer.Initialize();
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup_crash.txt"), 
+                ex.ToString() + "\n\nInner: " + ex.InnerException?.ToString());
+            Shutdown();
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

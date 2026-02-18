@@ -92,10 +92,20 @@ public class CashChangerTestApp : IDisposable
         {
             if (Application != null && !Application.HasExited)
             {
+                var processId = Application.ProcessId;
                 Application.Close();
+                // Force kill if it doesn't close within 2 seconds
+                using var process = System.Diagnostics.Process.GetProcessById(processId);
+                if (process != null && !process.WaitForExit(2000))
+                {
+                    process.Kill();
+                }
                 Application.Dispose();
             }
         }
         catch { }
+
+        // Final pause to let the OS/UIA clean up traces
+        Thread.Sleep(1000);
     }
 }

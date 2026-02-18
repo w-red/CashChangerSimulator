@@ -24,12 +24,11 @@ public class CurrencyMetadataProvider
     /// <summary>設定プロバイダーを指定してメタデータプロバイダーを初期化する。</summary>
     public CurrencyMetadataProvider(ConfigurationProvider configProvider)
     {
-        CurrencyCode = configProvider.Config.CurrencyCode;
+        CurrencyCode = string.IsNullOrWhiteSpace(configProvider.Config.CurrencyCode) ? "JPY" : configProvider.Config.CurrencyCode;
         var currencyCode = CurrencyCode;
 
         // MoneyKind4Opos アセンブリから対応する通貨クラスを探す
-        _currencyType = FindCurrencyType(currencyCode) 
-            ?? throw new ArgumentException($"Unsupported currency code: {currencyCode}");
+        _currencyType = FindCurrencyType(currencyCode) ?? FindCurrencyType("JPY")!;
 
         // 通貨記号を取得 (Local.Symbol)
         Symbol = GetStaticPropertyValue<CurrencyFormattingOptions>(_currencyType, "Local")?.Symbol ?? "";

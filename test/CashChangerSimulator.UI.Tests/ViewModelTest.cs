@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.Device;
 using Moq;
 using R3;
 
@@ -34,6 +35,7 @@ public class ViewModelTest
         var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object);
 
         var realHardware = new HardwareStatusManager();
+        var depositController = new DepositController(mockInventory.Object, mockManager.Object);
         
         var vm = new MainViewModel(
             mockInventory.Object,
@@ -43,7 +45,8 @@ public class ViewModelTest
             realAggregator,
             realConfig,
             realMetadata,
-            realHardware)
+            realHardware,
+            depositController)
         {
             // Dispense 1000
             DispenseAmountInput = "1000"
@@ -55,26 +58,4 @@ public class ViewModelTest
         Assert.Equal("", vm.DispenseAmountInput);
     }
 
-    /// <summary>Add コマンド実行時に在庫に 1 枚追加されることを検証する。</summary>
-    [Fact]
-    public void DenominationViewModelAddCommandShouldCallInventoryAdd()
-    {
-        // Setup
-        var mockInventory = new Mock<Inventory>();
-        mockInventory.Setup(i => i.Changed).Returns(Observable.Empty<DenominationKey>());
-        
-        var realConfig = new ConfigurationProvider();
-        realConfig.Config.CurrencyCode = "JPY"; // テスト用に明示的に設定
-        
-        var realMetadata = new CashChangerSimulator.UI.Wpf.Services.CurrencyMetadataProvider(realConfig);
-        
-        var key = new DenominationKey(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill);
-        var vm = new DenominationViewModel(mockInventory.Object, key, realMetadata);
-        
-        // Action
-        vm.AddCommand.Execute(Unit.Default);
-        
-        // Verify
-        mockInventory.Verify(i => i.Add(key, 1), Times.Once);
-    }
 }

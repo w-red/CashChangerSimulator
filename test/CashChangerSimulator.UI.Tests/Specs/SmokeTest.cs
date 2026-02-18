@@ -25,7 +25,7 @@ public class SmokeTest : IDisposable
     [Fact]
     public void TotalAmountShouldBeVisible()
     {
-        var totalAmountLabel = _app.MainWindow!.FindFirstDescendant(cf => cf.ByText("TOTAL AMOUNT"));
+        var totalAmountLabel = _app.MainWindow!.FindFirstDescendant(cf => cf.ByText("CASH BALANCE"));
         Assert.NotNull(totalAmountLabel);
     }
 

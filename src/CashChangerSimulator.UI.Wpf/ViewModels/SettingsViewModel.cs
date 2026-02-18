@@ -156,7 +156,8 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
             var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
             
             // 個別設定がある場合はそれを使用、ない場合はデフォルト値を適用
-            if (config.Inventory.Denominations.TryGetValue(keyStr, out var setting))
+            if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventory) &&
+                inventory.Denominations.TryGetValue(keyStr, out var setting))
             {
                 DenominationSettings.Add(new DenominationSettingItem(
                     key, 
@@ -194,11 +195,17 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         config.Simulation.RandomErrorsEnabled = UseRandomErrors;
         config.Simulation.ErrorRate = ErrorRate;
 
-        config.Inventory.Denominations.Clear();
+        if (!config.Inventory.ContainsKey(config.CurrencyCode))
+        {
+            config.Inventory[config.CurrencyCode] = new InventorySettings();
+        }
+        
+        var activeInventory = config.Inventory[config.CurrencyCode];
+        activeInventory.Denominations.Clear();
         foreach (var item in DenominationSettings)
         {
             var keyStr = (item.Key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + item.Key.Value.ToString();
-            config.Inventory.Denominations[keyStr] = new DenominationSettings
+            activeInventory.Denominations[keyStr] = new DenominationSettings
             {
                 DisplayName = item.DisplayName,
                 InitialCount = item.Count,
