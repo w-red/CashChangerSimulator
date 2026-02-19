@@ -1,8 +1,8 @@
+using CashChangerSimulator.Core.Models;
+using MaterialDesignThemes.Wpf;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using CashChangerSimulator.Core.Models;
-using MaterialDesignThemes.Wpf;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 

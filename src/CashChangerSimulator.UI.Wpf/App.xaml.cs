@@ -1,8 +1,9 @@
-﻿using System.IO;
-using System.Windows;
-using CashChangerSimulator.Core;
+﻿using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using System.IO;
+using System.Windows;
+using R3;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -13,9 +14,16 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
-        try 
+        try
         {
             base.OnStartup(e);
+
+            // Initialize R3 WPF provider
+            // Initialize R3 WPF provider with unhandled exception handler
+            WpfProviderInitializer.SetDefaultObservableSystem(ex => 
+            {
+                try { File.AppendAllText("r3_errors.txt", $"{DateTime.Now}: {ex}\n"); } catch {}
+            });
 
             // Load configuration and initialize logger
             var config = ConfigurationLoader.Load();

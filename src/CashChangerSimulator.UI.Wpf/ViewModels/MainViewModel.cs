@@ -1,11 +1,12 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
 using R3;
+
+using System.Collections.ObjectModel;
+
+using System.Threading;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -27,44 +28,42 @@ public class MainViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>ジャムが発生しているかどうかを制御する ReactiveProperty。</summary>
-    public BindableReactiveProperty<bool> IsJammed { get; }
+    public ReactiveProperty<bool> IsJammed { get; }
 
     /// <summary>紙幣などの重なりが発生しているかどうかを制御する ReactiveProperty。</summary>
-    public BindableReactiveProperty<bool> IsOverlapped { get; }
+    public ReactiveProperty<bool> IsOverlapped { get; }
 
     /// <summary>画面に表示する金種別情報のリスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
-    private readonly ReactiveProperty<decimal> _totalAmount;
-    /// <summary>在庫の合計金額（ReactiveProperty 版）。</summary>
-    public ReadOnlyReactiveProperty<decimal> TotalAmount { get; }
-    /// <summary>全金種のステータスを統合したデバイス全体のステータス (空・ニアエンプティ)。</summary>
+
+    // State Properties
+    /// <summary>入金モード中かどうか。</summary>
+    public BindableReactiveProperty<bool> IsInDepositMode { get; }
+    /// <summary>現在入金された合計金額。</summary>
+    public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
+    /// <summary>入金が確定したかどうか。</summary>
+    public BindableReactiveProperty<bool> IsDepositFixed { get; }
+    /// <summary>入金ステータス。</summary>
+    public BindableReactiveProperty<CashDepositStatus> DepositStatus { get; }
+    /// <summary>入金が一時停止中かどうか。</summary>
+    public BindableReactiveProperty<bool> IsDepositPaused { get; }
+    /// <summary>現在の動作状態を示す名前。</summary>
+    public BindableReactiveProperty<string> CurrentModeName { get; }
+
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
-    /// <summary>全金種のステータスを統合したデバイス全体のステータス (満杯・ニアフル)。</summary>
     public ReadOnlyReactiveProperty<CashStatus> FullStatus { get; }
-    /// <summary>最近の取引履歴のリスト。</summary>
-    public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
-    /// <summary>設定画面を開くコマンド。</summary>
-    public RelayCommand OpenSettingsCommand { get; }
+
+    public ReactiveCommand DispenseCommand { get; }
 
     /// <summary>ユーザーが入力した払出金額（文字列）。</summary>
     public BindableReactiveProperty<string> DispenseAmountInput { get; }
 
-    /// <summary>払出処理を実行するコマンド。</summary>
-    public ReactiveCommand DispenseCommand { get; }
-
-    // Deposit Mode Properties
-    /// <summary>現在入金モード（入金セッション中）かどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsInDepositMode { get; }
-    /// <summary>現在の入金セッションにおける合計投入金額。</summary>
-    public ReadOnlyReactiveProperty<decimal> CurrentDepositAmount { get; }
-    /// <summary>入金が確定（Fix）された状態かどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsDepositFixed { get; }
-    /// <summary>入金処理が一時停止されているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsDepositPaused { get; }
-    /// <summary>現在の入金ステータス（Start, Count, End など）。</summary>
-    public ReadOnlyReactiveProperty<CashDepositStatus> DepositStatus { get; }
-    /// <summary>現在のモード名（表示用）。</summary>
-    public ReadOnlyReactiveProperty<string> CurrentModeName { get; }
+    /// <summary>残高を示す BindableReactiveProperty。</summary>
+    public BindableReactiveProperty<decimal> TotalAmount { get; }
+    /// <summary>最近の取引履歴のリスト。</summary>
+    public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
+    /// <summary>設定画面を開くコマンド。</summary>
+    public RelayCommand OpenSettingsCommand { get; }
 
     // WPF plain properties for binding (Removed)
 
@@ -126,46 +125,64 @@ public class MainViewModel : IDisposable
         _hardwareStatusManager = hardwareStatusManager;
         _depositController = depositController;
 
+        // Initialize R3 synchronization for the current thread
+        // WpfProvider.SetDefault is called in App.xaml.cs, but we ensure it's here for tests too if needed
+        // or just let it use the default behavior.
+
+        try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: MainViewModel Init. Application.Current.Dispatcher exists: {System.Windows.Application.Current?.Dispatcher != null}\n"); } catch {}
+
+
         IsJammed = _hardwareStatusManager.IsJammed;
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
         
         // Initialize ALL properties before any subscriptions
+        
+        // Manual backing fields for BindableReactiveProperty to ensure dispatcher updates
+        // Initialize status properties using R3's WPF integration
         IsInDepositMode = _depositController.Changed
             .Select(_ => _depositController.IsDepositInProgress)
-            .ToReadOnlyReactiveProperty(_depositController.IsDepositInProgress)
+            .ToBindableReactiveProperty(_depositController.IsDepositInProgress)
             .AddTo(_disposables);
 
         CurrentDepositAmount = _depositController.Changed
             .Select(_ => _depositController.DepositAmount)
-            .ToReadOnlyReactiveProperty(_depositController.DepositAmount)
+            .ToBindableReactiveProperty(_depositController.DepositAmount)
             .AddTo(_disposables);
 
         IsDepositFixed = _depositController.Changed
             .Select(_ => _depositController.IsFixed)
-            .ToReadOnlyReactiveProperty(_depositController.IsFixed)
+            .ToBindableReactiveProperty(_depositController.IsFixed)
             .AddTo(_disposables);
 
         DepositStatus = _depositController.Changed
             .Select(_ => _depositController.DepositStatus)
-            .ToReadOnlyReactiveProperty(_depositController.DepositStatus)
+            .ToBindableReactiveProperty(_depositController.DepositStatus)
             .AddTo(_disposables);
 
         IsDepositPaused = _depositController.Changed
             .Select(_ => _depositController.IsPaused)
-            .ToReadOnlyReactiveProperty(_depositController.IsPaused)
+            .ToBindableReactiveProperty(_depositController.IsPaused)
             .AddTo(_disposables);
 
         CurrentModeName = _depositController.Changed
             .Select(_ => GetModeName())
-            .ToReadOnlyReactiveProperty(GetModeName())
+            .Do(mode => { try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: CurrentModeName selected: {mode}\n"); } catch {} })
+            .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
+
+
+
 
         OverallStatus = _statusAggregator.DeviceStatus;
         FullStatus = _statusAggregator.FullStatus;
 
         // Deposit Commands
         BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand().AddTo(_disposables);
-        BeginDepositCommand.Subscribe(_ => _depositController.BeginDeposit());
+        BeginDepositCommand.Subscribe(_ => 
+        {
+            _depositController.BeginDeposit();
+            OpenBulkInsertWindow();
+        });
 
         PauseDepositCommand = IsInDepositMode.CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
             .ToReactiveCommand().AddTo(_disposables);
@@ -192,12 +209,7 @@ public class MainViewModel : IDisposable
 
         ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
             .ToReactiveCommand().AddTo(_disposables);
-        ShowBulkInsertCommand.Subscribe(_ => 
-        {
-            PrepareBulkInsertItems();
-            var window = new BulkInsertWindow(this) { Owner = System.Windows.Application.Current.MainWindow };
-            window.ShowDialog();
-        });
+        ShowBulkInsertCommand.Subscribe(_ => OpenBulkInsertWindow());
 
         InsertBulkCommand = new ReactiveCommand().AddTo(_disposables);
         InsertBulkCommand.Subscribe(_ => ExecuteBulkInsert());
@@ -228,27 +240,26 @@ public class MainViewModel : IDisposable
             Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, monitor, displayName));
         }
 
-        // Reactive Total Amount
-        _totalAmount = new ReactiveProperty<decimal>(_inventory.CalculateTotal()).AddTo(_disposables);
-        TotalAmount = _totalAmount;
+        // Total Amount Initialization
+
+        TotalAmount = new BindableReactiveProperty<decimal>(_inventory.CalculateTotal()).AddTo(_disposables);
 
         _inventory.Changed
             .Subscribe(_ =>
             {
                 var total = _inventory.CalculateTotal();
+                try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: MainViewModel Inventory Changed. New Total: {total}\n"); } catch {}
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => 
-                    {
-                        _totalAmount.Value = total;
-                    });
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => TotalAmount.Value = total);
                 }
                 else
                 {
-                    _totalAmount.Value = total;
+                    TotalAmount.Value = total;
                 }
             })
             .AddTo(_disposables);
+
 
         // Auto-save inventory changes (throttle to avoid excessive I/O)
         _inventory.Changed
@@ -289,24 +300,15 @@ public class MainViewModel : IDisposable
                     ? new Exception("Enter a valid number")
                     : val <= 0
                     ? new Exception("Amount must be positive")
-                    : val > TotalAmount.CurrentValue
+                    : val > TotalAmount.Value
                     ? new Exception("Insufficient funds")
                     : null
             )
             .AddTo(_disposables);
 
-        var hasDispenseErrors = Observable.FromEvent<EventHandler<DataErrorsChangedEventArgs>, DataErrorsChangedEventArgs>(
-                h => (s, e) => h(e),
-                h => DispenseAmountInput.ErrorsChanged += h,
-                h => DispenseAmountInput.ErrorsChanged -= h)
-            .Select(_ => DispenseAmountInput.HasErrors)
-            .Prepend(DispenseAmountInput.HasErrors);
-
-        var canDispense = hasDispenseErrors
-            .Select(x => !x)
-            .CombineLatest(DispenseAmountInput, (noError, text) => noError && !string.IsNullOrEmpty(text));
-
-        DispenseCommand = canDispense
+        DispenseCommand = DispenseAmountInput
+            .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
+            .CombineLatest(IsInDepositMode, (canDispenseInput, mode) => canDispenseInput && !mode)
             .ToReactiveCommand()
             .AddTo(_disposables);
             
@@ -327,8 +329,14 @@ public class MainViewModel : IDisposable
         ShowBulkDispenseCommand.Subscribe(_ =>
         {
             PrepareBulkDispenseItems();
-            var window = new BulkDispenseWindow(this) { Owner = System.Windows.Application.Current.MainWindow };
-            window.ShowDialog();
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
+            if (mainWindow != null)
+            {
+                var window = new BulkDispenseWindow(this) { Owner = mainWindow };
+                window.Show();
+            }
+
+
         });
 
         DispenseBulkCommand = new ReactiveCommand().AddTo(_disposables);
@@ -382,9 +390,12 @@ public class MainViewModel : IDisposable
     /// <summary>一括払出を実行し、結果をハンドリングする。</summary>
     private void ExecuteBulkDispense()
     {
+        try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: ExecuteBulkDispense called. Items: {BulkDispenseItems.Count}\n"); } catch {}
         var counts = BulkDispenseItems
             .Where(x => x.Quantity.Value > 0)
             .ToDictionary(x => x.Key, x => x.Quantity.Value);
+
+        try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: ExecuteBulkDispense counts: {counts.Count}\n"); } catch {}
 
         if (counts.Count > 0)
         {
@@ -394,6 +405,7 @@ public class MainViewModel : IDisposable
             }
             catch (Exception ex)
             {
+                try { System.IO.File.AppendAllText("debug_log.txt", $"{DateTime.Now}: Dispense Error: {ex}\n"); } catch {}
                 System.Windows.MessageBox.Show(ex.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
@@ -438,6 +450,25 @@ public class MainViewModel : IDisposable
                         CashDepositStatus.End => "IDLE (待機中)",
                         _ => "UNKNOWN"
                     };
+    }
+
+    private void OpenBulkInsertWindow()
+    {
+        if (System.Windows.Application.Current?.MainWindow == null) return;
+        
+        PrepareBulkInsertItems();
+        // Run on Dispatcher to be safe, though Command logic usually runs on UI thread
+        System.Windows.Application.Current?.Dispatcher.Invoke(() => 
+        {
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
+            if (mainWindow != null)
+            {
+                var window = new BulkInsertWindow(this) { Owner = mainWindow };
+                window.Show();
+            }
+        });
+
+
     }
 }
 

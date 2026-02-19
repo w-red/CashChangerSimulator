@@ -1,5 +1,5 @@
-using System.Windows;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf;
 

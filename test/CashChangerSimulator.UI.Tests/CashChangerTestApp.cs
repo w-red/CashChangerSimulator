@@ -1,10 +1,10 @@
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
-using FlaUI.UIA3;
 using FlaUI.Core.Tools;
-using System.Reflection;
+using FlaUI.UIA3;
 using System.IO;
+using System.Reflection;
 
 namespace CashChangerSimulator.UI.Tests;
 

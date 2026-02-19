@@ -17,7 +17,7 @@ public class DepositModeViewModelTest
     private readonly Mock<CashChangerManager> _mockManager;
     private readonly DepositController _depositController;
     private readonly MainViewModel _mainViewModel;
-    private readonly CashChangerSimulator.UI.Wpf.Services.CurrencyMetadataProvider _metadataProvider;
+    private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly DenominationKey _testKey = new(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill);
 
     public DepositModeViewModelTest()
@@ -36,7 +36,7 @@ public class DepositModeViewModelTest
         var hardwareManager = new HardwareStatusManager();
         _depositController = new DepositController(_mockInventory.Object, _mockManager.Object, configProvider.Config.Simulation, hardwareManager);
 
-        _metadataProvider = new CashChangerSimulator.UI.Wpf.Services.CurrencyMetadataProvider(configProvider);
+        _metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
 
@@ -56,7 +56,7 @@ public class DepositModeViewModelTest
     public void DenominationViewModel_IsAcceptingCash_ShouldReflectPausedState()
     {
         // Arrange
-        var config = new CashChangerSimulator.Core.Configuration.DenominationSettings();
+        var config = new Core.Configuration.DenominationSettings();
         var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
         var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, "1000");
         _depositController.BeginDeposit();

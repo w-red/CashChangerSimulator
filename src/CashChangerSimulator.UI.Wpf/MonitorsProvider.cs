@@ -1,5 +1,5 @@
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
 
 namespace CashChangerSimulator.UI.Wpf;
 

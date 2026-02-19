@@ -35,12 +35,10 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
-        Thread.Sleep(2000); // Allow UI to transition and elements to appear in tree
-
-        // 3. Add some cash via Bulk Insert
-        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        bulkButton.ShouldNotBeNull();
-        bulkButton.Click();
+        // 3. Bulk Insert Window should open automatically
+        // var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
+        // bulkButton.ShouldNotBeNull();
+        // bulkButton.Click();
         Thread.Sleep(1000);
 
         // Find the BulkInsertWindow
@@ -109,33 +107,15 @@ public class DepositTest : IDisposable
                 window,
                 "BeginDepositButton",
                 "NEW DEPOSIT")
-            ?.AsButton() as Button;
+            ?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton?.Click();
         
         // Wait for state transition to Deposit Mode
-        Thread.Sleep(500); 
-
-        // Open Bulk Insert Dialog
-        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        if (bulkButton == null)
-        {
-            Thread.Sleep(1000);
-            bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        }
-        bulkButton.ShouldNotBeNull();
-        bulkButton.Click();
-        Thread.Sleep(2000); // Wait for Dialog window to pop up
-
-        // Find the BulkInsertWindow
-        var bulkInsertWindow = 
-            UiTestRetry
-            .FindWindow(
-                _app.Application,
-                _app.Automation,
-                "BULK CASH INSERT",
-                TimeSpan.FromSeconds(15));
+        // Check for automatic BulkInsertWindow and proceed
+        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
         bulkInsertWindow.ShouldNotBeNull();
+
 
         // Find the first TextBox
         var firstTextBox = 
@@ -171,6 +151,16 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
+        Thread.Sleep(1000);
+
+        // Close the Bulk Insert Window that opens automatically
+        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(5));
+        if (bulkInsertWindow != null)
+        {
+            var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
+            cancelButton?.Click();
+            Thread.Sleep(500);
+        }
 
         // 2. Wait for Mode Indicator to become COUNTING
         var modeIndicator = FindElement(window, "ModeIndicatorText", null)?.AsLabel();
@@ -230,16 +220,14 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton?.Click();
 
-        // Add some cash via Bulk Insert
-        Thread.Sleep(500);
-        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        bulkButton.ShouldNotBeNull();
-        bulkButton.Click();
-        Thread.Sleep(1000);
+        // Find the BulkInsertWindow
+        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
+        bulkInsertWindow.ShouldNotBeNull();
+
         var firstTextBox = 
             UiTestRetry
             .Find(
-                    () => window
+                    () => bulkInsertWindow
                     .FindFirstDescendant(
                         cf => cf.ByAutomationId("BulkInsertQuantityBox"))
                     ?.AsTextBox(),
@@ -248,13 +236,14 @@ public class DepositTest : IDisposable
         firstTextBox.Text = "1";
         var executeButton =
             FindElement(
-                window,
+                bulkInsertWindow,
                 "BulkInsertExecuteButton",
                 "INSERT ALL")
             ?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
         Thread.Sleep(500);
+
 
         // Click "RETURN"
         var repayButton =
@@ -294,15 +283,25 @@ public class DepositTest : IDisposable
         beginButton.Click();
         Thread.Sleep(1000);
 
+        // Close the Bulk Insert Window that opens automatically
+        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(5));
+        if (bulkInsertWindow != null)
+        {
+            var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
+            cancelButton?.Click();
+            Thread.Sleep(500);
+        }
+
         // 2. Click "SIMULATE OVERLAP"
         var overlapButton =
             FindElement(
                 window,
                 "SimulateOverlapButton",
-                "OVERLAP (ERR)")
+                "SIMULATE OVERLAP")
             ?.AsButton();
         overlapButton.ShouldNotBeNull();
         overlapButton.Click();
+
         Thread.Sleep(1000);
 
         // 3. Verify VAL ERROR indicator appears
@@ -329,10 +328,11 @@ public class DepositTest : IDisposable
 
         // 5. Cancel (RETURN) should work and clear error
         var repayButton = FindElement(
-            window,
-            "RepayDepositButton",
-            "RETURN")
+                window,
+                "RepayDepositButton",
+                "RETURN")
             ?.AsButton();
+
         repayButton.ShouldNotBeNull();
         repayButton.Click();
         Thread.Sleep(1000);
