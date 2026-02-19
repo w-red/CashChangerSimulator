@@ -1,7 +1,7 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.Device;
 using Moq;
 using R3;
 using Shouldly;
@@ -28,7 +28,7 @@ public class ViewModelTest
         realConfig.Config.CurrencyCode = "JPY"; // テスト用に明示的に設定
         
         // デフォルトの JPY 設定を使用
-        var realMetadata = new CashChangerSimulator.UI.Wpf.Services.CurrencyMetadataProvider(realConfig);
+        var realMetadata = new Wpf.Services.CurrencyMetadataProvider(realConfig);
         var realMonitors = new MonitorsProvider(mockInventory.Object, realConfig, realMetadata);
         var realAggregator = new OverallStatusAggregatorProvider(realMonitors);
 

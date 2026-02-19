@@ -1,6 +1,6 @@
-using System.Windows;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
+using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf;
 

@@ -1,9 +1,9 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.UI.Wpf.ViewModels;
 using MicroResolver;
 using Microsoft.Extensions.Logging;
 

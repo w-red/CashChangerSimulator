@@ -1,7 +1,7 @@
-using System.Reflection;
+using CashChangerSimulator.Core.Models;
 using MoneyKind4Opos.Codes;
 using MoneyKind4Opos.Currencies.Interfaces;
-using CashChangerSimulator.Core.Models;
+using System.Reflection;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
