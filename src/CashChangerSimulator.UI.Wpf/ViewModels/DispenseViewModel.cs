@@ -21,14 +21,21 @@ public class DispenseViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     // Properties
+    /// <summary>現在の在庫合計金額。</summary>
     public BindableReactiveProperty<decimal> TotalAmount { get; }
+    /// <summary>出金金額の入力値。</summary>
     public BindableReactiveProperty<string> DispenseAmountInput { get; }
+    /// <summary>出金を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
 
     // Bulk Dispense
+    /// <summary>一括出金用のアイテムリスト。</summary>
     public ObservableCollection<BulkInsertItemViewModel> BulkDispenseItems { get; } = [];
+    /// <summary>一括出金画面を表示するコマンド。</summary>
     public ReactiveCommand ShowBulkDispenseCommand { get; }
+    /// <summary>一括出金を実行するコマンド。</summary>
     public ReactiveCommand DispenseBulkCommand { get; }
+    /// <summary>一括出金をキャンセルするコマンド。</summary>
     public ReactiveCommand CancelBulkDispenseCommand { get; }
 
     public DispenseViewModel(
@@ -145,10 +152,15 @@ public class DispenseViewModel : IDisposable
     }
 
     // Phase 18: Properties
+    /// <summary>出金ステータス。</summary>
     public BindableReactiveProperty<CashDispenseStatus> Status { get; }
+    /// <summary>出金ステータスの表示名。</summary>
     public BindableReactiveProperty<string> StatusName { get; }
+    /// <summary>出金処理中かどうか。</summary>
     public BindableReactiveProperty<bool> IsBusy { get; }
+    /// <summary>現在出金中の合計金額。</summary>
     public BindableReactiveProperty<decimal> DispensingAmount { get; } // For display
+    /// <summary>エラー状態をクリアするコマンド。</summary>
     public ReactiveCommand ClearErrorCommand { get; }
 
     private void DispenseCash(decimal amount)
@@ -198,6 +210,7 @@ public class DispenseViewModel : IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

@@ -9,9 +9,7 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
+/// <summary>アプリケーションのエントリーポイントおよびライフサイクルを管理するクラス。</summary>
 public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)

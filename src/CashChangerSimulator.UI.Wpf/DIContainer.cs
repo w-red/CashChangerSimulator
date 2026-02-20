@@ -7,10 +7,12 @@ using MicroResolver;
 
 namespace CashChangerSimulator.UI.Wpf;
 
+/// <summary>依存関係の注入（DI）を管理する静的コンテナクラス。</summary>
 public static class DIContainer
 {
     private static ObjectResolver _resolver = null!;
 
+    /// <summary>コンテナを初期化し、各サービスの登録と解決を行います。</summary>
     public static void Initialize()
     {
         var resolver = ObjectResolver.Create();
@@ -91,6 +93,7 @@ public static class DIContainer
         }
     }
 
+    /// <summary>指定された型のインスタンスをコンテナから解決します。</summary>
     public static T Resolve<T>()
     {
         return _resolver.Resolve<T>();

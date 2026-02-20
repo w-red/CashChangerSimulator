@@ -25,6 +25,7 @@ public class SettingsViewModel : IDisposable
     /// <summary>シミュレーターのUIモード</summary>
     public BindableReactiveProperty<UIMode> ActiveUIMode { get; }
 
+    /// <summary>利用可能な UI モードのリスト。</summary>
     public UIMode[] AvailableUIModes { get; } = [UIMode.Standard, UIMode.PosTransaction];
 
     /// <summary>NearEmpty と判定するデフォルト枚数。</summary>
@@ -64,59 +65,99 @@ public class SettingsViewModel : IDisposable
     public BindableReactiveProperty<bool> SaveSucceeded { get; }
 
     /// <summary>各プロバイダーを注入してインスタンスを初期化する。</summary>
-    public SettingsViewModel(ConfigurationProvider configProvider, MonitorsProvider monitorsProvider, Services.CurrencyMetadataProvider metadataProvider)
+    public SettingsViewModel(
+        ConfigurationProvider configProvider,
+        MonitorsProvider monitorsProvider,
+        Services.CurrencyMetadataProvider metadataProvider)
     {
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
         _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
-        CurrencyCode = new BindableReactiveProperty<string>("JPY").AddTo(_disposables);
-        ActiveUIMode = new BindableReactiveProperty<UIMode>(UIMode.Standard).AddTo(_disposables);
+        CurrencyCode =
+            new BindableReactiveProperty<string>("JPY")
+            .AddTo(_disposables);
+        ActiveUIMode =
+            new BindableReactiveProperty<UIMode>(UIMode.Standard)
+            .AddTo(_disposables);
 
         NearEmpty = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val <= 0 ? new Exception("NearEmpty は 1 以上にしてください。") : null)
+            .EnableValidation(val =>
+                val <= 0
+                ? new Exception("NearEmpty は 1 以上にしてください。")
+                : null)
             .AddTo(_disposables);
 
         NearFull = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val <= NearEmpty.Value ? new Exception("NearFull は NearEmpty より大きくしてください。") : null)
+            .EnableValidation(val =>
+                val <= NearEmpty.Value
+                ? new Exception("NearFull は NearEmpty より大きくしてください。")
+                : null)
             .AddTo(_disposables);
 
         Full = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val <= NearFull.Value ? new Exception("Full は NearFull より大きくしてください。") : null)
+            .EnableValidation(val =>
+                val <= NearFull.Value
+                ? new Exception("Full は NearFull より大きくしてください。")
+                : null)
             .AddTo(_disposables);
 
-        UseDelay = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        UseDelay = new BindableReactiveProperty<bool>(false)
+            .AddTo(_disposables);
         MinDelay = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val < 0 ? new Exception("MinDelay は 0 以上にしてください。") : null)
+            .EnableValidation(val =>
+                val < 0
+                ? new Exception("MinDelay は 0 以上にしてください。")
+                : null)
             .AddTo(_disposables);
 
         MaxDelay = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val < MinDelay.Value ? new Exception("MaxDelay は MinDelay 以上にしてください。") : null)
+            .EnableValidation(val =>
+                val < MinDelay.Value
+                ? new Exception("MaxDelay は MinDelay 以上にしてください。")
+                : null)
             .AddTo(_disposables);
 
-        UseRandomErrors = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
-        ErrorRate = new BindableReactiveProperty<int>(0)
+        UseRandomErrors =
+            new BindableReactiveProperty<bool>(false)
+            .AddTo(_disposables);
+        ErrorRate =
+            new BindableReactiveProperty<int>(0)
             .EnableValidation(val => 
                 val is < 0 or > 100 ?
                 new Exception("ErrorRate は 0 から 100 の間にしてください。")
                 : null)
             .AddTo(_disposables);
 
-        SaveSucceeded = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        SaveSucceeded =
+            new BindableReactiveProperty<bool>(false)
+            .AddTo(_disposables);
 
         LoadFromConfig(configProvider.Config);
 
         var canSave = Observable.CombineLatest(
             NearEmpty, NearFull, Full,
             MinDelay, MaxDelay, ErrorRate,
-            (_, _, _, _, _, _) => !NearEmpty.HasErrors && !NearFull.HasErrors && !Full.HasErrors && !MinDelay.HasErrors && !MaxDelay.HasErrors && !ErrorRate.HasErrors);
+            (_, _, _, _, _, _) => 
+                !NearEmpty.HasErrors &&
+                !NearFull.HasErrors &&
+                !Full.HasErrors &&
+                !MinDelay.HasErrors &&
+                !MaxDelay.HasErrors &&
+                !ErrorRate.HasErrors);
 
-        SaveCommand = canSave.ToReactiveCommand().AddTo(_disposables);
-        SaveCommand.Subscribe(_ => Save());
+        SaveCommand = canSave
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+        SaveCommand
+            .Subscribe(_ => Save());
 
-        ResetToDefaultCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetToDefaultCommand.Subscribe(_ => ResetToDefault());
+        ResetToDefaultCommand =
+            new ReactiveCommand()
+            .AddTo(_disposables);
+        ResetToDefaultCommand
+            .Subscribe(_ => ResetToDefault());
     }
 
     /// <summary>設定オブジェクトから ViewModel の各プロパティへ値を読み込む。</summary>
@@ -237,6 +278,7 @@ public class SettingsViewModel : IDisposable
         LoadFromConfig(defaultConfig);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

@@ -19,12 +19,19 @@ public class InventoryViewModel : IDisposable
     private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly CompositeDisposable _disposables = [];
 
+    /// <summary>金種ごとの ViewModel リスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
+    /// <summary>デバイス全体の在庫ステータス（空・ニアエンプティ）。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
+    /// <summary>デバイス全体の満杯ステータス。</summary>
     public ReadOnlyReactiveProperty<CashStatus> FullStatus { get; }
+    /// <summary>ジャムが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsJammed { get; }
+    /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsOverlapped { get; }
+    /// <summary>最近の取引履歴リスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
+    /// <summary>設定画面を開くコマンド。</summary>
     public ReactiveCommand OpenSettingsCommand { get; }
 
     public InventoryViewModel(

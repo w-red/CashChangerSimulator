@@ -3,6 +3,7 @@ using System.Windows.Data;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
+/// <summary>論理値を反転させるコンバーター。</summary>
 public class InverseBooleanConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

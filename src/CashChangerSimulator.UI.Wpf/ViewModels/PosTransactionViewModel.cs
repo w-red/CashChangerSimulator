@@ -16,14 +16,21 @@ public class PosTransactionViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     // Properties
+    /// <summary>目標金額の入力値。</summary>
     public BindableReactiveProperty<string> TargetAmountInput { get; }
+    /// <summary>現在の取引ステータス。</summary>
     public BindableReactiveProperty<PosTransactionStatus> TransactionStatus { get; }
+    /// <summary>投入済みの合計金額。</summary>
     public BindableReactiveProperty<decimal> InsertedAmount { get; }
+    /// <summary>不足している残り金額。</summary>
     public BindableReactiveProperty<decimal> RemainingAmount { get; }
+    /// <summary>お釣りの合計金額。</summary>
     public BindableReactiveProperty<decimal> ChangeAmount { get; }
 
     // Commands
+    /// <summary>取引を開始するコマンド。</summary>
     public ReactiveCommand<Unit> StartCommand { get; }
+    /// <summary>取引をキャンセルするコマンド。</summary>
     public ReactiveCommand<Unit> CancelCommand { get; }
 
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
@@ -135,6 +142,7 @@ public class PosTransactionViewModel : IDisposable
         TargetAmountInput.Value = "";
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

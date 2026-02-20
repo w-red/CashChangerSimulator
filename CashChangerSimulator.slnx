@@ -8,4 +8,5 @@
     <Project Path="test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj" />
     <Project Path="test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj" />
   </Folder>
+  <Folder Name="/ソリューション項目/" />
 </Solution>

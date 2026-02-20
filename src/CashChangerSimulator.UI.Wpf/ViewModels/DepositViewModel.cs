@@ -18,30 +18,51 @@ public class DepositViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     // State Properties
+    /// <summary>入金モード中かどうか。</summary>
     public BindableReactiveProperty<bool> IsInDepositMode { get; }
+    /// <summary>現在の入金合計額。</summary>
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
+    /// <summary>入金が確定されたかどうか。</summary>
     public BindableReactiveProperty<bool> IsDepositFixed { get; }
+    /// <summary>入金ステータス。</summary>
     public BindableReactiveProperty<CashDepositStatus> DepositStatus { get; }
+    /// <summary>入金が一時停止中かどうか。</summary>
     public BindableReactiveProperty<bool> IsDepositPaused { get; }
+    /// <summary>現在の動作モードの表示名。</summary>
     public BindableReactiveProperty<string> CurrentModeName { get; }
+    /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsOverlapped { get; }
+    /// <summary>一括投入画面が表示されているかどうか。</summary>
     public BindableReactiveProperty<bool> IsBulkInsertVisible { get; }
+    /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
 
     // Commands
+    /// <summary>入金を開始するコマンド。</summary>
     public ReactiveCommand<Unit> BeginDepositCommand { get; }
+    /// <summary>入金を一時停止するコマンド。</summary>
     public ReactiveCommand<Unit> PauseDepositCommand { get; }
+    /// <summary>入金を再開するコマンド。</summary>
     public ReactiveCommand<Unit> ResumeDepositCommand { get; }
+    /// <summary>入金を確定するコマンド。</summary>
     public ReactiveCommand<Unit> FixDepositCommand { get; }
+    /// <summary>確定した入金を収納するコマンド。</summary>
     public ReactiveCommand<Unit> StoreDepositCommand { get; }
+    /// <summary>入金をキャンセル（返却）するコマンド。</summary>
     public ReactiveCommand<Unit> CancelDepositCommand { get; }
+    /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
 
     // Bulk Deposit
+    /// <summary>一括投入用のアイテムリスト。</summary>
     public ObservableCollection<BulkInsertItemViewModel> BulkInsertItems { get; } = [];
+    /// <summary>一括投入画面を表示するコマンド。</summary>
     public ReactiveCommand<Unit> ShowBulkInsertCommand { get; }
+    /// <summary>一括投入を実行するコマンド。</summary>
     public ReactiveCommand<Unit> InsertBulkCommand { get; }
+    /// <summary>一括投入をキャンセルするコマンド。</summary>
     public ReactiveCommand<Unit> CancelBulkInsertCommand { get; }
+    /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
     public DepositViewModel(
@@ -238,6 +259,7 @@ public class DepositViewModel : IDisposable
         QuickDepositAmountInput.Value = "";
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

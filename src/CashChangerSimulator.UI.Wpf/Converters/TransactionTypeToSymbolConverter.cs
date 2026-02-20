@@ -5,6 +5,7 @@ using System.Windows.Data;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
+/// <summary>取引タイプを対応するアイコン（PackIconKind）に変換するコンバーター。</summary>
 public class TransactionTypeToSymbolConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
