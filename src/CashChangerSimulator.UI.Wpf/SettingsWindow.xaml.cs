@@ -19,7 +19,7 @@ public partial class SettingsWindow : Window
     /// <summary>Save ボタンクリック時に保存成功を確認してダイアログを閉じる。</summary>
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_viewModel.SaveSucceeded)
+        if (_viewModel.SaveSucceeded.Value)
         {
             DialogResult = true;
             Close();

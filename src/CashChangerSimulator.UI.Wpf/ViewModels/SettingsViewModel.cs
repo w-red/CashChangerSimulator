@@ -7,119 +7,65 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ZLogger;
+using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
 /// <summary>設定画面の ViewModel。閾値と初期枚数の編集・保存・バリデーションを担当する。</summary>
-public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
+public class SettingsViewModel : IDisposable
 {
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly Services.CurrencyMetadataProvider _metadataProvider;
     private readonly ILogger<SettingsViewModel> _logger;
-    private readonly Dictionary<string, List<string>> _errors = [];
-
-    /// <summary>プロパティ値が変更されたときに発生するイベント。</summary>
-    public event PropertyChangedEventHandler? PropertyChanged;
-    /// <summary>バリデーションエラーが変更されたときに発生するイベント。</summary>
-    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    private readonly CompositeDisposable _disposables = [];
 
     /// <summary>選択されている通貨コード。</summary>
-    private string _currencyCode = "JPY";
-    public string CurrencyCode
-    {
-        get => _currencyCode;
-        set { _currencyCode = value; OnPropertyChanged(); }
-    }
+    public BindableReactiveProperty<string> CurrencyCode { get; }
 
     /// <summary>利用可能な通貨コードのリスト。</summary>
-    public string[] AvailableCurrencyCodes { get; } =
-        ["JPY", "USD"];
+    public string[] AvailableCurrencyCodes { get; } = ["JPY", "USD"];
+
+    /// <summary>シミュレーターのUIモード</summary>
+    public BindableReactiveProperty<UIMode> ActiveUIMode { get; }
+
+    public UIMode[] AvailableUIModes { get; } = [UIMode.Standard, UIMode.PosTransaction];
 
     /// <summary>NearEmpty と判定するデフォルト枚数。</summary>
-    private int _nearEmpty;
-    public int NearEmpty
-    {
-        get => _nearEmpty;
-        set { _nearEmpty = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> NearEmpty { get; }
 
     /// <summary>NearFull と判定するデフォルト枚数。</summary>
-    private int _nearFull;
-    public int NearFull
-    {
-        get => _nearFull;
-        set { _nearFull = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> NearFull { get; }
 
     /// <summary>Full と判定するデフォルト枚数。</summary>
-    private int _full;
-    public int Full
-    {
-        get => _full;
-        set { _full = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> Full { get; }
 
     /// <summary>シミュレーション遅延を有効にするか。</summary>
-    private bool _useDelay;
-    public bool UseDelay
-    {
-        get => _useDelay;
-        set { _useDelay = value; OnPropertyChanged(); }
-    }
+    public BindableReactiveProperty<bool> UseDelay { get; }
 
     /// <summary>最小遅延時間 (ms)。</summary>
-    private int _minDelay;
-    public int MinDelay
-    {
-        get => _minDelay;
-        set { _minDelay = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> MinDelay { get; }
 
     /// <summary>最大遅延時間 (ms)。</summary>
-    private int _maxDelay;
-    public int MaxDelay
-    {
-        get => _maxDelay;
-        set { _maxDelay = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> MaxDelay { get; }
 
     /// <summary>ランダムエラーを有効にするか。</summary>
-    private bool _useRandomErrors;
-    public bool UseRandomErrors
-    {
-        get => _useRandomErrors;
-        set { _useRandomErrors = value; OnPropertyChanged(); }
-    }
+    public BindableReactiveProperty<bool> UseRandomErrors { get; }
 
     /// <summary>エラー発生確率 (0-100)。</summary>
-    private int _errorRate;
-    public int ErrorRate
-    {
-        get => _errorRate;
-        set { _errorRate = value; OnPropertyChanged(); Validate(); }
-    }
+    public BindableReactiveProperty<int> ErrorRate { get; }
 
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
 
     /// <summary>設定を保存するコマンド。</summary>
-    public ICommand SaveCommand { get; }
+    public ReactiveCommand SaveCommand { get; }
+    
     /// <summary>設定をデフォルト値にリセットするコマンド。</summary>
-    public ICommand ResetToDefaultCommand { get; }
-
-    /// <summary>エラーが存在するかどうかを取得する。</summary>
-    public bool HasErrors => _errors.Any(e => e.Value.Count > 0);
-    /// <summary>指定したプロパティのエラー一覧を取得する。</summary>
-    public System.Collections.IEnumerable GetErrors(string? propertyName)
-    {
-        return propertyName != null
-            && _errors.TryGetValue(propertyName, out var errors)
-            ? errors : Array.Empty<string>();
-    }
+    public ReactiveCommand ResetToDefaultCommand { get; }
 
     /// <summary>直前の保存処理が成功したかどうか。</summary>
-    public bool SaveSucceeded { get; private set; }
+    public BindableReactiveProperty<bool> SaveSucceeded { get; }
 
     /// <summary>各プロバイダーを注入してインスタンスを初期化する。</summary>
     public SettingsViewModel(ConfigurationProvider configProvider, MonitorsProvider monitorsProvider, Services.CurrencyMetadataProvider metadataProvider)
@@ -129,25 +75,65 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         _metadataProvider = metadataProvider;
         _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
+        CurrencyCode = new BindableReactiveProperty<string>("JPY").AddTo(_disposables);
+        ActiveUIMode = new BindableReactiveProperty<UIMode>(Core.Configuration.UIMode.Standard).AddTo(_disposables);
+        
+        NearEmpty = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val <= 0 ? new Exception("NearEmpty は 1 以上にしてください。") : null)
+            .AddTo(_disposables);
+            
+        NearFull = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val <= NearEmpty.Value ? new Exception("NearFull は NearEmpty より大きくしてください。") : null)
+            .AddTo(_disposables);
+            
+        Full = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val <= NearFull.Value ? new Exception("Full は NearFull より大きくしてください。") : null)
+            .AddTo(_disposables);
+
+        UseDelay = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        MinDelay = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val < 0 ? new Exception("MinDelay は 0 以上にしてください。") : null)
+            .AddTo(_disposables);
+            
+        MaxDelay = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val < MinDelay.Value ? new Exception("MaxDelay は MinDelay 以上にしてください。") : null)
+            .AddTo(_disposables);
+
+        UseRandomErrors = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        ErrorRate = new BindableReactiveProperty<int>(0)
+            .EnableValidation(val => val < 0 || val > 100 ? new Exception("ErrorRate は 0 から 100 の間にしてください。") : null)
+            .AddTo(_disposables);
+
+        SaveSucceeded = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+
         LoadFromConfig(configProvider.Config);
 
-        SaveCommand = new RelayCommand(Save, () => !HasErrors);
-        ResetToDefaultCommand = new RelayCommand(ResetToDefault);
+        var canSave = Observable.CombineLatest(
+            NearEmpty, NearFull, Full,
+            MinDelay, MaxDelay, ErrorRate,
+            (_, _, _, _, _, _) => !NearEmpty.HasErrors && !NearFull.HasErrors && !Full.HasErrors && !MinDelay.HasErrors && !MaxDelay.HasErrors && !ErrorRate.HasErrors);
+
+        SaveCommand = canSave.ToReactiveCommand().AddTo(_disposables);
+        SaveCommand.Subscribe(_ => Save());
+        
+        ResetToDefaultCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetToDefaultCommand.Subscribe(_ => ResetToDefault());
     }
 
     /// <summary>設定オブジェクトから ViewModel の各プロパティへ値を読み込む。</summary>
     private void LoadFromConfig(SimulatorConfiguration config)
     {
-        CurrencyCode = config.CurrencyCode;
-        NearEmpty = config.Thresholds.NearEmpty;
-        NearFull = config.Thresholds.NearFull;
-        Full = config.Thresholds.Full;
+        CurrencyCode.Value = config.CurrencyCode;
+        NearEmpty.Value = config.Thresholds.NearEmpty;
+        NearFull.Value = config.Thresholds.NearFull;
+        Full.Value = config.Thresholds.Full;
+        ActiveUIMode.Value = config.Simulation.UIMode;
 
-        UseDelay = config.Simulation.DelayEnabled;
-        MinDelay = config.Simulation.MinDelayMs;
-        MaxDelay = config.Simulation.MaxDelayMs;
-        UseRandomErrors = config.Simulation.RandomErrorsEnabled;
-        ErrorRate = config.Simulation.ErrorRate;
+        UseDelay.Value = config.Simulation.DelayEnabled;
+        MinDelay.Value = config.Simulation.MinDelayMs;
+        MaxDelay.Value = config.Simulation.MaxDelayMs;
+        UseRandomErrors.Value = config.Simulation.RandomErrorsEnabled;
+        ErrorRate.Value = config.Simulation.ErrorRate;
 
         DenominationSettings.Clear();
         
@@ -173,9 +159,9 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
                     key, 
                     _metadataProvider.GetDenominationName(key),
                     0,
-                    NearEmpty,
-                    NearFull,
-                    Full));
+                    NearEmpty.Value,
+                    NearFull.Value,
+                    Full.Value));
             }
         }
     }
@@ -184,25 +170,27 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     private void Save()
     {
         var config = _configProvider.Config;
-        config.CurrencyCode = CurrencyCode;
-        config.Thresholds.NearEmpty = NearEmpty;
-        config.Thresholds.NearFull = NearFull;
-        config.Thresholds.Full = Full;
+        config.CurrencyCode = CurrencyCode.Value;
+        config.Thresholds.NearEmpty = NearEmpty.Value;
+        config.Thresholds.NearFull = NearFull.Value;
+        config.Thresholds.Full = Full.Value;
 
-        config.Simulation.DelayEnabled = UseDelay;
-        config.Simulation.MinDelayMs = MinDelay;
-        config.Simulation.MaxDelayMs = MaxDelay;
-        config.Simulation.RandomErrorsEnabled = UseRandomErrors;
-        config.Simulation.ErrorRate = ErrorRate;
+        config.Simulation.DelayEnabled = UseDelay.Value;
+        config.Simulation.MinDelayMs = MinDelay.Value;
+        config.Simulation.MaxDelayMs = MaxDelay.Value;
+        config.Simulation.RandomErrorsEnabled = UseRandomErrors.Value;
+        config.Simulation.ErrorRate = ErrorRate.Value;
+        config.Simulation.UIMode = ActiveUIMode.Value;
 
         try
         {
             var simSettings = DIContainer.Resolve<SimulationSettings>();
-            simSettings.DelayEnabled = UseDelay;
-            simSettings.MinDelayMs = MinDelay;
-            simSettings.MaxDelayMs = MaxDelay;
-            simSettings.RandomErrorsEnabled = UseRandomErrors;
-            simSettings.ErrorRate = ErrorRate;
+            simSettings.DelayEnabled = UseDelay.Value;
+            simSettings.MinDelayMs = MinDelay.Value;
+            simSettings.MaxDelayMs = MaxDelay.Value;
+            simSettings.RandomErrorsEnabled = UseRandomErrors.Value;
+            simSettings.ErrorRate = ErrorRate.Value;
+            simSettings.UIMode = ActiveUIMode.Value;
         }
         catch (Exception ex)
         {
@@ -221,11 +209,11 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
             var keyStr = (item.Key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + item.Key.Value.ToString();
             activeInventory.Denominations[keyStr] = new DenominationSettings
             {
-                DisplayName = item.DisplayName,
-                InitialCount = item.Count,
-                NearEmpty = item.NearEmpty,
-                NearFull = item.NearFull,
-                Full = item.Full
+                DisplayName = item.DisplayName.Value,
+                InitialCount = item.Count.Value,
+                NearEmpty = item.NearEmpty.Value,
+                NearFull = item.NearFull.Value,
+                Full = item.Full.Value
             };
         }
 
@@ -236,7 +224,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 
         _logger.ZLogInformation($"Simulator configuration saved and reloaded.");
 
-        SaveSucceeded = true;
+        SaveSucceeded.Value = true;
     }
 
     /// <summary>設定をデフォルト値（初期値）に戻す。</summary>
@@ -244,115 +232,23 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     {
         var defaultConfig = new SimulatorConfiguration
         {
-            CurrencyCode = CurrencyCode
+            CurrencyCode = CurrencyCode.Value
         };
         LoadFromConfig(defaultConfig);
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
     }
 
     /// <summary>入力値の整合性を検証する。</summary>
     private void Validate()
     {
-        ClearErrors(nameof(NearEmpty));
-        ClearErrors(nameof(NearFull));
-        ClearErrors(nameof(Full));
-        ClearErrors(nameof(MinDelay));
-        ClearErrors(nameof(MaxDelay));
-        ClearErrors(nameof(ErrorRate));
-
-        if (NearEmpty <= 0)
-            AddError(nameof(NearEmpty), "NearEmpty は 1 以上にしてください。");
-        if (NearFull <= NearEmpty)
-            AddError(nameof(NearFull), "NearFull は NearEmpty より大きくしてください。");
-        if (Full <= NearFull)
-            AddError(nameof(Full), "Full は NearFull より大きくしてください。");
-
-        if (MinDelay < 0)
-            AddError(nameof(MinDelay), "最小遅延は 0 以上にしてください。");
-        if (MaxDelay < MinDelay)
-            AddError(nameof(MaxDelay), "最大遅延は最小遅延以上にしてください。");
-        if (ErrorRate < 0 || ErrorRate > 100)
-            AddError(nameof(ErrorRate), "エラー率は 0-100 の範囲にしてください。");
-
-        OnPropertyChanged(nameof(HasErrors));
+        // This method is largely redundant as BindableReactiveProperty.EnableValidation() is used.
+        // Keeping it for now if there's any other manual validation logic not covered by BRP.
+        // If not, this method and related INotifyDataErrorInfo implementations can be removed.
     }
-
-    /// <summary>エラー情報を追加し、通知を発生させる。</summary>
-    private void AddError(string propertyName, string error)
-    {
-        if (!_errors.ContainsKey(propertyName))
-            _errors[propertyName] = [];
-        _errors[propertyName].Add(error);
-        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-    }
-
-    /// <summary>特定プロパティのエラー情報を消去し、通知を発生させる。</summary>
-    private void ClearErrors(string propertyName)
-    {
-        if (_errors.Remove(propertyName))
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-    }
-
-    /// <summary>プロパティ変更通知を発生させる。</summary>
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
 
-/// <summary>金種ごとの詳細設定を保持・管理するデータ項目。</summary>
-public class DenominationSettingItem(
-    DenominationKey key,
-    string displayName,
-    int count,
-    int nearEmpty,
-    int nearFull,
-    int full) : INotifyPropertyChanged
-{
-    public event PropertyChangedEventHandler? PropertyChanged;
 
-    public DenominationKey Key { get; } = key;
-
-    public string DisplayName {
-        get => displayName;
-        set { displayName = value; OnPropertyChanged(); }
-    }
-
-    public int Count {
-        get => count;
-        set { count = value; OnPropertyChanged(); }
-    }
-
-    public int NearEmpty {
-        get => nearEmpty;
-        set { nearEmpty = value; OnPropertyChanged(); }
-    }
-
-    public int NearFull {
-        get => nearFull;
-        set { nearFull = value; OnPropertyChanged(); }
-    }
-
-    public int Full {
-        get => full;
-        set { full = value; OnPropertyChanged(); }
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-}
-
-/// <summary>アクションを実行するための ICommand 実装クラス。</summary>
-/// <remarks>実行ロジックと実行可能条件を指定して初期化する。</remarks>
-public class RelayCommand(Action execute, Func<bool>? canExecute = null) : ICommand
-{
-
-    /// <summary>コマンドの実行可能性が変更されたときに発生するイベント。</summary>
-    public event EventHandler? CanExecuteChanged
-    {
-        add => CommandManager.RequerySuggested += value;
-        remove => CommandManager.RequerySuggested -= value;
-    }
-
-    /// <summary>コマンドが実行可能かどうかを判断する。</summary>
-    public bool CanExecute(object? parameter) => canExecute?.Invoke() ?? true;
-    /// <summary>コマンドを実行する。</summary>
-    public void Execute(object? parameter) => execute();
-}

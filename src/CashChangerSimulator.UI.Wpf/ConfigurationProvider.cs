@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Configuration;
+using R3;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -7,6 +8,9 @@ namespace CashChangerSimulator.UI.Wpf;
 /// </summary>
 public class ConfigurationProvider
 {
+    private readonly Subject<Unit> _reloaded = new();
+    public Observable<Unit> Reloaded => _reloaded;
+
     /// <summary>現在保持している設定インスタンス。</summary>
     public SimulatorConfiguration Config { get; private set; }
 
@@ -20,5 +24,6 @@ public class ConfigurationProvider
     public void Reload()
     {
         Config = ConfigurationLoader.Load();
+        _reloaded.OnNext(Unit.Default);
     }
 }

@@ -40,4 +40,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="CashChangerSimulator.UI.Tests" />
+  </ItemGroup>
+
 </Project>

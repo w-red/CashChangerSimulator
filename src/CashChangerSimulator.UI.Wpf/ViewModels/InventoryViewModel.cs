@@ -25,7 +25,7 @@ public class InventoryViewModel : IDisposable
     public ReactiveProperty<bool> IsJammed { get; }
     public ReactiveProperty<bool> IsOverlapped { get; }
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
-    public RelayCommand OpenSettingsCommand { get; }
+    public ReactiveCommand OpenSettingsCommand { get; }
 
     public InventoryViewModel(
         Inventory inventory,
@@ -86,7 +86,8 @@ public class InventoryViewModel : IDisposable
             })
             .AddTo(_disposables);
 
-        OpenSettingsCommand = new RelayCommand(() =>
+        OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenSettingsCommand.Subscribe(_ =>
         {
             var settingsWindow = new SettingsWindow(_configProvider, _monitorsProvider, _metadataProvider)
             {

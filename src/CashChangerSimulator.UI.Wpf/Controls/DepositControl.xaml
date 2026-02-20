@@ -14,120 +14,177 @@
         <StackPanel>
             <TextBlock Text="DEPOSIT TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
             
-            <!-- View Before Deposit -->
-            <Button Style="{StaticResource PrimaryButtonStyle}" 
-                    Command="{Binding BeginDepositCommand}"
-                    Width="180" Height="40"
-                    HorizontalAlignment="Center" Margin="0,8"
-                    Visibility="{Binding IsInDepositMode.Value, Converter={StaticResource InvertedVisibilityConv}}"
-                    AutomationProperties.AutomationId="BeginDepositButton"
-                    AutomationProperties.Name="NEW DEPOSIT">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="PlusBox" Margin="0,0,8,0" />
-                    <TextBlock Text="NEW DEPOSIT" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+            <!-- VIEW: IDLE / QUICK DEPOSIT -->
+            <StackPanel Visibility="{Binding IsInDepositMode.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                <!-- Standard Start Button -->
+                <Button Style="{StaticResource PrimaryButtonStyle}" 
+                        Command="{Binding BeginDepositCommand}"
+                        Width="200" Height="40"
+                        HorizontalAlignment="Center" Margin="0,8"
+                        AutomationProperties.AutomationId="BeginDepositButton">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="HandPointingRight" Margin="0,0,8,0" />
+                        <TextBlock Text="START DEPOSIT" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
 
-            <!-- View During Deposit -->
+                <Separator Background="#1AFFFFFF" Margin="0,16"/>
+
+                <!-- Quick Deposit Input -->
+                <TextBlock Text="QUICK DEPOSIT" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Opacity="0.5" Margin="0,0,0,8"/>
+                <Grid Width="200" HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox materialDesign:HintAssist.Hint="Amount" 
+                             Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             FontSize="16"
+                             Margin="0,0,8,0">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Button Grid.Column="1" 
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Command="{Binding QuickDepositCommand}"
+                            Padding="8,0" Height="36"
+                            AutomationProperties.AutomationId="QuickDepositButton">
+                        <materialDesign:PackIcon Kind="Flash" />
+                    </Button>
+                </Grid>
+                <TextBlock Text="Calculates denominations automatically" 
+                           FontSize="9" Opacity="0.4" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- VIEW: ACTIVE DEPOSIT -->
             <StackPanel Visibility="{Binding IsInDepositMode.Value, Converter={StaticResource VisibilityConv}}">
-                 <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat={}{0:N0}}"  
-                           FontSize="32" FontWeight="Thin" HorizontalAlignment="Center" Margin="0,0,0,8"
+                <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat={}{0:N0}}"  
+                           FontSize="32" FontWeight="Thin" HorizontalAlignment="Center" Margin="0,0,0,16"
                            AutomationProperties.AutomationId="CurrentDepositText"/>
 
+                <!-- INLINE BULK INSERT GRID -->
+                <Border Background="#0DFFFFFF" CornerRadius="4" Margin="0,0,0,16" Padding="8"
+                        Visibility="{Binding IsBulkInsertVisible.Value, Converter={StaticResource VisibilityConv}}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="BULK INSERT" FontSize="10" FontWeight="Bold" Opacity="0.7"/>
+                            <materialDesign:PackIcon Kind="Close" HorizontalAlignment="Right" Opacity="0.5" Cursor="Hand">
+                                <materialDesign:PackIcon.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding CancelBulkInsertCommand}"/>
+                                </materialDesign:PackIcon.InputBindings>
+                            </materialDesign:PackIcon>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding BulkInsertItems}" MaxHeight="160">
+                            <ItemsControl.Template>
+                                <ControlTemplate TargetType="ItemsControl">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="60" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="11" Opacity="0.9"/>
+                                        <TextBox Grid.Column="1" 
+                                                 Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}"
+                                                 FontSize="11"
+                                                 materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryBrush}"
+                                                 HorizontalContentAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="INSERT" Style="{StaticResource PrimaryButtonStyle}"
+                                Height="28" Margin="0,8,0,0" FontSize="11"
+                                Command="{Binding InsertBulkCommand}"/>
+                    </StackPanel>
+                </Border>
                 
-                <!-- Step 1: Counting Controls -->
+                <!-- Main Actions -->
                 <StackPanel Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                    <Button Style="{StaticResource ModernFlatButtonStyle}" 
-                            Command="{Binding ShowBulkInsertCommand}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}"
-                            AutomationProperties.AutomationId="BulkInsertButton"
-                            AutomationProperties.Name="BULK INSERT">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,8,0" />
-                            <TextBlock Text="BULK INSERT" />
-                        </StackPanel>
-                    </Button>
-
-                    <Button Style="{StaticResource ModernFlatButtonStyle}" 
-                            Command="{Binding SimulateOverlapCommand}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            Foreground="Orange"
-                            AutomationProperties.AutomationId="SimulateOverlapButton"
-                            AutomationProperties.Name="SIMULATE OVERLAP">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                            <TextBlock Text="SIMULATE OVERLAP ERROR" />
-                        </StackPanel>
-                    </Button>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Style="{StaticResource ModernFlatButtonStyle}" 
+                                Command="{Binding ShowBulkInsertCommand}"
+                                Margin="4"
+                                IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,4,0" />
+                                <TextBlock Text="BULK" FontSize="11"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" Style="{StaticResource ModernFlatButtonStyle}" 
+                                Command="{Binding SimulateOverlapCommand}"
+                                Margin="4" Foreground="Orange">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,4,0" />
+                                <TextBlock Text="ERROR" FontSize="11"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
 
                     <Button Style="{StaticResource ModernFlatButtonStyle}" 
                             Command="{Binding FixDepositCommand}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            AutomationProperties.AutomationId="FixDepositButton"
-                            AutomationProperties.Name="FINISH">
+                            HorizontalAlignment="Stretch" Margin="4,8"
+                            AutomationProperties.AutomationId="FixDepositButton">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Check" Margin="0,0,8,0" />
-                            <TextBlock Text="FINISH COUNTING" />
+                            <TextBlock Text="FINISH COUNTING" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
 
-                
-                <!-- Pause/Resume Control -->
-                <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                    <Button Style="{StaticResource ModernFlatButtonStyle}" 
-                            Command="{Binding PauseDepositCommand}"
-                            Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            AutomationProperties.AutomationId="PauseDepositButton"
-                            AutomationProperties.Name="PAUSE">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Pause" Margin="0,0,8,0" />
-                            <TextBlock Text="PAUSE DEPOSIT" />
-                        </StackPanel>
-                    </Button>
-
-                    <Button Style="{StaticResource PrimaryButtonStyle}" 
-                            Command="{Binding ResumeDepositCommand}"
-                            Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            AutomationProperties.AutomationId="ResumeDepositButton"
-                            AutomationProperties.Name="RESUME">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Play" Margin="0,0,8,0" />
-                            <TextBlock Text="RESUME DEPOSIT" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-
-
+                <!-- Pause/Resume/Store/Return -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Step 2: Store -->
-                    <Button Grid.Column="0" Style="{StaticResource PrimaryButtonStyle}" 
-                            Command="{Binding StoreDepositCommand}"
-                            Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            AutomationProperties.AutomationId="StoreDepositButton"
-                            AutomationProperties.Name="STORE">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Wallet" Margin="0,0,4,0" />
-                            <TextBlock Text="STORE" />
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Grid.Column="0">
+                        <!-- Pause/Resume -->
+                        <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                            <Button Style="{StaticResource ModernFlatButtonStyle}" 
+                                    Command="{Binding PauseDepositCommand}"
+                                    Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
+                                    Margin="4">
+                                <materialDesign:PackIcon Kind="Pause" />
+                            </Button>
+                            <Button Style="{StaticResource PrimaryButtonStyle}" 
+                                    Command="{Binding ResumeDepositCommand}"
+                                    Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
+                                    Margin="4">
+                                <materialDesign:PackIcon Kind="Play" />
+                            </Button>
+                        </Grid>
 
-                    <!-- Common: Return/Cancel -->
+                        <!-- Store (Fixed state) -->
+                        <Button Style="{StaticResource PrimaryButtonStyle}" 
+                                Command="{Binding StoreDepositCommand}"
+                                Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}"
+                                Margin="4" AutomationProperties.AutomationId="StoreDepositButton">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Wallet" Margin="0,0,4,0" />
+                                <TextBlock Text="STORE" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
                     <Button Grid.Column="1" Style="{StaticResource ModernFlatButtonStyle}" 
                             Command="{Binding CancelDepositCommand}"
                             Foreground="IndianRed"
-                            HorizontalAlignment="Stretch" Margin="4"
-                            AutomationProperties.AutomationId="RepayDepositButton"
-                            AutomationProperties.Name="RETURN">
+                            Margin="4"
+                            AutomationProperties.AutomationId="RepayDepositButton">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Cancel" Margin="0,0,4,0" />
                             <TextBlock Text="RETURN" />
@@ -135,7 +192,6 @@
                     </Button>
                 </Grid>
             </StackPanel>
-
         </StackPanel>
     </Border>
 </UserControl>
