@@ -1,18 +1,20 @@
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
+using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// 入金コンポーネントを制御する ViewModel。
-/// </summary>
+/// <summary>入金コンポーネントを制御する ViewModel。</summary>
 public class DepositViewModel : IDisposable
 {
     private readonly DepositController _depositController;
     private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly ILogger<DepositViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
 
     // State Properties
@@ -42,7 +44,6 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<Unit> CancelBulkInsertCommand { get; }
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
-
     public DepositViewModel(
         DepositController depositController,
         HardwareStatusManager hardwareStatusManager,
@@ -50,6 +51,7 @@ public class DepositViewModel : IDisposable
     {
         _depositController = depositController;
         _hardwareStatusManager = hardwareStatusManager;
+        _logger = LogProvider.CreateLogger<DepositViewModel>();
 
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
         IsBulkInsertVisible = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
@@ -87,7 +89,7 @@ public class DepositViewModel : IDisposable
 
         // Commands
         BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand<Unit>().AddTo(_disposables);
-        BeginDepositCommand.Subscribe(_ => 
+        BeginDepositCommand.Subscribe(_ =>
         {
             try
             {
@@ -95,7 +97,11 @@ public class DepositViewModel : IDisposable
                 PrepareBulkInsertItems(getDenominations());
                 IsBulkInsertVisible.Value = false;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                _logger.ZLogError(ex, $"Failed to begin deposit.");
+                // Swallowed: error is logged, but we don't want to crash the UI thread
+            }
         });
 
         PauseDepositCommand = IsInDepositMode.CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
@@ -113,7 +119,7 @@ public class DepositViewModel : IDisposable
         StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
 
         CancelDepositCommand = IsInDepositMode.ToReactiveCommand<Unit>().AddTo(_disposables);
-        CancelDepositCommand.Subscribe(_ => 
+        CancelDepositCommand.Subscribe(_ =>
         {
             if (!_depositController.IsFixed) _depositController.FixDeposit();
             _depositController.EndDeposit(CashDepositAction.Repay);
@@ -121,21 +127,21 @@ public class DepositViewModel : IDisposable
 
         ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        ShowBulkInsertCommand.Subscribe(_ => 
+        ShowBulkInsertCommand.Subscribe(_ =>
         {
             PrepareBulkInsertItems(getDenominations());
             IsBulkInsertVisible.Value = !IsBulkInsertVisible.Value;
         });
 
         InsertBulkCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
-        InsertBulkCommand.Subscribe(_ => 
+        InsertBulkCommand.Subscribe(_ =>
         {
             ExecuteBulkInsert();
             IsBulkInsertVisible.Value = false;
         });
 
         CancelBulkInsertCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
-        CancelBulkInsertCommand.Subscribe(_ => 
+        CancelBulkInsertCommand.Subscribe(_ =>
         {
             IsBulkInsertVisible.Value = false;
         });
@@ -224,11 +230,11 @@ public class DepositViewModel : IDisposable
 
         // Auto Fix & Store
         // Consider a small delay to let UI react if desired, but for Quick Deposit it can be fast.
-        await Task.Delay(100); 
+        await Task.Delay(100);
         _depositController.FixDeposit();
         await Task.Delay(100);
         _depositController.EndDeposit(CashDepositAction.NoChange);
-        
+
         QuickDepositAmountInput.Value = "";
     }
 

@@ -17,28 +17,29 @@ public class MonitorsProvider
         var config = configProvider.Config;
         var keys = metadataProvider.SupportedDenominations;
 
-        Monitors = keys.Select(k => {
+        Monitors = keys.Select(k =>
+        {
             // 金種キーを文字列に変換 (B1000, C100 等)
             var keyStr = (k.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + k.Value.ToString();
-            
+
             // 個別設定があるか確認
             if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventorySettings) &&
                 inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
             {
                 return new CashStatusMonitor(
-                    inventory, 
-                    k, 
-                    setting.NearEmpty, 
-                    setting.NearFull, 
+                    inventory,
+                    k,
+                    setting.NearEmpty,
+                    setting.NearFull,
                     setting.Full);
             }
-            
+
             // 個別設定がない場合はグローバルなデフォルトを使用
             return new CashStatusMonitor(
-                inventory, 
-                k, 
-                config.Thresholds.NearEmpty, 
-                config.Thresholds.NearFull, 
+                inventory,
+                k,
+                config.Thresholds.NearEmpty,
+                config.Thresholds.NearFull,
                 config.Thresholds.Full);
         }).ToList();
     }

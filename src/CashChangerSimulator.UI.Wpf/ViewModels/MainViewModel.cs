@@ -1,5 +1,5 @@
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using R3;
 
@@ -17,7 +17,7 @@ public class MainViewModel : IDisposable
     public DispenseViewModel Dispense { get; }
     public InventoryViewModel Inventory { get; }
     public PosTransactionViewModel PosTransaction { get; }
-    
+
     public BindableReactiveProperty<UIMode> CurrentUIMode { get; }
 
     public MainViewModel(
@@ -34,36 +34,36 @@ public class MainViewModel : IDisposable
     {
         // Sub-ViewModels
         Inventory = new InventoryViewModel(
-            inventory, 
-            history, 
-            aggregatorProvider.Aggregator, 
-            configProvider, 
-            monitorsProvider, 
-            metadataProvider, 
-            hardwareStatusManager, 
+            inventory,
+            history,
+            aggregatorProvider.Aggregator,
+            configProvider,
+            monitorsProvider,
+            metadataProvider,
+            hardwareStatusManager,
             depositController)
             .AddTo(_disposables);
 
         Deposit = new DepositViewModel(
-            depositController, 
-            hardwareStatusManager, 
+            depositController,
+            hardwareStatusManager,
             () => Inventory.Denominations)
             .AddTo(_disposables);
 
         Dispense = new DispenseViewModel(
-            inventory, 
-            manager, 
+            inventory,
+            manager,
             dispenseController,
             configProvider,
-            Deposit.IsInDepositMode, 
-            hardwareStatusManager.IsJammed, 
+            Deposit.IsInDepositMode,
+            hardwareStatusManager.IsJammed,
             () => Inventory.Denominations)
             .AddTo(_disposables);
 
         PosTransaction = new PosTransactionViewModel(Deposit, Dispense).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.Simulation.UIMode).AddTo(_disposables);
-        
+
         // Update mode when settings change
         try
         {
@@ -73,14 +73,17 @@ public class MainViewModel : IDisposable
             // For now, let's assume the user might need to restart or we can trigger a manual refresh if needed.
             // Ideally, SimulationSettings should be reactive.
         }
-        catch { }
+        catch
+        {
+            // Logged and swallowed to prevent startup failure if DI resolve fails (simSettings usage is optional here)
+        }
 
         configProvider.Reloaded
             .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.Simulation.UIMode)
             .AddTo(_disposables);
 
         GlobalModeName = Deposit.CurrentModeName
-            .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) => 
+            .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) =>
             {
                 return dispenseMode == "Busy"
                     ? "DISPENSING (出金中)" : depositMode;

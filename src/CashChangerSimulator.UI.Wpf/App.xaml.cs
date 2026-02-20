@@ -1,9 +1,11 @@
 ﻿using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using Microsoft.Extensions.Logging;
+using R3;
 using System.IO;
 using System.Windows;
-using R3;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -18,16 +20,16 @@ public partial class App : Application
         {
             base.OnStartup(e);
 
-            // Initialize R3 WPF provider
-            // Initialize R3 WPF provider with unhandled exception handler
-            WpfProviderInitializer.SetDefaultObservableSystem(ex => 
-            {
-                try { File.AppendAllText("r3_errors.txt", $"{DateTime.Now}: {ex}\n"); } catch {}
-            });
-
-            // Load configuration and initialize logger
+            // Load configuration and initialize logger first
             var config = ConfigurationLoader.Load();
             LogProvider.Initialize(config.Logging);
+            var logger = LogProvider.CreateLogger<App>();
+
+            // Initialize R3 WPF provider with unhandled exception handler
+            WpfProviderInitializer.SetDefaultObservableSystem(ex =>
+            {
+                logger.ZLogError(ex, $"R3 Unhandled Exception");
+            });
 
             DIContainer.Initialize();
             var mainWindow = new MainWindow();
@@ -36,7 +38,12 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup_crash.txt"), 
+            // Initializing LogProvider might have failed, but we try to log anyway
+            var logger = LogProvider.CreateLogger<App>();
+            logger.ZLogCritical(ex, $"Startup Crash");
+            
+            // Still write to file as a last resort since logger might not be fully functional
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup_crash.txt"),
                 ex.ToString() + "\n\nInner: " + ex.InnerException?.ToString());
             Shutdown();
         }
@@ -52,7 +59,7 @@ public partial class App : Application
         }
         catch
         {
-            // Fail safe on exit
+            // Fail safe on exit: ensure application can close even if history saving fails
         }
         base.OnExit(e);
     }

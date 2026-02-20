@@ -1,13 +1,11 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf.ViewModels;
-using R3;
-using Moq;
-using Shouldly;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.Services;
-using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core;
+using CashChangerSimulator.UI.Wpf.ViewModels;
+using Moq;
+using R3;
+using Shouldly;
 using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Tests;
@@ -78,14 +76,14 @@ public class QuickDepositAndPosModeTest
         // Let's use the one in _mainViewModel.
 
         var depositVm = _mainViewModel.Deposit;
-        
+
         // Mock the return of denominations if necessary, but MainViewModel already setup sub-VMs.
         // However, the InventoryViewModel in MainViewModel might have empty denominations if metadata is empty.
         // Actually CurrencyMetadataProvider uses configProvider.Config.CurrencyCode to get denominations.
 
         // Act: Set input amount
         depositVm.QuickDepositAmountInput.Value = "16600";
-        
+
         // Assert Command can execute
         ((ICommand)depositVm.QuickDepositCommand).CanExecute(null).ShouldBeTrue();
 
@@ -103,7 +101,7 @@ public class QuickDepositAndPosModeTest
     public void IsBulkInsertVisible_ToggleBehavior()
     {
         var depositVm = _mainViewModel.Deposit;
-        
+
         // Initially false
         depositVm.IsBulkInsertVisible.Value.ShouldBeFalse();
 

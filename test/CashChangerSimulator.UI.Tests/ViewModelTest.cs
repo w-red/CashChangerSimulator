@@ -26,7 +26,7 @@ public class ViewModelTest
         // プロバイダー系は依存関係を注入した実インスタンスを使用するのが簡単です
         var realConfig = new ConfigurationProvider();
         realConfig.Config.CurrencyCode = "JPY"; // テスト用に明示的に設定
-        
+
         // デフォルトの JPY 設定を使用
         var realMetadata = new Wpf.Services.CurrencyMetadataProvider(realConfig);
         var realMonitors = new MonitorsProvider(mockInventory.Object, realConfig, realMetadata);
@@ -38,7 +38,7 @@ public class ViewModelTest
         var realHardware = new HardwareStatusManager();
         var depositController = new DepositController(mockInventory.Object);
         var dispenseController = new DispenseController(mockManager.Object);
-        
+
         var vm = new MainViewModel(
             mockInventory.Object,
             mockHistory.Object,
@@ -58,7 +58,7 @@ public class ViewModelTest
         vm.Dispense.DispenseAmountInput.Value = "1000";
 
         vm.Dispense.DispenseCommand.Execute(Unit.Default);
-        
+
         // Verify
         mockManager.Verify(m => m.Dispense(1000m, "JPY"), Times.Once);
         vm.Dispense.DispenseAmountInput.Value.ShouldBe("");

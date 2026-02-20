@@ -13,7 +13,7 @@ public class CashChangerTestApp : IDisposable
     public Application Application { get; private set; } = null!;
     public UIA3Automation Automation { get; private set; } = null!;
     public Window? MainWindow { get; private set; }
-    
+
     private readonly string _executablePath;
 
     public CashChangerTestApp()
@@ -22,16 +22,16 @@ public class CashChangerTestApp : IDisposable
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDir = Path.GetDirectoryName(assemblyLocation);
         if (string.IsNullOrEmpty(assemblyDir)) throw new Exception("Could not determine assembly directory.");
-        
+
         // Adjust this path based on your project structure and build output
         var potentialPath = Path.GetFullPath(Path.Combine(assemblyDir, "../../../../../src/CashChangerSimulator.UI.Wpf/bin/Debug/net10.0-windows/CashChangerSimulator.UI.Wpf.exe"));
-        
+
         if (!File.Exists(potentialPath))
         {
             // Fallback or throw
-             throw new FileNotFoundException($"Application executable not found at {potentialPath}. Ensure the application is built.");
+            throw new FileNotFoundException($"Application executable not found at {potentialPath}. Ensure the application is built.");
         }
-        
+
         _executablePath = potentialPath;
     }
 
@@ -39,7 +39,7 @@ public class CashChangerTestApp : IDisposable
     {
         string fullPath = Path.GetFullPath(_executablePath);
         string? appDir = Path.GetDirectoryName(fullPath);
-        
+
         // Clean up state files to ensure a fresh start for each test
         if (appDir != null)
         {
@@ -52,11 +52,11 @@ public class CashChangerTestApp : IDisposable
         }
 
         Console.WriteLine($"[CashChangerTestApp] Launching: {fullPath}");
-        
+
         // Start fresh
         Automation = new UIA3Automation();
         Application = Application.Launch(_executablePath);
-        
+
         // Use a more robust wait for the window
         MainWindow = Retry.WhileNull(() =>
         {

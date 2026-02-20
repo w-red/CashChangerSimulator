@@ -17,7 +17,7 @@ public class PerformanceTest(ITestOutputHelper output)
         var inventory = new Inventory();
         var history = new TransactionHistory();
         var manager = new CashChangerManager(inventory, history);
-        
+
         // JPY setup
         var key1000 = new DenominationKey(1000m, CashType.Bill, "JPY");
         inventory.SetCount(key1000, 10000);
@@ -46,7 +46,7 @@ public class PerformanceTest(ITestOutputHelper output)
     public void LoggingOverheadAnalysis()
     {
         const int iterations = 50000;
-        
+
         // Scenario 1: No Logging
         LogProvider.Initialize(new LoggingSettings { EnableConsole = false, EnableFile = false, LogLevel = "None" });
         var timeNoLog = MeasureLogTime(iterations, "No Logging");
@@ -57,10 +57,10 @@ public class PerformanceTest(ITestOutputHelper output)
 
         // Scenario 3: ZLogger File
         var tempLogDir = Path.Combine(Path.GetTempPath(), "CCS_PerfTest");
-        LogProvider.Initialize(new LoggingSettings 
-        { 
-            EnableConsole = false, 
-            EnableFile = true, 
+        LogProvider.Initialize(new LoggingSettings
+        {
+            EnableConsole = false,
+            EnableFile = true,
             LogLevel = "Information",
             LogDirectory = tempLogDir,
             LogFileName = "perf_test.log"
@@ -72,8 +72,8 @@ public class PerformanceTest(ITestOutputHelper output)
         output.WriteLine($"No Logging: {timeNoLog} ms");
         output.WriteLine($"Console Log: {timeConsoleLog} ms");
         output.WriteLine($"File Log: {timeFileLog} ms");
-        
-        try 
+
+        try
         {
             if (Directory.Exists(tempLogDir)) Directory.Delete(tempLogDir, true);
         }

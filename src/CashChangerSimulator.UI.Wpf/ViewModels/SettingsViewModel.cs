@@ -1,13 +1,9 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Models;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using ZLogger;
 using R3;
+using System.Collections.ObjectModel;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -60,7 +56,7 @@ public class SettingsViewModel : IDisposable
 
     /// <summary>設定を保存するコマンド。</summary>
     public ReactiveCommand SaveCommand { get; }
-    
+
     /// <summary>設定をデフォルト値にリセットするコマンド。</summary>
     public ReactiveCommand ResetToDefaultCommand { get; }
 
@@ -76,16 +72,16 @@ public class SettingsViewModel : IDisposable
         _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
         CurrencyCode = new BindableReactiveProperty<string>("JPY").AddTo(_disposables);
-        ActiveUIMode = new BindableReactiveProperty<UIMode>(Core.Configuration.UIMode.Standard).AddTo(_disposables);
-        
+        ActiveUIMode = new BindableReactiveProperty<UIMode>(UIMode.Standard).AddTo(_disposables);
+
         NearEmpty = new BindableReactiveProperty<int>(0)
             .EnableValidation(val => val <= 0 ? new Exception("NearEmpty は 1 以上にしてください。") : null)
             .AddTo(_disposables);
-            
+
         NearFull = new BindableReactiveProperty<int>(0)
             .EnableValidation(val => val <= NearEmpty.Value ? new Exception("NearFull は NearEmpty より大きくしてください。") : null)
             .AddTo(_disposables);
-            
+
         Full = new BindableReactiveProperty<int>(0)
             .EnableValidation(val => val <= NearFull.Value ? new Exception("Full は NearFull より大きくしてください。") : null)
             .AddTo(_disposables);
@@ -94,14 +90,17 @@ public class SettingsViewModel : IDisposable
         MinDelay = new BindableReactiveProperty<int>(0)
             .EnableValidation(val => val < 0 ? new Exception("MinDelay は 0 以上にしてください。") : null)
             .AddTo(_disposables);
-            
+
         MaxDelay = new BindableReactiveProperty<int>(0)
             .EnableValidation(val => val < MinDelay.Value ? new Exception("MaxDelay は MinDelay 以上にしてください。") : null)
             .AddTo(_disposables);
 
         UseRandomErrors = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
         ErrorRate = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => val < 0 || val > 100 ? new Exception("ErrorRate は 0 から 100 の間にしてください。") : null)
+            .EnableValidation(val => 
+                val is < 0 or > 100 ?
+                new Exception("ErrorRate は 0 から 100 の間にしてください。")
+                : null)
             .AddTo(_disposables);
 
         SaveSucceeded = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
@@ -115,7 +114,7 @@ public class SettingsViewModel : IDisposable
 
         SaveCommand = canSave.ToReactiveCommand().AddTo(_disposables);
         SaveCommand.Subscribe(_ => Save());
-        
+
         ResetToDefaultCommand = new ReactiveCommand().AddTo(_disposables);
         ResetToDefaultCommand.Subscribe(_ => ResetToDefault());
     }
@@ -136,17 +135,17 @@ public class SettingsViewModel : IDisposable
         ErrorRate.Value = config.Simulation.ErrorRate;
 
         DenominationSettings.Clear();
-        
+
         foreach (var key in _metadataProvider.SupportedDenominations)
         {
             var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
-            
+
             // 個別設定がある場合はそれを使用、ない場合はデフォルト値を適用
             if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventory) &&
                 inventory.Denominations.TryGetValue(keyStr, out var setting))
             {
                 DenominationSettings.Add(new DenominationSettingItem(
-                    key, 
+                    key,
                     setting.DisplayName ?? _metadataProvider.GetDenominationName(key),
                     setting.InitialCount,
                     setting.NearEmpty,
@@ -156,7 +155,7 @@ public class SettingsViewModel : IDisposable
             else
             {
                 DenominationSettings.Add(new DenominationSettingItem(
-                    key, 
+                    key,
                     _metadataProvider.GetDenominationName(key),
                     0,
                     NearEmpty.Value,
@@ -195,14 +194,15 @@ public class SettingsViewModel : IDisposable
         catch (Exception ex)
         {
             _logger.ZLogWarning(ex, $"Could not update DI singleton SimulationSettings array. This might require restart to take effect.");
+            // Swallowed: we log the warning but allow the user to continue changing other settings even if DI update fails
         }
 
-        if (!config.Inventory.ContainsKey(config.CurrencyCode))
+        if (!config.Inventory.TryGetValue(config.CurrencyCode, out InventorySettings? activeInventory))
         {
-            config.Inventory[config.CurrencyCode] = new InventorySettings();
+            activeInventory = new InventorySettings();
+            config.Inventory[config.CurrencyCode] = activeInventory;
         }
-        
-        var activeInventory = config.Inventory[config.CurrencyCode];
+
         activeInventory.Denominations.Clear();
         foreach (var item in DenominationSettings)
         {
@@ -242,14 +242,4 @@ public class SettingsViewModel : IDisposable
         _disposables.Dispose();
         GC.SuppressFinalize(this);
     }
-
-    /// <summary>入力値の整合性を検証する。</summary>
-    private void Validate()
-    {
-        // This method is largely redundant as BindableReactiveProperty.EnableValidation() is used.
-        // Keeping it for now if there's any other manual validation logic not covered by BRP.
-        // If not, this method and related INotifyDataErrorInfo implementations can be removed.
-    }
 }
-
-
