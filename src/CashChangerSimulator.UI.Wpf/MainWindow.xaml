@@ -79,13 +79,21 @@
                 <!-- Right: Terminals & Activity -->
                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <!-- Dispense Input -->
-                        <ctrl:DispenseControl DataContext="{Binding Dispense}" Margin="0,0,0,16"/>
+                        <!-- STANDARD MODE: Dispense & Deposit -->
+                        <StackPanel Visibility="{Binding CurrentUIMode.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=Standard}">
+                            <!-- Dispense Input -->
+                            <ctrl:DispenseControl DataContext="{Binding Dispense}" Margin="0,0,0,16"/>
+                            
+                            <!-- Deposit Actions -->
+                            <ctrl:DepositControl DataContext="{Binding Deposit}" Margin="0,0,0,16"/>
+                        </StackPanel>
+
+                        <!-- POS TRANSACTION MODE -->
+                        <StackPanel Visibility="{Binding CurrentUIMode.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=PosTransaction}">
+                            <ctrl:PosTransactionControl DataContext="{Binding PosTransaction}" Margin="0,0,0,16"/>
+                        </StackPanel>
                         
-                        <!-- Deposit Actions -->
-                        <ctrl:DepositControl DataContext="{Binding Deposit}" Margin="0,0,0,16"/>
-                        
-                        <!-- Recent Transactions Activity Feed -->
+                        <!-- Recent Transactions Activity Feed (Common) -->
                         <ctrl:ActivityFeedControl DataContext="{Binding Inventory}" />
                     </StackPanel>
                 </ScrollViewer>

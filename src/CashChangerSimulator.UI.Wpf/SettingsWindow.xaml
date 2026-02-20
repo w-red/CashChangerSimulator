@@ -58,10 +58,22 @@
                         <ComboBox
                             materialDesign:HintAssist.Hint="Active Currency"
                             ItemsSource="{Binding AvailableCurrencyCodes}"
-                            SelectedItem="{Binding CurrencyCode}"
+                            SelectedItem="{Binding CurrencyCode.Value}"
                             Style="{StaticResource ModernComboBoxStyle}"/>
                         <TextBlock
                             Text="* Requires restart for inventory recalibration."
+                            FontSize="10"
+                            Foreground="{StaticResource SecondaryBrush}"
+                            Margin="4,4,0,0"/>
+
+                        <ComboBox
+                            materialDesign:HintAssist.Hint="Operating UI Mode"
+                            ItemsSource="{Binding AvailableUIModes}"
+                            SelectedItem="{Binding ActiveUIMode.Value}"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                            Margin="0,16,0,0"/>
+                        <TextBlock
+                            Text="* Change the user interface behavior pattern."
                             FontSize="10"
                             Foreground="{StaticResource SecondaryBrush}"
                             Margin="4,4,0,0"/>
@@ -89,15 +101,15 @@
                                 Margin="0,0,0,20"/>
                             <TextBox
                                 materialDesign:HintAssist.Hint="Near Empty"
-                                Text="{Binding NearEmpty, UpdateSourceTrigger=PropertyChanged}"
+                                Text="{Binding NearEmpty.Value, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource ModernTextBoxStyle}"/>
                             <TextBox
                                 materialDesign:HintAssist.Hint="Near Full"
-                                Text="{Binding NearFull, UpdateSourceTrigger=PropertyChanged}"
+                                Text="{Binding NearFull.Value, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource ModernTextBoxStyle}"/>
                             <TextBox
                                 materialDesign:HintAssist.Hint="Full Limit"
-                                Text="{Binding Full, UpdateSourceTrigger=PropertyChanged}"
+                                Text="{Binding Full.Value, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Border>
@@ -116,22 +128,22 @@
                                 Margin="0,0,0,20"/>
                             <CheckBox
                                 Content="Enable Latency"
-                                IsChecked="{Binding UseDelay}"
+                                IsChecked="{Binding UseDelay.Value}"
                                 Style="{StaticResource ToggleSwitchStyle}"
                                 Margin="0,0,0,16"/>
                             <StackPanel
                                 Orientation="Horizontal"
-                                IsEnabled="{Binding UseDelay}">
+                                IsEnabled="{Binding UseDelay.Value}">
                                 <TextBox
                                     materialDesign:HintAssist.Hint="Min (ms)"
                                     Width="80"
-                                    Text="{Binding MinDelay}"
+                                    Text="{Binding MinDelay.Value}"
                                     Style="{StaticResource ModernTextBoxStyle}"
                                     Margin="0,0,16,0"/>
                                 <TextBox
                                     materialDesign:HintAssist.Hint="Max (ms)"
                                     Width="80"
-                                    Text="{Binding MaxDelay}"
+                                    Text="{Binding MaxDelay.Value}"
                                     Style="{StaticResource ModernTextBoxStyle}"
                                     Margin="0,0,16,0"/>
                             </StackPanel>
@@ -194,7 +206,7 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn
                                     Header="IDENTIFIER"
-                                    Binding="{Binding DisplayName}"
+                                    Binding="{Binding DisplayName.Value}"
                                     Width="*">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style
@@ -208,19 +220,19 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn
                                     Header="BASE QTY"
-                                    Binding="{Binding Count}"
+                                    Binding="{Binding Count.Value}"
                                     Width="80"/>
                                 <DataGridTextColumn
                                     Header="N.EMPTY"
-                                    Binding="{Binding NearEmpty}"
+                                    Binding="{Binding NearEmpty.Value}"
                                     Width="80"/>
                                 <DataGridTextColumn
                                     Header="N.FULL"
-                                    Binding="{Binding NearFull}"
+                                    Binding="{Binding NearFull.Value}"
                                     Width="80"/>
                                 <DataGridTextColumn
                                     Header="MAX CAP"
-                                    Binding="{Binding Full}"
+                                    Binding="{Binding Full.Value}"
                                     Width="80"/>
                             </DataGrid.Columns>
                         </DataGrid>

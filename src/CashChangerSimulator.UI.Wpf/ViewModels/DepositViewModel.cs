@@ -23,21 +23,24 @@ public class DepositViewModel : IDisposable
     public BindableReactiveProperty<bool> IsDepositPaused { get; }
     public BindableReactiveProperty<string> CurrentModeName { get; }
     public ReactiveProperty<bool> IsOverlapped { get; }
+    public BindableReactiveProperty<bool> IsBulkInsertVisible { get; }
+    public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
 
     // Commands
-    public ReactiveCommand BeginDepositCommand { get; }
-    public ReactiveCommand PauseDepositCommand { get; }
-    public ReactiveCommand ResumeDepositCommand { get; }
-    public ReactiveCommand FixDepositCommand { get; }
-    public ReactiveCommand StoreDepositCommand { get; }
-    public ReactiveCommand CancelDepositCommand { get; }
-    public ReactiveCommand SimulateOverlapCommand { get; }
+    public ReactiveCommand<Unit> BeginDepositCommand { get; }
+    public ReactiveCommand<Unit> PauseDepositCommand { get; }
+    public ReactiveCommand<Unit> ResumeDepositCommand { get; }
+    public ReactiveCommand<Unit> FixDepositCommand { get; }
+    public ReactiveCommand<Unit> StoreDepositCommand { get; }
+    public ReactiveCommand<Unit> CancelDepositCommand { get; }
+    public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
 
     // Bulk Deposit
     public ObservableCollection<BulkInsertItemViewModel> BulkInsertItems { get; } = [];
-    public ReactiveCommand ShowBulkInsertCommand { get; }
-    public ReactiveCommand InsertBulkCommand { get; }
-    public ReactiveCommand CancelBulkInsertCommand { get; }
+    public ReactiveCommand<Unit> ShowBulkInsertCommand { get; }
+    public ReactiveCommand<Unit> InsertBulkCommand { get; }
+    public ReactiveCommand<Unit> CancelBulkInsertCommand { get; }
+    public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
 
     public DepositViewModel(
@@ -49,6 +52,8 @@ public class DepositViewModel : IDisposable
         _hardwareStatusManager = hardwareStatusManager;
 
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
+        IsBulkInsertVisible = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         IsInDepositMode = _depositController.Changed
             .Select(_ => _depositController.IsDepositInProgress)
@@ -81,37 +86,33 @@ public class DepositViewModel : IDisposable
             .AddTo(_disposables);
 
         // Commands
-        BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand().AddTo(_disposables);
+        BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ => 
         {
-            try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", "BeginDepositCommand subscribed.\n"); } catch {}
             try
             {
                 _depositController.BeginDeposit();
-                try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", "Controller.BeginDeposit finished.\n"); } catch {}
-                OpenBulkInsertWindow(getDenominations());
+                PrepareBulkInsertItems(getDenominations());
+                IsBulkInsertVisible.Value = false;
             }
-            catch (Exception ex)
-            {
-                try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", $"Exception: {ex}\n"); } catch {}
-            }
+            catch (Exception) { }
         });
 
         PauseDepositCommand = IsInDepositMode.CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
-            .ToReactiveCommand().AddTo(_disposables);
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         PauseDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Pause));
 
-        ResumeDepositCommand = IsDepositPaused.ToReactiveCommand().AddTo(_disposables);
+        ResumeDepositCommand = IsDepositPaused.ToReactiveCommand<Unit>().AddTo(_disposables);
         ResumeDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Restart));
 
         FixDepositCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
-            .ToReactiveCommand().AddTo(_disposables);
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         FixDepositCommand.Subscribe(_ => _depositController.FixDeposit());
 
-        StoreDepositCommand = IsDepositFixed.ToReactiveCommand().AddTo(_disposables);
+        StoreDepositCommand = IsDepositFixed.ToReactiveCommand<Unit>().AddTo(_disposables);
         StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
 
-        CancelDepositCommand = IsInDepositMode.ToReactiveCommand().AddTo(_disposables);
+        CancelDepositCommand = IsInDepositMode.ToReactiveCommand<Unit>().AddTo(_disposables);
         CancelDepositCommand.Subscribe(_ => 
         {
             if (!_depositController.IsFixed) _depositController.FixDeposit();
@@ -119,18 +120,34 @@ public class DepositViewModel : IDisposable
         });
 
         ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
-            .ToReactiveCommand().AddTo(_disposables);
-        ShowBulkInsertCommand.Subscribe(_ => OpenBulkInsertWindow(getDenominations()));
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
+        ShowBulkInsertCommand.Subscribe(_ => 
+        {
+            PrepareBulkInsertItems(getDenominations());
+            IsBulkInsertVisible.Value = !IsBulkInsertVisible.Value;
+        });
 
-        InsertBulkCommand = new ReactiveCommand().AddTo(_disposables);
-        InsertBulkCommand.Subscribe(_ => ExecuteBulkInsert());
+        InsertBulkCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        InsertBulkCommand.Subscribe(_ => 
+        {
+            ExecuteBulkInsert();
+            IsBulkInsertVisible.Value = false;
+        });
 
-        CancelBulkInsertCommand = new ReactiveCommand().AddTo(_disposables);
-        CancelBulkInsertCommand.Subscribe(_ => { });
+        CancelBulkInsertCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        CancelBulkInsertCommand.Subscribe(_ => 
+        {
+            IsBulkInsertVisible.Value = false;
+        });
+
+        QuickDepositCommand = IsInDepositMode
+            .CombineLatest(QuickDepositAmountInput, (mode, input) => !mode && decimal.TryParse(input, out var a) && a > 0)
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
+        QuickDepositCommand.Subscribe(async _ => await ExecuteQuickDepositAsync(getDenominations()));
 
         SimulateOverlapCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => mode && !fixed_ && !overlapped)
-            .ToReactiveCommand()
+            .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
     }
@@ -173,24 +190,46 @@ public class DepositViewModel : IDisposable
         }
     }
 
-    private void OpenBulkInsertWindow(IEnumerable<DenominationViewModel> denominations)
+    internal async Task ExecuteQuickDepositAsync(IEnumerable<DenominationViewModel> denominations)
     {
-        try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", "OpenBulkInsertWindow called.\n"); } catch {}
-        PrepareBulkInsertItems(denominations);
+        if (!decimal.TryParse(QuickDepositAmountInput.Value, out var targetAmount)) return;
 
-        var mainWindow = System.Windows.Application.Current?.MainWindow;
-        try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", $"MainWindow: {mainWindow}\n"); } catch {}
+        // Start Deposit
+        _depositController.BeginDeposit();
+
+        // Calculate greedy breakdown
+        var breakdown = new Dictionary<DenominationKey, int>();
+        var remaining = targetAmount;
+
+        // Sort denominations descending (e.g., 10000, 5000...)
+        var sortedDens = denominations
+            .OrderByDescending(d => d.Key.Value);
+
+        foreach (var den in sortedDens)
+        {
+            if (den.Key.Value <= 0) continue;
+            int count = (int)(remaining / den.Key.Value);
+            if (count > 0)
+            {
+                breakdown[den.Key] = count;
+                remaining -= count * den.Key.Value;
+            }
+        }
+
+        // Insert
+        if (breakdown.Count > 0)
+        {
+            _depositController.TrackBulkDeposit(breakdown);
+        }
+
+        // Auto Fix & Store
+        // Consider a small delay to let UI react if desired, but for Quick Deposit it can be fast.
+        await Task.Delay(100); 
+        _depositController.FixDeposit();
+        await Task.Delay(100);
+        _depositController.EndDeposit(CashDepositAction.NoChange);
         
-        if (mainWindow != null)
-        {
-            var window = new BulkInsertWindow(this) { Owner = mainWindow };
-            window.Show();
-            try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", "Window showed.\n"); } catch {}
-        }
-        else
-        {
-             try { System.IO.File.AppendAllText(@"C:\Users\ITI202301003_User\debug_deposit.txt", "MainWindow is null.\n"); } catch {}
-        }
+        QuickDepositAmountInput.Value = "";
     }
 
     public void Dispose()
