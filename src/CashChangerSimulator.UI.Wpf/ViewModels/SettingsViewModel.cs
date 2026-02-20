@@ -46,11 +46,6 @@ public class SettingsViewModel : IDisposable
     /// <summary>最大遅延時間 (ms)。</summary>
     public BindableReactiveProperty<int> MaxDelay { get; }
 
-    /// <summary>ランダムエラーを有効にするか。</summary>
-    public BindableReactiveProperty<bool> UseRandomErrors { get; }
-
-    /// <summary>エラー発生確率 (0-100)。</summary>
-    public BindableReactiveProperty<int> ErrorRate { get; }
 
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
@@ -119,16 +114,6 @@ public class SettingsViewModel : IDisposable
                 : null)
             .AddTo(_disposables);
 
-        UseRandomErrors =
-            new BindableReactiveProperty<bool>(false)
-            .AddTo(_disposables);
-        ErrorRate =
-            new BindableReactiveProperty<int>(0)
-            .EnableValidation(val => 
-                val is < 0 or > 100 ?
-                new Exception("ErrorRate は 0 から 100 の間にしてください。")
-                : null)
-            .AddTo(_disposables);
 
         SaveSucceeded =
             new BindableReactiveProperty<bool>(false)
@@ -138,14 +123,13 @@ public class SettingsViewModel : IDisposable
 
         var canSave = Observable.CombineLatest(
             NearEmpty, NearFull, Full,
-            MinDelay, MaxDelay, ErrorRate,
-            (_, _, _, _, _, _) => 
+            MinDelay, MaxDelay,
+            (_, _, _, _, _) => 
                 !NearEmpty.HasErrors &&
                 !NearFull.HasErrors &&
                 !Full.HasErrors &&
                 !MinDelay.HasErrors &&
-                !MaxDelay.HasErrors &&
-                !ErrorRate.HasErrors);
+                !MaxDelay.HasErrors);
 
         SaveCommand = canSave
             .ToReactiveCommand()
@@ -172,8 +156,6 @@ public class SettingsViewModel : IDisposable
         UseDelay.Value = config.Simulation.DelayEnabled;
         MinDelay.Value = config.Simulation.MinDelayMs;
         MaxDelay.Value = config.Simulation.MaxDelayMs;
-        UseRandomErrors.Value = config.Simulation.RandomErrorsEnabled;
-        ErrorRate.Value = config.Simulation.ErrorRate;
 
         DenominationSettings.Clear();
 
@@ -218,8 +200,6 @@ public class SettingsViewModel : IDisposable
         config.Simulation.DelayEnabled = UseDelay.Value;
         config.Simulation.MinDelayMs = MinDelay.Value;
         config.Simulation.MaxDelayMs = MaxDelay.Value;
-        config.Simulation.RandomErrorsEnabled = UseRandomErrors.Value;
-        config.Simulation.ErrorRate = ErrorRate.Value;
         config.Simulation.UIMode = ActiveUIMode.Value;
 
         try
@@ -228,8 +208,6 @@ public class SettingsViewModel : IDisposable
             simSettings.DelayEnabled = UseDelay.Value;
             simSettings.MinDelayMs = MinDelay.Value;
             simSettings.MaxDelayMs = MaxDelay.Value;
-            simSettings.RandomErrorsEnabled = UseRandomErrors.Value;
-            simSettings.ErrorRate = ErrorRate.Value;
             simSettings.UIMode = ActiveUIMode.Value;
         }
         catch (Exception ex)
