@@ -59,7 +59,7 @@ public class CurrencyMetadataProvider
     {
         var faces = GetStaticPropertyValue<IEnumerable<CashFaceInfo>>(_currencyType, key.Type == CashType.Coin ? "Coins" : "Bills");
         var face = faces?.FirstOrDefault(f => f.Value == key.Value);
-        
+
         if (face != null)
         {
             // MoneyKind4Opos の Name を使用（例: "100 Yen Coin", "1 Dollar Bill"）
@@ -72,8 +72,8 @@ public class CurrencyMetadataProvider
     private static Type? FindCurrencyType(string code)
     {
         return typeof(ICurrency).Assembly.GetTypes()
-            .FirstOrDefault(t => 
-                typeof(ICurrency).IsAssignableFrom(t) && 
+            .FirstOrDefault(t =>
+                typeof(ICurrency).IsAssignableFrom(t) &&
                 !t.IsInterface && !t.IsAbstract &&
                 GetStaticPropertyValue<Iso4217>(t, "Code").ToString().Equals(code, StringComparison.OrdinalIgnoreCase));
     }

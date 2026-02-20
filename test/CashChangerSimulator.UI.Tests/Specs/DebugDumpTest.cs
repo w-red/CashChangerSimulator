@@ -20,7 +20,7 @@ public class DebugDumpTest : IDisposable
     public void DumpAllElements()
     {
         var lines = new List<string>();
-        
+
         // 1. Desktop level windows
         lines.Add("=== Desktop Level Windows ===");
         var desktop = _app.Automation.GetDesktop();
@@ -38,7 +38,7 @@ public class DebugDumpTest : IDisposable
             foreach (var w in appWindows)
             {
                 lines.Add($"  AppWindow Title='{w.Title}' Name='{w.Name}' Id='{w.AutomationId}'");
-                
+
                 // Content of each window
                 lines.Add($"  --- Content of {w.Title} ---");
                 var descendants = w.FindAllDescendants();

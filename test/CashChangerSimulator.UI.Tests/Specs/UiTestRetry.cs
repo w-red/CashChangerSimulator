@@ -18,7 +18,8 @@ public static class UiTestRetry
     public static AutomationElement? Find(Func<AutomationElement?> func, TimeSpan timeout)
     {
         AutomationElement? result = null;
-        FlaUI.Core.Tools.Retry.WhileTrue(() => {
+        FlaUI.Core.Tools.Retry.WhileTrue(() =>
+        {
             result = func();
             return result == null;
         }, timeout);
@@ -39,10 +40,12 @@ public static class UiTestRetry
         Window? result = null;
         var processId = app.ProcessId;
         int counter = 0;
-        FlaUI.Core.Tools.Retry.WhileTrue(() => {
+        FlaUI.Core.Tools.Retry.WhileTrue(() =>
+        {
             counter++;
             // Try 1: App top level windows and their direct children (WPF Ownership often puts windows as children)
-            try {
+            try
+            {
                 var topWindows = app.GetAllTopLevelWindows(automation);
                 foreach (var w in topWindows)
                 {
@@ -52,7 +55,7 @@ public static class UiTestRetry
                         return false;
                     }
 
-                     // Look for owned windows which might appear as children in UIA tree
+                    // Look for owned windows which might appear as children in UIA tree
                     var child = w.FindFirstChild(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window).And(
                         cf.ByAutomationId(title).Or(cf.ByName(title))));
                     if (child != null)
@@ -61,18 +64,21 @@ public static class UiTestRetry
                         return false;
                     }
                 }
-            } catch { } 
+            }
+            catch { }
 
             // Try 2: Desktop direct children (Absolute fallback)
-            try {
+            try
+            {
                 var desktop = automation.GetDesktop();
                 var windows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
-                
-                result = windows.FirstOrDefault(w => 
+
+                result = windows.FirstOrDefault(w =>
                     (w.Properties.ProcessId == processId || true) && // Relax PID for fallback
                     (w.AutomationId == title || (w.Name != null && w.Name.Contains(title))))?.AsWindow();
-            } catch { }
-            
+            }
+            catch { }
+
             return result == null;
         }, timeout);
 
@@ -80,14 +86,16 @@ public static class UiTestRetry
         {
             // Debug: List all windows if not found (will show in test output if assertions follow)
             Console.WriteLine($"Failed to find window '{title}' for PID {processId}. Available windows for this PID:");
-            try {
+            try
+            {
                 var desktop = automation.GetDesktop();
                 var all = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
-                foreach(var w in all.Where(x => x.Properties.ProcessId == processId))
+                foreach (var w in all.Where(x => x.Properties.ProcessId == processId))
                 {
                     Console.WriteLine($"- Name: '{w.Name}', Id: '{w.AutomationId}'");
                 }
-            } catch {}
+            }
+            catch { }
         }
 
         return result!;

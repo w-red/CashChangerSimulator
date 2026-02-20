@@ -39,7 +39,7 @@ public class DenominationViewModel
                     _count.Value = newCount;
                 }
             });
-            
+
         IsAcceptingCash = depositController.Changed
             .Select(_ => depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused)
             .ToBindableReactiveProperty(depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused);

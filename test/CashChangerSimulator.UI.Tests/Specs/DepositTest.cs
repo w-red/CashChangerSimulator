@@ -103,7 +103,7 @@ public class DepositTest : IDisposable
         window.ShouldNotBeNull();
         window.SetForeground();
         VerifyComponentStructure(window);
-        
+
 
         // Start Deposit
         var beginButton =
@@ -114,7 +114,7 @@ public class DepositTest : IDisposable
             ?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton?.Click();
-        
+
         // Wait for state transition to Deposit Mode
         // Check for automatic BulkInsertWindow and proceed
         var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
@@ -122,7 +122,7 @@ public class DepositTest : IDisposable
 
 
         // Find the first TextBox
-        var firstTextBox = 
+        var firstTextBox =
             UiTestRetry.Find(
                 () => bulkInsertWindow
                 .FindFirstDescendant(
@@ -232,7 +232,7 @@ public class DepositTest : IDisposable
         var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
         bulkInsertWindow.ShouldNotBeNull();
 
-        var firstTextBox = 
+        var firstTextBox =
             UiTestRetry
             .Find(
                     () => bulkInsertWindow
@@ -332,7 +332,7 @@ public class DepositTest : IDisposable
         errorIndicator.IsOffscreen.ShouldBeFalse();
 
         // 4. Try to click FINISH (FixDeposit) -> Should fail or show error
-        var finishButton = 
+        var finishButton =
             window
             .FindFirstDescendant(
                 cf => cf.ByAutomationId("FixDepositButton"));
@@ -376,7 +376,8 @@ public class DepositTest : IDisposable
 
     {
         if (window == null) return null;
-        var result = UiTestRetry.Find(() => {
+        var result = UiTestRetry.Find(() =>
+        {
             var el = window
                 .FindFirstDescendant(
                     cf => cf.ByAutomationId(automationId));

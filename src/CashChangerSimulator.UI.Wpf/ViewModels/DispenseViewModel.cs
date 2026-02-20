@@ -1,7 +1,10 @@
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
+using Microsoft.Extensions.Logging;
 using R3;
 using System.Collections.ObjectModel;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -14,6 +17,7 @@ public class DispenseViewModel : IDisposable
     private readonly CashChangerManager _manager;
     private readonly DispenseController _controller;
     private readonly ConfigurationProvider _configProvider;
+    private readonly ILogger<DispenseViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
 
     // Properties
@@ -40,6 +44,7 @@ public class DispenseViewModel : IDisposable
         _manager = manager;
         _controller = controller;
         _configProvider = configProvider;
+        _logger = LogProvider.CreateLogger<DispenseViewModel>();
 
         // Phase 18: UI Alignment
         // Expose Status for UI State switching
@@ -95,7 +100,7 @@ public class DispenseViewModel : IDisposable
             .CombineLatest(IsBusy, (can, busy) => can && !busy)
             .ToReactiveCommand()
             .AddTo(_disposables);
-            
+
         DispenseCommand.Subscribe(_ =>
         {
             if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
@@ -133,7 +138,7 @@ public class DispenseViewModel : IDisposable
             .Select(s => s == CashDispenseStatus.Error)
             .ToReactiveCommand()
             .AddTo(_disposables);
-            
+
         ClearErrorCommand.Subscribe(_ => _controller.ClearError());
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
@@ -155,7 +160,9 @@ public class DispenseViewModel : IDisposable
         }
         catch (Exception ex)
         {
+            _logger.ZLogError(ex, $"Failed to dispense {amount}.");
             System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            // Swallowed: error is logged and shown to user, but we don't want to crash the UI thread
         }
     }
 
@@ -184,7 +191,9 @@ public class DispenseViewModel : IDisposable
             }
             catch (Exception ex)
             {
+                _logger.ZLogError(ex, $"Failed to dispense cash (bulk).");
                 System.Windows.MessageBox.Show(ex.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                // Swallowed: error is logged and shown to user, but we don't want to crash the UI thread
             }
         }
     }

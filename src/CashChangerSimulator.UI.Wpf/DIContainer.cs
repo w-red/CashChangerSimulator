@@ -1,4 +1,3 @@
-using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
@@ -41,11 +40,11 @@ public static class DIContainer
         _resolver = resolver;
 
         // Populate ServiceLocator for cross-project singleton sharing
-        CashChangerSimulator.Core.ServiceLocator.Inventory = _resolver.Resolve<Inventory>();
-        CashChangerSimulator.Core.ServiceLocator.History = _resolver.Resolve<TransactionHistory>();
-        CashChangerSimulator.Core.ServiceLocator.Manager = _resolver.Resolve<CashChangerManager>();
-        CashChangerSimulator.Core.ServiceLocator.HardwareStatusManager = _resolver.Resolve<HardwareStatusManager>();
-        
+        Core.ServiceLocator.Inventory = _resolver.Resolve<Inventory>();
+        Core.ServiceLocator.History = _resolver.Resolve<TransactionHistory>();
+        Core.ServiceLocator.Manager = _resolver.Resolve<CashChangerManager>();
+        Core.ServiceLocator.HardwareStatusManager = _resolver.Resolve<HardwareStatusManager>();
+
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
@@ -59,7 +58,7 @@ public static class DIContainer
         simSettings.RandomErrorsEnabled = simConfig.RandomErrorsEnabled;
         simSettings.ErrorRate = simConfig.ErrorRate;
         simSettings.ValidationFailureRate = simConfig.ValidationFailureRate;
-        
+
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();
         if (state?.Counts != null && state.Counts.Count > 0)

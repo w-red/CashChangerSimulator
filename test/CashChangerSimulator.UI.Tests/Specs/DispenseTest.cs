@@ -27,7 +27,7 @@ public class DispenseTest : IDisposable
         Thread.Sleep(500);
 
 
-        var totalAmountText = 
+        var totalAmountText =
             UiTestRetry.Find(
                 () => window
                     .FindFirstDescendant(
@@ -40,9 +40,9 @@ public class DispenseTest : IDisposable
         // Check Mode
         var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel()?.Text;
         Console.WriteLine($"Current Mode: {modeText}");
-        
+
         // Open Bulk Dispense
-        var showBulkDispenseButton = 
+        var showBulkDispenseButton =
             UiTestRetry
             .Find(
                 () => window
@@ -52,7 +52,7 @@ public class DispenseTest : IDisposable
                 TimeSpan.FromSeconds(10)) as Button;
         showBulkDispenseButton.ShouldNotBeNull();
         showBulkDispenseButton.IsEnabled.ShouldBeTrue($"ShowBulkDispenseButton is disabled! Mode: {modeText}");
-        
+
         if (showBulkDispenseButton.Patterns.Invoke.IsSupported)
         {
             showBulkDispenseButton.Patterns.Invoke.Pattern.Invoke();
@@ -66,7 +66,7 @@ public class DispenseTest : IDisposable
         // Find the BulkDispenseWindow
         var bulkDispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH DISPENSE", TimeSpan.FromSeconds(15));
         bulkDispenseWindow.ShouldNotBeNull();
-        
+
         // Enter dispense quantity
         var firstQuantityBox = UiTestRetry.Find(() =>
         {
@@ -78,12 +78,12 @@ public class DispenseTest : IDisposable
             return box != null && !box.IsOffscreen
                 ? box : (AutomationElement?)null;
         }, TimeSpan.FromSeconds(10)) as TextBox;
-        
+
         firstQuantityBox.ShouldNotBeNull();
         firstQuantityBox.Text = "1";
 
         // Execute Dispense
-        var executeButton = 
+        var executeButton =
             UiTestRetry
             .Find(
                 () => bulkDispenseWindow
@@ -97,7 +97,8 @@ public class DispenseTest : IDisposable
 
         // Verify total decreased
         decimal newAmount = 0;
-        bool success = FlaUI.Core.Tools.Retry.WhileFalse(() => {
+        bool success = FlaUI.Core.Tools.Retry.WhileFalse(() =>
+        {
             var el = window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel();
             newAmount = ParseAmount(el?.Text ?? "");
             return newAmount < initialAmount;
@@ -113,12 +114,12 @@ public class DispenseTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         VerifyComponentStructure(window);
-        
+
         Thread.Sleep(1000);
 
 
         // Find controls with retry
-        var totalAmountText = 
+        var totalAmountText =
             UiTestRetry.Find(
                 () => window
                 .FindFirstDescendant(
@@ -126,7 +127,7 @@ public class DispenseTest : IDisposable
                     .ByAutomationId("TotalAmountText"))
                 ?.AsLabel(),
                 TimeSpan.FromSeconds(10)) as Label;
-        var dispenseBox = 
+        var dispenseBox =
             UiTestRetry
             .Find(
                 () => window
@@ -158,9 +159,9 @@ public class DispenseTest : IDisposable
         decimal initialAmount = ParseAmount(totalAmountText.Text);
         var initialHistoryCount = historyListBox?.Items.Length ?? 0;
 
-        var dispenseAmount = 123m; 
+        var dispenseAmount = 123m;
         Console.WriteLine($"Entering amount: {dispenseAmount}");
-        
+
         dispenseBox.Focus();
         if (dispenseBox.Patterns.Value.IsSupported)
         {
@@ -170,10 +171,10 @@ public class DispenseTest : IDisposable
         {
             dispenseBox.Text = dispenseAmount.ToString();
         }
-        
+
         var initialDispenseText = dispenseBox.Text;
         Console.WriteLine($"Box text after entry: '{initialDispenseText}'");
-        
+
         Console.WriteLine("Invoking dispense button...");
         dispenseButton.Click();
 
@@ -183,15 +184,16 @@ public class DispenseTest : IDisposable
         // Wait for history update
         FlaUI.Core.Tools.Retry.WhileFalse(() => (historyListBox?.Items.Length ?? 0) > initialHistoryCount, TimeSpan.FromSeconds(5));
         Console.WriteLine($"History count after: {historyListBox?.Items.Length}");
-        
+
         historyListBox?.Items.Length.ShouldBe(initialHistoryCount + 1);
-        
+
         var lastEntry = historyListBox?.Items[0];
         var entryText =
             string
             .Join(" ",
                 lastEntry?.FindAllDescendants()
-                .Select(e => {
+                .Select(e =>
+                {
                     try { return e.AsLabel()?.Text ?? ""; }
                     catch { return ""; }
                 })
@@ -202,16 +204,17 @@ public class DispenseTest : IDisposable
         // Wait for update with re-finding
         var expectedAmount = initialAmount - dispenseAmount;
         decimal finalAmount = 0;
-        FlaUI.Core.Tools.Retry.WhileFalse(() => {
+        FlaUI.Core.Tools.Retry.WhileFalse(() =>
+        {
             var el = window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel();
             finalAmount = ParseAmount(el?.Text ?? "");
             return finalAmount == expectedAmount;
         }, TimeSpan.FromSeconds(10));
-        
+
         Console.WriteLine($"Initial: {initialAmount}, Expected: {expectedAmount}, Final Amount: {finalAmount}");
         finalAmount.ShouldBe(expectedAmount);
     }
-    
+
     /// <summary>払出金額入力欄のバリデーションを検証する。</summary>
     /// <summary>無効な払出金額（文字やマイナス値）が入力された場合に、払出ボタンが適切に制御されることを検証する。</summary>
     [Fact]
