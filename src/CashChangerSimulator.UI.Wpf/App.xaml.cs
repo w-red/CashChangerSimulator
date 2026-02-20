@@ -31,6 +31,7 @@ public partial class App : Application
 
             DIContainer.Initialize();
             var mainWindow = new MainWindow();
+            this.MainWindow = mainWindow;
             mainWindow.Show();
         }
         catch (Exception ex)

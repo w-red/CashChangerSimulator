@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CashChangerSimulator.UI.Wpf"
+             xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -11,6 +13,14 @@
             </ResourceDictionary.MergedDictionaries>
 
             <materialDesign:SnackbarMessageQueue x:Key="MainMessageQueue" />
+
+            <conv:CashStatusToBrushConverter x:Key="StatusBrushConv" />
+            <conv:TransactionTypeToSymbolConverter x:Key="TypeSymbolConv" />
+            <conv:InvertedBooleanToVisibilityConverter x:Key="InvertedVisibilityConv" />
+            <conv:InverseBooleanConverter x:Key="InverseBoolConverter" />
+            <conv:DepositModeBackgroundConverter x:Key="DepositModeBackgroundConv" />
+            <BooleanToVisibilityConverter x:Key="VisibilityConv" />
+
 
             <!-- Color Palette -->
             <Color x:Key="BackgroundColor">#121212</Color>

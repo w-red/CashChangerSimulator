@@ -5,7 +5,6 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using MicroResolver;
-using Microsoft.Extensions.Logging;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -32,6 +31,7 @@ public static class DIContainer
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
+        resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
 
         // ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
@@ -39,6 +39,12 @@ public static class DIContainer
         // Compilation
         resolver.Compile();
         _resolver = resolver;
+
+        // Populate ServiceLocator for cross-project singleton sharing
+        CashChangerSimulator.Core.ServiceLocator.Inventory = _resolver.Resolve<Inventory>();
+        CashChangerSimulator.Core.ServiceLocator.History = _resolver.Resolve<TransactionHistory>();
+        CashChangerSimulator.Core.ServiceLocator.Manager = _resolver.Resolve<CashChangerManager>();
+        CashChangerSimulator.Core.ServiceLocator.HardwareStatusManager = _resolver.Resolve<HardwareStatusManager>();
         
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();

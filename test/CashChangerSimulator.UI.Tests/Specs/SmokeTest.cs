@@ -18,7 +18,7 @@ public class SmokeTest : IDisposable
     {
         var window = _app.MainWindow;
         Assert.NotNull(window);
-        Assert.Equal("Cash Changer Simulator v1.1.0", window.Title);
+        Assert.Equal("Cash Changer Simulator v1.1.0 (Componentized)", window.Title);
     }
     
     /// <summary>合計金額のラベルが表示されていることを検証する。</summary>

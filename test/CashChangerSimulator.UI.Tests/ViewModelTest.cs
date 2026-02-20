@@ -18,7 +18,7 @@ public class ViewModelTest
         // Setup
         var mockInventory = new Mock<Inventory>();
         mockInventory.Setup(i => i.Changed).Returns(Observable.Empty<DenominationKey>());
-        mockInventory.Setup(i => i.CalculateTotal()).Returns(0m);
+        mockInventory.Setup(i => i.CalculateTotal(It.IsAny<string>())).Returns(0m);
 
         var mockHistory = new Mock<TransactionHistory>();
         mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
@@ -36,7 +36,8 @@ public class ViewModelTest
         var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object);
 
         var realHardware = new HardwareStatusManager();
-        var depositController = new DepositController(mockInventory.Object, mockManager.Object);
+        var depositController = new DepositController(mockInventory.Object);
+        var dispenseController = new DispenseController(mockManager.Object);
         
         var vm = new MainViewModel(
             mockInventory.Object,
@@ -47,16 +48,20 @@ public class ViewModelTest
             realConfig,
             realMetadata,
             realHardware,
-            depositController)
+            depositController,
+            dispenseController)
         {
             // Dispense 1000
-            DispenseAmountInput = { Value = "1000" }
+            Deposit = { IsInDepositMode = { Value = false } } // Ensure not in deposit mode
         };
-        vm.DispenseCommand.Execute(Unit.Default);
+        // Initialize sub-viewmodel property
+        vm.Dispense.DispenseAmountInput.Value = "1000";
+
+        vm.Dispense.DispenseCommand.Execute(Unit.Default);
         
         // Verify
-        mockManager.Verify(m => m.Dispense(1000m), Times.Once);
-        vm.DispenseAmountInput.Value.ShouldBe("");
+        mockManager.Verify(m => m.Dispense(1000m, "JPY"), Times.Once);
+        vm.Dispense.DispenseAmountInput.Value.ShouldBe("");
     }
 
 }
