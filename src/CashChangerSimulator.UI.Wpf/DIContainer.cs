@@ -57,9 +57,6 @@ public static class DIContainer
         simSettings.DelayEnabled = simConfig.DelayEnabled;
         simSettings.MinDelayMs = simConfig.MinDelayMs;
         simSettings.MaxDelayMs = simConfig.MaxDelayMs;
-        simSettings.RandomErrorsEnabled = simConfig.RandomErrorsEnabled;
-        simSettings.ErrorRate = simConfig.ErrorRate;
-        simSettings.ValidationFailureRate = simConfig.ValidationFailureRate;
 
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();

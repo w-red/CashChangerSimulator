@@ -147,19 +147,6 @@
                                     Style="{StaticResource ModernTextBoxStyle}"
                                     Margin="0,0,16,0"/>
                             </StackPanel>
-                            <Separator
-                                Background="#1AFFFFFF"
-                                Margin="0,16"/>
-                            <CheckBox
-                                Content="Fault Injection"
-                                IsChecked="{Binding UseRandomErrors}"
-                                Style="{StaticResource ToggleSwitchStyle}"
-                                Margin="0,0,0,16"/>
-                            <TextBox
-                                materialDesign:HintAssist.Hint="Error Rate (%)"
-                                Text="{Binding ErrorRate}"
-                                IsEnabled="{Binding UseRandomErrors}"
-                                Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
