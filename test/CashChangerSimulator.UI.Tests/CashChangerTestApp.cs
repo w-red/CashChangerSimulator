@@ -78,13 +78,7 @@ public class CashChangerTestApp : IDisposable
                 catch { }
             }
             return null;
-        }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500)).Result;
-
-        if (MainWindow == null)
-        {
-            throw new Exception("Main window 'Cash Changer Simulator' not found after 30 seconds.");
-        }
-
+        }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500)).Result ?? throw new Exception("Main window 'Cash Changer Simulator' not found after 30 seconds.");
         MainWindow.WaitUntilClickable(TimeSpan.FromSeconds(10));
         MainWindow.SetForeground();
     }
@@ -120,5 +114,6 @@ public class CashChangerTestApp : IDisposable
 
         // Final pause to let the OS/UIA clean up traces
         Thread.Sleep(1000);
+        GC.SuppressFinalize(this);
     }
 }

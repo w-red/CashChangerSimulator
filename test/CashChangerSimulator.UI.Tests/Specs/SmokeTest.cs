@@ -32,5 +32,6 @@ public class SmokeTest : IDisposable
     public void Dispose()
     {
         _app.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

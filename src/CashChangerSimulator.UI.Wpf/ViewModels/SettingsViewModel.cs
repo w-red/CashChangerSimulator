@@ -240,6 +240,7 @@ public class SettingsViewModel : IDisposable
     public void Dispose()
     {
         _disposables.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>入力値の整合性を検証する。</summary>
