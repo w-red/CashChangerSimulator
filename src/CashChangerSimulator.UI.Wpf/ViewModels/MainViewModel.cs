@@ -59,8 +59,8 @@ public class MainViewModel : IDisposable
         GlobalModeName = Deposit.CurrentModeName
             .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) => 
             {
-                if (dispenseMode == "Busy") return "DISPENSING (出金中)";
-                return depositMode;
+                return dispenseMode == "Busy"
+                    ? "DISPENSING (出金中)" : depositMode;
             })
             .ToBindableReactiveProperty("IDLE (待機中)")
             .AddTo(_disposables);
