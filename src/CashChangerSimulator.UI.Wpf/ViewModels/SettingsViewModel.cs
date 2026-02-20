@@ -195,6 +195,20 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         config.Simulation.RandomErrorsEnabled = UseRandomErrors;
         config.Simulation.ErrorRate = ErrorRate;
 
+        try
+        {
+            var simSettings = DIContainer.Resolve<SimulationSettings>();
+            simSettings.DelayEnabled = UseDelay;
+            simSettings.MinDelayMs = MinDelay;
+            simSettings.MaxDelayMs = MaxDelay;
+            simSettings.RandomErrorsEnabled = UseRandomErrors;
+            simSettings.ErrorRate = ErrorRate;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogWarning(ex, $"Could not update DI singleton SimulationSettings array. This might require restart to take effect.");
+        }
+
         if (!config.Inventory.ContainsKey(config.CurrencyCode))
         {
             config.Inventory[config.CurrencyCode] = new InventorySettings();

@@ -41,6 +41,23 @@ public class DispenseViewModel : IDisposable
         _controller = controller;
         _configProvider = configProvider;
 
+        // Phase 18: UI Alignment
+        // Expose Status for UI State switching
+        Status = _controller.Changed
+            .Select(_ => _controller.Status)
+            .ToBindableReactiveProperty(_controller.Status)
+            .AddTo(_disposables);
+
+        IsBusy = Status
+            .Select(s => s == CashDispenseStatus.Busy)
+            .ToBindableReactiveProperty(false)
+            .AddTo(_disposables);
+
+        StatusName = Status
+            .Select(s => s.ToString())
+            .ToBindableReactiveProperty(Status.Value.ToString())
+            .AddTo(_disposables);
+
         TotalAmount = new BindableReactiveProperty<decimal>(_inventory.CalculateTotal(_configProvider.Config.CurrencyCode)).AddTo(_disposables);
         _inventory.Changed
             .Subscribe(key =>
@@ -75,7 +92,7 @@ public class DispenseViewModel : IDisposable
         DispenseCommand = DispenseAmountInput
             .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
             .CombineLatest(isInDepositMode, (canDispenseInput, mode) => canDispenseInput && !mode)
-            .CombineLatest(_controller.Changed.Select(_ => !_controller.IsBusy).Prepend(!_controller.IsBusy), (can, notBusy) => can && notBusy)
+            .CombineLatest(IsBusy, (can, busy) => can && !busy)
             .ToReactiveCommand()
             .AddTo(_disposables);
             
@@ -91,7 +108,7 @@ public class DispenseViewModel : IDisposable
         // Bulk Dispense
         ShowBulkDispenseCommand = isInDepositMode
             .CombineLatest(isJammed, (inDeposit, jammed) => !inDeposit && !jammed)
-            .CombineLatest(_controller.Changed.Select(_ => !_controller.IsBusy).Prepend(!_controller.IsBusy), (can, notBusy) => can && notBusy)
+            .CombineLatest(IsBusy, (can, busy) => can && !busy)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
@@ -111,13 +128,30 @@ public class DispenseViewModel : IDisposable
 
         CancelBulkDispenseCommand = new ReactiveCommand().AddTo(_disposables);
         CancelBulkDispenseCommand.Subscribe(_ => { });
+
+        ClearErrorCommand = Status
+            .Select(s => s == CashDispenseStatus.Error)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+            
+        ClearErrorCommand.Subscribe(_ => _controller.ClearError());
+
+        DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
     }
+
+    // Phase 18: Properties
+    public BindableReactiveProperty<CashDispenseStatus> Status { get; }
+    public BindableReactiveProperty<string> StatusName { get; }
+    public BindableReactiveProperty<bool> IsBusy { get; }
+    public BindableReactiveProperty<decimal> DispensingAmount { get; } // For display
+    public ReactiveCommand ClearErrorCommand { get; }
 
     private void DispenseCash(decimal amount)
     {
         try
         {
-            _manager.Dispense(amount, _configProvider.Config.CurrencyCode);
+            DispensingAmount.Value = amount;
+            _ = _controller.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.CurrencyCode);
         }
         catch (Exception ex)
         {
@@ -144,7 +178,9 @@ public class DispenseViewModel : IDisposable
         {
             try
             {
-                _manager.Dispense(counts);
+                var total = counts.Sum(x => x.Key.Value * x.Value);
+                DispensingAmount.Value = total;
+                _ = _controller.DispenseCashAsync(counts, true, (code, ext) => { });
             }
             catch (Exception ex)
             {

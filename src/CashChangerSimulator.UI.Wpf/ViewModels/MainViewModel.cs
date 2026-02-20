@@ -55,7 +55,18 @@ public class MainViewModel : IDisposable
             hardwareStatusManager.IsJammed, 
             () => Inventory.Denominations)
             .AddTo(_disposables);
+
+        GlobalModeName = Deposit.CurrentModeName
+            .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) => 
+            {
+                if (dispenseMode == "Busy") return "DISPENSING (出金中)";
+                return depositMode;
+            })
+            .ToBindableReactiveProperty("IDLE (待機中)")
+            .AddTo(_disposables);
     }
+
+    public BindableReactiveProperty<string> GlobalModeName { get; }
 
     public void Dispose()
     {

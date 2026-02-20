@@ -9,38 +9,102 @@
              d:DataContext="{d:DesignInstance Type=vm:DispenseViewModel}"
              AutomationProperties.AutomationId="DispenseComponent">
     <Border Style="{StaticResource CardStyle}">
-        <StackPanel>
-            <TextBlock Text="DISPENSE TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
-            
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Grid>
+            <!-- Idle View -->
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusName.Value}" Value="Idle">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
                 
-                <TextBox Grid.Column="0" 
-                         materialDesign:HintAssist.Hint="Enter amount"
-                         Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
-                         Style="{StaticResource ModernTextBoxStyle}"
-                         FontSize="20" FontWeight="Light"
-                         AutomationProperties.AutomationId="DispenseBox"/>
+                <TextBlock Text="DISPENSE TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
-                    <Button Style="{StaticResource ModernActionButtonStyle}" 
-                            Command="{Binding ShowBulkDispenseCommand}" 
-                            ToolTip="Bulk Dispense"
-                            Margin="0,0,8,0" VerticalAlignment="Center"
-                            AutomationProperties.AutomationId="BulkDispenseShowButton">
-                        <materialDesign:PackIcon Kind="PlaylistCheck" />
-                    </Button>
-                    <Button Style="{StaticResource ModernActionButtonStyle}" 
-                            Command="{Binding DispenseCommand}" 
-                            VerticalAlignment="Center"
-                            AutomationProperties.AutomationId="DispenseButton">
-                        <materialDesign:PackIcon Kind="ChevronRight" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0" 
+                             materialDesign:HintAssist.Hint="Enter amount"
+                             Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             FontSize="20" FontWeight="Light"
+                             AutomationProperties.AutomationId="DispenseBox"/>
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
+                        <Button Style="{StaticResource ModernActionButtonStyle}" 
+                                Command="{Binding ShowBulkDispenseCommand}" 
+                                ToolTip="Bulk Dispense"
+                                Margin="0,0,8,0" VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="BulkDispenseShowButton">
+                            <materialDesign:PackIcon Kind="PlaylistCheck" />
+                        </Button>
+                        <Button Style="{StaticResource ModernActionButtonStyle}" 
+                                Command="{Binding DispenseCommand}" 
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="DispenseButton">
+                            <materialDesign:PackIcon Kind="ChevronRight" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- Busy View -->
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusName.Value}" Value="Busy">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                
+                <TextBlock Text="DISPENSE TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,16">
+                    <TextBlock Text="DISPENSING..." FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding DispensingAmount.Value, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Thin" HorizontalAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True" Margin="0,16" Width="200" Height="4" Foreground="{StaticResource PrimaryBrush}" BorderThickness="0" Background="Transparent"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Error View -->
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusName.Value}" Value="Error">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                
+                <TextBlock Text="DISPENSE TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,8">
+                    <materialDesign:PackIcon Kind="AlertCircle" Width="48" Height="48" Foreground="Red" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <TextBlock Text="DISPENSE ERROR" FontSize="20" FontWeight="Bold" Foreground="Red" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Hardware check required." FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,8"/>
+                    <Button Command="{Binding ClearErrorCommand}" Style="{StaticResource ModernFlatButtonStyle}" Foreground="Red" Margin="0,8">
+                         <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" />
+                            <TextBlock Text="CLEAR ERROR" />
+                        </StackPanel>
                     </Button>
                 </StackPanel>
-            </Grid>
-        </StackPanel>
+            </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
