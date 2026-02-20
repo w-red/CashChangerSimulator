@@ -13,11 +13,16 @@ public class MainViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
 
+    /// <summary>入金管理用の ViewModel。</summary>
     public DepositViewModel Deposit { get; }
+    /// <summary>出金管理用の ViewModel。</summary>
     public DispenseViewModel Dispense { get; }
+    /// <summary>在庫管理用の ViewModel。</summary>
     public InventoryViewModel Inventory { get; }
+    /// <summary>POS取引モード用の ViewModel。</summary>
     public PosTransactionViewModel PosTransaction { get; }
 
+    /// <summary>現在の UI 動作モード。</summary>
     public BindableReactiveProperty<UIMode> CurrentUIMode { get; }
 
     public MainViewModel(
@@ -92,8 +97,10 @@ public class MainViewModel : IDisposable
             .AddTo(_disposables);
     }
 
+    /// <summary>全体的な動作状態の表示名。</summary>
     public BindableReactiveProperty<string> GlobalModeName { get; }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

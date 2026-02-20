@@ -25,7 +25,7 @@ public class DepositTest : IDisposable
         window.ShouldNotBeNull();
         window.SetForeground();
         VerifyComponentStructure(window);
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
 
         // 1. Get initial total
@@ -41,7 +41,7 @@ public class DepositTest : IDisposable
         // var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
         // bulkButton.ShouldNotBeNull();
         // bulkButton.Click();
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         // Find the BulkInsertWindow
         var bulkInsertWindow =
@@ -68,7 +68,7 @@ public class DepositTest : IDisposable
         var executeButton = FindElement(bulkInsertWindow, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
-        Thread.Sleep(1000); // Allow window to close and logic to execute
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs); // Allow window to close and logic to execute
 
         // 4. Verify Current Deposit Amount updates
         var currentDepositText = FindElement(window, "CurrentDepositText", null)?.AsLabel();
@@ -81,7 +81,7 @@ public class DepositTest : IDisposable
         var fixButton = FindElement(window, "FixDepositButton", "FINISH")?.AsButton();
         fixButton.ShouldNotBeNull();
         fixButton.Click();
-        Thread.Sleep(500); // Allow mode transition
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs); // Allow mode transition
 
         // 6. Click "STORE"
         var storeButton = FindElement(window, "StoreDepositButton", "STORE")?.AsButton();
@@ -135,7 +135,7 @@ public class DepositTest : IDisposable
         var executeButton = FindElement(bulkInsertWindow, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
-        Thread.Sleep(1000); // Wait for logic and window close
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs); // Wait for logic and window close
 
         // Verify Current Deposit Amount
         var currentDepositText = FindElement(window, "CurrentDepositText", null)?.AsLabel();
@@ -157,7 +157,7 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         // Close the Bulk Insert Window that opens automatically
         var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(5));
@@ -165,7 +165,7 @@ public class DepositTest : IDisposable
         {
             var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
             cancelButton?.Click();
-            Thread.Sleep(500);
+            Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
         }
 
         // 2. Wait for Mode Indicator to become COUNTING
@@ -186,7 +186,7 @@ public class DepositTest : IDisposable
                 TimeSpan.FromSeconds(10)) as Button;
         pauseButton.ShouldNotBeNull();
         pauseButton.Click();
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
         // 4. Wait for Mode Indicator to become PAUSED
         Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("PAUSED") ?? false), TimeSpan.FromSeconds(10));
@@ -203,7 +203,7 @@ public class DepositTest : IDisposable
                 TimeSpan.FromSeconds(10)) as Button;
         resumeButton.ShouldNotBeNull();
         resumeButton.Click();
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
         // 6. Wait for Mode Indicator to return to COUNTING
         Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), TimeSpan.FromSeconds(10));
@@ -250,7 +250,7 @@ public class DepositTest : IDisposable
             ?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
 
         // Click "RETURN"
@@ -264,7 +264,7 @@ public class DepositTest : IDisposable
         repayButton.Click();
 
         // Total should stay same
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
         decimal finalTotal =
             ParseAmount(
                 totalAmountText?.Text ?? "0");
@@ -279,7 +279,7 @@ public class DepositTest : IDisposable
         window.ShouldNotBeNull();
         window.SetForeground();
         VerifyComponentStructure(window);
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
 
         // 1. Begin Deposit
@@ -291,7 +291,7 @@ public class DepositTest : IDisposable
             ?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         // Close the Bulk Insert Window that opens automatically
         var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
@@ -299,11 +299,11 @@ public class DepositTest : IDisposable
         {
             var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
             cancelButton?.Click();
-            Thread.Sleep(1000);
+            Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
         }
 
         window.SetForeground();
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
         // 2. Click "SIMULATE OVERLAP"
         var overlapButton =
@@ -321,7 +321,7 @@ public class DepositTest : IDisposable
         overlapButton.ShouldNotBeNull();
         overlapButton.Click();
 
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         // 3. Verify VAL ERROR indicator appears
         var errorIndicator =
@@ -338,7 +338,7 @@ public class DepositTest : IDisposable
                 cf => cf.ByAutomationId("FixDepositButton"));
         finishButton.ShouldNotBeNull();
         finishButton.Click();
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
         // Verify VAL ERROR indicator still exists
         window
@@ -354,7 +354,7 @@ public class DepositTest : IDisposable
 
         repayButton.ShouldNotBeNull();
         repayButton.Click();
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         // Error indicator should be gone
         window

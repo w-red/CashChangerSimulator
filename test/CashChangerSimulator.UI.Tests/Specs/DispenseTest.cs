@@ -24,7 +24,7 @@ public class DispenseTest : IDisposable
         window.ShouldNotBeNull();
         window.SetForeground();
         VerifyComponentStructure(window);
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
 
         var totalAmountText =
@@ -61,7 +61,7 @@ public class DispenseTest : IDisposable
         {
             showBulkDispenseButton.Click();
         }
-        Thread.Sleep(2000); // Wait for window to open
+        Thread.Sleep(DepositTestTimings.WindowPopupDelayMs); // Wait for window to open
 
         // Find the BulkDispenseWindow
         var bulkDispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH DISPENSE", TimeSpan.FromSeconds(15));
@@ -93,7 +93,7 @@ public class DispenseTest : IDisposable
                 TimeSpan.FromSeconds(10)) as Button;
         executeButton.ShouldNotBeNull();
         executeButton.Click();
-        Thread.Sleep(1000); // Allow window to close and logic to execute
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs); // Allow window to close and logic to execute
 
         // Verify total decreased
         decimal newAmount = 0;
@@ -115,7 +115,7 @@ public class DispenseTest : IDisposable
         window.ShouldNotBeNull();
         VerifyComponentStructure(window);
 
-        Thread.Sleep(1000);
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
 
         // Find controls with retry
@@ -228,7 +228,7 @@ public class DispenseTest : IDisposable
 
         dispenseBox.Focus();
         dispenseBox.Text = "abc";
-        Thread.Sleep(500);
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
         dispenseBox.Text.ShouldBe("abc");
     }
 

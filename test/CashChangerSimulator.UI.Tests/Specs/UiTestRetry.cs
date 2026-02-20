@@ -23,7 +23,7 @@ public static class UiTestRetry
             result = func();
             return result == null;
         }, timeout);
-        return result!;
+        return result;
     }
 
     /// <summary>
@@ -39,10 +39,8 @@ public static class UiTestRetry
     {
         Window? result = null;
         var processId = app.ProcessId;
-        int counter = 0;
         FlaUI.Core.Tools.Retry.WhileTrue(() =>
         {
-            counter++;
             // Try 1: App top level windows and their direct children (WPF Ownership often puts windows as children)
             try
             {
@@ -74,7 +72,7 @@ public static class UiTestRetry
                 var windows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
 
                 result = windows.FirstOrDefault(w =>
-                    (w.Properties.ProcessId == processId || true) && // Relax PID for fallback
+                    w.Properties.ProcessId == processId &&
                     (w.AutomationId == title || (w.Name != null && w.Name.Contains(title))))?.AsWindow();
             }
             catch { }
@@ -98,6 +96,6 @@ public static class UiTestRetry
             catch { }
         }
 
-        return result!;
+        return result;
     }
 }

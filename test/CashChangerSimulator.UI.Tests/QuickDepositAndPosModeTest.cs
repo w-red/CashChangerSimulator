@@ -10,6 +10,7 @@ using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Tests;
 
+/// <summary>クイック入金と POS 取引モードの連動を検証するテストクラス。</summary>
 public class QuickDepositAndPosModeTest
 {
     private readonly Mock<Inventory> _mockInventory;

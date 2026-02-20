@@ -5,6 +5,7 @@ using System.Windows.Media;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
+/// <summary>在庫ステータスを対応する色（Brush）に変換するコンバーター。</summary>
 public class CashStatusToBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

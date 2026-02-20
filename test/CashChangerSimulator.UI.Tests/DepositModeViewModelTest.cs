@@ -9,6 +9,7 @@ using R3;
 
 namespace CashChangerSimulator.UI.Tests;
 
+/// <summary>入金モードの ViewModel 動作をシミュレートして検証するテストクラス。</summary>
 public class DepositModeViewModelTest
 {
     private readonly Mock<Inventory> _mockInventory;

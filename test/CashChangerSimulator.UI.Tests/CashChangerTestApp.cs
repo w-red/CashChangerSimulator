@@ -8,6 +8,7 @@ using System.Reflection;
 
 namespace CashChangerSimulator.UI.Tests;
 
+/// <summary>UI テスト用のヘルパークラス。App インスタンスの管理や画面操作の抽象化を担当する。</summary>
 public class CashChangerTestApp : IDisposable
 {
     public Application Application { get; private set; } = null!;

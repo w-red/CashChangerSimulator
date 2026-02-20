@@ -9,11 +9,16 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 public class DenominationViewModel
 {
     private readonly Inventory _inventory;
+    /// <summary>金種キー。</summary>
     public DenominationKey Key { get; }
+    /// <summary>表示名。</summary>
     public string Name { get; }
     private readonly BindableReactiveProperty<int> _count;
+    /// <summary>現在の在庫枚数。</summary>
     public BindableReactiveProperty<int> Count { get; }
+    /// <summary>現在の在庫ステータス。</summary>
     public BindableReactiveProperty<CashStatus> Status { get; }
+    /// <summary>現在この金種を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
     public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
