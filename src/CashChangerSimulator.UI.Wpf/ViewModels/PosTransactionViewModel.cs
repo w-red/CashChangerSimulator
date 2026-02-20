@@ -6,17 +6,6 @@ using System.Linq;
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
 /// <summary>
-/// POS取引モードの状態を表す列挙型。
-/// </summary>
-public enum PosTransactionStatus
-{
-    Idle,
-    WaitingForCash,
-    DispensingChange,
-    Completed
-}
-
-/// <summary>
 /// POS取引（支払い、お釣り払い出し）フローを管理する ViewModel。
 /// </summary>
 public class PosTransactionViewModel : IDisposable
@@ -142,5 +131,6 @@ public class PosTransactionViewModel : IDisposable
     public void Dispose()
     {
         _disposables.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
