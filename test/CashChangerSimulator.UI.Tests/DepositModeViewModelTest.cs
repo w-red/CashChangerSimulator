@@ -6,7 +6,6 @@ using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.PointOfService;
 using Moq;
 using R3;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests;
 
@@ -16,6 +15,7 @@ public class DepositModeViewModelTest
     private readonly Mock<TransactionHistory> _mockHistory;
     private readonly Mock<CashChangerManager> _mockManager;
     private readonly DepositController _depositController;
+    private readonly DispenseController _dispenseController;
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly DenominationKey _testKey = new(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill);
@@ -34,7 +34,8 @@ public class DepositModeViewModelTest
 
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object);
         var hardwareManager = new HardwareStatusManager();
-        _depositController = new DepositController(_mockInventory.Object, _mockManager.Object, configProvider.Config.Simulation, hardwareManager);
+        _depositController = new DepositController(_mockInventory.Object, configProvider.Config.Simulation, hardwareManager);
+        _dispenseController = new DispenseController(_mockManager.Object, configProvider.Config.Simulation, hardwareManager);
 
         _metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
@@ -49,7 +50,8 @@ public class DepositModeViewModelTest
             configProvider,
             _metadataProvider,
             hardwareManager,
-            _depositController);
+            _depositController,
+            _dispenseController);
     }
 
     [Fact]
@@ -81,27 +83,27 @@ public class DepositModeViewModelTest
     public void MainViewModel_CurrentModeName_ShouldReflectTransitions()
     {
         // Initial
-        Assert.Contains("IDLE", _mainViewModel.CurrentModeName.CurrentValue);
+        Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
 
         // Start
         _depositController.BeginDeposit();
-        Assert.Contains("COUNTING", _mainViewModel.CurrentModeName.CurrentValue);
+        Assert.Contains("COUNTING", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
 
         // Pause
-        _mainViewModel.PauseDepositCommand.Execute(Unit.Default);
-        Assert.Contains("PAUSED", _mainViewModel.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.PauseDepositCommand.Execute(Unit.Default);
+        Assert.Contains("PAUSED", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
 
         // Resume
-        _mainViewModel.ResumeDepositCommand.Execute(Unit.Default);
-        Assert.Contains("COUNTING", _mainViewModel.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.ResumeDepositCommand.Execute(Unit.Default);
+        Assert.Contains("COUNTING", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
 
         // Fix
-        _mainViewModel.FixDepositCommand.Execute(Unit.Default);
-        Assert.Contains("FIXED", _mainViewModel.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.FixDepositCommand.Execute(Unit.Default);
+        Assert.Contains("FIXED", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
 
         // End
-        _mainViewModel.StoreDepositCommand.Execute(Unit.Default);
-        Assert.Contains("IDLE", _mainViewModel.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.StoreDepositCommand.Execute(Unit.Default);
+        Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
     }
 }
 

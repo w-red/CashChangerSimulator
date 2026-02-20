@@ -1,0 +1,197 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Controls.InventoryControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CashChangerSimulator.UI.Wpf.Controls"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:InventoryViewModel}"
+             AutomationProperties.AutomationId="InventoryComponent">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="340" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- Inventory Grid Area (Left) -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
+            <ItemsControl ItemsSource="{Binding Denominations}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="175" Height="190" Margin="0,0,16,16" Padding="0" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="15" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
+                            </Border.Effect>
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                            </Border.RenderTransform>
+                             <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAcceptingCash.Value}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                                        To="{StaticResource PrimaryColor}" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                                         To="0.6" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                                        To="Transparent" Duration="0:0:0.2" />
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                                         To="0" Duration="0:0:0.2" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.2" />
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.2" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2" />
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Margin="16,16,16,0">
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="10" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                    </Grid>
+                                     <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="8" 
+                                                 Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" Background="#15FFFFFF" BorderThickness="0"
+                                                 materialDesign:TransitionAssist.DisableTransitions="False"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="1" Text="{Binding Count.Value}" FontSize="48" FontWeight="Thin" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Status & History Sidebar (Right) -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            
+            <!-- Status Indicators -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16" Padding="16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+                        <Border Background="OrangeRed" 
+                                CornerRadius="12" Padding="12,4" Margin="0,0,8,0"
+                                Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
+                            <TextBlock Text="VAL ERROR" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                        </Border>
+                        <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" 
+                                CornerRadius="12" Padding="12,4" Margin="0,0,8,0">
+                            <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                        </Border>
+                        <Border Background="{Binding FullStatus.Value, Converter={StaticResource StatusBrushConv}}" 
+                                CornerRadius="12" Padding="12,4">
+                            <TextBlock Text="{Binding FullStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                        </Border>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
+                                      IsChecked="{Binding IsJammed.Value}"
+                                      ToolTip="Simulate Mechanical Jam"
+                                      Margin="0,0,8,0">
+                            <ToggleButton.Content>
+                                <materialDesign:PackIcon Kind="CarBrakeAlert" />
+                            </ToggleButton.Content>
+                            <materialDesign:ToggleButtonAssist.OnContent>
+                                <materialDesign:PackIcon Kind="CarBrakeAlert" />
+                            </materialDesign:ToggleButtonAssist.OnContent>
+                        </ToggleButton>
+
+                        <Button Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding OpenSettingsCommand}"
+                                ToolTip="System Settings"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource PrimaryBrush}">
+                            <materialDesign:PackIcon Kind="Settings" Foreground="{StaticResource PrimaryBrush}"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Activity Feed -->
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="ACTIVITY FEED" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    
+                    <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0"
+                             AutomationProperties.AutomationId="HistoryListBox">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Padding" Value="0,8"/>
+                                <Setter Property="Margin" Value="0,0,0,8"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <materialDesign:PackIcon Kind="{Binding Type, Converter={StaticResource TypeSymbolConv}}" 
+                                                             Foreground="{StaticResource PrimaryBrush}" 
+                                                             Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                    
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Type}" FontSize="13" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="11" Opacity="0.6"/>
+                                    </StackPanel>
+                                    
+                                    <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat={}{0:N0}}" 
+                                               VerticalAlignment="Center" FontWeight="Bold" FontSize="15" Foreground="{StaticResource PrimaryBrush}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -24,7 +24,9 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
         Thread.Sleep(1000);
+
 
         // 1. Get initial total
         var totalAmountText = FindElement(window, "TotalAmountText", "¥")?.AsLabel();
@@ -100,7 +102,9 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
         
+
         // Start Deposit
         var beginButton =
             FindElement(
@@ -146,6 +150,8 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
+
 
         // 1. Start Deposit
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
@@ -212,6 +218,8 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
+
 
         var totalAmountText = FindElement(window, "TotalAmountText", "¥")?.AsLabel();
         decimal initialTotal = ParseAmount(totalAmountText?.Text ?? "0");
@@ -270,7 +278,9 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
         Thread.Sleep(500);
+
 
         // 1. Begin Deposit
         var beginButton =
@@ -284,13 +294,16 @@ public class DepositTest : IDisposable
         Thread.Sleep(1000);
 
         // Close the Bulk Insert Window that opens automatically
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(5));
+        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
         if (bulkInsertWindow != null)
         {
             var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
             cancelButton?.Click();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
         }
+
+        window.SetForeground();
+        Thread.Sleep(500);
 
         // 2. Click "SIMULATE OVERLAP"
         var overlapButton =
@@ -299,6 +312,12 @@ public class DepositTest : IDisposable
                 "SimulateOverlapButton",
                 "SIMULATE OVERLAP")
             ?.AsButton();
+
+        if (overlapButton == null)
+        {
+            DumpDescendants(window);
+        }
+
         overlapButton.ShouldNotBeNull();
         overlapButton.Click();
 
@@ -345,7 +364,16 @@ public class DepositTest : IDisposable
     }
 
     /// <summary>指定した AutomationId またはテキストを持つ要素を、リトライしながら検索するヘルパーメソッド。</summary>
+    private static void VerifyComponentStructure(Window window)
+    {
+        // These should exist after refactoring as UserControl containers
+        FindElement(window, "DepositComponent", null).ShouldNotBeNull();
+        FindElement(window, "DispenseComponent", null).ShouldNotBeNull();
+        FindElement(window, "InventoryComponent", null).ShouldNotBeNull();
+    }
+
     private static AutomationElement? FindElement(Window? window, string automationId, string? text)
+
     {
         if (window == null) return null;
         var result = UiTestRetry.Find(() => {
@@ -384,6 +412,17 @@ public class DepositTest : IDisposable
         return decimal
             .TryParse(cleaned, out var result)
             ? result : 0;
+    }
+
+    private static void DumpDescendants(AutomationElement element)
+    {
+        Console.WriteLine($"--- DUMPING DESCENDANTS OF {element.Name} (ID: {element.AutomationId}) ---");
+        var descendants = element.FindAllDescendants();
+        foreach (var d in descendants)
+        {
+            Console.WriteLine($"- [{d.ControlType}] Name: '{d.Name}', Id: '{d.AutomationId}', Offscreen: {d.IsOffscreen}");
+        }
+        Console.WriteLine("--- END DUMP ---");
     }
 
     public void Dispose()

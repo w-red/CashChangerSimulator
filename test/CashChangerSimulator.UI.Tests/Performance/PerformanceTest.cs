@@ -3,22 +3,13 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using Microsoft.Extensions.Logging;
 using MoneyKind4Opos.Currencies.Interfaces;
-using System;
 using System.Diagnostics;
 using System.IO;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Performance;
 
-public class PerformanceTest
+public class PerformanceTest(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public PerformanceTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
     [Fact]
     public void BulkTransactionPerformance()
     {
@@ -32,7 +23,7 @@ public class PerformanceTest
         inventory.SetCount(key1000, 10000);
 
         const int iterations = 10000;
-        _output.WriteLine($"Starting bulk dispense test with {iterations} iterations...");
+        output.WriteLine($"Starting bulk dispense test with {iterations} iterations...");
 
         var sw = Stopwatch.StartNew();
         var initialMemory = GC.GetTotalMemory(true);
@@ -45,10 +36,10 @@ public class PerformanceTest
         sw.Stop();
         var finalMemory = GC.GetTotalMemory(true);
 
-        _output.WriteLine($"Completed {iterations} dispense operations.");
-        _output.WriteLine($"Total Time: {sw.ElapsedMilliseconds} ms");
-        _output.WriteLine($"Avg Time per op: {(double)sw.ElapsedMilliseconds / iterations:F4} ms");
-        _output.WriteLine($"Memory Delta: {(finalMemory - initialMemory) / 1024.0:F2} KB");
+        output.WriteLine($"Completed {iterations} dispense operations.");
+        output.WriteLine($"Total Time: {sw.ElapsedMilliseconds} ms");
+        output.WriteLine($"Avg Time per op: {(double)sw.ElapsedMilliseconds / iterations:F4} ms");
+        output.WriteLine($"Memory Delta: {(finalMemory - initialMemory) / 1024.0:F2} KB");
     }
 
     [Fact]
@@ -76,11 +67,11 @@ public class PerformanceTest
         });
         var timeFileLog = MeasureLogTime(iterations, "ZLogger File");
 
-        _output.WriteLine("--- Performance Summary ---");
-        _output.WriteLine($"Iterations: {iterations}");
-        _output.WriteLine($"No Logging: {timeNoLog} ms");
-        _output.WriteLine($"Console Log: {timeConsoleLog} ms");
-        _output.WriteLine($"File Log: {timeFileLog} ms");
+        output.WriteLine("--- Performance Summary ---");
+        output.WriteLine($"Iterations: {iterations}");
+        output.WriteLine($"No Logging: {timeNoLog} ms");
+        output.WriteLine($"Console Log: {timeConsoleLog} ms");
+        output.WriteLine($"File Log: {timeFileLog} ms");
         
         try 
         {
@@ -98,7 +89,7 @@ public class PerformanceTest
             logger.LogInformation("Test log message with index {Index}", i);
         }
         sw.Stop();
-        _output.WriteLine($"{label}: {sw.ElapsedMilliseconds} ms");
+        output.WriteLine($"{label}: {sw.ElapsedMilliseconds} ms");
         return sw.ElapsedMilliseconds;
     }
 }

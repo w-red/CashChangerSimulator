@@ -23,7 +23,9 @@ public class DispenseTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
+        VerifyComponentStructure(window);
         Thread.Sleep(500);
+
 
         var totalAmountText = 
             UiTestRetry.Find(
@@ -110,8 +112,10 @@ public class DispenseTest : IDisposable
     {
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
+        VerifyComponentStructure(window);
         
         Thread.Sleep(1000);
+
 
         // Find controls with retry
         var totalAmountText = 
@@ -174,10 +178,10 @@ public class DispenseTest : IDisposable
         dispenseButton.Click();
 
         // Wait for clear
-        FlaUI.Core.Tools.Retry.WhileTrue(() => dispenseBox.Text == "", TimeSpan.FromSeconds(3));
+        FlaUI.Core.Tools.Retry.WhileFalse(() => dispenseBox.Text == "", TimeSpan.FromSeconds(5));
 
         // Wait for history update
-        FlaUI.Core.Tools.Retry.WhileTrue(() => (historyListBox?.Items.Length ?? 0) > initialHistoryCount, TimeSpan.FromSeconds(3));
+        FlaUI.Core.Tools.Retry.WhileFalse(() => (historyListBox?.Items.Length ?? 0) > initialHistoryCount, TimeSpan.FromSeconds(5));
         Console.WriteLine($"History count after: {historyListBox?.Items.Length}");
         
         historyListBox?.Items.Length.ShouldBe(initialHistoryCount + 1);
@@ -198,7 +202,7 @@ public class DispenseTest : IDisposable
         // Wait for update with re-finding
         var expectedAmount = initialAmount - dispenseAmount;
         decimal finalAmount = 0;
-        FlaUI.Core.Tools.Retry.WhileTrue(() => {
+        FlaUI.Core.Tools.Retry.WhileFalse(() => {
             var el = window.FindFirstDescendant(cf => cf.ByAutomationId("TotalAmountText"))?.AsLabel();
             finalAmount = ParseAmount(el?.Text ?? "");
             return finalAmount == expectedAmount;
@@ -214,7 +218,9 @@ public class DispenseTest : IDisposable
     public void ShouldValidateInput()
     {
         var window = _app.MainWindow;
+        VerifyComponentStructure(window);
         var dispenseBox = UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox(), TimeSpan.FromSeconds(10)) as TextBox;
+
         dispenseBox.ShouldNotBeNull();
 
         dispenseBox.Focus();
@@ -223,7 +229,18 @@ public class DispenseTest : IDisposable
         dispenseBox.Text.ShouldBe("abc");
     }
 
+    private static void VerifyComponentStructure(Window? window)
+    {
+        window.ShouldNotBeNull();
+        // These should exist after refactoring as UserControl containers
+        // We use FindFirstDescendant on the window because elements might be deep
+        window!.FindFirstDescendant(cf => cf.ByAutomationId("DepositComponent")).ShouldNotBeNull();
+        window.FindFirstDescendant(cf => cf.ByAutomationId("DispenseComponent")).ShouldNotBeNull();
+        window.FindFirstDescendant(cf => cf.ByAutomationId("InventoryComponent")).ShouldNotBeNull();
+    }
+
     private static decimal ParseAmount(string text)
+
     {
         if (string.IsNullOrEmpty(text))
         {

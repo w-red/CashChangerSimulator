@@ -1,0 +1,46 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Controls.DispenseControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:DispenseViewModel}"
+             AutomationProperties.AutomationId="DispenseComponent">
+    <Border Style="{StaticResource CardStyle}">
+        <StackPanel>
+            <TextBlock Text="DISPENSE TERMINAL" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBox Grid.Column="0" 
+                         materialDesign:HintAssist.Hint="Enter amount"
+                         Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         FontSize="20" FontWeight="Light"
+                         AutomationProperties.AutomationId="DispenseBox"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
+                    <Button Style="{StaticResource ModernActionButtonStyle}" 
+                            Command="{Binding ShowBulkDispenseCommand}" 
+                            ToolTip="Bulk Dispense"
+                            Margin="0,0,8,0" VerticalAlignment="Center"
+                            AutomationProperties.AutomationId="BulkDispenseShowButton">
+                        <materialDesign:PackIcon Kind="PlaylistCheck" />
+                    </Button>
+                    <Button Style="{StaticResource ModernActionButtonStyle}" 
+                            Command="{Binding DispenseCommand}" 
+                            VerticalAlignment="Center"
+                            AutomationProperties.AutomationId="DispenseButton">
+                        <materialDesign:PackIcon Kind="ChevronRight" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>
