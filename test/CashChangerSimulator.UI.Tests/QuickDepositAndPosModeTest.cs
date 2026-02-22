@@ -35,8 +35,8 @@ public class QuickDepositAndPosModeTest
 
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object);
         var hardwareManager = new HardwareStatusManager();
-        _depositController = new DepositController(_mockInventory.Object, configProvider.Config.Simulation, hardwareManager);
-        _dispenseController = new DispenseController(_mockManager.Object, configProvider.Config.Simulation, hardwareManager);
+        _depositController = new DepositController(_mockInventory.Object, hardwareManager);
+        _dispenseController = new DispenseController(_mockManager.Object, hardwareManager);
 
         _metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);

@@ -123,7 +123,7 @@ public class SettingsViewModel : IDisposable
         NearEmpty.Value = config.Thresholds.NearEmpty;
         NearFull.Value = config.Thresholds.NearFull;
         Full.Value = config.Thresholds.Full;
-        ActiveUIMode.Value = config.Simulation.UIMode;
+        ActiveUIMode.Value = config.UIMode;
 
         DenominationSettings.Clear();
 
@@ -165,18 +165,7 @@ public class SettingsViewModel : IDisposable
         config.Thresholds.NearFull = NearFull.Value;
         config.Thresholds.Full = Full.Value;
 
-        config.Simulation.UIMode = ActiveUIMode.Value;
-
-        try
-        {
-            var simSettings = DIContainer.Resolve<SimulationSettings>();
-            simSettings.UIMode = ActiveUIMode.Value;
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogWarning(ex, $"Could not update DI singleton SimulationSettings array. This might require restart to take effect.");
-            // Swallowed: we log the warning but allow the user to continue changing other settings even if DI update fails
-        }
+        config.UIMode = ActiveUIMode.Value;
 
         if (!config.Inventory.TryGetValue(config.CurrencyCode, out InventorySettings? activeInventory))
         {

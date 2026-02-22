@@ -22,9 +22,6 @@ public static class DIContainer
         resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
 
-        // Configuration-related
-        resolver.Register<SimulationSettings, SimulationSettings>(Lifestyle.Singleton);
-
         // Core Services (Singleton)
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
         resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
@@ -50,11 +47,6 @@ public static class DIContainer
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
-
-        // Initialize Simulation Settings from Config
-        var simSettings = _resolver.Resolve<SimulationSettings>();
-        var simConfig = configProvider.Config.Simulation;
-        simSettings.UIMode = simConfig.UIMode;
 
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();
