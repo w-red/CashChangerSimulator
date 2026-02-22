@@ -112,43 +112,7 @@
                                 Text="{Binding Full.Value, UpdateSourceTrigger=PropertyChanged}"
                                 Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
-                    </Border>
-
-                    <!-- Simulation -->
-                    <Border
-                        Grid.Column="1"
-                        Style="{StaticResource CardStyle}"
-                        Margin="12,0,0,24">
-                        <StackPanel>
-                            <TextBlock
-                                Text="ENGINE SIMULATION"
-                                FontSize="11"
-                                FontWeight="Black"
-                                Foreground="{StaticResource TextSecondaryBrush}"
-                                Margin="0,0,0,20"/>
-                            <CheckBox
-                                Content="Enable Latency"
-                                IsChecked="{Binding UseDelay.Value}"
-                                Style="{StaticResource ToggleSwitchStyle}"
-                                Margin="0,0,0,16"/>
-                            <StackPanel
-                                Orientation="Horizontal"
-                                IsEnabled="{Binding UseDelay.Value}">
-                                <TextBox
-                                    materialDesign:HintAssist.Hint="Min (ms)"
-                                    Width="80"
-                                    Text="{Binding MinDelay.Value}"
-                                    Style="{StaticResource ModernTextBoxStyle}"
-                                    Margin="0,0,16,0"/>
-                                <TextBox
-                                    materialDesign:HintAssist.Hint="Max (ms)"
-                                    Width="80"
-                                    Text="{Binding MaxDelay.Value}"
-                                    Style="{StaticResource ModernTextBoxStyle}"
-                                    Margin="0,0,16,0"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
+                </Border>
                 </Grid>
 
                 <!-- DataGrid Section -->
