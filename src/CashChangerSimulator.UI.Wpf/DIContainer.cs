@@ -1,3 +1,4 @@
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
@@ -38,11 +39,8 @@ public static class DIContainer
         resolver.Compile();
         _resolver = resolver;
 
-        // Populate ServiceLocator for cross-project singleton sharing
-        Core.ServiceLocator.Inventory = _resolver.Resolve<Inventory>();
-        Core.ServiceLocator.History = _resolver.Resolve<TransactionHistory>();
-        Core.ServiceLocator.Manager = _resolver.Resolve<CashChangerManager>();
-        Core.ServiceLocator.HardwareStatusManager = _resolver.Resolve<HardwareStatusManager>();
+        // Register as SimulatorServices provider for cross-project service sharing
+        SimulatorServices.Provider = new ResolverServiceProvider(_resolver);
 
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
@@ -85,4 +83,10 @@ public static class DIContainer
     {
         return _resolver.Resolve<T>();
     }
+}
+
+/// <summary>MicroResolver ベースの ISimulatorServiceProvider 実装。</summary>
+internal sealed class ResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider
+{
+    public T Resolve<T>() where T : class => resolver.Resolve<T>();
 }
