@@ -54,9 +54,7 @@ public static class DIContainer
         // Initialize Simulation Settings from Config
         var simSettings = _resolver.Resolve<SimulationSettings>();
         var simConfig = configProvider.Config.Simulation;
-        simSettings.DelayEnabled = simConfig.DelayEnabled;
-        simSettings.MinDelayMs = simConfig.MinDelayMs;
-        simSettings.MaxDelayMs = simConfig.MaxDelayMs;
+        simSettings.UIMode = simConfig.UIMode;
 
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();

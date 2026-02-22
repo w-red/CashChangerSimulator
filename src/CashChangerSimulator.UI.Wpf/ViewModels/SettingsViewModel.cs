@@ -37,15 +37,6 @@ public class SettingsViewModel : IDisposable
     /// <summary>Full と判定するデフォルト枚数。</summary>
     public BindableReactiveProperty<int> Full { get; }
 
-    /// <summary>シミュレーション遅延を有効にするか。</summary>
-    public BindableReactiveProperty<bool> UseDelay { get; }
-
-    /// <summary>最小遅延時間 (ms)。</summary>
-    public BindableReactiveProperty<int> MinDelay { get; }
-
-    /// <summary>最大遅延時間 (ms)。</summary>
-    public BindableReactiveProperty<int> MaxDelay { get; }
-
 
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
@@ -98,22 +89,6 @@ public class SettingsViewModel : IDisposable
                 : null)
             .AddTo(_disposables);
 
-        UseDelay = new BindableReactiveProperty<bool>(false)
-            .AddTo(_disposables);
-        MinDelay = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val =>
-                val < 0
-                ? new Exception("MinDelay は 0 以上にしてください。")
-                : null)
-            .AddTo(_disposables);
-
-        MaxDelay = new BindableReactiveProperty<int>(0)
-            .EnableValidation(val =>
-                val < MinDelay.Value
-                ? new Exception("MaxDelay は MinDelay 以上にしてください。")
-                : null)
-            .AddTo(_disposables);
-
 
         SaveSucceeded =
             new BindableReactiveProperty<bool>(false)
@@ -123,13 +98,10 @@ public class SettingsViewModel : IDisposable
 
         var canSave = Observable.CombineLatest(
             NearEmpty, NearFull, Full,
-            MinDelay, MaxDelay,
-            (_, _, _, _, _) => 
+            (_, _, _) => 
                 !NearEmpty.HasErrors &&
                 !NearFull.HasErrors &&
-                !Full.HasErrors &&
-                !MinDelay.HasErrors &&
-                !MaxDelay.HasErrors);
+                !Full.HasErrors);
 
         SaveCommand = canSave
             .ToReactiveCommand()
@@ -152,10 +124,6 @@ public class SettingsViewModel : IDisposable
         NearFull.Value = config.Thresholds.NearFull;
         Full.Value = config.Thresholds.Full;
         ActiveUIMode.Value = config.Simulation.UIMode;
-
-        UseDelay.Value = config.Simulation.DelayEnabled;
-        MinDelay.Value = config.Simulation.MinDelayMs;
-        MaxDelay.Value = config.Simulation.MaxDelayMs;
 
         DenominationSettings.Clear();
 
@@ -197,17 +165,11 @@ public class SettingsViewModel : IDisposable
         config.Thresholds.NearFull = NearFull.Value;
         config.Thresholds.Full = Full.Value;
 
-        config.Simulation.DelayEnabled = UseDelay.Value;
-        config.Simulation.MinDelayMs = MinDelay.Value;
-        config.Simulation.MaxDelayMs = MaxDelay.Value;
         config.Simulation.UIMode = ActiveUIMode.Value;
 
         try
         {
             var simSettings = DIContainer.Resolve<SimulationSettings>();
-            simSettings.DelayEnabled = UseDelay.Value;
-            simSettings.MinDelayMs = MinDelay.Value;
-            simSettings.MaxDelayMs = MaxDelay.Value;
             simSettings.UIMode = ActiveUIMode.Value;
         }
         catch (Exception ex)
