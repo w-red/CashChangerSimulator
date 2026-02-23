@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
@@ -30,6 +31,7 @@ public static class DIContainer
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
+        resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
 

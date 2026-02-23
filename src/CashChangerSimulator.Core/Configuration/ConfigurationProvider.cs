@@ -1,7 +1,6 @@
-using CashChangerSimulator.Core.Configuration;
 using R3;
 
-namespace CashChangerSimulator.UI.Wpf;
+namespace CashChangerSimulator.Core.Configuration;
 
 /// <summary>
 /// アプリケーション全体で共有される設定を提供するプロバイダー。
