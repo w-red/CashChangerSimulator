@@ -4,14 +4,10 @@ using FlaUI.UIA3; // Added for UIA3Automation type
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
-/// <summary>
-/// UIオートメーションにおける再試行ロジックと、信頼性の高いウィンドウ検索機能を提供する静的クラス。
-/// </summary>
+/// <summary>UIオートメーションの再試行とウィンドウ検索を行う静的クラス。</summary>
 public static class UiTestRetry
 {
-    /// <summary>
-    /// 条件を満たす要素が見つかるまで、指定されたタイムアウト時間内で再試行を行う。
-    /// </summary>
+    /// <summary>条件を満たす要素が見つかるまで、指定されたタイムアウト時間内で再試行を行う。</summary>
     /// <param name="func">要素を返す関数。</param>
     /// <param name="timeout">タイムアウト時間。</param>
     /// <returns>見つかった要素。見つからない場合は null。</returns>
@@ -26,10 +22,7 @@ public static class UiTestRetry
         return result;
     }
 
-    /// <summary>
-    /// 指定されたアプリケーション、タイトル、または AutomationId に基づいてウィンドウを検索する。
-    /// アプリケーションが提供するウィンドウリストで見つからない場合、デスクトップ全体からの検索を試みる。
-    /// </summary>
+    /// <summary>アプリケーション、タイトル、または AutomationId に基づいてウィンドウを検索する。</summary>
     /// <param name="app">対象のアプリケーションインスタンス。</param>
     /// <param name="automation">オートメーションインスタンス。</param>
     /// <param name="title">ウィンドウのタイトル、または AutomationId。</param>
@@ -37,6 +30,8 @@ public static class UiTestRetry
     /// <returns>見つかったウィンドウ。見つからない場合は null。</returns>
     public static Window? FindWindow(Application app, UIA3Automation automation, string title, TimeSpan timeout)
     {
+        if (app == null || automation == null) return null;
+
         Window? result = null;
         var processId = app.ProcessId;
         FlaUI.Core.Tools.Retry.WhileTrue(() =>
@@ -47,7 +42,9 @@ public static class UiTestRetry
                 var topWindows = app.GetAllTopLevelWindows(automation);
                 foreach (var w in topWindows)
                 {
-                    if (w.Title.Contains(title) || (w.Name != null && w.Name.Contains(title)) || w.AutomationId == title)
+                    if ((w.Title?.Contains(title) ?? false) || 
+                        (w.Name?.Contains(title) ?? false) || 
+                        w.AutomationId == title)
                     {
                         result = w;
                         return false;
@@ -73,7 +70,7 @@ public static class UiTestRetry
 
                 result = windows.FirstOrDefault(w =>
                     w.Properties.ProcessId == processId &&
-                    (w.AutomationId == title || (w.Name != null && w.Name.Contains(title))))?.AsWindow();
+                    (w.AutomationId == title || (w.Name?.Contains(title) ?? false)))?.AsWindow();
 
                 if (result == null)
                 {
@@ -101,7 +98,7 @@ public static class UiTestRetry
                 var all = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
                 foreach (var w in all.Where(x => x.Properties.ProcessId == processId))
                 {
-                    Console.WriteLine($"- Name: '{w.Name}', Id: '{w.AutomationId}'");
+                    Console.WriteLine($"- Name: '{w.Name ?? "(null)"}', Id: '{w.AutomationId ?? "(null)"}'");
                 }
             }
             catch { }

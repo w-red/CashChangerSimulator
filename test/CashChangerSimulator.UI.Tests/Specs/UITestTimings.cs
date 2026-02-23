@@ -1,7 +1,7 @@
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>UIテスト用の共通待機時間・タイムアウト定数。</summary>
-public static class DepositTestTimings
+public static class UITestTimings
 {
     /// <summary>UI状態遷移待機時間（ミリ秒）。</summary>
     public const int UiTransitionDelayMs = 1000;

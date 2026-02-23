@@ -6,9 +6,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel, IsDesignTimeCreatable=False}"
     Title="System Settings" Height="780" Width="720"
+
     Background="{StaticResource BackgroundBrush}"
     Foreground="{StaticResource OnBackgroundBrush}"
     WindowStartupLocation="CenterOwner"
@@ -44,153 +46,11 @@
             VerticalScrollBarVisibility="Auto"
             materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
             <StackPanel Margin="0,0,16,0">
-                <!-- Currency Section -->
-                <Border 
-                    Style="{StaticResource CardStyle}" 
-                    Margin="0,0,0,24">
-                    <StackPanel>
-                        <TextBlock
-                            Text="CORE PARAMETERS"
-                            FontSize="11"
-                            FontWeight="Black"
-                            Foreground="{StaticResource TextSecondaryBrush}"
-                            Margin="0,0,0,20"/>
-                        <ComboBox
-                            materialDesign:HintAssist.Hint="Active Currency"
-                            ItemsSource="{Binding AvailableCurrencyCodes}"
-                            SelectedItem="{Binding CurrencyCode.Value}"
-                            Style="{StaticResource ModernComboBoxStyle}"/>
-                        <TextBlock
-                            Text="* Requires restart for inventory recalibration."
-                            FontSize="10"
-                            Foreground="{StaticResource SecondaryBrush}"
-                            Margin="4,4,0,0"/>
-
-                        <ComboBox
-                            materialDesign:HintAssist.Hint="Operating UI Mode"
-                            ItemsSource="{Binding AvailableUIModes}"
-                            SelectedItem="{Binding ActiveUIMode.Value}"
-                            Style="{StaticResource ModernComboBoxStyle}"
-                            Margin="0,16,0,0"/>
-                        <TextBlock
-                            Text="* Change the user interface behavior pattern."
-                            FontSize="10"
-                            Foreground="{StaticResource SecondaryBrush}"
-                            Margin="4,4,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Simulation & Thresholds -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <!-- Thresholds -->
-                    <Border
-                        Grid.Column="0"
-                        Style="{StaticResource CardStyle}"
-                        Margin="0,0,12,24">
-                        <StackPanel>
-                            <TextBlock
-                                Text="GLOBAL THRESHOLDS"
-                                FontSize="11"
-                                FontWeight="Black"
-                                Foreground="{StaticResource TextSecondaryBrush}"
-                                Margin="0,0,0,20"/>
-                            <TextBox
-                                materialDesign:HintAssist.Hint="Near Empty"
-                                Text="{Binding NearEmpty.Value, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBox
-                                materialDesign:HintAssist.Hint="Near Full"
-                                Text="{Binding NearFull.Value, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBox
-                                materialDesign:HintAssist.Hint="Full Limit"
-                                Text="{Binding Full.Value, UpdateSourceTrigger=PropertyChanged}"
-                                Style="{StaticResource ModernTextBoxStyle}"/>
-                        </StackPanel>
-                </Border>
-                </Grid>
-
-                <!-- DataGrid Section -->
-                <Border
-                    Style="{StaticResource CardStyle}"
-                    Padding="0">
-                    <DockPanel>
-                        <Border
-                            DockPanel.Dock="Top"
-                            Padding="15,15,15,10">
-                            <TextBlock
-                                Text="DENOMINATION CALIBRATION"
-                                FontSize="11"
-                                FontWeight="Black"
-                                Foreground="{StaticResource TextSecondaryBrush}"/>
-                        </Border>
-                        
-                        <DataGrid
-                            ItemsSource="{Binding DenominationSettings}"
-                            AutoGenerateColumns="False"
-                            CanUserAddRows="False"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            materialDesign:DataGridAssist.CellPadding="12,8"
-                            materialDesign:DataGridAssist.ColumnHeaderPadding="12,8"
-                            materialDesign:DataGridAssist.SelectedCellBorderBrush="{StaticResource PrimaryBrush}">
-                            <DataGrid.Resources>
-                                <Style
-                                    TargetType="DataGridColumnHeader"
-                                    BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                                    <Setter
-                                        Property="Background"
-                                        Value="#15FFFFFF"/>
-                                    <Setter
-                                        Property="FontSize"
-                                        Value="10"/>
-                                    <Setter
-                                        Property="FontWeight"
-                                        Value="Black"/>
-                                </Style>
-                            </DataGrid.Resources>
-                            <DataGrid.Columns>
-                                <DataGridTextColumn
-                                    Header="IDENTIFIER"
-                                    Binding="{Binding DisplayName.Value}"
-                                    Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style
-                                            TargetType="TextBlock"
-                                            BasedOn="{StaticResource {x:Type TextBlock}}">
-                                            <Setter
-                                                Property="FontWeight"
-                                                Value="Bold" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn
-                                    Header="BASE QTY"
-                                    Binding="{Binding Count.Value}"
-                                    Width="80"/>
-                                <DataGridTextColumn
-                                    Header="N.EMPTY"
-                                    Binding="{Binding NearEmpty.Value}"
-                                    Width="80"/>
-                                <DataGridTextColumn
-                                    Header="N.FULL"
-                                    Binding="{Binding NearFull.Value}"
-                                    Width="80"/>
-                                <DataGridTextColumn
-                                    Header="MAX CAP"
-                                    Binding="{Binding Full.Value}"
-                                    Width="80"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </DockPanel>
-                </Border>
+                <views:SettingsGeneralView />
+                <views:SettingsDenominationView />
             </StackPanel>
         </ScrollViewer>
+
 
         <!-- Footer Actions -->
         <Grid
