@@ -97,24 +97,5 @@ public class QuickDepositAndPosModeTest
         depositVm.CurrentDepositAmount.Value.ShouldBe(0m);
     }
 
-    [Fact]
-    public void IsBulkInsertVisible_ToggleBehavior()
-    {
-        var depositVm = _mainViewModel.Deposit;
 
-        // Initially false
-        depositVm.IsBulkInsertVisible.Value.ShouldBeFalse();
-
-        // Can't show if not in deposit mode
-        ((ICommand)depositVm.ShowBulkInsertCommand).CanExecute(null).ShouldBeFalse();
-
-        _depositController.BeginDeposit();
-        ((ICommand)depositVm.ShowBulkInsertCommand).CanExecute(null).ShouldBeTrue();
-
-        depositVm.ShowBulkInsertCommand.Execute(Unit.Default);
-        depositVm.IsBulkInsertVisible.Value.ShouldBeTrue();
-
-        depositVm.CancelBulkInsertCommand.Execute(Unit.Default);
-        depositVm.IsBulkInsertVisible.Value.ShouldBeFalse();
-    }
 }

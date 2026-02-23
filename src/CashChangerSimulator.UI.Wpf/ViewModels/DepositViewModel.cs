@@ -32,8 +32,6 @@ public class DepositViewModel : IDisposable
     public BindableReactiveProperty<string> CurrentModeName { get; }
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsOverlapped { get; }
-    /// <summary>一括投入画面が表示されているかどうか。</summary>
-    public BindableReactiveProperty<bool> IsBulkInsertVisible { get; }
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
 
@@ -54,14 +52,10 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
 
     // Bulk Deposit
-    /// <summary>一括投入用のアイテムリスト。</summary>
-    public ObservableCollection<BulkInsertItemViewModel> BulkInsertItems { get; } = [];
-    /// <summary>一括投入画面を表示するコマンド。</summary>
+    /// <summary>一括投入画面を表示するコマンド（View側で購読）。</summary>
     public ReactiveCommand<Unit> ShowBulkInsertCommand { get; }
     /// <summary>一括投入を実行するコマンド。</summary>
-    public ReactiveCommand<Unit> InsertBulkCommand { get; }
-    /// <summary>一括投入をキャンセルするコマンド。</summary>
-    public ReactiveCommand<Unit> CancelBulkInsertCommand { get; }
+    public ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>> InsertBulkCommand { get; }
     /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
@@ -75,7 +69,6 @@ public class DepositViewModel : IDisposable
         _logger = LogProvider.CreateLogger<DepositViewModel>();
 
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
-        IsBulkInsertVisible = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         IsInDepositMode = _depositController.Changed
@@ -115,13 +108,10 @@ public class DepositViewModel : IDisposable
             try
             {
                 _depositController.BeginDeposit();
-                PrepareBulkInsertItems(getDenominations());
-                IsBulkInsertVisible.Value = false;
             }
             catch (Exception ex)
             {
                 _logger.ZLogError(ex, $"Failed to begin deposit.");
-                // Swallowed: error is logged, but we don't want to crash the UI thread
             }
         });
 
@@ -148,23 +138,14 @@ public class DepositViewModel : IDisposable
 
         ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        ShowBulkInsertCommand.Subscribe(_ =>
-        {
-            PrepareBulkInsertItems(getDenominations());
-            IsBulkInsertVisible.Value = !IsBulkInsertVisible.Value;
-        });
 
-        InsertBulkCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
-        InsertBulkCommand.Subscribe(_ =>
+        InsertBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
+        InsertBulkCommand.Subscribe(counts =>
         {
-            ExecuteBulkInsert();
-            IsBulkInsertVisible.Value = false;
-        });
-
-        CancelBulkInsertCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
-        CancelBulkInsertCommand.Subscribe(_ =>
-        {
-            IsBulkInsertVisible.Value = false;
+            if (counts != null && counts.Count > 0)
+            {
+                _depositController.TrackBulkDeposit(counts);
+            }
         });
 
         QuickDepositCommand = IsInDepositMode
@@ -194,27 +175,6 @@ public class DepositViewModel : IDisposable
                         CashDepositStatus.End => "IDLE (待機中)",
                         _ => "UNKNOWN"
                     };
-    }
-
-    private void PrepareBulkInsertItems(IEnumerable<DenominationViewModel> denominations)
-    {
-        BulkInsertItems.Clear();
-        foreach (var den in denominations)
-        {
-            BulkInsertItems.Add(new BulkInsertItemViewModel(den.Key, den.Name));
-        }
-    }
-
-    private void ExecuteBulkInsert()
-    {
-        var counts = BulkInsertItems
-            .Where(x => x.Quantity.Value > 0)
-            .ToDictionary(x => x.Key, x => x.Quantity.Value);
-
-        if (counts.Count > 0)
-        {
-            _depositController.TrackBulkDeposit(counts);
-        }
     }
 
     internal async Task ExecuteQuickDepositAsync(IEnumerable<DenominationViewModel> denominations)
@@ -250,7 +210,6 @@ public class DepositViewModel : IDisposable
         }
 
         // Auto Fix & Store
-        // Consider a small delay to let UI react if desired, but for Quick Deposit it can be fast.
         await Task.Delay(100);
         _depositController.FixDeposit();
         await Task.Delay(100);
