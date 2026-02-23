@@ -96,7 +96,7 @@ public class InventoryViewModel : IDisposable
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
         {
-            var settingsWindow = new SettingsWindow(_configProvider, _monitorsProvider, _metadataProvider)
+            var settingsWindow = new SettingsWindow()
             {
                 Owner = System.Windows.Application.Current.MainWindow
             };

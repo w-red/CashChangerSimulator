@@ -37,26 +37,17 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton.ShouldNotBeNull();
         beginButton.Click();
-        // 3. Bulk Insert Window should open automatically
-        // var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
-        // bulkButton.ShouldNotBeNull();
-        // bulkButton.Click();
+        // 3. User must click "BULK INSERT" to open the window
+        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
+        bulkButton.ShouldNotBeNull();
+        bulkButton.Click();
         Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
-        // Find the BulkInsertWindow
-        var bulkInsertWindow =
-            UiTestRetry
-            .FindWindow(
-                _app.Application,
-                _app.Automation,
-                "BULK CASH INSERT",
-                TimeSpan.FromSeconds(15));
-        bulkInsertWindow.ShouldNotBeNull();
-
+        // 4. Fill Bulk Insert (Inline area)
         var firstTextBox =
             UiTestRetry
             .Find(
-                () => bulkInsertWindow
+                () => window
                     .FindFirstDescendant(
                         cf => cf.ByAutomationId("BulkInsertQuantityBox")
                 )?.AsTextBox(),
@@ -65,7 +56,7 @@ public class DepositTest : IDisposable
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Text = "2";
 
-        var executeButton = FindElement(bulkInsertWindow, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
+        var executeButton = FindElement(window, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
         Thread.Sleep(DepositTestTimings.UiTransitionDelayMs); // Allow window to close and logic to execute
@@ -117,22 +108,24 @@ public class DepositTest : IDisposable
 
         // Wait for state transition to Deposit Mode
         // Check for automatic BulkInsertWindow and proceed
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
-        bulkInsertWindow.ShouldNotBeNull();
+        // 2. Open Bulk Insert
+        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
+        bulkButton.ShouldNotBeNull();
+        bulkButton.Click();
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
-
-        // Find the first TextBox
+        // 3. Fill Inline Bulk Insert
         var firstTextBox =
             UiTestRetry.Find(
-                () => bulkInsertWindow
+                () => window
                 .FindFirstDescendant(
                     cf => cf.ByAutomationId("BulkInsertQuantityBox"))
                 ?.AsTextBox(), TimeSpan.FromSeconds(10)) as TextBox;
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Text = "10";
 
-        // Click "INSERT ALL"
-        var executeButton = FindElement(bulkInsertWindow, "BulkInsertExecuteButton", "INSERT ALL")?.AsButton();
+        // Click "INSERT"
+        var executeButton = FindElement(window, "BulkInsertExecuteButton", "INSERT")?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
         Thread.Sleep(DepositTestTimings.UiTransitionDelayMs); // Wait for logic and window close
@@ -159,14 +152,18 @@ public class DepositTest : IDisposable
         beginButton.Click();
         Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
-        // Close the Bulk Insert Window that opens automatically
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(5));
-        if (bulkInsertWindow != null)
-        {
-            var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
-            cancelButton?.Click();
-            Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
-        }
+        // 2. Bulk Insert is NOT opened automatically anymore.
+        // If we want to simulate counting, we could insert here, but purely for pause/resume, 
+        // we can just proceed if counting status is reached.
+        // If the test needs counting status, we should trigger an insert.
+        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
+        bulkButton.ShouldNotBeNull();
+        bulkButton.Click();
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
+
+        var executeButton = FindElement(window, "BulkInsertExecuteButton", "INSERT")?.AsButton();
+        executeButton?.Click();
+        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
 
         // 2. Wait for Mode Indicator to become COUNTING
         var modeIndicator = FindElement(window, "ModeIndicatorText", null)?.AsLabel();
@@ -228,14 +225,16 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(window, "BeginDepositButton", "NEW DEPOSIT")?.AsButton();
         beginButton?.Click();
 
-        // Find the BulkInsertWindow
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
-        bulkInsertWindow.ShouldNotBeNull();
+        // Open and fill Bulk Insert
+        var bulkButton = FindElement(window, "BulkInsertButton", "BULK INSERT")?.AsButton();
+        bulkButton.ShouldNotBeNull();
+        bulkButton.Click();
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         var firstTextBox =
             UiTestRetry
             .Find(
-                    () => bulkInsertWindow
+                    () => window
                     .FindFirstDescendant(
                         cf => cf.ByAutomationId("BulkInsertQuantityBox"))
                     ?.AsTextBox(),
@@ -244,9 +243,9 @@ public class DepositTest : IDisposable
         firstTextBox.Text = "1";
         var executeButton =
             FindElement(
-                bulkInsertWindow,
+                window,
                 "BulkInsertExecuteButton",
-                "INSERT ALL")
+                "INSERT")
             ?.AsButton();
         executeButton.ShouldNotBeNull();
         executeButton.Click();
@@ -293,14 +292,10 @@ public class DepositTest : IDisposable
         beginButton.Click();
         Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
-        // Close the Bulk Insert Window that opens automatically
-        var bulkInsertWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BULK CASH INSERT", TimeSpan.FromSeconds(10));
-        if (bulkInsertWindow != null)
-        {
-            var cancelButton = FindElement(bulkInsertWindow, "BulkInsertCancelButton", "CANCEL")?.AsButton();
-            cancelButton?.Click();
-            Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
-        }
+        // Bulk Insert is not auto-opened, nothing to close here for now.
+        // But we need to be in counting state to show the overlap button?
+        // Let's ensure we are in deposit mode.
+        Thread.Sleep(DepositTestTimings.UiTransitionDelayMs);
 
         window.SetForeground();
         Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);

@@ -20,6 +20,7 @@
             <conv:InverseBooleanConverter x:Key="InverseBoolConverter" />
             <conv:DepositModeBackgroundConverter x:Key="DepositModeBackgroundConv" />
             <BooleanToVisibilityConverter x:Key="VisibilityConv" />
+            <conv:UIModeToVisibilityConverter x:Key="UIModeVisibilityConv" />
 
 
             <!-- Color Palette -->

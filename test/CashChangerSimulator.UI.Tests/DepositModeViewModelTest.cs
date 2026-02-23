@@ -33,7 +33,7 @@ public class DepositModeViewModelTest
         var configProvider = new ConfigurationProvider();
         configProvider.Config.CurrencyCode = "JPY";
 
-        _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object);
+        _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
         var hardwareManager = new HardwareStatusManager();
         _depositController = new DepositController(_mockInventory.Object, hardwareManager);
         _dispenseController = new DispenseController(_mockManager.Object, hardwareManager);

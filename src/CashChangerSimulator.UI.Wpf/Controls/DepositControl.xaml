@@ -96,14 +96,16 @@
                                                  Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}"
                                                  FontSize="11"
                                                  materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryBrush}"
-                                                 HorizontalContentAlignment="Right"/>
+                                                 HorizontalContentAlignment="Right"
+                                                 AutomationProperties.AutomationId="BulkInsertQuantityBox"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <Button Content="INSERT" Style="{StaticResource PrimaryButtonStyle}"
                                 Height="28" Margin="0,8,0,0" FontSize="11"
-                                Command="{Binding InsertBulkCommand}"/>
+                                Command="{Binding InsertBulkCommand}"
+                                AutomationProperties.AutomationId="BulkInsertExecuteButton"/>
                     </StackPanel>
                 </Border>
                 
@@ -117,7 +119,8 @@
                         <Button Grid.Column="0" Style="{StaticResource ModernFlatButtonStyle}" 
                                 Command="{Binding ShowBulkInsertCommand}"
                                 Margin="4"
-                                IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}">
+                                IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}"
+                                AutomationProperties.AutomationId="BulkInsertButton">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,4,0" />
                                 <TextBlock Text="BULK" FontSize="11"/>
@@ -125,7 +128,8 @@
                         </Button>
                         <Button Grid.Column="1" Style="{StaticResource ModernFlatButtonStyle}" 
                                 Command="{Binding SimulateOverlapCommand}"
-                                Margin="4" Foreground="Orange">
+                                Margin="4" Foreground="Orange"
+                                AutomationProperties.AutomationId="SimulateOverlapButton">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,4,0" />
                                 <TextBlock Text="ERROR" FontSize="11"/>
@@ -157,13 +161,15 @@
                             <Button Style="{StaticResource ModernFlatButtonStyle}" 
                                     Command="{Binding PauseDepositCommand}"
                                     Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
-                                    Margin="4">
+                                    Margin="4"
+                                    AutomationProperties.AutomationId="PauseDepositButton">
                                 <materialDesign:PackIcon Kind="Pause" />
                             </Button>
                             <Button Style="{StaticResource PrimaryButtonStyle}" 
                                     Command="{Binding ResumeDepositCommand}"
                                     Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
-                                    Margin="4">
+                                    Margin="4"
+                                    AutomationProperties.AutomationId="ResumeDepositButton">
                                 <materialDesign:PackIcon Kind="Play" />
                             </Button>
                         </Grid>
