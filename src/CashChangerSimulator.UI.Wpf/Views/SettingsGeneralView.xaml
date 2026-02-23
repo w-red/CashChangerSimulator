@@ -1,0 +1,74 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.SettingsGeneralView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:SettingsViewModel}"
+             d:DesignHeight="450" d:DesignWidth="600">
+    <StackPanel>
+        <!-- Currency Section -->
+        <Border 
+            Style="{StaticResource CardStyle}" 
+            Margin="0,0,0,24">
+            <StackPanel>
+                <TextBlock
+                    Text="CORE PARAMETERS"
+                    FontSize="11"
+                    FontWeight="Black"
+                    Foreground="{StaticResource TextSecondaryBrush}"
+                    Margin="0,0,0,20"/>
+                <ComboBox
+                    materialDesign:HintAssist.Hint="Active Currency"
+                    ItemsSource="{Binding AvailableCurrencyCodes}"
+                    SelectedItem="{Binding CurrencyCode.Value}"
+                    Style="{StaticResource ModernComboBoxStyle}"/>
+                <TextBlock
+                    Text="* Requires restart for inventory recalibration."
+                    FontSize="10"
+                    Foreground="{StaticResource SecondaryBrush}"
+                    Margin="4,4,0,0"/>
+
+                <ComboBox
+                    materialDesign:HintAssist.Hint="Operating UI Mode"
+                    ItemsSource="{Binding AvailableUIModes}"
+                    SelectedItem="{Binding ActiveUIMode.Value}"
+                    Style="{StaticResource ModernComboBoxStyle}"
+                    Margin="0,16,0,0"/>
+                <TextBlock
+                    Text="* Change the user interface behavior pattern."
+                    FontSize="10"
+                    Foreground="{StaticResource SecondaryBrush}"
+                    Margin="4,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Thresholds -->
+        <Border
+            Style="{StaticResource CardStyle}"
+            Margin="0,0,0,24">
+            <StackPanel>
+                <TextBlock
+                    Text="GLOBAL THRESHOLDS"
+                    FontSize="11"
+                    FontWeight="Black"
+                    Foreground="{StaticResource TextSecondaryBrush}"
+                    Margin="0,0,0,20"/>
+                <TextBox
+                    materialDesign:HintAssist.Hint="Near Empty"
+                    Text="{Binding NearEmpty.Value, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource ModernTextBoxStyle}"/>
+                <TextBox
+                    materialDesign:HintAssist.Hint="Near Full"
+                    Text="{Binding NearFull.Value, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource ModernTextBoxStyle}"/>
+                <TextBox
+                    materialDesign:HintAssist.Hint="Full Limit"
+                    Text="{Binding Full.Value, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource ModernTextBoxStyle}"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

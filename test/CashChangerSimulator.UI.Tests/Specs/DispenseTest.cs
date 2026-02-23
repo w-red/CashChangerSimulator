@@ -37,14 +37,14 @@ public class DispenseTest : IDisposable
         var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", "BULK")?.AsButton();
         showBulkButton.ShouldNotBeNull();
         showBulkButton.Click();
-        Thread.Sleep(DepositTestTimings.WindowPopupDelayMs);
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Find the new dialog window
-        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", TimeSpan.FromSeconds(15));
+        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", UITestTimings.RetryLongTimeout);
         dialog.ShouldNotBeNull();
 
         // 4. Enter quantities
-        var firstQuantityBox = UiTestRetry.Find(() => dialog.FindFirstDescendant(cf => cf.ByAutomationId("BulkQuantityBox"))?.AsTextBox(), TimeSpan.FromSeconds(10)) as TextBox;
+        var firstQuantityBox = UiTestRetry.Find(() => dialog.FindFirstDescendant(cf => cf.ByAutomationId("BulkQuantityBox"))?.AsTextBox(), UITestTimings.RetryLongTimeout) as TextBox;
         firstQuantityBox.ShouldNotBeNull();
         firstQuantityBox.Text = "1";
 
@@ -59,10 +59,10 @@ public class DispenseTest : IDisposable
         {
             executeButton.Click();
         }
-        Thread.Sleep(DepositTestTimings.LogicExecutionDelayMs);
+        Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 6. Verify total decreased (Check on Main Window)
-        Retry.WhileTrue(() => ParseAmount(totalAmountLabel.Text) == initialAmount, TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => ParseAmount(totalAmountLabel.Text) == initialAmount, UITestTimings.RetryLongTimeout);
         decimal finalAmount = ParseAmount(totalAmountLabel.Text);
         finalAmount.ShouldBeLessThan(initialAmount);
     }
@@ -92,11 +92,11 @@ public class DispenseTest : IDisposable
         }
 
         // 3. Verify Busy state appears on terminal
-        var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")), TimeSpan.FromSeconds(5));
+        var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")), UITestTimings.RetryShortTimeout);
         busyIndicator.ShouldNotBeNull();
         
         // Wait for completion (Return to Idle)
-        Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, TimeSpan.FromSeconds(10));
+        Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, UITestTimings.RetryLongTimeout);
     }
 
     private Window OpenDispenseTerminal(Window mainWindow)
@@ -113,8 +113,8 @@ public class DispenseTest : IDisposable
             launchButton.Click();
         }
 
-        Thread.Sleep(DepositTestTimings.WindowPopupDelayMs);
-        var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", TimeSpan.FromSeconds(15));
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+        var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", UITestTimings.RetryLongTimeout);
         dispenseWindow.ShouldNotBeNull();
         dispenseWindow.SetForeground();
         return dispenseWindow;
@@ -133,7 +133,7 @@ public class DispenseTest : IDisposable
                 if (elByText != null) return elByText;
             }
             return null;
-        }, TimeSpan.FromSeconds(10));
+        }, UITestTimings.RetryLongTimeout);
     }
 
     private static decimal ParseAmount(string text)
