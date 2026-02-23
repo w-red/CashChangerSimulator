@@ -1,3 +1,5 @@
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
@@ -35,7 +37,8 @@ public class ViewModelTest
 
         var realHardware = new HardwareStatusManager();
         var depositController = new DepositController(mockInventory.Object);
-        var dispenseController = new DispenseController(mockManager.Object);
+        var mockSimulator = new Mock<IDeviceSimulator>();
+        var dispenseController = new DispenseController(mockManager.Object, null, mockSimulator.Object);
 
         var vm = new MainViewModel(
             mockInventory.Object,

@@ -1,3 +1,5 @@
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
@@ -30,13 +32,14 @@ public class QuickDepositAndPosModeTest
         _mockHistory = new Mock<TransactionHistory>();
         _mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
 
-        var configProvider = new CashChangerSimulator.UI.Wpf.ConfigurationProvider();
+        var configProvider = new ConfigurationProvider();
         configProvider.Config.CurrencyCode = "JPY";
 
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
         var hardwareManager = new HardwareStatusManager();
         _depositController = new DepositController(_mockInventory.Object, hardwareManager);
-        _dispenseController = new DispenseController(_mockManager.Object, hardwareManager);
+        var mockSimulator = new Mock<IDeviceSimulator>();
+        _dispenseController = new DispenseController(_mockManager.Object, hardwareManager, mockSimulator.Object);
 
         _metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
