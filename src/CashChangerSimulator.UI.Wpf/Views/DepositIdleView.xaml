@@ -1,0 +1,53 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.DepositIdleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:DepositViewModel}"
+             d:DesignHeight="300" d:DesignWidth="400">
+    <StackPanel>
+        <Button Style="{StaticResource PrimaryButtonStyle}" 
+                Command="{Binding BeginDepositCommand}"
+                Width="260" Height="48"
+                HorizontalAlignment="Center" Margin="0,16"
+                AutomationProperties.AutomationId="BeginDepositButton">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="HandPointingRight" Margin="0,0,12,0" Width="24" Height="24"/>
+                <TextBlock Text="START DEPOSIT" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+
+        <Separator Background="#1AFFFFFF" Margin="0,24"/>
+
+        <!-- Quick Deposit Input -->
+        <TextBlock Text="QUICK DEPOSIT" FontSize="11" FontWeight="Bold" 
+                   HorizontalAlignment="Center" Opacity="0.5" Margin="0,0,0,12"/>
+        <Grid Width="260" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox materialDesign:HintAssist.Hint="Amount" 
+                     Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource ModernTextBoxStyle}"
+                     FontSize="18"
+                     Margin="0,0,12,0">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+            <Button Grid.Column="1" 
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding QuickDepositCommand}"
+                    Padding="12,0" Height="40"
+                    AutomationProperties.AutomationId="QuickDepositButton">
+                <materialDesign:PackIcon Kind="Flash" Width="20" Height="20"/>
+            </Button>
+        </Grid>
+        <TextBlock Text="Calculates denominations automatically" 
+                   FontSize="10" Opacity="0.4" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,54 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.DispenseIdleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:DispenseViewModel}"
+             d:DesignHeight="450" d:DesignWidth="400">
+    <StackPanel>
+        <!-- Simple Dispense -->
+        <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="AMOUNT DISPENSE" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,12"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" 
+                             materialDesign:HintAssist.Hint="Enter amount"
+                             Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             FontSize="22" FontWeight="Light"
+                             AutomationProperties.AutomationId="DispenseBox"/>
+
+                    <Button Grid.Column="1" 
+                            Style="{StaticResource PrimaryButtonStyle}" 
+                            Command="{Binding DispenseCommand}" 
+                            VerticalAlignment="Center"
+                            Margin="12,0,0,0" Height="44" Width="44"
+                            AutomationProperties.AutomationId="DispenseButton">
+                        <materialDesign:PackIcon Kind="ChevronRight" Width="24" Height="24"/>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Separator Background="#1AFFFFFF" Margin="0,4,0,20"/>
+
+        <!-- Bulk Dispense (Dialog) -->
+        <Button Style="{StaticResource ModernFlatButtonStyle}"
+                Command="{Binding ShowBulkDispenseCommand}"
+                HorizontalAlignment="Stretch" Height="44" Margin="0,0,0,12"
+                AutomationProperties.AutomationId="BulkDispenseShowButton">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="PlaylistCheck" Margin="0,0,8,0"/>
+                <TextBlock Text="BULK DISPENSE" FontSize="13"/>
+            </StackPanel>
+        </Button>
+    </StackPanel>
+</UserControl>
