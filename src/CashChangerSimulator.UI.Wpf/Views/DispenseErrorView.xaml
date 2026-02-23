@@ -1,0 +1,22 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.DispenseErrorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:DispenseViewModel}"
+             d:DesignHeight="300" d:DesignWidth="400">
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40">
+        <materialDesign:PackIcon Kind="AlertCircle" Width="64" Height="64" Foreground="Red" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+        <TextBlock Text="DISPENSE ERROR" FontSize="24" FontWeight="Bold" Foreground="Red" HorizontalAlignment="Center"/>
+        <TextBlock Text="Hardware check required." FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,12"/>
+        <Button Command="{Binding ClearErrorCommand}" Style="{StaticResource ModernFlatButtonStyle}" Foreground="Red" Margin="0,16" Height="44">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" />
+                <TextBlock Text="CLEAR ERROR" FontSize="14"/>
+            </StackPanel>
+        </Button>
+    </StackPanel>
+</UserControl>

@@ -18,6 +18,8 @@ public class PosTransactionViewModel : IDisposable
     // Properties
     /// <summary>目標金額の入力値。</summary>
     public BindableReactiveProperty<string> TargetAmountInput { get; }
+    /// <summary>目標金額（数値型）。</summary>
+    public ReadOnlyReactiveProperty<decimal> TargetAmount { get; }
     /// <summary>現在の取引ステータス。</summary>
     public BindableReactiveProperty<PosTransactionStatus> TransactionStatus { get; }
     /// <summary>投入済みの合計金額。</summary>
@@ -47,6 +49,11 @@ public class PosTransactionViewModel : IDisposable
                 !decimal.TryParse(text, out var val) ? new Exception("Invalid amount") :
                 val <= 0 ? new Exception("Amount must be positive") : null)
             .AddTo(_disposables);
+
+        TargetAmount = TargetAmountInput.Select(text =>
+        {
+            return decimal.TryParse(text, out var val) ? val : 0m;
+        }).ToReadOnlyReactiveProperty(0m).AddTo(_disposables);
 
         TransactionStatus = _status.ToBindableReactiveProperty().AddTo(_disposables);
 

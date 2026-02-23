@@ -50,7 +50,7 @@
                     
                     <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                         <TextBlock Text="TOTAL DUE" FontSize="10" Opacity="0.5"/>
-                        <TextBlock Text="{Binding TargetAmountInput.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding TargetAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="16,0,0,0">
@@ -60,7 +60,7 @@
                 </Grid>
 
                 <ProgressBar Value="{Binding InsertedAmount.Value}" 
-                             Maximum="{Binding TargetAmountInput.Value}"
+                             Maximum="{Binding TargetAmount.Value}"
                              Height="10" Margin="16,0,16,8"
                              Foreground="{StaticResource PrimaryBrush}"
                              Background="#1AFFFFFF"/>
