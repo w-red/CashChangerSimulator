@@ -41,7 +41,7 @@ public static class UiTestRetry
         var processId = app.ProcessId;
         FlaUI.Core.Tools.Retry.WhileTrue(() =>
         {
-            // Try 1: App top level windows and their direct children (WPF Ownership often puts windows as children)
+            // Try 1: App top level windows and their descendants
             try
             {
                 var topWindows = app.GetAllTopLevelWindows(automation);
@@ -53,8 +53,8 @@ public static class UiTestRetry
                         return false;
                     }
 
-                    // Look for owned windows which might appear as children in UIA tree
-                    var child = w.FindFirstChild(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window).And(
+                    // Look for owned windows which might appear as descendants in UIA tree
+                    var child = w.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window).And(
                         cf.ByAutomationId(title).Or(cf.ByName(title))));
                     if (child != null)
                     {
@@ -65,7 +65,7 @@ public static class UiTestRetry
             }
             catch { }
 
-            // Try 2: Desktop direct children (Absolute fallback)
+            // Try 2: Desktop indirect children/descendants (Absolute fallback)
             try
             {
                 var desktop = automation.GetDesktop();
@@ -74,6 +74,17 @@ public static class UiTestRetry
                 result = windows.FirstOrDefault(w =>
                     w.Properties.ProcessId == processId &&
                     (w.AutomationId == title || (w.Name != null && w.Name.Contains(title))))?.AsWindow();
+
+                if (result == null)
+                {
+                    // Even deeper search on desktop if needed
+                    var allAny = desktop.FindFirstDescendant(cf => cf.ByProcessId(processId).And(
+                        cf.ByAutomationId(title).Or(cf.ByName(title))));
+                    if (allAny != null && allAny.ControlType == FlaUI.Core.Definitions.ControlType.Window)
+                    {
+                        result = allAny.AsWindow();
+                    }
+                }
             }
             catch { }
 

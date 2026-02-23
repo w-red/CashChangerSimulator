@@ -25,6 +25,11 @@ public class MainViewModel : IDisposable
     /// <summary>現在の UI 動作モード。</summary>
     public BindableReactiveProperty<UIMode> CurrentUIMode { get; }
 
+    /// <summary>入金ウィンドウを表示するコマンド。</summary>
+    public ReactiveCommand OpenDepositCommand { get; }
+    /// <summary>出金ウィンドウを表示するコマンド。</summary>
+    public ReactiveCommand OpenDispenseCommand { get; }
+
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,
@@ -81,6 +86,38 @@ public class MainViewModel : IDisposable
             })
             .ToBindableReactiveProperty("IDLE (待機中)")
             .AddTo(_disposables);
+
+        OpenDepositCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenDepositCommand.Subscribe(_ =>
+        {
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
+            if (mainWindow != null)
+            {
+                var window = new DepositWindow(Deposit, () => Inventory.Denominations) { Owner = mainWindow };
+                window.Show();
+            }
+            else
+            {
+                var window = new DepositWindow(Deposit, () => Inventory.Denominations);
+                window.Show();
+            }
+        });
+
+        OpenDispenseCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenDispenseCommand.Subscribe(_ =>
+        {
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
+            if (mainWindow != null)
+            {
+                var window = new DispenseWindow(Dispense, () => Inventory.Denominations) { Owner = mainWindow };
+                window.Show();
+            }
+            else
+            {
+                var window = new DispenseWindow(Dispense, () => Inventory.Denominations);
+                window.Show();
+            }
+        });
     }
 
     /// <summary>全体的な動作状態の表示名。</summary>
