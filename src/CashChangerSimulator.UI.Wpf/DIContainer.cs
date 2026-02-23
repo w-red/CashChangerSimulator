@@ -26,6 +26,7 @@ public static class DIContainer
         // Core Services (Singleton)
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
         resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
+        resolver.Register<ChangeCalculator, ChangeCalculator>(Lifestyle.Singleton);
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);

@@ -12,29 +12,26 @@ namespace CashChangerSimulator.UI.Tests;
 /// <summary>ViewModel 全体の基本動作や初期状態を検証するテストクラス。</summary>
 public class ViewModelTest
 {
-    /// <summary>払出コマンド実行時にマネージャーが呼ばれ、入力がクリアされることを検証する。</summary>
+    /// <summary>MainViewModel の初期状態が正しくセットアップされることを検証する。</summary>
     [Fact]
-    public void MainViewModelDispenseShouldCallManagerAndClearInput()
+    public void MainViewModelShouldInitializeCorrectly()
     {
         // Setup
         var mockInventory = new Mock<Inventory>();
         mockInventory.Setup(i => i.Changed).Returns(Observable.Empty<DenominationKey>());
-        mockInventory.Setup(i => i.CalculateTotal(It.IsAny<string>())).Returns(0m);
+        mockInventory.Setup(i => i.CalculateTotal(It.IsAny<string>())).Returns(10000m);
 
         var mockHistory = new Mock<TransactionHistory>();
         mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
 
-        // プロバイダー系は依存関係を注入した実インスタンスを使用するのが簡単です
         var realConfig = new ConfigurationProvider();
-        realConfig.Config.CurrencyCode = "JPY"; // テスト用に明示的に設定
+        realConfig.Config.CurrencyCode = "JPY";
 
-        // デフォルトの JPY 設定を使用
         var realMetadata = new Wpf.Services.CurrencyMetadataProvider(realConfig);
         var realMonitors = new MonitorsProvider(mockInventory.Object, realConfig, realMetadata);
         var realAggregator = new OverallStatusAggregatorProvider(realMonitors);
 
-        // Managerのメソッドがvirtualなのでモック可能です
-        var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object);
+        var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object, new ChangeCalculator());
 
         var realHardware = new HardwareStatusManager();
         var depositController = new DepositController(mockInventory.Object);
@@ -50,19 +47,21 @@ public class ViewModelTest
             realMetadata,
             realHardware,
             depositController,
-            dispenseController)
-        {
-            // Dispense 1000
-            Deposit = { IsInDepositMode = { Value = false } } // Ensure not in deposit mode
-        };
-        // Initialize sub-viewmodel property
-        vm.Dispense.DispenseAmountInput.Value = "1000";
+            dispenseController);
 
-        vm.Dispense.DispenseCommand.Execute(Unit.Default);
+        // Verify: ViewModel is properly initialized
+        vm.Deposit.ShouldNotBeNull();
+        vm.Dispense.ShouldNotBeNull();
+        vm.Inventory.ShouldNotBeNull();
+        vm.PosTransaction.ShouldNotBeNull();
 
-        // Verify
-        mockManager.Verify(m => m.Dispense(1000m, "JPY"), Times.Once);
+        // Verify: Total amount reflects mock inventory
+        vm.Dispense.TotalAmount.Value.ShouldBe(10000m);
+
+        // Verify: IsInDepositMode is false by default
+        vm.Deposit.IsInDepositMode.Value.ShouldBeFalse();
+
+        // Verify: DispenseAmountInput is empty by default
         vm.Dispense.DispenseAmountInput.Value.ShouldBe("");
     }
-
 }

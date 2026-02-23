@@ -8,11 +8,14 @@ public partial class SettingsWindow : Window
 {
     private readonly SettingsViewModel _viewModel;
 
-    /// <summary>各プロバイダーを注入し、ViewModel を初期化して画面を生成する。</summary>
-    public SettingsWindow(ConfigurationProvider configProvider, MonitorsProvider monitorsProvider, Services.CurrencyMetadataProvider metadataProvider)
+    /// <summary>DI コンテナからプロバイダーを解決し、ViewModel を初期化して画面を生成する。</summary>
+    public SettingsWindow()
     {
         InitializeComponent();
-        _viewModel = new SettingsViewModel(configProvider, monitorsProvider, metadataProvider);
+        _viewModel = new SettingsViewModel(
+            DIContainer.Resolve<ConfigurationProvider>(),
+            DIContainer.Resolve<MonitorsProvider>(),
+            DIContainer.Resolve<Services.CurrencyMetadataProvider>());
         DataContext = _viewModel;
     }
 

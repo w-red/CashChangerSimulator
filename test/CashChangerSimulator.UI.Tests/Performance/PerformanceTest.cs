@@ -16,7 +16,7 @@ public class PerformanceTest(ITestOutputHelper output)
         // Setup
         var inventory = new Inventory();
         var history = new TransactionHistory();
-        var manager = new CashChangerManager(inventory, history);
+        var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
 
         // JPY setup
         var key1000 = new DenominationKey(1000m, CashType.Bill, "JPY");
