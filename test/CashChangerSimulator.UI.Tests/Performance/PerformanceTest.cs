@@ -1,6 +1,9 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.Core.Managers;
+using CashChangerSimulator.Core.Services;
 using Microsoft.Extensions.Logging;
 using MoneyKind4Opos.Currencies.Interfaces;
 using System.Diagnostics;

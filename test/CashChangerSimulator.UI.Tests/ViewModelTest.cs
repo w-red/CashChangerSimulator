@@ -3,6 +3,8 @@ using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
