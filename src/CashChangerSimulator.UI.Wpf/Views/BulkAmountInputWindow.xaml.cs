@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace CashChangerSimulator.UI.Wpf;
+namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>金種指定入出金用のダイアログウィンドウ。</summary>
 public partial class BulkAmountInputWindow : Window

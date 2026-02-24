@@ -1,5 +1,6 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using R3;
 using System.Collections.ObjectModel;

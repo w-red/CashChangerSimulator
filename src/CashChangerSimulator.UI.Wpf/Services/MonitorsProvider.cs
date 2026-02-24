@@ -1,7 +1,7 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 
-namespace CashChangerSimulator.UI.Wpf;
+namespace CashChangerSimulator.UI.Wpf.Services;
 
 /// <summary>
 /// 全金種の CashStatusMonitor インスタンスを提供するプロバイダー。

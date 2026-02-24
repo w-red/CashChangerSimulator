@@ -4,25 +4,25 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CashChangerSimulator.UI.Wpf;
+namespace CashChangerSimulator.UI.Wpf.Views;
 
-/// <summary>入金操作を行うための独立ウィンドウ。</summary>
-public partial class DepositWindow : Window
+/// <summary>出金操作を行うための独立ウィンドウ。</summary>
+public partial class DispenseWindow : Window
 {
     private readonly CompositeDisposable _disposables = [];
 
-    /// <summary>DepositWindow の新しいインスタンスを初期化する。</summary>
-    /// <param name="viewModel">入金ビューモデル。</param>
+    /// <summary>DispenseWindow の新しいインスタンスを初期化する。</summary>
+    /// <param name="viewModel">出金ビューモデル。</param>
     /// <param name="getDenominations">金種リスト取得関数。</param>
-    public DepositWindow(DepositViewModel viewModel, Func<IEnumerable<DenominationViewModel>> getDenominations)
+    public DispenseWindow(DispenseViewModel viewModel, Func<IEnumerable<DenominationViewModel>> getDenominations)
     {
         InitializeComponent();
         DataContext = viewModel;
 
-        viewModel.ShowBulkInsertCommand.Subscribe(_ =>
+        viewModel.ShowBulkDispenseCommand.Subscribe(_ =>
         {
             var items = getDenominations().Select(d => new BulkAmountInputItemViewModel(d.Key, d.Name)).ToList();
-            var dialog = new BulkAmountInputWindow("BULK INSERT", "INSERT")
+            var dialog = new BulkAmountInputWindow("BULK DISPENSE", "DISPENSE")
             { 
                 Owner = this,
                 DataContext = items 
@@ -32,7 +32,7 @@ public partial class DepositWindow : Window
             {
                 var counts = items.Where(x => x.Quantity.Value > 0)
                                   .ToDictionary(x => x.Key, x => x.Quantity.Value);
-                viewModel.InsertBulkCommand.Execute(counts);
+                viewModel.DispenseBulkCommand.Execute(counts);
             }
         }).AddTo(_disposables);
     }

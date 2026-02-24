@@ -1,4 +1,6 @@
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;

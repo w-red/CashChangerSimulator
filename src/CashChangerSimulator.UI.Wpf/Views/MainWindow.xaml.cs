@@ -1,7 +1,7 @@
 ﻿using CashChangerSimulator.UI.Wpf.ViewModels;
 using System.Windows;
 
-namespace CashChangerSimulator.UI.Wpf;
+namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>メインウィンドウの表示と操作を制御する UI 要素。</summary>
 public partial class MainWindow : Window
