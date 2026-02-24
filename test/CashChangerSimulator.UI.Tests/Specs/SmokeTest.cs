@@ -29,6 +29,7 @@ public class SmokeTest : IDisposable
         Assert.NotNull(totalAmountLabel);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _app.Dispose();

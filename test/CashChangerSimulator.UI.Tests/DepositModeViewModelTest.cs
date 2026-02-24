@@ -23,6 +23,7 @@ public class DepositModeViewModelTest
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly DenominationKey _testKey = new(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill);
 
+    /// <summary>DepositModeViewModelTest の新しいインスタンスを初期化します。</summary>
     public DepositModeViewModelTest()
     {
         _mockInventory = new Mock<Inventory>();
@@ -58,8 +59,9 @@ public class DepositModeViewModelTest
             _dispenseController);
     }
 
+    /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証する。</summary>
     [Fact]
-    public void DenominationViewModel_IsAcceptingCash_ShouldReflectPausedState()
+    public void DenominationViewModelIsAcceptingCashShouldReflectPausedState()
     {
         // Arrange
         var config = new Core.Configuration.DenominationSettings();
@@ -83,8 +85,9 @@ public class DepositModeViewModelTest
         Assert.True(denVm.IsAcceptingCash.CurrentValue);
     }
 
+    /// <summary>MainViewModel の CurrentModeName が状態遷移を正しく反映することを検証する。</summary>
     [Fact]
-    public void MainViewModel_CurrentModeName_ShouldReflectTransitions()
+    public void MainViewModelCurrentModeNameShouldReflectTransitions()
     {
         // Initial
         Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);

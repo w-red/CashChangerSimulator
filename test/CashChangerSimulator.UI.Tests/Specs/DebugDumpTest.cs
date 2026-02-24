@@ -62,6 +62,7 @@ public class DebugDumpTest : IDisposable
         Assert.True(File.Exists(outPath));
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _app?.Dispose();
