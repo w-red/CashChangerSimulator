@@ -1,7 +1,7 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 
-namespace CashChangerSimulator.UI.Wpf.Services;
+namespace CashChangerSimulator.Core.Services;
 
 /// <summary>全体的なステータス集計インスタンスを提供するプロバイダー。</summary>
 /// <param name="monitorsProvider">ステータスモニタープロバイダー。</param>

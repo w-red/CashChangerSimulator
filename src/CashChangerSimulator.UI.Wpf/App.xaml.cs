@@ -53,13 +53,21 @@ public partial class App : Application
     {
         try
         {
+            // Only attempt to save if DIContainer was successfully initialized
             var history = DIContainer.Resolve<TransactionHistory>();
-            var state = history.ToState();
-            ConfigurationLoader.SaveHistoryState(state);
+            if (history != null)
+            {
+                var state = history.ToState();
+                ConfigurationLoader.SaveHistoryState(state);
+            }
         }
-        catch
+        catch (InvalidOperationException)
         {
-            // Fail safe on exit: ensure application can close even if history saving fails
+            // DIContainer not initialized, ignore
+        }
+        catch (Exception)
+        {
+            // Other failures safe on exit: ensure application can close even if history saving fails
         }
         base.OnExit(e);
     }

@@ -3,7 +3,7 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Transactions;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Device;
 using R3;
@@ -19,7 +19,7 @@ public class InventoryViewModel : IDisposable
     private readonly OverallStatusAggregator _statusAggregator;
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
-    private readonly Services.CurrencyMetadataProvider _metadataProvider;
+    private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly CompositeDisposable _disposables = [];
 
@@ -45,7 +45,7 @@ public class InventoryViewModel : IDisposable
         OverallStatusAggregator aggregator,
         ConfigurationProvider configProvider,
         MonitorsProvider monitorsProvider,
-        Services.CurrencyMetadataProvider metadataProvider,
+        CurrencyMetadataProvider metadataProvider,
         HardwareStatusManager hardwareStatusManager,
         DepositController depositController)
     {
@@ -116,3 +116,4 @@ public class InventoryViewModel : IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
