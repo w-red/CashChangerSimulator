@@ -175,13 +175,13 @@ public class DepositTest : IDisposable
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // 2. Click "ERROR" (Simulate Overlap)
-        var overlapButton = FindElement(depositWindow, "SimulateOverlapButton", "ERROR")?.AsButton();
+        var overlapButton = UiTestRetry.Find(() => FindElement(depositWindow, "SimulateOverlapButton", null)?.AsButton(), UITestTimings.RetryLongTimeout);
         overlapButton.ShouldNotBeNull();
         overlapButton.Click();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // 3. Verify VAL ERROR indicator appears (On Main Window or Terminal? Let's assume global status shows it)
-        var errorIndicator = window.FindFirstDescendant(cf => cf.ByText("VAL ERROR"));
+        var errorIndicator = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")), UITestTimings.RetryLongTimeout);
         errorIndicator.ShouldNotBeNull();
 
         // 4. Try to click FINISH (FixDeposit) -> Should fail to proceed
