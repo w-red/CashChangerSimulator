@@ -1,48 +1,45 @@
-using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Managers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Monitoring;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Transactions;
-using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
 using Shouldly;
-using Microsoft.Extensions.Logging;
-using Microsoft.PointOfService;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests;
 
-public class PosTransactionViewModelTest
+public class PosTransactionViewModelTest : IDisposable
 {
+    private readonly PosTransactionViewModelFixture _fixture = new();
+
+    public PosTransactionViewModelTest()
+    {
+        _fixture.Initialize(PosTransactionTestConstants.TestCurrencyCode);
+    }
+
+    /// <summary>
+    /// 取引開始時のOPOSシーケンス呼び出しを検証するテスト。
+    /// 
+    /// テストフロー:
+    /// 1. 取引目標金額をセット
+    /// 2. 取引開始コマンドを実行
+    /// 
+    /// 期待値: 初期化および入金開始シーケンス（Open, Claim, BeginDeposit）が正しく呼ばれること。
+    /// </summary>
     [Fact]
     public void StartTransactionShouldCallOposSequence()
     {
-        // Setup
-        var inv = new Inventory();
-        var history = new TransactionHistory();
-        var manager = new CashChangerManager(inv, history, new ChangeCalculator());
-        var hw = new HardwareStatusManager();
-        var dep = new DepositController(inv);
-        var disp = new DispenseController(manager, null, new Mock<IDeviceSimulator>().Object);
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.Inventory.TryAdd("JPY", new InventorySettings());
-        configProvider.Config.CurrencyCode = "JPY";
+        // Arrange
+        var depVm = new Mock<DepositViewModel>(_fixture.DepositController, _fixture.Hardware, (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
+        var dispVm = new Mock<DispenseViewModel>(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
+        
+        var vm = new PosTransactionViewModel(depVm.Object, dispVm.Object, _fixture.CashChanger);
 
-        var monitorsProvider = new MonitorsProvider(inv, configProvider, new CurrencyMetadataProvider(configProvider));
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        
-        var cc = new SimulatorCashChanger(configProvider, inv, history, manager, dep, disp, aggregatorProvider, hw);
-        cc.SkipStateVerification = true;
-        cc.CurrencyCode = "JPY";
-        
-        var depVm = new Mock<DepositViewModel>(dep, hw, (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
-        var dispVm = new Mock<DispenseViewModel>(inv, manager, disp, new ConfigurationProvider(), Observable.Return(false), Observable.Return(false), (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
-        
-        var vm = new PosTransactionViewModel(depVm.Object, dispVm.Object, cc);
-
-        vm.TargetAmountInput.Value = "1000";
+        vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
 
         // Act
         vm.StartCommand.Execute(Unit.Default);
@@ -54,53 +51,57 @@ public class PosTransactionViewModelTest
         vm.OposLog.ShouldContain(s => s.Contains("BeginDeposit()"));
     }
 
+    /// <summary>
+    /// 取引完了時のOPOSシーケンス呼び出しを検証するテスト。
+    /// 
+    /// テストフロー:
+    /// 1. 取引を開始状態にする
+    /// 2. 支払い金額に達するまでの現金を投入する
+    /// 3. 取引完了を待機し、お釣りの支払いを実行
+    /// 
+    /// 期待値: 預り金確定、釣銭支払い、デバイス解放（EndDeposit, DispenseChange, Release, Close）が正しく呼ばれること。
+    /// </summary>
     [Fact]
     public async Task CompleteTransactionShouldCallOposSequence()
     {
-        // Setup
-        var inv = new Inventory();
-        var history = new TransactionHistory();
-        var manager = new CashChangerManager(inv, history, new ChangeCalculator());
-        var hw = new HardwareStatusManager();
-        var dep = new DepositController(inv);
-        var disp = new DispenseController(manager, null, new Mock<IDeviceSimulator>().Object);
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.Inventory.TryAdd("JPY", new InventorySettings());
-        configProvider.Config.CurrencyCode = "JPY";
+        // Arrange
+        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
+        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
+        
+        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
 
-        var monitorsProvider = new MonitorsProvider(inv, configProvider, new CurrencyMetadataProvider(configProvider));
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        
-        var cc = new SimulatorCashChanger(configProvider, inv, history, manager, dep, disp, aggregatorProvider, hw);
-        cc.SkipStateVerification = true;
-        cc.CurrencyCode = "JPY";
-        
-        var depVm = new DepositViewModel(dep, hw, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(inv, manager, disp, new ConfigurationProvider(), Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        
-        var vm = new PosTransactionViewModel(depVm, dispVm, cc);
+        // Act
+        await ExecuteCompleteTransaction(vm);
 
-        vm.TargetAmountInput.Value = "1000";
+        // Verify
+        VerifyCompletionSequence(vm);
+    }
+
+    private async Task ExecuteCompleteTransaction(PosTransactionViewModel vm)
+    {
+        vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
         // Simulate start
         vm.StartCommand.Execute(Unit.Default);
         vm.OposLog.Clear(); // Clear start logs for easier verification
 
         // Simulate cash insertion (1500 JPY) at once to avoid race condition
-        dep.TrackBulkDeposit(new Dictionary<DenominationKey, int> {
+        _fixture.DepositController.TrackBulkDeposit(new Dictionary<DenominationKey, int> {
             { new DenominationKey(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), 1 },
             { new DenominationKey(500, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin), 1 }
         });
 
         // Act - Trigger completion logic (which is called automatically by subscription)
         // Give it a moment to process the async completion
-        await Task.Delay(5000);
+        await Task.Delay(PosTransactionTestConstants.AsyncCompletionWaitMs);
+    }
 
-        // Verify
+    private void VerifyCompletionSequence(PosTransactionViewModel vm)
+    {
         try
         {
             vm.OposLog.ShouldContain(s => s.Contains("FixDeposit()"));
             vm.OposLog.ShouldContain(s => s.Contains("EndDeposit(NoChange)"));
-            vm.OposLog.ShouldContain(s => s.Contains("DispenseChange(500)"));
+            vm.OposLog.ShouldContain(s => s.Contains($"DispenseChange({PosTransactionTestConstants.ChangeAmount})"));
             vm.OposLog.ShouldContain(s => s.Contains("Release()"));
             vm.OposLog.ShouldContain(s => s.Contains("Close()"));
         }
@@ -109,5 +110,10 @@ public class PosTransactionViewModelTest
             var logs = string.Join("\n", vm.OposLog);
             throw new Exception($"Test Failed. OposLog:\n{logs}\n\nOriginal Exception: {ex.Message}", ex);
         }
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 }
