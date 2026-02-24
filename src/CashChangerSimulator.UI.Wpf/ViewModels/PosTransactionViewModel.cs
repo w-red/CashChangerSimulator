@@ -16,6 +16,7 @@ public class PosTransactionViewModel : IDisposable
     private readonly SimulatorCashChanger _cashChanger;
     private readonly ILogger<PosTransactionViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
+    private CancellationTokenSource? _timeoutCts;
 
     // Properties
     /// <summary>目標金額の入力値。</summary>
@@ -30,6 +31,8 @@ public class PosTransactionViewModel : IDisposable
     public BindableReactiveProperty<decimal> RemainingAmount { get; }
     /// <summary>お釣りの合計金額。</summary>
     public BindableReactiveProperty<decimal> ChangeAmount { get; }
+    /// <summary>取引のタイムアウト時間（秒）。0以下の場合はタイムアウトなし。</summary>
+    public BindableReactiveProperty<int> TransactionTimeoutSeconds { get; }
     /// <summary>OPOSアクションのログ。</summary>
     public ObservableCollection<string> OposLog { get; } = new();
 
@@ -62,7 +65,8 @@ public class PosTransactionViewModel : IDisposable
             .EnableValidation(text =>
                 string.IsNullOrWhiteSpace(text) ? null :
                 !decimal.TryParse(text, out var val) ? new Exception("Invalid amount") :
-                val <= 0 ? new Exception("Amount must be positive") : null)
+                val <= 0 ? new Exception("Amount must be positive") : 
+                val > 100_000_000 ? new Exception("Amount is too large") : null)
             .AddTo(_disposables);
 
         TargetAmount = TargetAmountInput.Select(text =>
@@ -91,6 +95,8 @@ public class PosTransactionViewModel : IDisposable
             }
             return 0m;
         }).ToBindableReactiveProperty(0m).AddTo(_disposables);
+
+        TransactionTimeoutSeconds = new BindableReactiveProperty<int>(60).AddTo(_disposables);
 
         StartCommand = TargetAmountInput
             .Select(text => !TargetAmountInput.HasErrors && !string.IsNullOrWhiteSpace(text))
@@ -126,6 +132,9 @@ public class PosTransactionViewModel : IDisposable
                 var (inserted, status) = x;
                 if (status != PosTransactionStatus.WaitingForCash) return;
 
+                // Reset timeout on cash insertion
+                ResetTimeout();
+
                 if (decimal.TryParse(TargetAmountInput.Value, out var target))
                 {
                     if (inserted >= target)
@@ -159,6 +168,7 @@ public class PosTransactionViewModel : IDisposable
             _cashChanger.BeginDeposit();
 
             _status.Value = PosTransactionStatus.WaitingForCash;
+            ResetTimeout();
         }
         catch (Exception ex)
         {
@@ -167,6 +177,35 @@ public class PosTransactionViewModel : IDisposable
             _status.Value = PosTransactionStatus.Idle;
         }
         _logger.LogInformation("StartTransaction finished. Status: {0}", _status.Value);
+    }
+
+    private void ResetTimeout()
+    {
+        _timeoutCts?.Cancel();
+        _timeoutCts?.Dispose();
+
+        var timeoutSec = TransactionTimeoutSeconds.Value;
+        if (timeoutSec <= 0) return;
+
+        _timeoutCts = new CancellationTokenSource();
+        var token = _timeoutCts.Token;
+
+        Task.Delay(TimeSpan.FromSeconds(timeoutSec), token).ContinueWith(t =>
+        {
+            if (t.IsCompletedSuccessfully && !token.IsCancellationRequested)
+            {
+                _logger.LogWarning("Transaction timed out after {0} seconds.", timeoutSec);
+                LogOpos($"TIMEOUT: {timeoutSec}s exceeded.");
+                CancelTransaction();
+            }
+        }, TaskScheduler.Default);
+    }
+
+    private void StopTimeout()
+    {
+        _timeoutCts?.Cancel();
+        _timeoutCts?.Dispose();
+        _timeoutCts = null;
     }
 
     private void LogOpos(string message)
@@ -178,10 +217,13 @@ public class PosTransactionViewModel : IDisposable
     private void CancelTransaction()
     {
         _logger.LogInformation("Canceling POS transaction.");
-        LogOpos("Cancelling... EndDeposit(Repay)");
+        StopTimeout();
         
         try
         {
+            LogOpos("FixDeposit()");
+            _cashChanger.FixDeposit();
+            LogOpos("Cancelling... EndDeposit(Repay)");
             _cashChanger.EndDeposit(CashDepositAction.Repay);
             LogOpos("Release()");
             _cashChanger.Release();
@@ -198,6 +240,7 @@ public class PosTransactionViewModel : IDisposable
 
     private async Task CompleteTransactionAsync()
     {
+        StopTimeout();
         var inserted = InsertedAmount.Value;
         var targetValue = decimal.TryParse(TargetAmountInput.Value, out var v) ? v : 0m;
         var changeToDispense = (int)Math.Max(0, inserted - targetValue);
