@@ -11,6 +11,13 @@
     
     <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT SIDE: Transaction States -->
+            <Grid Grid.Column="0">
             <!-- IDLE STATE: Entry of Target Amount -->
             <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=Idle}">
                 <TextBlock Text="POS TRANSACTION" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
@@ -91,6 +98,63 @@
                 <TextBlock Text="PAYMENT COMPLETED" FontSize="20" FontWeight="Black" HorizontalAlignment="Center"/>
                 <TextBlock Text="Thank you for your purchase!" FontSize="12" Opacity="0.7" HorizontalAlignment="Center" Margin="0,8,0,0"/>
             </StackPanel>
+            </Grid>
+
+            <!-- RIGHT SIDE: OPOS LOG -->
+            <Border Grid.Column="1" Background="#0D000000" CornerRadius="0,8,8,0" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="OPOS EVENT LOG" Grid.Row="0"
+                               FontSize="10" FontWeight="Bold" Opacity="0.6" 
+                               Margin="0,0,0,8" HorizontalAlignment="Center"/>
+
+                    <ListBox Grid.Row="1" 
+                             ItemsSource="{Binding OposLog}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             FontSize="10"
+                             FontFamily="Consolas"
+                             Margin="0,0,0,16"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="2,1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Opacity="0.8" Foreground="LightSkyBlue"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Manual OPOS Control Buttons (Added based on design) -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Button Grid.Row="0" Style="{StaticResource MaterialDesignRaisedButton}" Background="#E5F9E0" Foreground="Black" Content="Open" Command="{Binding ManualOpenCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Row="1" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Deposit" Command="{Binding ManualDepositCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Row="2" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Dispense" Command="{Binding ManualDispenseCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Row="3" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Close" Command="{Binding ManualCloseCommand}" Margin="0,0,0,0" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </UserControl>
