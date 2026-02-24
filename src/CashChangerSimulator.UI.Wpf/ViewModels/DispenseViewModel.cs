@@ -45,6 +45,7 @@ public class DispenseViewModel : IDisposable
     /// <summary>エラー状態をクリアするコマンド。</summary>
     public ReactiveCommand ClearErrorCommand { get; }
 
+    /// <summary>DispenseViewModel の新しいインスタンスを初期化します。</summary>
     public DispenseViewModel(
         Inventory inventory,
         CashChangerManager manager,
@@ -176,6 +177,7 @@ public class DispenseViewModel : IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

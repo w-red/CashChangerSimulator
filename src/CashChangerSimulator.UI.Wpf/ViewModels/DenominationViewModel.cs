@@ -21,6 +21,7 @@ public class DenominationViewModel
     /// <summary>現在この金種を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
+    /// <summary>DenominationViewModel の新しいインスタンスを初期化します。</summary>
     public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
     {
         _inventory = inventory;
