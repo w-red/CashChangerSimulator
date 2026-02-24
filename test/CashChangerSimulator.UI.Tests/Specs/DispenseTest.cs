@@ -99,7 +99,7 @@ public class DispenseTest : IDisposable
         Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, UITestTimings.RetryLongTimeout);
     }
 
-    private Window OpenDispenseTerminal(Window mainWindow)
+    private Window OpenDispenseTerminal(Window? mainWindow)
     {
         var launchButton = FindElement(mainWindow, "LaunchDispenseButton", "DISPENSE")?.AsButton();
         launchButton.ShouldNotBeNull();
@@ -122,8 +122,9 @@ public class DispenseTest : IDisposable
 
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
-        if (container == null) return null;
-        return UiTestRetry.Find(() =>
+        return container == null
+            ? null
+            : UiTestRetry.Find(() =>
         {
             var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
             if (el != null) return el;

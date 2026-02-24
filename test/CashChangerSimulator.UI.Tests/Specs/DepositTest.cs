@@ -183,7 +183,7 @@ public class DepositTest : IDisposable
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // 3. Verify VAL ERROR indicator appears (On Main Window or Terminal? Let's assume global status shows it)
-        var errorIndicator = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")), UITestTimings.RetryLongTimeout);
+        var errorIndicator = UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByText("VAL ERROR")), UITestTimings.RetryLongTimeout);
         errorIndicator.ShouldNotBeNull();
 
         // 4. Try to click FINISH (FixDeposit) -> Should fail to proceed
@@ -193,7 +193,7 @@ public class DepositTest : IDisposable
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Verify VAL ERROR indicator still exists
-        window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldNotBeNull();
+        window!.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldNotBeNull();
 
         // 5. Cancel (RETURN) should work and clear error
         var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
@@ -205,7 +205,7 @@ public class DepositTest : IDisposable
         window.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldBeNull();
     }
 
-    private Window OpenDepositTerminal(Window mainWindow)
+    private Window OpenDepositTerminal(Window? mainWindow)
     {
         var launchButton = FindElement(mainWindow, "LaunchDepositButton", "DEPOSIT")?.AsButton();
         launchButton.ShouldNotBeNull();
@@ -249,8 +249,9 @@ public class DepositTest : IDisposable
 
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
-        if (container == null) return null;
-        return UiTestRetry.Find(() =>
+        return container == null
+            ? null
+            : UiTestRetry.Find(() =>
         {
             var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
             if (el != null) return el;
