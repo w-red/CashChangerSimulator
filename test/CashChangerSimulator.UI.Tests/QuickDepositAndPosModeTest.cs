@@ -6,7 +6,6 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
-using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
@@ -59,7 +58,8 @@ public class QuickDepositAndPosModeTest
             _metadataProvider,
             hardwareManager,
             _depositController,
-            _dispenseController);
+            _dispenseController,
+            new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager));
     }
 
     /// <summary>クイック入金コマンドが内訳を計算し、入金を完了させることを検証する。</summary>
@@ -78,16 +78,7 @@ public class QuickDepositAndPosModeTest
             new DenominationViewModel(_mockInventory.Object, new DenominationKey(100, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin), _metadataProvider, _depositController, monitor, "100"),
         };
 
-        // We need to pass these denoms to the DepositViewModel. 
-        // In MainViewModel, it's passed as () => Inventory.Denominations.
-        // But our Phase19_TDD_Test has its own MainViewModel which creates its own InventoryViewModel.
-        // Let's use the one in _mainViewModel.
-
         var depositVm = _mainViewModel.Deposit;
-
-        // Mock the return of denominations if necessary, but MainViewModel already setup sub-VMs.
-        // However, the InventoryViewModel in MainViewModel might have empty denominations if metadata is empty.
-        // Actually CurrencyMetadataProvider uses configProvider.Config.CurrencyCode to get denominations.
 
         // Act: Set input amount
         depositVm.QuickDepositAmountInput.Value = "16600";
@@ -98,12 +89,8 @@ public class QuickDepositAndPosModeTest
         // Act: Execute
         await depositVm.ExecuteQuickDepositAsync(_mainViewModel.Inventory.Denominations);
 
-        // ...
-
         // Assert: Controller state should be Idle (because it finishes automatically)
         depositVm.IsInDepositMode.Value.ShouldBeFalse();
         depositVm.CurrentDepositAmount.Value.ShouldBe(0m);
     }
-
-
 }
