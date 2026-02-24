@@ -1,7 +1,6 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.UI.Wpf.Services;
-using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Managers;
@@ -32,7 +31,7 @@ public class ViewModelTest
         var realConfig = new ConfigurationProvider();
         realConfig.Config.CurrencyCode = "JPY";
 
-        var realMetadata = new Wpf.Services.CurrencyMetadataProvider(realConfig);
+        var realMetadata = new CurrencyMetadataProvider(realConfig);
         var realMonitors = new MonitorsProvider(mockInventory.Object, realConfig, realMetadata);
         var realAggregator = new OverallStatusAggregatorProvider(realMonitors);
 
@@ -51,9 +50,10 @@ public class ViewModelTest
             realAggregator,
             realConfig,
             realMetadata,
-            realHardware,
-            depositController,
-            dispenseController);
+            hardwareStatusManager: realHardware,
+            depositController: depositController,
+            dispenseController: dispenseController,
+            cashChanger: new SimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware));
 
         // Verify: ViewModel is properly initialized
         vm.Deposit.ShouldNotBeNull();

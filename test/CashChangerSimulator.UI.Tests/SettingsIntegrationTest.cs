@@ -6,7 +6,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Core.Services;
 using Shouldly;
 using Xunit;
 using MoneyKind4Opos.Currencies.Interfaces;

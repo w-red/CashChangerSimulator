@@ -6,7 +6,6 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf;
-using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.PointOfService;
 using Moq;
@@ -59,7 +58,8 @@ public class DepositModeViewModelTest
             _metadataProvider,
             hardwareManager,
             _depositController,
-            _dispenseController);
+            _dispenseController,
+            new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager));
     }
 
     /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証する。</summary>
@@ -116,7 +116,3 @@ public class DepositModeViewModelTest
         Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
     }
 }
-
-// Dummy implementation of MetaDataProvider if needed, but we used actual one above.
-// Note: DenominationViewModel constructor was updated in MainViewModel.cs:229
-// Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, displayName));
