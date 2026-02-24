@@ -1,5 +1,6 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
 using R3;
@@ -23,7 +24,7 @@ public class DenominationViewModel
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
     /// <summary>DenominationViewModel の新しいインスタンスを初期化します。</summary>
-    public DenominationViewModel(Inventory inventory, DenominationKey key, Services.CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
+    public DenominationViewModel(Inventory inventory, DenominationKey key, CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
     {
         _inventory = inventory;
         Key = key;
@@ -52,3 +53,4 @@ public class DenominationViewModel
             .ToBindableReactiveProperty(depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused);
     }
 }
+

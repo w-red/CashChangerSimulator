@@ -2,7 +2,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 
-namespace CashChangerSimulator.UI.Wpf.Services;
+namespace CashChangerSimulator.Core.Services;
 
 /// <summary>
 /// 全金種の CashStatusMonitor インスタンスを提供するプロバイダー。
@@ -13,7 +13,7 @@ public class MonitorsProvider
     public IReadOnlyList<CashStatusMonitor> Monitors { get; }
 
     /// <summary>在庫と設定を元に、全金種のモニターを初期化する。</summary>
-    public MonitorsProvider(Inventory inventory, ConfigurationProvider configProvider, Services.CurrencyMetadataProvider metadataProvider)
+    public MonitorsProvider(Inventory inventory, ConfigurationProvider configProvider, CurrencyMetadataProvider metadataProvider)
     {
         var config = configProvider.Config;
         var keys = metadataProvider.SupportedDenominations;

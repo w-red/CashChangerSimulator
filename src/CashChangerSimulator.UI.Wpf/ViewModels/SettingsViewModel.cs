@@ -1,6 +1,6 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Core.Services;
 using Microsoft.Extensions.Logging;
 using R3;
 using System.Collections.ObjectModel;
@@ -13,7 +13,7 @@ public class SettingsViewModel : IDisposable
 {
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
-    private readonly Services.CurrencyMetadataProvider _metadataProvider;
+    private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
 
@@ -55,7 +55,7 @@ public class SettingsViewModel : IDisposable
     public SettingsViewModel(
         ConfigurationProvider configProvider,
         MonitorsProvider monitorsProvider,
-        Services.CurrencyMetadataProvider metadataProvider)
+        CurrencyMetadataProvider metadataProvider)
     {
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
@@ -215,3 +215,4 @@ public class SettingsViewModel : IDisposable
         GC.SuppressFinalize(this);
     }
 }
+

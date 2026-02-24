@@ -5,7 +5,6 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using MicroResolver;
 
@@ -21,23 +20,26 @@ public static class DIContainer
     {
         var resolver = ObjectResolver.Create();
 
-        // Providers (Singleton)
+        // 1. Providers (Singleton)
         resolver.Register<ConfigurationProvider, ConfigurationProvider>(Lifestyle.Singleton);
         resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
+        resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
 
-        // Core Services (Singleton)
+        // 2. Core Services (Singleton)
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
         resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
         resolver.Register<ChangeCalculator, ChangeCalculator>(Lifestyle.Singleton);
         resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
-        resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
+
+        // 3. Simulator / Devices (Singleton)
+        resolver.Register<SimulatorCashChanger, SimulatorCashChanger>(Lifestyle.Singleton);
         resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
 
-        // ViewModels (Singleton - to ensure consistency between UI and Logic)
+        // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
 
         // Compilation
@@ -86,7 +88,9 @@ public static class DIContainer
     /// <summary>指定された型のインスタンスをコンテナから解決します。</summary>
     public static T Resolve<T>()
     {
-        return _resolver.Resolve<T>();
+        return _resolver == null
+            ? throw new InvalidOperationException("DIContainer is not initialized yet. Call DIContainer.Initialize() first.")
+            : _resolver.Resolve<T>();
     }
 }
 

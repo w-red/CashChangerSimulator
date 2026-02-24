@@ -4,7 +4,7 @@ using MoneyKind4Opos.Codes;
 using MoneyKind4Opos.Currencies.Interfaces;
 using System.Reflection;
 
-namespace CashChangerSimulator.UI.Wpf.Services;
+namespace CashChangerSimulator.Core.Services;
 
 /// <summary>
 /// 通貨コードに基づいて、MoneyKind4Opos から通貨のメタデータを提供するサービス。

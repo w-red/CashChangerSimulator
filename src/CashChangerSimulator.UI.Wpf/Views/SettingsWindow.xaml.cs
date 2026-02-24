@@ -1,6 +1,6 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Core.Services;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.Views;
@@ -17,7 +17,7 @@ public partial class SettingsWindow : Window
         _viewModel = new SettingsViewModel(
             DIContainer.Resolve<ConfigurationProvider>(),
             DIContainer.Resolve<MonitorsProvider>(),
-            DIContainer.Resolve<Services.CurrencyMetadataProvider>());
+            DIContainer.Resolve<CurrencyMetadataProvider>());
         DataContext = _viewModel;
     }
 
@@ -31,3 +31,4 @@ public partial class SettingsWindow : Window
         }
     }
 }
+

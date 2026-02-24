@@ -1,5 +1,5 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
@@ -39,10 +39,11 @@ public class MainViewModel : IDisposable
         MonitorsProvider monitorsProvider,
         OverallStatusAggregatorProvider aggregatorProvider,
         ConfigurationProvider configProvider,
-        Services.CurrencyMetadataProvider metadataProvider,
+        CurrencyMetadataProvider metadataProvider,
         HardwareStatusManager hardwareStatusManager,
         DepositController depositController,
-        DispenseController dispenseController)
+        DispenseController dispenseController,
+        SimulatorCashChanger cashChanger)
     {
         // Sub-ViewModels
         Inventory = new InventoryViewModel(
@@ -72,7 +73,7 @@ public class MainViewModel : IDisposable
             () => Inventory.Denominations)
             .AddTo(_disposables);
 
-        PosTransaction = new PosTransactionViewModel(Deposit, Dispense).AddTo(_disposables);
+        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.UIMode).AddTo(_disposables);
 
@@ -132,3 +133,4 @@ public class MainViewModel : IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
