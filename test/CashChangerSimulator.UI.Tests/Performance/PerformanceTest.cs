@@ -12,6 +12,7 @@ namespace CashChangerSimulator.UI.Tests.Performance;
 /// <param name="output">テスト出力ヘルパー。</param>
 public class PerformanceTest(ITestOutputHelper output)
 {
+    /// <summary>大量取引時のパフォーマンスを検証する。</summary>
     [Fact]
     public void BulkTransactionPerformance()
     {
@@ -44,6 +45,7 @@ public class PerformanceTest(ITestOutputHelper output)
         output.WriteLine($"Memory Delta: {(finalMemory - initialMemory) / 1024.0:F2} KB");
     }
 
+    /// <summary>ロギングによるオーバーヘッドを分析する。</summary>
     [Fact]
     public void LoggingOverheadAnalysis()
     {

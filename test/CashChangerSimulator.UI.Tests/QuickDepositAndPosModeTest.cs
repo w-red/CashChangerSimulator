@@ -23,6 +23,7 @@ public class QuickDepositAndPosModeTest
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
 
+    /// <summary>QuickDepositAndPosModeTest の新しいインスタンスを初期化します。</summary>
     public QuickDepositAndPosModeTest()
     {
         _mockInventory = new Mock<Inventory>();
@@ -58,8 +59,9 @@ public class QuickDepositAndPosModeTest
             _dispenseController);
     }
 
+    /// <summary>クイック入金コマンドが内訳を計算し、入金を完了させることを検証する。</summary>
     [Fact]
-    public async Task QuickDepositCommand_ShouldCalculateBreakdownAndCompleteDeposit()
+    public async Task QuickDepositCommandShouldCalculateBreakdownAndCompleteDeposit()
     {
         // Arrange
         var monitor = new CashStatusMonitor(_mockInventory.Object, new DenominationKey(1, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), 5, 90, 100);
