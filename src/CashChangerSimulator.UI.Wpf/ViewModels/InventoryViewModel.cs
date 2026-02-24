@@ -1,5 +1,7 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Device;
 using R3;
 using System.Collections.ObjectModel;
