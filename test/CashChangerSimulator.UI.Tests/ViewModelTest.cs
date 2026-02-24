@@ -10,7 +10,6 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
-/// <summary>ViewModel の動作を検証する単体テスト。</summary>
 /// <summary>ViewModel 全体の基本動作や初期状態を検証するテストクラス。</summary>
 public class ViewModelTest
 {

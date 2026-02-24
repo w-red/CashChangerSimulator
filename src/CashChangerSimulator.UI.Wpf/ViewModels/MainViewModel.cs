@@ -5,10 +5,7 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// アプリケーションのメイン画面を制御するメイン（シェル） ViewModel。
-/// 入金、出金、在庫のサブ ViewModel を統括する。
-/// </summary>
+/// <summary>アプリケーションのメイン画面を制御する ViewModel。</summary>
 public class MainViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
@@ -30,6 +27,7 @@ public class MainViewModel : IDisposable
     /// <summary>出金ウィンドウを表示するコマンド。</summary>
     public ReactiveCommand OpenDispenseCommand { get; }
 
+    /// <summary>MainViewModel の新しいインスタンスを初期化します。</summary>
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,

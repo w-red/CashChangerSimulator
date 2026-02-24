@@ -5,9 +5,7 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// POS取引（支払い、お釣り払い出し）フローを管理する ViewModel。
-/// </summary>
+/// <summary>POS取引（支払い、お釣り払い出し）フローを管理する ViewModel。</summary>
 public class PosTransactionViewModel : IDisposable
 {
     private readonly DepositViewModel _deposit;
@@ -37,6 +35,7 @@ public class PosTransactionViewModel : IDisposable
 
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
+    /// <summary>PosTransactionViewModel の新しいインスタンスを初期化します。</summary>
     public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense)
     {
         _deposit = deposit;

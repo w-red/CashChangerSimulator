@@ -6,9 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// 在庫表示とデバイスステータスを管理する ViewModel。
-/// </summary>
+/// <summary>在庫表示とデバイスステータスを管理する ViewModel。</summary>
 public class InventoryViewModel : IDisposable
 {
     private readonly Inventory _inventory;
@@ -35,6 +33,7 @@ public class InventoryViewModel : IDisposable
     /// <summary>設定画面を開くコマンド。</summary>
     public ReactiveCommand OpenSettingsCommand { get; }
 
+    /// <summary>InventoryViewModel の新しいインスタンスを初期化します。</summary>
     public InventoryViewModel(
         Inventory inventory,
         TransactionHistory history,
@@ -105,6 +104,7 @@ public class InventoryViewModel : IDisposable
         });
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();

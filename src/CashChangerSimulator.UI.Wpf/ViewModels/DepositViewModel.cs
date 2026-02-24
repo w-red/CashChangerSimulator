@@ -59,6 +59,7 @@ public class DepositViewModel : IDisposable
     /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
+    /// <summary>DepositViewModel の新しいインスタンスを初期化します。</summary>
     public DepositViewModel(
         DepositController depositController,
         HardwareStatusManager hardwareStatusManager,

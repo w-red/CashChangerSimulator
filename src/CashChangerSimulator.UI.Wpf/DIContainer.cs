@@ -89,6 +89,7 @@ public static class DIContainer
 }
 
 /// <summary>MicroResolver ベースの ISimulatorServiceProvider 実装。</summary>
+/// <param name="resolver">MicroResolver のリゾルバーインスタンス。</param>
 internal sealed class ResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider
 {
     public T Resolve<T>() where T : class => resolver.Resolve<T>();

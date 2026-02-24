@@ -4,6 +4,8 @@ using R3;
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
 /// <summary>金種指定入出金用のアイテム ViewModel。</summary>
+/// <param name="key">金種キー。</param>
+/// <param name="name">表示名。</param>
 public class BulkAmountInputItemViewModel(DenominationKey key, string name)
 {
     /// <summary>金種キー。</summary>
