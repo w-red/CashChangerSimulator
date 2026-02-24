@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;

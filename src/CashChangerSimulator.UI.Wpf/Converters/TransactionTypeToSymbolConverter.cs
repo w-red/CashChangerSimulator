@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Transactions;
 using MaterialDesignThemes.Wpf;
 using System.Globalization;
 using System.Windows.Data;

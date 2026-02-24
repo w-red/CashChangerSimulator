@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
