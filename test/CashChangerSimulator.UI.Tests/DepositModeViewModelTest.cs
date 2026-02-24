@@ -67,7 +67,7 @@ public class DepositModeViewModelTest
     public void DenominationViewModelIsAcceptingCashShouldReflectPausedState()
     {
         // Arrange
-        var config = new Core.Configuration.DenominationSettings();
+        var config = new DenominationSettings();
         var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
         var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, "1000");
         _depositController.BeginDeposit();

@@ -27,7 +27,7 @@ public class PosTransactionViewModelTest
         var dep = new DepositController(inv);
         var disp = new DispenseController(manager, null, new Mock<IDeviceSimulator>().Object);
         var configProvider = new ConfigurationProvider();
-        configProvider.Config.Inventory.TryAdd("JPY", new CashChangerSimulator.Core.Configuration.InventorySettings());
+        configProvider.Config.Inventory.TryAdd("JPY", new InventorySettings());
         configProvider.Config.CurrencyCode = "JPY";
 
         var monitorsProvider = new MonitorsProvider(inv, configProvider, new CurrencyMetadataProvider(configProvider));
@@ -65,7 +65,7 @@ public class PosTransactionViewModelTest
         var dep = new DepositController(inv);
         var disp = new DispenseController(manager, null, new Mock<IDeviceSimulator>().Object);
         var configProvider = new ConfigurationProvider();
-        configProvider.Config.Inventory.TryAdd("JPY", new CashChangerSimulator.Core.Configuration.InventorySettings());
+        configProvider.Config.Inventory.TryAdd("JPY", new InventorySettings());
         configProvider.Config.CurrencyCode = "JPY";
 
         var monitorsProvider = new MonitorsProvider(inv, configProvider, new CurrencyMetadataProvider(configProvider));
