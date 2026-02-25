@@ -101,11 +101,11 @@ public class DispenseViewModel : IDisposable
                 string.IsNullOrWhiteSpace(text)
                     ? null
                     : !decimal.TryParse(text, out var val)
-                    ? new Exception("Enter a valid number")
+                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorEnterValidNumber"])
                     : val <= 0
-                    ? new Exception("Amount must be positive")
+                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorAmountPositive"])
                     : val > TotalAmount.Value
-                    ? new Exception("Insufficient funds")
+                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorInsufficientFunds"])
                     : null
             )
             .AddTo(_disposables);

@@ -20,7 +20,7 @@ public partial class DispenseWindow : Window
         viewModel.ShowBulkDispenseCommand.Subscribe(_ =>
         {
             var items = getDenominations().Select(d => new BulkAmountInputItemViewModel(d.Key, d.Name)).ToList();
-            var dialog = new BulkAmountInputWindow("BULK DISPENSE", "DISPENSE")
+            var dialog = new BulkAmountInputWindow("BULK DISPENSE", "Please enter the quantity to dispense.", "DISPENSE")
             { 
                 Owner = this,
                 DataContext = items 

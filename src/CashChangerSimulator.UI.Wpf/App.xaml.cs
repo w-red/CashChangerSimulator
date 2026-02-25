@@ -30,6 +30,10 @@ public partial class App : Application
             });
 
             DIContainer.Initialize();
+            
+            // Apply language setting
+            UpdateLanguage(config.CultureCode);
+
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;
             mainWindow.Show();
@@ -68,6 +72,42 @@ public partial class App : Application
             // Other failures safe on exit: ensure application can close even if history saving fails
         }
         base.OnExit(e);
+    }
+
+    /// <summary>UIの表示言語を更新します。</summary>
+    /// <param name="cultureCode">カルチャコード（"en-US", "ja-JP" など）</param>
+    public static void UpdateLanguage(string cultureCode)
+    {
+        if (Application.Current == null) return;
+
+        try
+        {
+            var resourceName = cultureCode == "ja-JP" ? "Strings.ja-JP.xaml" : "Strings.en-US.xaml";
+            var dict = new ResourceDictionary
+            {
+                Source = new Uri($"pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/{resourceName}")
+            };
+
+            var dictionaries = Application.Current.Resources.MergedDictionaries;
+            
+            // Find and replace existing Strings dictionary
+            for (int i = 0; i < dictionaries.Count; i++)
+            {
+                var source = dictionaries[i].Source?.ToString() ?? "";
+                if (source.Contains("Strings.en-US.xaml") || source.Contains("Strings.ja-JP.xaml") || source.Contains("Themes/Strings.xaml"))
+                {
+                    dictionaries[i] = dict;
+                    return;
+                }
+            }
+
+            // If not found, just add it
+            dictionaries.Add(dict);
+        }
+        catch
+        {
+            // Silently ignore failures in resource loading (primarily for unit tests)
+        }
     }
 }
 

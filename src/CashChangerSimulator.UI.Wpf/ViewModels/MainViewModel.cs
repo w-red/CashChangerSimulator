@@ -85,9 +85,9 @@ public class MainViewModel : IDisposable
             .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) =>
             {
                 return dispenseMode == "Busy"
-                    ? "DISPENSING (出金中)" : depositMode;
+                    ? "DISPENSING" : depositMode;
             })
-            .ToBindableReactiveProperty("IDLE (待機中)")
+            .ToBindableReactiveProperty("IDLE")
             .AddTo(_disposables);
 
         OpenDepositCommand = new ReactiveCommand().AddTo(_disposables);
