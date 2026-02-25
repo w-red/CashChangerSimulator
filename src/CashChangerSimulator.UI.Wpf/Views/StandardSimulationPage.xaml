@@ -1,0 +1,68 @@
+<Page x:Class="CashChangerSimulator.UI.Wpf.Views.StandardSimulationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+      xmlns:ctrl="clr-namespace:CashChangerSimulator.UI.Wpf.Controls"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+      d:DesignHeight="600" d:DesignWidth="1200"
+      Title="StandardSimulationPage">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="340" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- Left: Inventory Tiles -->
+        <ctrl:InventoryGridControl DataContext="{Binding Inventory}" />
+
+        <!-- Right: Terminals & Activity -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,24,0">
+                <!-- Terminal Launchers -->
+                <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="TERMINAL ACCESS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="0" 
+                                    Style="{StaticResource PrimaryButtonStyle}" 
+                                    Height="60" Margin="4"
+                                    Command="{Binding OpenDepositCommand}"
+                                    AutomationProperties.AutomationId="LaunchDepositButton">
+                                <StackPanel>
+                                    <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                    <TextBlock Text="DEPOSIT" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Grid.Column="1" 
+                                    Style="{StaticResource PrimaryButtonStyle}" 
+                                    Height="60" Margin="4"
+                                    Background="{StaticResource SecondaryBrush}"
+                                    BorderBrush="{StaticResource SecondaryBrush}"
+                                    Command="{Binding OpenDispenseCommand}"
+                                    AutomationProperties.AutomationId="LaunchDispenseButton">
+                                <StackPanel>
+                                    <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24"/>
+                                    <TextBlock Text="DISPENSE" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recent Transactions Activity Feed -->
+                <ctrl:ActivityFeedControl DataContext="{Binding Inventory}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
