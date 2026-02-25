@@ -85,7 +85,8 @@
                                          materialDesign:TransitionAssist.DisableTransitions="False"/>
                         </StackPanel>
                         
-                        <TextBlock Grid.Row="1" Text="{Binding Count.Value}" FontSize="48" FontWeight="Thin" 
+                        <TextBlock Grid.Row="1" Text="{Binding Count.Value}" FontSize="54" FontWeight="Bold" 
+                                   Foreground="{StaticResource TextPrimaryBrush}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </Border>
