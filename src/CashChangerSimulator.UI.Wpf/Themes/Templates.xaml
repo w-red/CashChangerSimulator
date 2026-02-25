@@ -1,7 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                    xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels">
+                    xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+                    xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views">
     
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml" />
@@ -128,4 +129,42 @@
                        VerticalAlignment="Center" FontWeight="Bold" FontSize="15" Foreground="{StaticResource PrimaryBrush}"/>
         </Grid>
     </DataTemplate>
+
+    <!-- OPOS Log Item Template -->
+    <DataTemplate x:Key="OposLogItemTemplate">
+        <Grid Margin="0,2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss.fff}" FontSize="10" Opacity="0.5" Width="75" VerticalAlignment="Top"/>
+            <TextBlock Grid.Column="1" Text="{Binding Message}" FontSize="11" TextWrapping="Wrap" FontFamily="Consolas"/>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Bulk Input Item Template -->
+    <DataTemplate x:Key="BulkInputItemTemplate">
+        <Grid Margin="0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14"/>
+            <TextBox Grid.Column="1" Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}" 
+                     materialDesign:HintAssist.Hint="0"
+                     AutomationProperties.AutomationId="BulkQuantityBox"
+                     TextAlignment="Right"
+                     FontSize="14"
+                     Padding="4"/>
+        </Grid>
+    </DataTemplate>
+
+    <!-- View Switching Templates -->
+    <DataTemplate x:Key="DispenseIdleTemplate"><views:DispenseIdleView /></DataTemplate>
+    <DataTemplate x:Key="DispenseBusyTemplate"><views:DispenseBusyView /></DataTemplate>
+    <DataTemplate x:Key="DispenseErrorTemplate"><views:DispenseErrorView /></DataTemplate>
+
+    <DataTemplate x:Key="DepositIdleTemplate"><views:DepositIdleView /></DataTemplate>
+    <DataTemplate x:Key="DepositActiveTemplate"><views:DepositActiveView /></DataTemplate>
+
 </ResourceDictionary>
