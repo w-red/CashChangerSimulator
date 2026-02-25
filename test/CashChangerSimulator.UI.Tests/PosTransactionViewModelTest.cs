@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
 using Shouldly;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests;
 
@@ -33,19 +28,40 @@ public class PosTransactionViewModelTest : IDisposable
     public void StartTransactionShouldCallOposSequence()
     {
         // Arrange
-        var depVm = new Mock<DepositViewModel>(_fixture.DepositController, _fixture.Hardware, (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
-        var dispVm = new Mock<DispenseViewModel>(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), (Func<IEnumerable<DenominationViewModel>>)(() => Enumerable.Empty<DenominationViewModel>()));
-        
-        var vm = new PosTransactionViewModel(depVm.Object, dispVm.Object, _fixture.CashChanger);
+        var vm = CreateViewModel();
 
-        vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
+        vm.TargetAmountInput.Value =
+            PosTransactionTestConstants.TargetAmount;
 
         // Act
         vm.StartCommand.Execute(Unit.Default);
 
         // Verify
-        vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.WaitingForCash);
-        VerifyOposLogSequence(vm, "Open()", "Claim(1000)", "BeginDeposit()");
+        vm.TransactionStatus.Value
+            .ShouldBe(PosTransactionStatus.WaitingForCash);
+        VerifyOposLogSequence(
+            vm,
+            "Open()",
+            "Claim(1000)",
+            "BeginDeposit()");
+    }
+
+    private PosTransactionViewModel CreateViewModel()
+    {
+        var depVm = new DepositViewModel(
+            _fixture.DepositController,
+            _fixture.Hardware,
+            () => []);
+        var dispVm = new DispenseViewModel(
+            _fixture.Inventory,
+            _fixture.Manager,
+            _fixture.DispenseController,
+            _fixture.ConfigProvider,
+            Observable.Return(false),
+            Observable.Return(false),
+            () => []);
+        
+        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
     }
 
     /// <summary>取引完了時のOPOSシーケンス呼び出しを検証します。</summary>
@@ -61,10 +77,7 @@ public class PosTransactionViewModelTest : IDisposable
     public async Task CompleteTransactionShouldCallOposSequence()
     {
         // Arrange
-        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        
-        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        var vm = CreateViewModel();
 
         // Act
         await ExecuteCompleteTransaction(vm);
@@ -88,10 +101,10 @@ public class PosTransactionViewModelTest : IDisposable
 
         // Act - Trigger completion logic (which is called automatically by subscription)
         // Give it a moment to process the async completion
-        await Task.Delay(PosTransactionTestConstants.AsyncCompletionWaitMs);
+        await Task.Delay(PosTransactionTestConstants.AsyncCompletionWaitMs, TestContext.Current.CancellationToken);
     }
 
-    private void VerifyCompletionSequence(PosTransactionViewModel vm)
+    private static void VerifyCompletionSequence(PosTransactionViewModel vm)
     {
         VerifyOposLogSequence(vm, 
             "FixDeposit()", 
@@ -101,7 +114,9 @@ public class PosTransactionViewModelTest : IDisposable
             "Close()");
     }
 
-    private void VerifyOposLogSequence(PosTransactionViewModel vm, params string[] expectedMessages)
+    private static void VerifyOposLogSequence(
+        PosTransactionViewModel vm,
+        params string[] expectedMessages)
     {
         foreach (var expectedMessage in expectedMessages)
         {
@@ -133,9 +148,7 @@ public class PosTransactionViewModelTest : IDisposable
     public void StartTransactionWithInvalidAmount_ShouldReject(string invalidAmount)
     {
         // Arrange
-        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        var vm = CreateViewModel();
 
         // Act
         vm.TargetAmountInput.Value = invalidAmount;
@@ -151,12 +164,13 @@ public class PosTransactionViewModelTest : IDisposable
     [Fact]
     public void StartTransactionWithExtremelyLargeAmount_ShouldReject()
     {
-        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        // Arrange
+        var vm = CreateViewModel();
 
+        // Act
         vm.TargetAmountInput.Value = "100000001"; // 1億1円
         
+        // Assert
         vm.StartCommand.CanExecute().ShouldBeFalse();
     }
 
@@ -171,17 +185,16 @@ public class PosTransactionViewModelTest : IDisposable
     public void TransactionCancelledAfterPartialPayment_ShouldRepayAndClose()
     {
         // Arrange
-        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        var vm = CreateViewModel();
 
         vm.TargetAmountInput.Value = "2000";
         vm.StartCommand.Execute(Unit.Default);
 
         // 1000円だけ投入
-        _fixture.DepositController.TrackBulkDeposit(new Dictionary<DenominationKey, int> {
-            { new DenominationKey(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), 1 }
-        });
+        _fixture.DepositController.TrackBulkDeposit(
+            new Dictionary<DenominationKey, int> {
+                { new DenominationKey(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), 1 }
+            });
         
         vm.OposLog.Clear(); // Clear logs for easier verification
 
@@ -203,12 +216,10 @@ public class PosTransactionViewModelTest : IDisposable
     /// 期待値: 指定時間経過後に CancelTransaction が実行されること。
     /// </remarks>
     [Fact]
-    public async Task TransactionShouldTimeout_AfterSpecifiedPeriod()
+    public async Task TransactionShouldTimeoutAfterSpecifiedPeriod()
     {
         // Arrange
-        var depVm = new DepositViewModel(_fixture.DepositController, _fixture.Hardware, () => Enumerable.Empty<DenominationViewModel>());
-        var dispVm = new DispenseViewModel(_fixture.Inventory, _fixture.Manager, _fixture.DispenseController, _fixture.ConfigProvider, Observable.Return(false), Observable.Return(false), () => Enumerable.Empty<DenominationViewModel>());
-        var vm = new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        var vm = CreateViewModel();
 
         // テスト用に短いタイムアウトを設定
         vm.TransactionTimeoutSeconds.Value = 1; 
@@ -219,15 +230,22 @@ public class PosTransactionViewModelTest : IDisposable
 
         // Act
         // タイムアウト設定が1秒なら、2秒待てばキャンセルされているはず
-        await Task.Delay(2000); 
+        await Task.Delay(2000, TestContext.Current.CancellationToken); 
 
         // Verify
-        VerifyOposLogSequence(vm, "FixDeposit()", "EndDeposit(Repay)", "Close()");
-        vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.Idle);
+        VerifyOposLogSequence(
+            vm,
+            "FixDeposit()",
+            "EndDeposit(Repay)",
+            "Close()");
+        vm.TransactionStatus.Value
+            .ShouldBe(PosTransactionStatus.Idle);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _fixture.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
