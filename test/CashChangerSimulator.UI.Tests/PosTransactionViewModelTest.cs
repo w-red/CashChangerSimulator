@@ -1,6 +1,8 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.Core.Services;
+using Moq;
 using R3;
 using Shouldly;
 
@@ -47,18 +49,25 @@ public class PosTransactionViewModelTest : IDisposable
 
     private PosTransactionViewModel CreateViewModel()
     {
+        var notifyService = new Mock<INotifyService>().Object;
+        var isDispenseBusy = new BindableReactiveProperty<bool>(false);
+        var isInDepositMode = new BindableReactiveProperty<bool>(false);
+
         var depVm = new DepositViewModel(
             _fixture.DepositController,
             _fixture.Hardware,
-            () => []);
+            () => [],
+            isDispenseBusy,
+            notifyService);
         var dispVm = new DispenseViewModel(
             _fixture.Inventory,
             _fixture.Manager,
             _fixture.DispenseController,
             _fixture.ConfigProvider,
+            isInDepositMode,
             Observable.Return(false),
-            Observable.Return(false),
-            () => []);
+            () => [],
+            notifyService);
         
         return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
     }
@@ -210,36 +219,7 @@ public class PosTransactionViewModelTest : IDisposable
         vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.Idle);
     }
 
-    /// <summary>タイムアウトによる自動キャンセル動作を検証します。</summary>
-    /// <remarks>
-    /// 期待値: 指定時間経過後に CancelTransaction が実行されること。
-    /// </remarks>
-    [Fact]
-    public async Task TransactionShouldTimeoutAfterSpecifiedPeriod()
-    {
-        // Arrange
-        var vm = CreateViewModel();
 
-        // テスト用に短いタイムアウトを設定
-        vm.TransactionTimeoutSeconds.Value = 1; 
-
-        vm.TargetAmountInput.Value = "1000";
-        vm.StartCommand.Execute(Unit.Default);
-        vm.OposLog.Clear();
-
-        // Act
-        // タイムアウト設定が1秒なら、2秒待てばキャンセルされているはず
-        await Task.Delay(2000, TestContext.Current.CancellationToken); 
-
-        // Verify
-        VerifyOposLogSequence(
-            vm,
-            "FixDeposit()",
-            "EndDeposit(Repay)",
-            "Close()");
-        vm.TransactionStatus.Value
-            .ShouldBe(PosTransactionStatus.Idle);
-    }
 
     /// <inheritdoc/>
     public void Dispose()

@@ -19,7 +19,7 @@
     WindowStartupLocation="CenterScreen"
     TextElement.Foreground="{StaticResource OnBackgroundBrush}"
     TextElement.FontWeight="Regular"
-    TextElement.FontSize="13"
+    TextElement.FontSize="16"
     TextOptions.TextFormattingMode="Ideal"
     TextOptions.TextRenderingMode="Auto">
     
@@ -28,50 +28,52 @@
         <sys:Boolean x:Key="False">False</sys:Boolean>
     </Window.Resources>
 
-    <Grid>
-        <Grid Margin="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="340" />
-            </Grid.ColumnDefinitions>
-            
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <materialDesign:DialogHost Identifier="RootDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+        <Grid>
+            <Grid Margin="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="340" />
+                </Grid.ColumnDefinitions>
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <!-- Header Dashboard -->
-            <Border Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="24,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <!-- Left: Balance -->
-                    <ctrl:BalanceDisplayControl DataContext="{Binding Dispense}" HorizontalAlignment="Left" />
-                    
-                    <!-- Right: Status / Mode / Jam -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
-                            <!-- Global Mode Indicator -->
-                            <Border Background="{StaticResource PrimaryBrush}" 
-                                    CornerRadius="12" Padding="12,4" Margin="0,0,8,0"
-                                    VerticalAlignment="Top">
-                                <TextBlock Text="{Binding GlobalModeName.Value}" Foreground="White" FontWeight="Bold" FontSize="11"
-                                           AutomationProperties.AutomationId="ModeIndicatorText"/>
-                            </Border>
-                            <!-- Hardaware Status Indicators -->
-                            <ctrl:StatusHeaderControl DataContext="{Binding Inventory}" />
+                <!-- Header Dashboard -->
+                <Border Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="0,0,0,24" Padding="24,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Left: Balance -->
+                        <ctrl:BalanceDisplayControl DataContext="{Binding Dispense}" HorizontalAlignment="Left" />
+                        
+                        <!-- Right: Status / Mode / Jam -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+                                <!-- Global Mode Indicator -->
+                                <Border Background="{StaticResource PrimaryBrush}" 
+                                        CornerRadius="12" Padding="12,4" Margin="0,0,8,0"
+                                        VerticalAlignment="Top">
+                                    <TextBlock Text="{Binding GlobalModeName.Value}" Foreground="White" FontWeight="Bold" FontSize="11"
+                                               AutomationProperties.AutomationId="ModeIndicatorText"/>
+                                </Border>
+                                <!-- Hardaware Status Indicators -->
+                                <ctrl:StatusHeaderControl DataContext="{Binding Inventory}" />
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                    </Grid>
+                </Border>
 
-            <!-- Main Content Area (Navigation Frame) -->
-            <Grid Grid.Row="1" Grid.ColumnSpan="2">
-                <Frame Name="MainFrame" NavigationUIVisibility="Hidden" />
+                <!-- Main Content Area (Navigation Frame) -->
+                <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                    <Frame Name="MainFrame" NavigationUIVisibility="Hidden" />
+                </Grid>
             </Grid>
         </Grid>
-    </Grid>
+    </materialDesign:DialogHost>
 </Window>

@@ -1,0 +1,34 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.MessageDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d">
+    <!-- Removed fixed MinWidth/MaxWidth to support liquid layout. Grid handles relative sizing based on children and margins -->
+    <Grid Margin="16" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="0,0,0,16"
+                   Text="{Binding Title}"
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+
+        <TextBlock Grid.Row="1" Margin="0,0,0,24"
+                   Text="{Binding Message}"
+                   TextWrapping="Wrap"
+                   Style="{StaticResource MaterialDesignBody1TextBlock}" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button IsDefault="True"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                    Padding="16,4" MinWidth="80">
+                <TextBlock Text="{StaticResource StrOk}" FontWeight="Bold" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>
