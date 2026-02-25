@@ -96,19 +96,8 @@
                     <ListBox ItemsSource="{Binding OposLog}" 
                              Background="Transparent" BorderThickness="0"
                              ItemContainerStyle="{StaticResource LogItemStyle}"
+                             ItemTemplate="{StaticResource OposLogItemTemplate}"
                              AutomationProperties.AutomationId="OposLogListBox">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,2">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss.fff}" FontSize="10" Opacity="0.5" Width="75" VerticalAlignment="Top"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Message}" FontSize="11" TextWrapping="Wrap" FontFamily="Consolas"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
             </Border>

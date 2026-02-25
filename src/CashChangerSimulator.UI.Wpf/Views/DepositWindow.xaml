@@ -39,22 +39,10 @@
                 <ContentControl Content="{Binding}">
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <views:DepositIdleView />
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="ContentTemplate" Value="{StaticResource DepositIdleTemplate}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsInDepositMode.Value}" Value="True">
-                                    <Setter Property="ContentTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <views:DepositActiveView />
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="ContentTemplate" Value="{StaticResource DepositActiveTemplate}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

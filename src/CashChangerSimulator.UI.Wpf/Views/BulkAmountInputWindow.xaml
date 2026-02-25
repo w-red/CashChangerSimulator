@@ -10,6 +10,15 @@
         Foreground="{StaticResource OnBackgroundBrush}"
         TextElement.Foreground="{StaticResource OnBackgroundBrush}"
         ResizeMode="NoResize">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,24 +35,8 @@
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" Margin="0,0,0,16" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="0,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="100"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14"/>
-                            <TextBox Grid.Column="1" Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}" 
-                                     materialDesign:HintAssist.Hint="0"
-                                     AutomationProperties.AutomationId="BulkQuantityBox"
-                                     TextAlignment="Right"
-                                     FontSize="14"
-                                     Padding="4"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding}"
+                          ItemTemplate="{StaticResource BulkInputItemTemplate}">
             </ItemsControl>
         </ScrollViewer>
 
