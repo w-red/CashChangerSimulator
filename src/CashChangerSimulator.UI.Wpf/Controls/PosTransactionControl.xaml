@@ -3,158 +3,127 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vm:PosTransactionViewModel}"
-             AutomationProperties.AutomationId="PosTransactionComponent">
-    
-    <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="300" />
-            </Grid.ColumnDefinitions>
+             d:DataContext="{d:DesignInstance Type=vm:PosTransactionViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
-            <!-- LEFT SIDE: Transaction States -->
-            <Grid Grid.Column="0">
-            <!-- IDLE STATE: Entry of Target Amount -->
-            <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=Idle}">
-                <TextBlock Text="POS TRANSACTION" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
-                <TextBlock Text="Enter Payment Amount" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.7"/>
-                <Grid Width="250" HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox materialDesign:HintAssist.Hint="Amount to Pay" 
-                             Text="{Binding TargetAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             FontSize="24" FontWeight="Bold"
-                             Margin="0,0,8,0">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding StartCommand}"/>
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <Button Grid.Column="1" 
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Command="{Binding StartCommand}"
-                            Content="START" Padding="16,0" Height="48"/>
-                </Grid>
-                <TextBlock Text="Please input the total price for the transaction" 
-                           FontSize="10" Opacity="0.5" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-            </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- WAITING FOR CASH -->
-            <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=WaitingForCash}">
-                <TextBlock Text="PAYMENT IN PROGRESS" FontSize="11" Foreground="SkyBlue" FontWeight="Black" Margin="0,0,0,16"/>
+        <!-- Transaction Progress Area -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="TRANSACTION STATUS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                 
                 <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     
-                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                        <TextBlock Text="TOTAL DUE" FontSize="10" Opacity="0.5"/>
-                        <TextBlock Text="{Binding TargetAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding StatusText.Value}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="{Binding Message.Value}" FontSize="14" Opacity="0.7" Margin="0,4,0,0"/>
                     </StackPanel>
-
-                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="16,0,0,0">
-                        <TextBlock Text="INSERTED" FontSize="10" Opacity="0.5"/>
-                        <TextBlock Text="{Binding InsertedAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Thin" Foreground="{StaticResource PrimaryBrush}"/>
-                    </StackPanel>
+                    
+                    <materialDesign:PackIcon Grid.Column="1" Kind="CashMultiple" Width="48" Height="48" Foreground="{StaticResource PrimaryBrush}" Opacity="0.2"/>
                 </Grid>
 
-                <ProgressBar Value="{Binding InsertedAmount.Value}" 
-                             Maximum="{Binding TargetAmount.Value}"
-                             Height="10" Margin="16,0,16,8"
-                             Foreground="{StaticResource PrimaryBrush}"
-                             Background="#1AFFFFFF"/>
+                <ProgressBar Value="{Binding Progress.Value}" Height="4" Background="#15FFFFFF" Foreground="{StaticResource PrimaryBrush}"/>
                 
-                <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}Remaining: {0:N0} JPY}" 
-                           HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Margin="0,0,0,16"/>
-
-                <Button Content="CANCEL TRANSACTION" 
-                        Style="{StaticResource ModernFlatButtonStyle}"
-                        Command="{Binding CancelCommand}"
-                        Foreground="IndianRed"
-                        HorizontalAlignment="Center"/>
+                <Grid Margin="0,8,0,0">
+                    <TextBlock Text="{Binding CurrentAmount.Value, StringFormat=Input: ¥{0:N0}}" HorizontalAlignment="Left" FontSize="12" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TotalTargetAmount.Value, StringFormat=Target: ¥{0:N0}}" HorizontalAlignment="Right" FontSize="12" Opacity="0.6"/>
+                </Grid>
             </StackPanel>
+        </Border>
 
-            <!-- DISPENSING CHANGE -->
-            <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=DispensingChange}" 
-                        VerticalAlignment="Center">
-                <materialDesign:PackIcon Kind="CashMultiple" Width="48" Height="48" HorizontalAlignment="Center" Foreground="LightGreen" Margin="0,0,0,16"/>
-                <TextBlock Text="DISPENSING CHANGE" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="{Binding ChangeAmount.Value, StringFormat={}{0:N0}}" FontSize="32" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                <TextBlock Text="Please wait while your change is being processed..." FontSize="11" Opacity="0.5" HorizontalAlignment="Center" Margin="0,16,0,0"/>
-            </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="400" />
+            </Grid.ColumnDefinitions>
 
-            <!-- COMPLETED -->
-            <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource VisibilityConv}, ConverterParameter=Completed}" 
-                        VerticalAlignment="Center">
-                <materialDesign:PackIcon Kind="CheckCircle" Width="64" Height="64" HorizontalAlignment="Center" Foreground="MediumSpringGreen" Margin="0,0,0,16"/>
-                <TextBlock Text="PAYMENT COMPLETED" FontSize="20" FontWeight="Black" HorizontalAlignment="Center"/>
-                <TextBlock Text="Thank you for your purchase!" FontSize="12" Opacity="0.7" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-            </StackPanel>
-            </Grid>
+            <!-- Interaction Area -->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,16,0">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <!-- Idle State -->
+                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
+                        <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
+                        <TextBlock Text="Ready for Transaction" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <Button Style="{StaticResource PrimaryButtonStyle}" 
+                                Content="START SIMULATION" 
+                                Command="{Binding StartCommand}"
+                                Width="240" />
+                    </StackPanel>
 
-            <!-- RIGHT SIDE: OPOS LOG -->
-            <Border Grid.Column="1" Background="#0D000000" CornerRadius="0,8,8,0" Padding="12">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Text="OPOS EVENT LOG" Grid.Row="0"
-                               FontSize="10" FontWeight="Bold" Opacity="0.6" 
-                               Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                    <!-- Waiting for Cash State -->
+                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=WaitingForCash}">
+                        <TextBlock Text="Insert Cash to Continue" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <ItemsControl ItemsSource="{Binding AvailableDenominations}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel HorizontalAlignment="Center" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ModernFlatButtonStyle}"
+                                            Content="{Binding Name}"
+                                            Command="{Binding DataContext.InsertCashCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Margin="4" Width="80"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
 
-                    <ListBox Grid.Row="1" 
-                             ItemsSource="{Binding OposLog}"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             FontSize="10"
-                             FontFamily="Consolas"
-                             Margin="0,0,0,16"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Padding" Value="2,1"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListBoxItem">
-                                            <ContentPresenter />
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
+                    <!-- Completed State -->
+                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Completed}">
+                        <materialDesign:PackIcon Kind="CheckCircle" Width="64" Height="64" HorizontalAlignment="Center" Foreground="LightGreen" Margin="0,0,0,16"/>
+                        <TextBlock Text="Transaction Finished" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <Button Style="{StaticResource ModernFlatButtonStyle}" 
+                                Content="RESET" 
+                                Command="{Binding ResetCommand}"
+                                HorizontalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- OPOS Events Log -->
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="OPOS DEVICE LOG" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <ListBox ItemsSource="{Binding OposLog}" 
+                             Background="Transparent" BorderThickness="0"
+                             ItemContainerStyle="{StaticResource LogItemStyle}"
+                             AutomationProperties.AutomationId="OposLogListBox">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Opacity="0.8" Foreground="LightSkyBlue"/>
+                                <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss.fff}" FontSize="10" Opacity="0.5" Width="75" VerticalAlignment="Top"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Message}" FontSize="11" TextWrapping="Wrap" FontFamily="Consolas"/>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-
-                    <!-- Manual OPOS Control Buttons (Added based on design) -->
-                    <Grid Grid.Row="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Button Grid.Row="0" Style="{StaticResource MaterialDesignRaisedButton}" Background="#E5F9E0" Foreground="Black" Content="Open" Command="{Binding ManualOpenCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Row="1" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Deposit" Command="{Binding ManualDepositCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Row="2" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Dispense" Command="{Binding ManualDispenseCommand}" Margin="0,0,0,8" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Row="3" Style="{StaticResource MaterialDesignRaisedButton}" Background="White" Foreground="Black" Content="Close" Command="{Binding ManualCloseCommand}" Margin="0,0,0,0" FontSize="16" Height="40" HorizontalAlignment="Stretch"/>
-                    </Grid>
-                </Grid>
+                </DockPanel>
             </Border>
         </Grid>
-    </Border>
+    </Grid>
 </UserControl>

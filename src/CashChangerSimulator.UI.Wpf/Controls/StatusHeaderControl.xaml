@@ -7,22 +7,26 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:InventoryViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <StackPanel VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,12">
-            <Border Background="OrangeRed" 
-                    CornerRadius="12" Padding="12,4" Margin="0,0,8,0"
+            <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="VAL ERROR" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                <TextBlock Text="VAL ERROR"/>
             </Border>
-            <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" 
-                    CornerRadius="12" Padding="12,4" Margin="0,0,8,0">
-                <TextBlock Text="{Binding OverallStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+            <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}">
+                <TextBlock Text="{Binding OverallStatus.Value}"/>
             </Border>
-            <Border Background="{Binding FullStatus.Value, Converter={StaticResource StatusBrushConv}}" 
-                    CornerRadius="12" Padding="12,4">
-                <TextBlock Text="{Binding FullStatus.Value}" Foreground="White" FontWeight="Bold" FontSize="11"/>
+            <Border Background="{Binding FullStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}" Margin="0">
+                <TextBlock Text="{Binding FullStatus.Value}"/>
             </Border>
-            <!-- Mode Indicator will be handled separately if it depends on DepositViewModel -->
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -30,9 +34,7 @@
                           IsChecked="{Binding IsJammed.Value}"
                           ToolTip="Simulate Mechanical Jam"
                           Margin="0,0,8,0">
-                <ToggleButton.Content>
-                    <materialDesign:PackIcon Kind="CarBrakeAlert" />
-                </ToggleButton.Content>
+                <materialDesign:PackIcon Kind="CarBrakeAlert" />
                 <materialDesign:ToggleButtonAssist.OnContent>
                     <materialDesign:PackIcon Kind="CarBrakeAlert" />
                 </materialDesign:ToggleButtonAssist.OnContent>
