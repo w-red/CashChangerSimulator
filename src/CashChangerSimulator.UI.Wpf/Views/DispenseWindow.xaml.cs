@@ -1,8 +1,6 @@
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using System.Windows;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CashChangerSimulator.UI.Wpf.Views;
 

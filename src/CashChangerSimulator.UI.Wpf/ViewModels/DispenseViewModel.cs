@@ -6,7 +6,6 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
 using R3;
-using System.Collections.ObjectModel;
 using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;

@@ -2,7 +2,6 @@ using CashChangerSimulator.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
-using ZLogger;
 using System.Collections.ObjectModel;
 using CashChangerSimulator.Device;
 
@@ -34,7 +33,7 @@ public class PosTransactionViewModel : IDisposable
     /// <summary>取引のタイムアウト時間（秒）。0以下の場合はタイムアウトなし。</summary>
     public BindableReactiveProperty<int> TransactionTimeoutSeconds { get; }
     /// <summary>OPOSアクションのログ。</summary>
-    public ObservableCollection<string> OposLog { get; } = new();
+    public ObservableCollection<string> OposLog { get; } = [];
 
     // Commands
     /// <summary>取引を開始するコマンド。</summary>
@@ -80,20 +79,12 @@ public class PosTransactionViewModel : IDisposable
 
         RemainingAmount = InsertedAmount.CombineLatest(TargetAmountInput, (inserted, targetStr) =>
         {
-            if (decimal.TryParse(targetStr, out var target))
-            {
-                return Math.Max(0, target - inserted);
-            }
-            return 0m;
+            return decimal.TryParse(targetStr, out var target) ? Math.Max(0, target - inserted) : 0m;
         }).ToBindableReactiveProperty(0m).AddTo(_disposables);
 
         ChangeAmount = InsertedAmount.CombineLatest(TargetAmountInput, (inserted, targetStr) =>
         {
-            if (decimal.TryParse(targetStr, out var target))
-            {
-                return Math.Max(0, inserted - target);
-            }
-            return 0m;
+            return decimal.TryParse(targetStr, out var target) ? Math.Max(0, inserted - target) : 0m;
         }).ToBindableReactiveProperty(0m).AddTo(_disposables);
 
         TransactionTimeoutSeconds = new BindableReactiveProperty<int>(60).AddTo(_disposables);

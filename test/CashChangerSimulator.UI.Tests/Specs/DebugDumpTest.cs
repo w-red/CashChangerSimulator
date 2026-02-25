@@ -19,10 +19,11 @@ public class DebugDumpTest : IDisposable
     [Fact]
     public void DumpAllElements()
     {
-        var lines = new List<string>();
-
-        // 1. Desktop level windows
-        lines.Add("=== Desktop Level Windows ===");
+        var lines = new List<string>
+        {
+            // 1. Desktop level windows
+            "=== Desktop Level Windows ==="
+        };
         var desktop = _app.Automation.GetDesktop();
         var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
         foreach (var w in allWindows)

@@ -1,4 +1,3 @@
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using System.Globalization;
 using System.Windows.Data;
@@ -11,9 +10,8 @@ public class CashStatusToBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is CashStatus status)
-        {
-            return status switch
+        return value is CashStatus status
+            ? status switch
             {
                 CashStatus.Empty => Brushes.IndianRed,
                 CashStatus.NearEmpty => Brushes.Orange,
@@ -21,9 +19,8 @@ public class CashStatusToBrushConverter : IValueConverter
                 CashStatus.Full => Brushes.DodgerBlue,
                 CashStatus.Normal => Brushes.MediumSeaGreen,
                 _ => Brushes.Gray
-            };
-        }
-        return Brushes.Gray;
+            }
+            : Brushes.Gray;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();

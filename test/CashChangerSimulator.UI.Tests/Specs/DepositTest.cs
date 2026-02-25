@@ -1,9 +1,6 @@
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
-
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.UI.Wpf.Views;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金フロー（開始、投入、確定、返却）を検証する UI テスト。</summary>

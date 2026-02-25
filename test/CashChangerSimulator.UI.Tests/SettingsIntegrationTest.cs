@@ -4,7 +4,6 @@ using R3;
 
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Services;
 using Shouldly;
@@ -12,7 +11,6 @@ using Xunit;
 using MoneyKind4Opos.Currencies.Interfaces;
 using System.IO;
 using System.Linq;
-using System.Windows.Input;
 
 /// <summary>設定の保存と再読み込みの統合動作を検証するテスト。</summary>
 public class SettingsIntegrationTest
