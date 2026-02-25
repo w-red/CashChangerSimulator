@@ -8,6 +8,15 @@
         <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <!-- ItemsPanel Templates -->
+    <ItemsPanelTemplate x:Key="CenteredWrapPanelItemsPanel">
+        <WrapPanel HorizontalAlignment="Center" />
+    </ItemsPanelTemplate>
+
+    <ItemsPanelTemplate x:Key="DefaultWrapPanelItemsPanel">
+        <WrapPanel />
+    </ItemsPanelTemplate>
+
     <!-- Inventory Tile Template -->
     <DataTemplate x:Key="InventoryTileTemplate" DataType="{x:Type vm:DenominationViewModel}">
         <Border MinWidth="170" MinHeight="185" Margin="0,0,16,16" Padding="4" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent">
@@ -86,6 +95,15 @@
                 </Viewbox>
             </Grid>
         </Border>
+    </DataTemplate>
+
+    <!-- Cash Insertion Template -->
+    <DataTemplate x:Key="CashInsertionTemplate">
+        <Button Style="{StaticResource ModernFlatButtonStyle}"
+                Content="{Binding Name}"
+                Command="{Binding DataContext.InsertCashCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                CommandParameter="{Binding}"
+                Margin="4" Width="80"/>
     </DataTemplate>
 
     <!-- Transaction Item Template (Activity Feed) -->
