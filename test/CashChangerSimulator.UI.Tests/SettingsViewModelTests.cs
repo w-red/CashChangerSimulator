@@ -4,12 +4,10 @@ using R3;
 
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Services;
 using Shouldly;
 using Xunit;
-using System.Linq;
 using System.Windows.Input;
 
 /// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
@@ -29,7 +27,10 @@ public class SettingsViewModelTests
         _monitorsProvider = new MonitorsProvider(_inventory, _configProvider, _metadataProvider);
     }
 
-    /// <summary>初期値が正しくロードされることを検証する。</summary>
+    /// <summary>初期値が正しくロードされることを検証します。</summary>
+    /// <remarks>
+    /// 設定プロバイダーの値を変更し、ViewModel 生成時にその値が反映されていることを確認します。
+    /// </remarks>
     [Fact]
     public void LoadFromConfigShouldSetInitialValues()
     {
@@ -134,7 +135,10 @@ public class SettingsViewModelTests
         vm.Full.Value.ShouldBe(100);
     }
 
-    /// <summary>SaveCommand が実行された時に、プロバイダーと設定が更新されることを検証する。</summary>
+    /// <summary>SaveCommand が実行された時に、プロバイダーと設定が更新されることを検証します。</summary>
+    /// <remarks>
+    /// ViewModel で値を変更して保存を実行し、元の設定オブジェクトと再通知イベントが発生することを確認します。
+    /// </remarks>
     [Fact]
     public void SaveCommandShouldUpdateConfigAndMonitors()
     {

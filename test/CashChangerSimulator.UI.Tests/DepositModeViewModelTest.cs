@@ -5,7 +5,6 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.PointOfService;
 using Moq;
@@ -62,7 +61,10 @@ public class DepositModeViewModelTest
             new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager));
     }
 
-    /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証する。</summary>
+    /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証します。</summary>
+    /// <remarks>
+    /// 入金開始、中断、再開の各ステータスにおいて、IsAcceptingCash が期待通りに変化することを確認します。
+    /// </remarks>
     [Fact]
     public void DenominationViewModelIsAcceptingCashShouldReflectPausedState()
     {
@@ -88,7 +90,10 @@ public class DepositModeViewModelTest
         Assert.True(denVm.IsAcceptingCash.CurrentValue);
     }
 
-    /// <summary>MainViewModel の CurrentModeName が状態遷移を正しく反映することを検証する。</summary>
+    /// <summary>MainViewModel の CurrentModeName が状態遷移を正しく反映することを検証します。</summary>
+    /// <remarks>
+    /// IDLE, COUNTING, PAUSED, FIXED の各状態遷移後の表示文字列を確認します。
+    /// </remarks>
     [Fact]
     public void MainViewModelCurrentModeNameShouldReflectTransitions()
     {

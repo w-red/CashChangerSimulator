@@ -1,11 +1,9 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
@@ -16,7 +14,7 @@ namespace CashChangerSimulator.UI.Tests;
 /// <summary>ViewModel 全体の基本動作や初期状態を検証するテストクラス。</summary>
 public class ViewModelTest
 {
-    /// <summary>MainViewModel の初期状態が正しくセットアップされることを検証する。</summary>
+    /// <summary>MainViewModel の初期状態が正しくセットアップされることを検証します。</summary>
     [Fact]
     public void MainViewModelShouldInitializeCorrectly()
     {
