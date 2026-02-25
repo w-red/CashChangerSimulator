@@ -19,7 +19,7 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,12">
             <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="VAL ERROR"/>
+                <TextBlock Text="{StaticResource StrValidationError}"/>
             </Border>
             <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}">
                 <TextBlock Text="{Binding OverallStatus.Value}"/>

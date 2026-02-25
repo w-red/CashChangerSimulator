@@ -29,12 +29,12 @@
         <!-- Title -->
         <StackPanel Margin="0,0,0,32">
             <TextBlock 
-                Text="SYSTEM SETTINGS"
+                Text="{StaticResource StrSystemSettings}"
                 FontSize="24"
                 FontWeight="Black"
                 Foreground="{StaticResource PrimaryBrush}"/>
             <TextBlock
-                Text="Configure device behavior and currency parameters"
+                Text="{StaticResource StrSettingsSubtitle}"
                 FontSize="12"
                 Opacity="0.6"
                 Margin="0,4,0,0"/>
@@ -64,7 +64,7 @@
             </Grid.ColumnDefinitions>
 
             <Button
-                Content="DEFAULT"
+                Content="{StaticResource StrDefault}"
                 Command="{Binding ResetToDefaultCommand}"
                 Style="{StaticResource MaterialDesignOutlinedButton}"
                 BorderBrush="#33FFFFFF"
@@ -73,14 +73,14 @@
 
             <Button
                 Grid.Column="2"
-                Content="CANCEL"
+                Content="{StaticResource StrCancel}"
                 IsCancel="True"
                 Style="{StaticResource ModernFlatButtonStyle}"
                 Margin="0,0,16,0"/>
 
             <Button
                 Grid.Column="3"
-                Content="COMMIT CHANGES"
+                Content="{StaticResource StrCommitChanges}"
                 Command="{Binding SaveCommand}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Width="180"

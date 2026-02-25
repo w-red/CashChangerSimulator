@@ -13,6 +13,7 @@
                 
                 <!-- Application Themes -->
                 <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Strings.en-US.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml" />
             </ResourceDictionary.MergedDictionaries>
