@@ -17,11 +17,7 @@
     </UserControl.Resources>
     
     <ItemsControl ItemsSource="{Binding Denominations}"
+                  ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                   ItemTemplate="{StaticResource InventoryTileTemplate}">
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
     </ItemsControl>
 </UserControl>

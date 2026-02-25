@@ -71,21 +71,9 @@
                     <!-- Waiting for Cash State -->
                     <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=WaitingForCash}">
                         <TextBlock Text="Insert Cash to Continue" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,16"/>
-                        <ItemsControl ItemsSource="{Binding AvailableDenominations}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel HorizontalAlignment="Center" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Style="{StaticResource ModernFlatButtonStyle}"
-                                            Content="{Binding Name}"
-                                            Command="{Binding DataContext.InsertCashCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Margin="4" Width="80"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
+                        <ItemsControl ItemsSource="{Binding AvailableDenominations}"
+                                      ItemsPanel="{StaticResource CenteredWrapPanelItemsPanel}"
+                                      ItemTemplate="{StaticResource CashInsertionTemplate}">
                         </ItemsControl>
                     </StackPanel>
 
