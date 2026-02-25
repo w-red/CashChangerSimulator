@@ -43,8 +43,11 @@ public class MainViewModel : IDisposable
         HardwareStatusManager hardwareStatusManager,
         DepositController depositController,
         DispenseController dispenseController,
-        SimulatorCashChanger cashChanger)
+        SimulatorCashChanger cashChanger,
+        INotifyService notifyService)
     {
+        var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+
         // Sub-ViewModels
         Inventory = new InventoryViewModel(
             inventory,
@@ -60,7 +63,9 @@ public class MainViewModel : IDisposable
         Deposit = new DepositViewModel(
             depositController,
             hardwareStatusManager,
-            () => Inventory.Denominations)
+            () => Inventory.Denominations,
+            isDispenseBusy,
+            notifyService)
             .AddTo(_disposables);
 
         Dispense = new DispenseViewModel(
@@ -70,8 +75,11 @@ public class MainViewModel : IDisposable
             configProvider,
             Deposit.IsInDepositMode,
             hardwareStatusManager.IsJammed,
-            () => Inventory.Denominations)
+            () => Inventory.Denominations,
+            notifyService)
             .AddTo(_disposables);
+
+        Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
         PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger).AddTo(_disposables);
 

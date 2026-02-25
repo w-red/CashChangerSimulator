@@ -7,6 +7,7 @@
     <system:String x:Key="StrOk">OK</system:String>
     <system:String x:Key="StrError">エラー</system:String>
     <system:String x:Key="StrReset">リセット</system:String>
+    <system:String x:Key="StrWarn">警告</system:String>
     <system:String x:Key="StrBusy">ビジー</system:String>
 
     <system:String x:Key="StrCashBalance">在庫合計金額</system:String>
@@ -42,11 +43,14 @@
     <system:String x:Key="StrDispenseTerminal">出金ターミナル</system:String>
     <system:String x:Key="StrDepositTerminal">入金ターミナル</system:String>
     <system:String x:Key="StrAmountDispense">金額指定出金</system:String>
+    <system:String x:Key="StrQuickDispense">クイック出金</system:String>
     <system:String x:Key="StrBulkDispense">一括出金</system:String>
     <system:String x:Key="StrDispenseError">出金エラー</system:String>
     <system:String x:Key="StrHardwareCheckRequired">ハードウェアを確認してください。</system:String>
     <system:String x:Key="StrClearError">エラー解除</system:String>
     <system:String x:Key="StrDispensing">出金中...</system:String>
+    <system:String x:Key="StrWarnDispenseDuringDeposit">入金処理中のため、出金は実行できません。</system:String>
+    <system:String x:Key="StrWarnDepositDuringDispense">出金処理中のため、入金は開始できません。</system:String>
 
     <system:String x:Key="StrCurrentDeposit">現在の投入金額</system:String>
     <system:String x:Key="StrStartDeposit">入金開始</system:String>

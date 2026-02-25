@@ -2,12 +2,15 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                     xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
-                    xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views">
-    
+                    xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views"
+                    xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters">
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml" />
         <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <conv:IntToStringConverter x:Key="IntToStrConv" />
 
     <!-- ItemsPanel Templates -->
     <ItemsPanelTemplate x:Key="CenteredWrapPanelItemsPanel">
@@ -150,7 +153,7 @@
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14"/>
-            <TextBox Grid.Column="1" Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged}" 
+            <TextBox Grid.Column="1" Text="{Binding Quantity.Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStrConv}}" 
                      materialDesign:HintAssist.Hint="0"
                      AutomationProperties.AutomationId="BulkQuantityBox"
                      TextAlignment="Right"

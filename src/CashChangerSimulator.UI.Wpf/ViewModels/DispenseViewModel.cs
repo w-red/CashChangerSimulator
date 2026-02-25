@@ -1,5 +1,6 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
@@ -18,6 +19,8 @@ public class DispenseViewModel : IDisposable
     private readonly DispenseController _controller;
     private readonly ConfigurationProvider _configProvider;
     private readonly ILogger<DispenseViewModel> _logger;
+    private readonly INotifyService _notifyService;
+    private readonly BindableReactiveProperty<bool> _isInDepositMode;
     private readonly CompositeDisposable _disposables = [];
 
     // Properties
@@ -43,6 +46,10 @@ public class DispenseViewModel : IDisposable
     public BindableReactiveProperty<bool> IsBusy { get; }
     /// <summary>現在出金中の合計金額。</summary>
     public BindableReactiveProperty<decimal> DispensingAmount { get; }
+    /// <summary>利用可能な金種リスト。</summary>
+    public IEnumerable<DenominationViewModel> Denominations { get; }
+    /// <summary>特定の金種を1枚出金するコマンド。</summary>
+    public ReactiveCommand<DenominationViewModel> QuickDispenseCommand { get; }
     /// <summary>エラー状態をクリアするコマンド。</summary>
     public ReactiveCommand ClearErrorCommand { get; }
 
@@ -52,14 +59,17 @@ public class DispenseViewModel : IDisposable
         CashChangerManager manager,
         DispenseController controller,
         ConfigurationProvider configProvider,
-        Observable<bool> isInDepositMode,
+        BindableReactiveProperty<bool> isInDepositMode,
         Observable<bool> isJammed,
-        Func<IEnumerable<DenominationViewModel>> getDenominations)
+        Func<IEnumerable<DenominationViewModel>> getDenominations,
+        INotifyService notifyService)
     {
         _inventory = inventory;
         _manager = manager;
         _controller = controller;
         _configProvider = configProvider;
+        _isInDepositMode = isInDepositMode;
+        _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DispenseViewModel>();
 
         // State Mapping
@@ -112,13 +122,20 @@ public class DispenseViewModel : IDisposable
 
         DispenseCommand = DispenseAmountInput
             .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
-            .CombineLatest(isInDepositMode, (canDispenseInput, mode) => canDispenseInput && !mode)
             .CombineLatest(IsBusy, (can, busy) => can && !busy)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
-        DispenseCommand.Subscribe(_ =>
+        DispenseCommand.Subscribe(x =>
         {
+            if (_isInDepositMode.Value)
+            {
+                _notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrWarnDispenseDuringDeposit"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
             if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
             {
                 DispenseCash(amount);
@@ -126,11 +143,30 @@ public class DispenseViewModel : IDisposable
             }
         });
 
-        ShowBulkDispenseCommand = isInDepositMode
-            .CombineLatest(isJammed, (inDeposit, jammed) => !inDeposit && !jammed)
-            .CombineLatest(IsBusy, (can, busy) => can && !busy)
+        var canDispense = IsBusy.Select(busy => !busy);
+
+        ShowBulkDispenseCommand = canDispense
             .ToReactiveCommand()
             .AddTo(_disposables);
+
+        Denominations = getDenominations().ToList();
+
+        QuickDispenseCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
+
+        QuickDispenseCommand.Subscribe(d =>
+        {
+            if (d == null) return;
+
+            if (_isInDepositMode.Value)
+            {
+                _notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrWarnDispenseDuringDeposit"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
+            ExecuteBulkDispense(new Dictionary<DenominationKey, int> { [d.Key] = 1 });
+        });
 
         DispenseBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
         DispenseBulkCommand.Subscribe(counts =>
