@@ -39,31 +39,13 @@
                 <ContentControl Content="{Binding}">
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <views:DispenseIdleView />
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="ContentTemplate" Value="{StaticResource DispenseIdleTemplate}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding StatusName.Value}" Value="Busy">
-                                    <Setter Property="ContentTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <views:DispenseBusyView />
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="ContentTemplate" Value="{StaticResource DispenseBusyTemplate}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding StatusName.Value}" Value="Error">
-                                    <Setter Property="ContentTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <views:DispenseErrorView />
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="ContentTemplate" Value="{StaticResource DispenseErrorTemplate}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
