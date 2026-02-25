@@ -5,11 +5,15 @@ namespace CashChangerSimulator.UI.Wpf.Views;
 /// <summary>金種指定入出金用のダイアログウィンドウ。</summary>
 public partial class BulkAmountInputWindow : Window
 {
-    public BulkAmountInputWindow(string title, string? buttonText = null)
+    public BulkAmountInputWindow(string title, string? subtitle = null, string? buttonText = null)
     {
         InitializeComponent();
         TitleText.Text = title;
         Title = title;
+        if (!string.IsNullOrEmpty(subtitle))
+        {
+            SubtitleText.Text = subtitle;
+        }
         if (!string.IsNullOrEmpty(buttonText))
         {
             ConfirmButton.Content = buttonText;

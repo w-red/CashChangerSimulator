@@ -29,6 +29,12 @@ public class SettingsViewModel : IDisposable
     /// <summary>利用可能な UI モードのリスト。</summary>
     public UIMode[] AvailableUIModes { get; } = [UIMode.Standard, UIMode.PosTransaction];
 
+    /// <summary>表示言語（カルチャコード）。</summary>
+    public BindableReactiveProperty<string> CultureCode { get; }
+
+    /// <summary>利用可能な言語のリスト。</summary>
+    public string[] AvailableCultures { get; } = ["en-US", "ja-JP"];
+
     /// <summary>NearEmpty と判定するデフォルト枚数。</summary>
     public BindableReactiveProperty<int> NearEmpty { get; }
 
@@ -68,6 +74,11 @@ public class SettingsViewModel : IDisposable
         ActiveUIMode =
             new BindableReactiveProperty<UIMode>(UIMode.Standard)
             .AddTo(_disposables);
+        CultureCode =
+            new BindableReactiveProperty<string>("en-US")
+            .AddTo(_disposables);
+
+        CultureCode.Subscribe(App.UpdateLanguage).AddTo(_disposables);
 
         NearEmpty = new BindableReactiveProperty<int>(0)
             .EnableValidation(val =>
@@ -125,6 +136,7 @@ public class SettingsViewModel : IDisposable
         NearFull.Value = config.Thresholds.NearFull;
         Full.Value = config.Thresholds.Full;
         ActiveUIMode.Value = config.UIMode;
+        CultureCode.Value = config.CultureCode ?? "en-US";
 
         DenominationSettings.Clear();
 
@@ -167,6 +179,7 @@ public class SettingsViewModel : IDisposable
         config.Thresholds.Full = Full.Value;
 
         config.UIMode = ActiveUIMode.Value;
+        config.CultureCode = CultureCode.Value;
 
         if (!config.Inventory.TryGetValue(config.CurrencyCode, out InventorySettings? activeInventory))
         {

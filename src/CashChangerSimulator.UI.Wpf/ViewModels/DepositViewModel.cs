@@ -164,16 +164,16 @@ public class DepositViewModel : IDisposable
     private string GetModeName()
     {
         return !_depositController.IsDepositInProgress && _depositController.DepositStatus != CashDepositStatus.End
-            ? "IDLE (待機中)"
+            ? "IDLE"
             : _depositController.IsPaused
-                ? "PAUSED (一時停止中)"
+                ? "PAUSED"
                 : _depositController.IsFixed
-                    ? "DEPOSIT FIXED (確定済み)"
+                    ? "FIXED"
                     : _depositController.DepositStatus switch
                     {
-                        CashDepositStatus.Start => "STARTING (開始中)",
-                        CashDepositStatus.Count => "COUNTING (計数中)",
-                        CashDepositStatus.End => "IDLE (待機中)",
+                        CashDepositStatus.Start => "STARTING",
+                        CashDepositStatus.Count => "COUNTING",
+                        CashDepositStatus.End => "IDLE",
                         _ => "UNKNOWN"
                     };
     }
