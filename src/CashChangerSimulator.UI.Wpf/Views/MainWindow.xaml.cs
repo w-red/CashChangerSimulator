@@ -1,4 +1,6 @@
-﻿using CashChangerSimulator.UI.Wpf.ViewModels;
+﻿using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.UI.Wpf.ViewModels;
+using R3;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.Views;
@@ -14,10 +16,34 @@ public partial class MainWindow : Window
         InitializeComponent();
         _viewModel = DIContainer.Resolve<MainViewModel>();
         DataContext = _viewModel;
+
+        // Navigation logic
+        _viewModel.CurrentUIMode
+            .Subscribe(mode => NavigateToMode(mode))
+            .AddTo(_disposables);
+    }
+
+    private readonly CompositeDisposable _disposables = [];
+
+    private void NavigateToMode(UIMode mode)
+    {
+        if (MainFrame == null) return;
+
+        switch (mode)
+        {
+            case UIMode.PosTransaction:
+                MainFrame.Navigate(new PosMainPage { DataContext = _viewModel });
+                break;
+            case UIMode.Standard:
+            default:
+                MainFrame.Navigate(new StandardSimulationPage { DataContext = _viewModel });
+                break;
+        }
     }
 
     protected override void OnClosed(EventArgs e)
     {
+        _disposables.Dispose();
         _viewModel.Dispose();
         base.OnClosed(e);
     }
