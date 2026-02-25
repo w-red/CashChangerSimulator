@@ -8,19 +8,19 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-      d:DesignHeight="600" d:DesignWidth="1200"
+      d:DesignHeight="820" d:DesignWidth="1240"
       Title="StandardSimulationPage">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="340" />
+            <ColumnDefinition x:Name="SidebarColumn" Width="Auto" />
         </Grid.ColumnDefinitions>
         
         <!-- Left: Inventory Tiles -->
         <ctrl:InventoryGridControl DataContext="{Binding Inventory}" />
 
         <!-- Right: Terminals & Activity -->
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer x:Name="SidebarContent" Grid.Column="1" VerticalScrollBarVisibility="Auto" Width="340">
             <StackPanel Margin="0,0,24,0">
                 <!-- Terminal Launchers -->
                 <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Margin="0,0,0,16">
