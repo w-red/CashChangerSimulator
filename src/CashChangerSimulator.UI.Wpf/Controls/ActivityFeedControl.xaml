@@ -7,41 +7,24 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:InventoryViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Border Style="{StaticResource CardStyle}">
         <DockPanel>
             <TextBlock DockPanel.Dock="Top" Text="ACTIVITY FEED" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
             
-            <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0"
+            <ListBox ItemsSource="{Binding RecentTransactions}" 
+                     Background="Transparent" BorderThickness="0"
+                     ItemContainerStyle="{StaticResource TransactionListStyle}"
+                     ItemTemplate="{StaticResource TransactionItemTemplate}"
                      AutomationProperties.AutomationId="HistoryListBox">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                        <Setter Property="Padding" Value="0,8"/>
-                        <Setter Property="Margin" Value="0,0,0,8"/>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            
-                            <materialDesign:PackIcon Kind="{Binding Type, Converter={StaticResource TypeSymbolConv}}" 
-                                                     Foreground="{StaticResource PrimaryBrush}" 
-                                                     Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                            
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Type}" FontSize="13" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="11" Opacity="0.6"/>
-                            </StackPanel>
-                            
-                            <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat={}{0:N0}}" 
-                                       VerticalAlignment="Center" FontWeight="Bold" FontSize="15" Foreground="{StaticResource PrimaryBrush}"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
             </ListBox>
         </DockPanel>
     </Border>
