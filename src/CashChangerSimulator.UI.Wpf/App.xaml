@@ -10,6 +10,11 @@
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+                
+                <!-- Application Themes -->
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <materialDesign:SnackbarMessageQueue x:Key="MainMessageQueue" />
@@ -21,95 +26,7 @@
             <conv:DepositModeBackgroundConverter x:Key="DepositModeBackgroundConv" />
             <BooleanToVisibilityConverter x:Key="VisibilityConv" />
             <conv:UIModeToVisibilityConverter x:Key="UIModeVisibilityConv" />
-
-
-            <!-- Color Palette -->
-            <Color x:Key="BackgroundColor">#121212</Color>
-            <Color x:Key="SurfaceColor">#1E1E1E</Color>
-            <Color x:Key="PrimaryColor">#BB86FC</Color>
-            <Color x:Key="SecondaryColor">#03DAC6</Color>
-            <Color x:Key="ErrorColor">#CF6679</Color>
-            <Color x:Key="OnBackgroundColor">#FFFFFF</Color>
-            <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
-
-            <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-            <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-            <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-            <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
-            <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
-            <SolidColorBrush x:Key="OnBackgroundBrush" Color="{StaticResource OnBackgroundColor}"/>
-            <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
-            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource OnSurfaceColor}"/>
-            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A0A0A0"/>
-
-            <!-- Converters -->
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
-            
-            <!-- Styles -->
-            <Style x:Key="CardStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-                <Setter Property="CornerRadius" Value="12"/>
-                <Setter Property="Padding" Value="15"/>
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="15" ShadowDepth="4"/>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Effect">
-                            <Setter.Value>
-                                <DropShadowEffect Color="Black" Opacity="0.6" BlurRadius="25" ShadowDepth="6"/>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-
-            <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                <Setter Property="Foreground" Value="Black"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Padding" Value="24,8"/>
-                <Setter Property="Height" Value="40"/>
-                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
-            </Style>
-
-            <!-- Aliases for robustness against library changes (Updated for MD3 / MDIX 5.x) -->
-            <Style x:Key="ModernFlatButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
-                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
-            </Style>
-
-            <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
-            </Style>
-
-            <Style x:Key="ModernToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
-            </Style>
-
-            <Style TargetType="Button" x:Key="IconButtonStyle" BasedOn="{StaticResource MaterialDesignIconButton}">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                <Setter Property="Width" Value="40"/>
-                <Setter Property="Height" Value="40"/>
-            </Style>
-
-            <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-                <Setter Property="Margin" Value="0,8,0,8"/>
-                <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
-                <Setter Property="materialDesign:TextFieldAssist.PrefixText" Value="¥"/>
-            </Style>
-
-            <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-                <Setter Property="Margin" Value="0,8,0,8"/>
-            </Style>
-
-            <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
-                <Setter Property="Background" Value="#333333"/>
-                <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
-            </Style>
-
-            <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionLightCheckBox}">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-            </Style>
 
         </ResourceDictionary>
     </Application.Resources>
