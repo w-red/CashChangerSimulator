@@ -16,7 +16,7 @@
                 DockPanel.Dock="Top"
                 Padding="15,15,15,10">
                 <TextBlock
-                    Text="DENOMINATION CALIBRATION"
+                    Text="{StaticResource StrDenomCalibration}"
                     FontSize="11"
                     FontWeight="Black"
                     Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -48,7 +48,7 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Header="IDENTIFIER"
+                        Header="{StaticResource StrHeaderIdentifier}"
                         Binding="{Binding DisplayName.Value}"
                         Width="*">
                         <DataGridTextColumn.ElementStyle>
@@ -62,19 +62,19 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn
-                        Header="BASE QTY"
+                        Header="{StaticResource StrHeaderBaseQty}"
                         Binding="{Binding Count.Value}"
                         Width="80"/>
                     <DataGridTextColumn
-                        Header="N.EMPTY"
+                        Header="{StaticResource StrHeaderNearEmpty}"
                         Binding="{Binding NearEmpty.Value}"
                         Width="80"/>
                     <DataGridTextColumn
-                        Header="N.FULL"
+                        Header="{StaticResource StrHeaderNearFull}"
                         Binding="{Binding NearFull.Value}"
                         Width="80"/>
                     <DataGridTextColumn
-                        Header="MAX CAP"
+                        Header="{StaticResource StrHeaderMaxCap}"
                         Binding="{Binding Full.Value}"
                         Width="80"/>
                 </DataGrid.Columns>

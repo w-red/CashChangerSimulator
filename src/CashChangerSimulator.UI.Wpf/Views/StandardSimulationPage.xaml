@@ -25,7 +25,7 @@
                 <!-- Terminal Launchers -->
                 <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="TERMINAL ACCESS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                        <TextBlock Text="{StaticResource StrTerminalAccess}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -40,7 +40,7 @@
                                     AutomationProperties.AutomationId="LaunchDepositButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                    <TextBlock Text="DEPOSIT" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{StaticResource StrDeposit}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Button>
                             
@@ -53,7 +53,7 @@
                                     AutomationProperties.AutomationId="LaunchDispenseButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24"/>
-                                    <TextBlock Text="DISPENSE" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{StaticResource StrDispense}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Button>
                         </Grid>

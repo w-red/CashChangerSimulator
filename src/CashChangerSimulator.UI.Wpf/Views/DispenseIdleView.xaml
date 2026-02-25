@@ -12,7 +12,7 @@
         <!-- Simple Dispense -->
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="AMOUNT DISPENSE" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,12"/>
+                <TextBlock Text="{StaticResource StrAmountDispense}" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,12"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -47,7 +47,7 @@
                 AutomationProperties.AutomationId="BulkDispenseShowButton">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="PlaylistCheck" Margin="0,0,8,0"/>
-                <TextBlock Text="BULK DISPENSE" FontSize="13"/>
+                <TextBlock Text="{StaticResource StrBulkDispense}" FontSize="13"/>
             </StackPanel>
         </Button>
     </StackPanel>

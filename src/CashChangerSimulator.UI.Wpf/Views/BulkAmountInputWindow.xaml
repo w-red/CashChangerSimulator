@@ -27,11 +27,11 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock x:Name="TitleText" Text="BULK INPUT" 
+            <TextBlock x:Name="TitleText" Text="{StaticResource StrBulkInput}" 
                        Style="{StaticResource MaterialDesignHeadline5TextBlock}" 
                        Foreground="{StaticResource TextSecondaryBrush}"
                        FontWeight="Black"/>
-            <TextBlock x:Name="SubtitleText" Text="金種ごとの数量を入力してください" FontSize="11" Opacity="0.4" Margin="0,4,0,0"/>
+            <TextBlock x:Name="SubtitleText" Text="{StaticResource StrBulkInputDefaultSubtitle}" FontSize="11" Opacity="0.4" Margin="0,4,0,0"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" Margin="0,0,0,16" VerticalScrollBarVisibility="Auto">
@@ -41,12 +41,12 @@
         </ScrollViewer>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="CANCEL" Click="CancelButton_Click" 
+            <Button Content="{StaticResource StrCancel}" Click="CancelButton_Click" 
                     Style="{StaticResource MaterialDesignFlatButton}" 
                     Margin="0,0,12,0" 
                     AutomationProperties.AutomationId="BulkCancelButton"
                     Width="100" Height="40"/>
-            <Button x:Name="ConfirmButton" Content="OK" Click="OkButton_Click" 
+            <Button x:Name="ConfirmButton" Content="{StaticResource StrOk}" Click="OkButton_Click" 
                     Style="{StaticResource PrimaryButtonStyle}" 
                     AutomationProperties.AutomationId="BulkConfirmButton"
                     Width="auto" Height="40"/>

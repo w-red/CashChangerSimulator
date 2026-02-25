@@ -10,12 +10,12 @@
              d:DesignHeight="300" d:DesignWidth="400">
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40">
         <materialDesign:PackIcon Kind="AlertCircle" Width="64" Height="64" Foreground="Red" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-        <TextBlock Text="DISPENSE ERROR" FontSize="24" FontWeight="Bold" Foreground="Red" HorizontalAlignment="Center"/>
-        <TextBlock Text="Hardware check required." FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,12"/>
+        <TextBlock Text="{StaticResource StrDispenseError}" FontSize="24" FontWeight="Bold" Foreground="Red" HorizontalAlignment="Center"/>
+        <TextBlock Text="{StaticResource StrHardwareCheckRequired}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,12"/>
         <Button Command="{Binding ClearErrorCommand}" Style="{StaticResource ModernFlatButtonStyle}" Foreground="Red" Margin="0,16" Height="44">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" />
-                <TextBlock Text="CLEAR ERROR" FontSize="14"/>
+                <TextBlock Text="{StaticResource StrClearError}" FontSize="14"/>
             </StackPanel>
         </Button>
     </StackPanel>

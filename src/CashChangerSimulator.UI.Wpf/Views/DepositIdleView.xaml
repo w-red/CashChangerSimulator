@@ -16,14 +16,14 @@
                 AutomationProperties.AutomationId="BeginDepositButton">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="HandPointingRight" Margin="0,0,12,0" Width="24" Height="24"/>
-                <TextBlock Text="START DEPOSIT" VerticalAlignment="Center" FontSize="16"/>
+                <TextBlock Text="{StaticResource StrStartDeposit}" VerticalAlignment="Center" FontSize="16"/>
             </StackPanel>
         </Button>
 
         <Separator Background="#1AFFFFFF" Margin="0,24"/>
 
         <!-- Quick Deposit Input -->
-        <TextBlock Text="QUICK DEPOSIT" FontSize="11" FontWeight="Bold" 
+        <TextBlock Text="{StaticResource StrQuickDeposit}" FontSize="11" FontWeight="Bold" 
                    HorizontalAlignment="Center" Opacity="0.5" Margin="0,0,0,12"/>
         <Grid Width="260" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
@@ -47,7 +47,7 @@
                 <materialDesign:PackIcon Kind="Flash" Width="20" Height="20"/>
             </Button>
         </Grid>
-        <TextBlock Text="Calculates denominations automatically" 
+        <TextBlock Text="{StaticResource StrAutoCalcDenoms}" 
                    FontSize="10" Opacity="0.4" HorizontalAlignment="Center" Margin="0,8,0,0"/>
     </StackPanel>
 </UserControl>

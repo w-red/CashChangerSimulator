@@ -9,7 +9,7 @@
              d:DataContext="{d:DesignInstance vm:DispenseViewModel}"
              d:DesignHeight="190" d:DesignWidth="400">
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,60">
-        <TextBlock Text="DISPENSING..." FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
+        <TextBlock Text="{StaticResource StrDispensing}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
         <TextBlock Text="{Binding DispensingAmount.Value, StringFormat=¥{0:N0}}" FontSize="56" FontWeight="Thin" HorizontalAlignment="Center"/>
         <ProgressBar IsIndeterminate="True" Margin="0,24" Width="240" Height="4" Foreground="{StaticResource PrimaryBrush}" BorderThickness="0" Background="Transparent"/>
     </StackPanel>

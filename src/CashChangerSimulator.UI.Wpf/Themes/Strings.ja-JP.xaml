@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Common Strings -->
+    <system:String x:Key="StrCancel">キャンセル</system:String>
+    <system:String x:Key="StrOk">OK</system:String>
+    <system:String x:Key="StrError">エラー</system:String>
+    <system:String x:Key="StrReset">リセット</system:String>
+    <system:String x:Key="StrBusy">ビジー</system:String>
+
+    <system:String x:Key="StrCashBalance">在庫合計金額</system:String>
+    <system:String x:Key="StrActivityFeed">アクティビティフィード</system:String>
+    <system:String x:Key="StrValidationError">入力エラー</system:String>
+
+    <!-- Validation Messages -->
+    <system:String x:Key="StrErrorEnterValidNumber">有効な数値を入力してください</system:String>
+    <system:String x:Key="StrErrorAmountPositive">正の値を入力してください</system:String>
+    <system:String x:Key="StrErrorInsufficientFunds">残高不足です</system:String>
+
+    <!-- Main Window / Settings -->
+    <system:String x:Key="StrSystemSettings">システム設定</system:String>
+    <system:String x:Key="StrSettingsSubtitle">デバイスの動作および通貨パラメータの設定</system:String>
+    <system:String x:Key="StrCoreParameters">基本パラメータ</system:String>
+    <system:String x:Key="StrRestartRequired">* 在庫再調整のため再起動が必要です。</system:String>
+    <system:String x:Key="StrUIBehaviorNote">* ユーザーインターフェースの動作パターンを変更します。</system:String>
+    <system:String x:Key="StrGlobalThresholds">共通しきい値</system:String>
+    <system:String x:Key="StrDenomCalibration">金種別設定</system:String>
+
+    <!-- Simulation Page -->
+    <system:String x:Key="StrTerminalAccess">各ターミナルへのアクセス</system:String>
+    <system:String x:Key="StrDeposit">入金</system:String>
+    <system:String x:Key="StrDispense">出金</system:String>
+    <system:String x:Key="StrTransactionStatus">取引ステータス</system:String>
+    <system:String x:Key="StrOposDeviceLog">OPOS デバイスログ</system:String>
+    <system:String x:Key="StrStartSimulation">シミュレーション開始</system:String>
+    <system:String x:Key="StrReadyForTransaction">取引可能</system:String>
+    <system:String x:Key="StrInsertCashToContinue">現金を投入してください</system:String>
+    <system:String x:Key="StrTransactionFinished">取引終了</system:String>
+
+    <!-- Terminals -->
+    <system:String x:Key="StrDispenseTerminal">出金ターミナル</system:String>
+    <system:String x:Key="StrDepositTerminal">入金ターミナル</system:String>
+    <system:String x:Key="StrAmountDispense">金額指定出金</system:String>
+    <system:String x:Key="StrBulkDispense">一括出金</system:String>
+    <system:String x:Key="StrDispenseError">出金エラー</system:String>
+    <system:String x:Key="StrHardwareCheckRequired">ハードウェアを確認してください。</system:String>
+    <system:String x:Key="StrClearError">エラー解除</system:String>
+    <system:String x:Key="StrDispensing">出金中...</system:String>
+
+    <system:String x:Key="StrCurrentDeposit">現在の投入金額</system:String>
+    <system:String x:Key="StrStartDeposit">入金開始</system:String>
+    <system:String x:Key="StrQuickDeposit">クイック入金</system:String>
+    <system:String x:Key="StrAutoCalcDenoms">枚数を自動計算して投入します</system:String>
+    <system:String x:Key="StrBulk">一括</system:String>
+    <system:String x:Key="StrFinishCounting">計数終了</system:String>
+    <system:String x:Key="StrPause">一時停止</system:String>
+    <system:String x:Key="StrResume">再開</system:String>
+    <system:String x:Key="StrStore">収納</system:String>
+    <system:String x:Key="StrReturn">返却</system:String>
+
+    <!-- Footer Actions -->
+    <system:String x:Key="StrCommitChanges">変更を保存</system:String>
+    <system:String x:Key="StrDefault">デフォルト</system:String>
+
+    <!-- Table Headers -->
+    <system:String x:Key="StrHeaderIdentifier">識別子</system:String>
+    <system:String x:Key="StrHeaderBaseQty">基準枚数</system:String>
+    <system:String x:Key="StrHeaderNearEmpty">ニアエンプティ</system:String>
+    <system:String x:Key="StrHeaderNearFull">ニアフル</system:String>
+    <system:String x:Key="StrHeaderMaxCap">最大容量</system:String>
+
+    <!-- Bulk Input Dialog -->
+    <system:String x:Key="StrBulkInput">一括投入</system:String>
+    <system:String x:Key="StrBulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
+    <system:String x:Key="StrBulkDepositSubtitle">投入する数量を入力してください。</system:String>
+    <system:String x:Key="StrBulkDispenseSubtitle">出金する数量を入力してください。</system:String>
+
+</ResourceDictionary>

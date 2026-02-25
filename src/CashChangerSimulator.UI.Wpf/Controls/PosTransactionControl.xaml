@@ -24,7 +24,7 @@
         <!-- Transaction Progress Area -->
         <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
             <StackPanel>
-                <TextBlock Text="TRANSACTION STATUS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                <TextBlock Text="{StaticResource StrTransactionStatus}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                 
                 <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
@@ -61,16 +61,16 @@
                     <!-- Idle State -->
                     <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
                         <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
-                        <TextBlock Text="Ready for Transaction" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <TextBlock Text="{StaticResource StrReadyForTransaction}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
                         <Button Style="{StaticResource PrimaryButtonStyle}" 
-                                Content="START SIMULATION" 
+                                Content="{StaticResource StrStartSimulation}" 
                                 Command="{Binding StartCommand}"
                                 Width="240" />
                     </StackPanel>
 
                     <!-- Waiting for Cash State -->
                     <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=WaitingForCash}">
-                        <TextBlock Text="Insert Cash to Continue" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="{StaticResource StrInsertCashToContinue}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,16"/>
                         <ItemsControl ItemsSource="{Binding AvailableDenominations}"
                                       ItemsPanel="{StaticResource CenteredWrapPanelItemsPanel}"
                                       ItemTemplate="{StaticResource CashInsertionTemplate}">
@@ -80,9 +80,9 @@
                     <!-- Completed State -->
                     <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Completed}">
                         <materialDesign:PackIcon Kind="CheckCircle" Width="64" Height="64" HorizontalAlignment="Center" Foreground="LightGreen" Margin="0,0,0,16"/>
-                        <TextBlock Text="Transaction Finished" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <TextBlock Text="{StaticResource StrTransactionFinished}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
                         <Button Style="{StaticResource ModernFlatButtonStyle}" 
-                                Content="RESET" 
+                                Content="{StaticResource StrReset}" 
                                 Command="{Binding ResetCommand}"
                                 HorizontalAlignment="Center" />
                     </StackPanel>
@@ -92,7 +92,7 @@
             <!-- OPOS Events Log -->
             <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="OPOS DEVICE LOG" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource StrOposDeviceLog}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                     <ListBox ItemsSource="{Binding OposLog}" 
                              Background="Transparent" BorderThickness="0"
                              ItemContainerStyle="{StaticResource LogItemStyle}"
