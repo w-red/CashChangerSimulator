@@ -1,8 +1,6 @@
-using System;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
@@ -36,10 +34,12 @@ public class PosTransactionViewModelFixture : IDisposable
 
         var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, new CurrencyMetadataProvider(ConfigProvider));
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        
-        CashChanger = new SimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware);
-        CashChanger.SkipStateVerification = true;
-        CashChanger.CurrencyCode = currencyCode;
+
+        CashChanger = new SimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware)
+        {
+            SkipStateVerification = true,
+            CurrencyCode = currencyCode
+        };
     }
 
     public void Dispose()

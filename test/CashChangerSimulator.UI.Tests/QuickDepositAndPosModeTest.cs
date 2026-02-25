@@ -5,7 +5,6 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;

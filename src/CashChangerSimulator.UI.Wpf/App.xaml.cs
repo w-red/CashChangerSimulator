@@ -1,9 +1,7 @@
 ﻿using CashChangerSimulator.Core;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
-using Microsoft.Extensions.Logging;
 using R3;
 using System.IO;
 using System.Windows;

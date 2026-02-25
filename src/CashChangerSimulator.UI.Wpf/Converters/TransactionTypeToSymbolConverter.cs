@@ -1,4 +1,3 @@
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using MaterialDesignThemes.Wpf;
 using System.Globalization;
@@ -11,9 +10,8 @@ public class TransactionTypeToSymbolConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is TransactionType type)
-        {
-            return type switch
+        return value is TransactionType type
+            ? type switch
             {
                 TransactionType.Deposit => PackIconKind.ArrowDownBoldCircleOutline,
                 TransactionType.Dispense => PackIconKind.ArrowUpBoldCircleOutline,
@@ -21,9 +19,8 @@ public class TransactionTypeToSymbolConverter : IValueConverter
                 TransactionType.Collection => PackIconKind.TrayArrowUp,
                 TransactionType.Adjustment => PackIconKind.Tools,
                 _ => PackIconKind.HelpCircleOutline
-            };
-        }
-        return PackIconKind.HelpCircleOutline;
+            }
+            : PackIconKind.HelpCircleOutline;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
