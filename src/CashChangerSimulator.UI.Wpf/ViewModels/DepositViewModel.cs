@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
@@ -59,14 +60,21 @@ public class DepositViewModel : IDisposable
     /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
 
+    private readonly BindableReactiveProperty<bool> _isDispenseBusy;
+    private readonly INotifyService _notifyService;
+
     /// <summary>DepositViewModel の新しいインスタンスを初期化します。</summary>
     public DepositViewModel(
         DepositController depositController,
         HardwareStatusManager hardwareStatusManager,
-        Func<IEnumerable<DenominationViewModel>> getDenominations)
+        Func<IEnumerable<DenominationViewModel>> getDenominations,
+        BindableReactiveProperty<bool> isDispenseBusy,
+        INotifyService notifyService)
     {
         _depositController = depositController;
         _hardwareStatusManager = hardwareStatusManager;
+        _isDispenseBusy = isDispenseBusy;
+        _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DepositViewModel>();
 
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
@@ -103,9 +111,19 @@ public class DepositViewModel : IDisposable
             .AddTo(_disposables);
 
         // Commands
-        BeginDepositCommand = IsInDepositMode.Select(x => !x).ToReactiveCommand<Unit>().AddTo(_disposables);
+        BeginDepositCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ =>
         {
+            if (_isDispenseBusy.Value)
+            {
+                _notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrWarnDepositDuringDispense"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
+            if (IsInDepositMode.Value) return;
+
             try
             {
                 _depositController.BeginDeposit();
@@ -149,10 +167,24 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        QuickDepositCommand = IsInDepositMode
-            .CombineLatest(QuickDepositAmountInput, (mode, input) => !mode && decimal.TryParse(input, out var a) && a > 0)
-            .ToReactiveCommand<Unit>().AddTo(_disposables);
-        QuickDepositCommand.Subscribe(async _ => await ExecuteQuickDepositAsync(getDenominations()));
+        QuickDepositCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        QuickDepositCommand.Subscribe(async _ =>
+        {
+            if (_isDispenseBusy.Value)
+            {
+                _notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrWarnDepositDuringDispense"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
+            if (IsInDepositMode.Value) return;
+
+            // Instead of evaluating in CanExecute, check validity here
+            if (!decimal.TryParse(QuickDepositAmountInput.Value, out var a) || a <= 0) return;
+
+            await ExecuteQuickDepositAsync(getDenominations());
+        });
 
         SimulateOverlapCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => mode && !fixed_ && !overlapped)

@@ -25,6 +25,7 @@ public static class DIContainer
         resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
+        resolver.Register<INotifyService, Services.WpfNotifyService>(Lifestyle.Singleton);
 
         // 2. Core Services (Singleton)
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);

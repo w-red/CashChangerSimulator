@@ -38,6 +38,26 @@
             </StackPanel>
         </Border>
 
+        <Separator Background="#1AFFFFFF" Margin="0,4,0,16"/>
+
+        <TextBlock Text="{StaticResource StrQuickDispense}" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,12" HorizontalAlignment="Center"/>
+
+        <ItemsControl ItemsSource="{Binding Denominations}"
+                      ItemsPanel="{StaticResource CenteredWrapPanelItemsPanel}"
+                      Margin="0,0,0,16">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Viewbox StretchDirection="DownOnly" Stretch="Uniform" Height="40" Margin="4">
+                        <Button Style="{StaticResource ModernFlatButtonStyle}"
+                                Content="{Binding Name}"
+                                Command="{Binding DataContext.QuickDispenseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Width="85" Height="40" />
+                    </Viewbox>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <Separator Background="#1AFFFFFF" Margin="0,4,0,20"/>
 
         <!-- Bulk Dispense (Dialog) -->

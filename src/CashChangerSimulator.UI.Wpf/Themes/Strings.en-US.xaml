@@ -7,6 +7,7 @@
     <system:String x:Key="StrOk">OK</system:String>
     <system:String x:Key="StrError">ERROR</system:String>
     <system:String x:Key="StrReset">RESET</system:String>
+    <system:String x:Key="StrWarn">WARNING</system:String>
     <system:String x:Key="StrBusy">BUSY</system:String>
 
     <system:String x:Key="StrCashBalance">CASH BALANCE</system:String>
@@ -42,11 +43,14 @@
     <system:String x:Key="StrDispenseTerminal">DISPENSE TERMINAL</system:String>
     <system:String x:Key="StrDepositTerminal">DEPOSIT TERMINAL</system:String>
     <system:String x:Key="StrAmountDispense">AMOUNT DISPENSE</system:String>
+    <system:String x:Key="StrQuickDispense">QUICK DISPENSE</system:String>
     <system:String x:Key="StrBulkDispense">BULK DISPENSE</system:String>
     <system:String x:Key="StrDispenseError">DISPENSE ERROR</system:String>
     <system:String x:Key="StrHardwareCheckRequired">Hardware check required.</system:String>
     <system:String x:Key="StrClearError">CLEAR ERROR</system:String>
     <system:String x:Key="StrDispensing">DISPENSING...</system:String>
+    <system:String x:Key="StrWarnDispenseDuringDeposit">Cannot dispense while a deposit is in progress.</system:String>
+    <system:String x:Key="StrWarnDepositDuringDispense">Cannot start deposit while a dispense is in progress.</system:String>
 
     <system:String x:Key="StrCurrentDeposit">CURRENT DEPOSIT</system:String>
     <system:String x:Key="StrStartDeposit">START DEPOSIT</system:String>

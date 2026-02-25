@@ -15,39 +15,42 @@
         Foreground="{StaticResource OnBackgroundBrush}"
         TextElement.Foreground="{StaticResource OnBackgroundBrush}"
         TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
+        TextElement.FontSize="16"
         ResizeMode="CanResize" MinWidth="360" MinHeight="500">
 
-    <Border Padding="24">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <!-- Removed explicit dialog width and let dialog scale with its content. Margin and internal padded Grid manage padding -->
+    <materialDesign:DialogHost Identifier="DepositDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+        <Border Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                <TextBlock Text="{StaticResource StrDepositTerminal}" 
-                           Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
-                           Foreground="{StaticResource TextSecondaryBrush}"
-                           FontWeight="Black"/>
-            </StackPanel>
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                    <TextBlock Text="{StaticResource StrDepositTerminal}" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontWeight="Black"/>
+                </StackPanel>
 
-            <!-- Content -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <ContentControl Content="{Binding}">
-                    <ContentControl.Style>
-                        <Style TargetType="ContentControl">
-                            <Setter Property="ContentTemplate" Value="{StaticResource DepositIdleTemplate}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsInDepositMode.Value}" Value="True">
-                                    <Setter Property="ContentTemplate" Value="{StaticResource DepositActiveTemplate}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ContentControl.Style>
-                </ContentControl>
-            </ScrollViewer>
-        </Grid>
-    </Border>
+                <!-- Content -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ContentControl Content="{Binding}">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="ContentTemplate" Value="{StaticResource DepositIdleTemplate}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsInDepositMode.Value}" Value="True">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource DepositActiveTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </materialDesign:DialogHost>
 </Window>
