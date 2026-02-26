@@ -39,6 +39,10 @@ public class InventoryViewModel : IDisposable
     public ReactiveCommand OpenSettingsCommand { get; }
     /// <summary>エラー解除コマンド。</summary>
     public ReactiveCommand ResetErrorCommand { get; }
+    /// <summary>すべての在庫を 0 にするコマンド。</summary>
+    public ReactiveCommand CollectAllCommand { get; }
+    /// <summary>すべての在庫を初期値に戻すコマンド。</summary>
+    public ReactiveCommand ReplenishAllCommand { get; }
 
     /// <summary>InventoryViewModel の新しいインスタンスを初期化します。</summary>
     public InventoryViewModel(
@@ -110,6 +114,25 @@ public class InventoryViewModel : IDisposable
                 Owner = System.Windows.Application.Current.MainWindow
             };
             settingsWindow.ShowDialog();
+        });
+        
+        CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
+        CollectAllCommand.Subscribe(_ =>
+        {
+            foreach (var den in Denominations)
+            {
+                _inventory.SetCount(den.Key, 0);
+            }
+        });
+
+        ReplenishAllCommand = new ReactiveCommand().AddTo(_disposables);
+        ReplenishAllCommand.Subscribe(_ =>
+        {
+            foreach (var den in Denominations)
+            {
+                var setting = _configProvider.Config.GetDenominationSetting(den.Key);
+                _inventory.SetCount(den.Key, setting.InitialCount);
+            }
         });
     }
 

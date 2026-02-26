@@ -36,6 +36,7 @@
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             
@@ -77,8 +78,39 @@
                 </StackPanel>
             </Border>
 
+            <!-- Bulk Operations -->
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="BULK OPERATIONS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,12"/>
+                    <UniformGrid Columns="2">
+                        <Button Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding ReplenishAllCommand}"
+                                ToolTip="Replenish All (Set to Initial Counts)"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource SuccessBrush}"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="HandCoin" Foreground="{StaticResource SuccessBrush}" Margin="0,0,4,0"/>
+                                <TextBlock Text="FILL" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource ModernActionButtonStyle}"
+                                Command="{Binding CollectAllCommand}"
+                                ToolTip="Collect All (Set to Zero)"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="OrangeRed">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DeleteSweep" Foreground="OrangeRed" Margin="0,0,4,0"/>
+                                <TextBlock Text="EMPTY" Foreground="OrangeRed" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
             <!-- Activity Feed -->
-            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="ACTIVITY FEED" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                     
