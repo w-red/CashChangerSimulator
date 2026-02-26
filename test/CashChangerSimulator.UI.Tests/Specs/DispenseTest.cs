@@ -99,6 +99,53 @@ public class DispenseTest : IDisposable
         Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, UITestTimings.RetryLongTimeout);
     }
 
+    /// <summary>エラー状態（ジャム等）の際にコントロールが無効化されることを検証する。</summary>
+    [Fact]
+    public void ShouldDisableControlsWhenErrorOccurs()
+    {
+        var window = _app.MainWindow;
+        var dispenseWindow = OpenDispenseTerminal(window);
+
+        // Verify initial state
+        var dispenseBox = FindElement(dispenseWindow, "DispenseBox", null)?.AsTextBox();
+        var dispenseButton = FindElement(dispenseWindow, "DispenseButton", null)?.AsButton();
+        var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", null)?.AsButton();
+
+        dispenseBox.ShouldNotBeNull();
+        dispenseButton.ShouldNotBeNull();
+        showBulkButton.ShouldNotBeNull();
+
+        // Enter amount so DispenseButton evaluates CanExecute to true
+        dispenseBox.Text = "1000";
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        dispenseBox.IsEnabled.ShouldBeTrue();
+        dispenseButton.IsEnabled.ShouldBeTrue();
+        showBulkButton.IsEnabled.ShouldBeTrue();
+
+        // Simulate Jam
+        var simulateJamButton = FindElement(dispenseWindow, "SimulateJamButton", null)?.AsButton();
+        simulateJamButton.ShouldNotBeNull();
+        simulateJamButton.Click();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        // Verify disabled state
+        dispenseBox.IsEnabled.ShouldBeFalse();
+        dispenseButton.IsEnabled.ShouldBeFalse();
+        showBulkButton.IsEnabled.ShouldBeFalse();
+
+        // Reset Error
+        var resetErrorButton = FindElement(dispenseWindow, "ResetErrorButton", null)?.AsButton();
+        resetErrorButton.ShouldNotBeNull();
+        resetErrorButton.Click();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        // Verify enabled state
+        dispenseBox.IsEnabled.ShouldBeTrue();
+        dispenseButton.IsEnabled.ShouldBeTrue();
+        showBulkButton.IsEnabled.ShouldBeTrue();
+    }
+
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
         var launchButton = FindElement(mainWindow, "LaunchDispenseButton", "DISPENSE")?.AsButton();

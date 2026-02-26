@@ -1,96 +1,119 @@
-using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Managers;
-using CashChangerSimulator.Device;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Monitoring;
-using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using Moq;
 using R3;
 using Shouldly;
-using System;
 
 namespace CashChangerSimulator.UI.Tests;
 
 /// <summary>状態競合時の警告ダイアログ動作を検証するテストクラス。</summary>
-public class StateConflictTest
+public class StateConflictTest : IAsyncLifetime
 {
-    private readonly Mock<INotifyService> _mockNotify;
-    private readonly Mock<Inventory> _mockInventory;
-    private readonly DepositController _depositController;
-    private readonly Mock<DispenseController> _mockDispenseController;
-    private readonly MainViewModel _mainViewModel;
-    private readonly Subject<Unit> _dispenseChanged = new();
+    private readonly StateConflictTestFixture _fixture = new();
+    private MainViewModel _mainViewModel = null!;
 
-    public StateConflictTest()
+    /// <inheritdoc/>
+    public async ValueTask InitializeAsync()
     {
-        _mockNotify = new Mock<INotifyService>();
-        var inventory = new Inventory();
-        var history = new TransactionHistory();
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.CurrencyCode = "JPY";
-        var invSettings = new InventorySettings();
-        invSettings.Denominations.Add("B1000", new DenominationSettings { DisplayName = "1000 JPY" });
-        configProvider.Config.Inventory.TryAdd("JPY", invSettings);
-        
-        var metadataProvider = new CurrencyMetadataProvider(configProvider);
-        var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
-        
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        var hardwareManager = new HardwareStatusManager();
-        
-        _depositController = new DepositController(inventory, hardwareManager);
-        var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
-        
-        _mockDispenseController = new Mock<DispenseController>(manager, hardwareManager, new Mock<IDeviceSimulator>().Object);
-        _mockDispenseController.SetupGet(c => c.Changed).Returns(_dispenseChanged);
-
-        var cashChangerMock = new Mock<SimulatorCashChanger>(configProvider, inventory, history, manager, _depositController, _mockDispenseController.Object, aggregatorProvider, hardwareManager);
-
+        _fixture.Initialize();
         _mainViewModel = new MainViewModel(
-            inventory: inventory,
-            history: history,
-            manager: manager,
-            monitorsProvider: monitorsProvider,
-            aggregatorProvider: aggregatorProvider,
-            configProvider: configProvider,
-            metadataProvider: metadataProvider,
-            hardwareStatusManager: hardwareManager,
-            depositController: _depositController,
-            dispenseController: _mockDispenseController.Object,
-            cashChanger: cashChangerMock.Object,
-            notifyService: _mockNotify.Object);
+            inventory: _fixture.Inventory,
+            history: _fixture.History,
+            manager: _fixture.Manager,
+            monitorsProvider: _fixture.MonitorsProvider,
+            aggregatorProvider: _fixture.AggregatorProvider,
+            configProvider: _fixture.ConfigProvider,
+            metadataProvider: _fixture.MetadataProvider,
+            hardwareStatusManager: _fixture.HardwareManager,
+            depositController: _fixture.DepositController,
+            dispenseController: _fixture.MockDispenseController.Object,
+            cashChanger: _fixture.MockCashChanger.Object,
+            notifyService: _fixture.MockNotify.Object);
+        await ValueTask.CompletedTask;
     }
 
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        _mainViewModel?.Dispose();
+        _fixture?.Dispose();
+        GC.SuppressFinalize(this);
+        await ValueTask.CompletedTask;
+    }
+
+    /// <summary>入金中のディスペンス試行時に警告が表示されることを検証する。</summary>
     [Fact]
     public void DispenseShouldShowWarningDuringDeposit()
     {
-        // Arrange: Start deposit
-        _depositController.BeginDeposit();
+        // Arrange
+        _fixture.DepositController.BeginDeposit();
         _mainViewModel.Deposit.IsInDepositMode.Value.ShouldBeTrue();
 
-        // Act: Attempt to dispense
-        _mainViewModel.Dispense.DispenseAmountInput.Value = "1000";
-        _mainViewModel.Dispense.DispenseCommand.Execute(Unit.Default);
+        // Act
+        var exception = Record.Exception(() =>
+        {
+            _mainViewModel.Dispense.DispenseAmountInput.Value = "1000";
+            _mainViewModel.Dispense.DispenseCommand.Execute(Unit.Default);
+        });
 
-        // Assert: Warning should be shown
-        _mockNotify.Verify(n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        // Assert
+        exception.ShouldBeNull($"ディスペンスコマンド実行中に例外が発生しました: {exception?.Message}");
+        
+        _fixture.MockNotify.Verify(
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            Times.Once,
+            "入金中のディスペンス試行時に警告ダイアログが表示されなかった");
     }
 
+    /// <summary>ディスペンス中の入金試行時に警告が表示されることを検証する。</summary>
     [Fact]
     public void DepositShouldShowWarningDuringDispense()
     {
-        // Arrange: Simulate dispense busy
-        _mockDispenseController.SetupGet(c => c.Status).Returns(CashDispenseStatus.Busy);
-        _dispenseChanged.OnNext(Unit.Default);
+        // Arrange
+        _fixture.MockDispenseController.SetupGet(c => c.Status).Returns(CashDispenseStatus.Busy);
+        _fixture.DispenseChanged.OnNext(Unit.Default);
         
         _mainViewModel.Dispense.IsBusy.Value.ShouldBeTrue();
 
-        // Act: Attempt to begin deposit
-        _mainViewModel.Deposit.BeginDepositCommand.Execute(Unit.Default);
+        // Act
+        var exception = Record.Exception(() =>
+        {
+            _mainViewModel.Deposit.BeginDepositCommand.Execute(Unit.Default);
+        });
 
-        // Assert: Warning should be shown
-        _mockNotify.Verify(n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        // Assert
+        exception.ShouldBeNull($"入金コマンド実行中に例外が発生しました: {exception?.Message}");
+        
+        _fixture.MockNotify.Verify(
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            Times.Once,
+            "ディスペンス中の入金試行時に警告ダイアログが表示されなかった");
+    }
+
+    /// <summary>複数回の状態競合試行時に、各回ごとに警告が表示されることを検証する。</summary>
+    [Fact]
+    public void MultipleConflictAttempts_ShouldShowWarningEachTime()
+    {
+        // Arrange
+        _fixture.DepositController.BeginDeposit();
+
+        // Act: 複数回ディスペンスを試行
+        for (int i = 0; i < 3; i++)
+        {
+            var exception = Record.Exception(() =>
+            {
+                _mainViewModel.Dispense.DispenseAmountInput.Value = "1000";
+                _mainViewModel.Dispense.DispenseCommand.Execute(Unit.Default);
+            });
+            
+            exception.ShouldBeNull($"ループ {i + 1} 回目でディスペンスコマンド実行中に例外が発生しました: {exception?.Message}");
+        }
+
+        // Assert: 3回警告が表示される
+        _fixture.MockNotify.Verify(
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            Times.Exactly(3),
+            "複数回の状態競合時に、各回ごとに警告が表示されなかった");
     }
 }

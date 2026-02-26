@@ -63,9 +63,9 @@ public class PosTransactionViewModelTest : IDisposable
             _fixture.Inventory,
             _fixture.Manager,
             _fixture.DispenseController,
+            _fixture.Hardware,
             _fixture.ConfigProvider,
             isInDepositMode,
-            Observable.Return(false),
             () => [],
             notifyService);
         
