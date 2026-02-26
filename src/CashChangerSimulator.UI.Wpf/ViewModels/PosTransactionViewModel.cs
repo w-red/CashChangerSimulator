@@ -35,6 +35,13 @@ public class PosTransactionViewModel : IDisposable
     /// <summary>OPOSアクションのログ。</summary>
     public ObservableCollection<string> OposLog { get; } = [];
 
+    // Missing Binding Properties for UI
+    public ReadOnlyReactiveProperty<string> StatusText { get; }
+    public ReadOnlyReactiveProperty<string> Message { get; }
+    public ReadOnlyReactiveProperty<decimal> TotalTargetAmount { get; }
+    public ReadOnlyReactiveProperty<decimal> CurrentAmount { get; }
+    public ReadOnlyReactiveProperty<double> Progress { get; }
+
     // Commands
     /// <summary>取引を開始するコマンド。</summary>
     public ReactiveCommand<Unit> StartCommand { get; }
@@ -88,6 +95,34 @@ public class PosTransactionViewModel : IDisposable
         }).ToBindableReactiveProperty(0m).AddTo(_disposables);
 
         TransactionTimeoutSeconds = new BindableReactiveProperty<int>(60).AddTo(_disposables);
+
+        // Map existing properties to the missing ones expected by XAML
+        TotalTargetAmount = TargetAmount;
+        CurrentAmount = InsertedAmount.ToReadOnlyReactiveProperty(0m).AddTo(_disposables);
+
+        Progress = TargetAmount.CombineLatest(CurrentAmount, (target, current) =>
+        {
+            if (target <= 0) return 0.0;
+            return Math.Min(100.0, (double)(current / target) * 100.0);
+        }).ToReadOnlyReactiveProperty(0.0).AddTo(_disposables);
+
+        StatusText = _status.Select(s => s switch
+        {
+            PosTransactionStatus.Idle => "Ready",
+            PosTransactionStatus.WaitingForCash => "Waiting for cash...",
+            PosTransactionStatus.DispensingChange => "Dispensing change...",
+            PosTransactionStatus.Completed => "Completed",
+            _ => "Unknown"
+        }).ToReadOnlyReactiveProperty("Ready").AddTo(_disposables);
+
+        Message = _status.Select(s => s switch
+        {
+            PosTransactionStatus.Idle => "Enter target amount to start simulation.",
+            PosTransactionStatus.WaitingForCash => "Please insert cash into the terminal.",
+            PosTransactionStatus.DispensingChange => "Do not forget your change.",
+            PosTransactionStatus.Completed => "Transaction finished successfully.",
+            _ => ""
+        }).ToReadOnlyReactiveProperty("").AddTo(_disposables);
 
         StartCommand = TargetAmountInput
             .Select(text => !TargetAmountInput.HasErrors && !string.IsNullOrWhiteSpace(text))

@@ -182,6 +182,33 @@ public class PosTransactionViewModelTest : IDisposable
         vm.StartCommand.CanExecute().ShouldBeFalse();
     }
 
+    /// <summary>プロパティが適切にマップされ、バインディング例外を防ぐことを検証します。</summary>
+    [Fact]
+    public void Properties_ShouldInitializeAndMapCorrectly()
+    {
+        using var vm = CreateViewModel();
+        
+        // Assert initial states
+        vm.TotalTargetAmount.CurrentValue.ShouldBe(0m);
+        vm.CurrentAmount.CurrentValue.ShouldBe(0m);
+        vm.Progress.CurrentValue.ShouldBe(0.0);
+        vm.StatusText.CurrentValue.ShouldBe("Ready");
+        vm.Message.CurrentValue.ShouldNotBeEmpty();
+
+        // Act
+        vm.TargetAmountInput.Value = "1000";
+        vm.StartCommand.Execute(Unit.Default); // Start the transaction to accept deposits
+
+        _fixture.DepositController.TrackBulkDeposit(new Dictionary<DenominationKey, int> {
+            { new DenominationKey(500, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin), 1 }
+        });
+
+        // Assert updated states safely mapped from string inputs
+        vm.TotalTargetAmount.CurrentValue.ShouldBe(1000m);
+        vm.CurrentAmount.CurrentValue.ShouldBe(500m);
+        vm.Progress.CurrentValue.ShouldBe(50.0);
+    }
+
     /// <summary>一部支払い後の取引キャンセル動作を検証します。</summary>
     /// <remarks>
     /// 期待値: 
