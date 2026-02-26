@@ -72,9 +72,9 @@ public class MainViewModel : IDisposable
             inventory,
             manager,
             dispenseController,
+            hardwareStatusManager,
             configProvider,
             Deposit.IsInDepositMode,
-            hardwareStatusManager.IsJammed,
             () => Inventory.Denominations,
             notifyService)
             .AddTo(_disposables);
@@ -101,6 +101,14 @@ public class MainViewModel : IDisposable
         OpenDepositCommand = new ReactiveCommand().AddTo(_disposables);
         OpenDepositCommand.Subscribe(_ =>
         {
+            if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
+            {
+                notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrErrorCannotOpenTerminalInError"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
             var mainWindow = System.Windows.Application.Current?.MainWindow;
             if (mainWindow != null)
             {
@@ -117,6 +125,14 @@ public class MainViewModel : IDisposable
         OpenDispenseCommand = new ReactiveCommand().AddTo(_disposables);
         OpenDispenseCommand.Subscribe(_ =>
         {
+            if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
+            {
+                notifyService.ShowWarning(
+                    (string)System.Windows.Application.Current.Resources["StrErrorCannotOpenTerminalInError"],
+                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                return;
+            }
+
             var mainWindow = System.Windows.Application.Current?.MainWindow;
             if (mainWindow != null)
             {
