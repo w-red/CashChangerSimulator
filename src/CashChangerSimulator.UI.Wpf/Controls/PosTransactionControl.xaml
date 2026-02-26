@@ -51,8 +51,8 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="400" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <!-- Interaction Area -->
