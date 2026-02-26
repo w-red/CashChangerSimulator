@@ -28,37 +28,30 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Style="{StaticResource ModernFlatButtonStyle}" 
+                <Button Grid.Column="0" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding ShowBulkInsertCommand}"
                         Margin="4" Height="40"
                         IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}"
                         AutomationProperties.AutomationId="BulkInsertButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrBulk}" FontSize="13"/>
+                        <TextBlock Text="{StaticResource StrBulk}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="1" Style="{StaticResource ModernFlatButtonStyle}" 
+                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
                         Margin="4" Height="40" Foreground="Orange"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrError}" FontSize="13"/>
+                        <TextBlock Text="{StaticResource StrError}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>
 
-            <Button Command="{Binding FixDepositCommand}"
-                    HorizontalAlignment="Stretch" Margin="4,8" Height="44"
+            <Button Command="{Binding FixDepositCommand}" Style="{StaticResource SecondaryButtonStyle}"
+                    HorizontalAlignment="Stretch" Margin="4,4,4,12" Height="44"
                     AutomationProperties.AutomationId="FixDepositButton">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
-                        <Style.Triggers>
-                            <!-- If we want any triggers here, but let's keep it simple -->
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Check" Margin="0,0,12,0" />
                     <TextBlock Text="{StaticResource StrFinishCounting}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold" FontSize="14"/>
@@ -76,14 +69,14 @@
             <StackPanel Grid.Column="0">
                 <!-- Pause/Resume -->
                 <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                    <Button Style="{StaticResource ModernFlatButtonStyle}" 
+                    <Button Style="{StaticResource SecondaryButtonStyle}" 
                             Command="{Binding PauseDepositCommand}"
                             Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
                             Margin="4" Height="40"
                             AutomationProperties.AutomationId="PauseDepositButton">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Pause" Margin="0,0,8,0"/>
-                            <TextBlock Text="{StaticResource StrPause}"/>
+                            <TextBlock Text="{StaticResource StrPause}" FontSize="12" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource PrimaryButtonStyle}" 
@@ -111,14 +104,14 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1">
-                <Button Style="{StaticResource ModernFlatButtonStyle}" 
+                <Button Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding CancelDepositCommand}"
                         Foreground="IndianRed"
                         Margin="4" Height="40"
                         AutomationProperties.AutomationId="RepayDepositButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Cancel" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrReturn}" FontSize="14"/>
+                        <TextBlock Text="{StaticResource StrReturn}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 <!-- RESET ERROR during active session -->
