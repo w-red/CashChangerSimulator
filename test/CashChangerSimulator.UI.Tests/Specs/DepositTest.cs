@@ -160,6 +160,53 @@ public class DepositTest : IDisposable
         finalTotal.ShouldBe(initialTotal);
     }
 
+    /// <summary>エラー状態（ジャム等）の際にコントロールが無効化されることを検証する。</summary>
+    [Fact]
+    public void ShouldDisableControlsWhenErrorOccurs()
+    {
+        var window = _app.MainWindow;
+        var depositWindow = OpenDepositTerminal(window);
+
+        // Verify initial state
+        var beginButton = FindElement(depositWindow, "BeginDepositButton", null)?.AsButton();
+        var quickDepositBox = FindElement(depositWindow, "QuickDepositBox", null)?.AsTextBox();
+        var quickDepositButton = FindElement(depositWindow, "QuickDepositButton", null)?.AsButton();
+        
+        beginButton.ShouldNotBeNull();
+        quickDepositBox.ShouldNotBeNull();
+        quickDepositButton.ShouldNotBeNull();
+
+        // Enter amount so QuickDepositButton evaluates CanExecute to true
+        quickDepositBox.Text = "1000";
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        beginButton.IsEnabled.ShouldBeTrue();
+        quickDepositBox.IsEnabled.ShouldBeTrue();
+        quickDepositButton.IsEnabled.ShouldBeTrue();
+
+        // Simulate Jam
+        var simulateJamButton = FindElement(depositWindow, "SimulateJamButton", null)?.AsButton();
+        simulateJamButton.ShouldNotBeNull();
+        simulateJamButton.Click();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        // Verify disabled state
+        beginButton.IsEnabled.ShouldBeFalse();
+        quickDepositBox.IsEnabled.ShouldBeFalse();
+        quickDepositButton.IsEnabled.ShouldBeFalse();
+
+        // Reset Error
+        var resetErrorButton = FindElement(depositWindow, "ResetErrorButton", null)?.AsButton();
+        resetErrorButton.ShouldNotBeNull();
+        resetErrorButton.Click();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        // Verify enabled state
+        beginButton.IsEnabled.ShouldBeTrue();
+        quickDepositBox.IsEnabled.ShouldBeTrue();
+        quickDepositButton.IsEnabled.ShouldBeTrue();
+    }
+
     /// <summary>紙幣重なりエラーが発生した際に、入金確定がブロックされることを検証する。</summary>
     [Fact]
     public void ShouldPreventFixWhenOverlapped()
@@ -192,10 +239,16 @@ public class DepositTest : IDisposable
         // Verify VAL ERROR indicator still exists
         window!.FindFirstDescendant(cf => cf.ByText("VAL ERROR")).ShouldNotBeNull();
 
-        // 5. Cancel (RETURN) should work and clear error
+        // 5. Cancel (RETURN) should work, but does NOT clear the hardware error
         var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
         repayButton.ShouldNotBeNull();
         repayButton.Click();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+
+        // 6. Manually reset the hardware error
+        var resetErrorButton = FindElement(depositWindow, "ActiveResetErrorButton", null)?.AsButton();
+        resetErrorButton.ShouldNotBeNull();
+        resetErrorButton.Click();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Error indicator should be gone
