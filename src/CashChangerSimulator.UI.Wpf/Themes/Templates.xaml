@@ -147,7 +147,7 @@
 
     <!-- Bulk Input Item Template -->
     <DataTemplate x:Key="BulkInputItemTemplate">
-        <Grid Margin="0,6">
+        <Grid Margin="0,4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="100"/>
