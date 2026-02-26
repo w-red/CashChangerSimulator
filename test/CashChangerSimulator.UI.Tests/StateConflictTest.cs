@@ -116,4 +116,31 @@ public class StateConflictTest : IAsyncLifetime
             Times.Exactly(3),
             "複数回の状態競合時に、各回ごとに警告が表示されなかった");
     }
+
+    /// <summary>入金モード中に出金コマンドが非活性になることを検証する。</summary>
+    [Fact]
+    public void DispenseCommandShouldBeDisabledWhenInDepositMode()
+    {
+        // Arrange
+        _fixture.DepositController.BeginDeposit();
+        _mainViewModel.Deposit.IsInDepositMode.Value.ShouldBeTrue();
+
+        // Assert
+        ((System.Windows.Input.ICommand)_mainViewModel.Dispense.DispenseCommand).CanExecute(null).ShouldBeFalse("入金中に通常出金ボタンが有効になっている");
+        ((System.Windows.Input.ICommand)_mainViewModel.Dispense.ShowBulkDispenseCommand).CanExecute(null).ShouldBeFalse("入金中に一括出金ボタンが有効になっている");
+    }
+
+    /// <summary>出金処理中に入金開始コマンドが非活性になることを検証する。</summary>
+    [Fact]
+    public void BeginDepositCommandShouldBeDisabledWhenDispenseIsBusy()
+    {
+        // Arrange
+        _fixture.MockDispenseController.SetupGet(c => c.Status).Returns(CashDispenseStatus.Busy);
+        _fixture.DispenseChanged.OnNext(Unit.Default);
+        _mainViewModel.Dispense.IsBusy.Value.ShouldBeTrue();
+
+        // Assert
+        ((System.Windows.Input.ICommand)_mainViewModel.Deposit.BeginDepositCommand).CanExecute(null).ShouldBeFalse("出金中に入金開始ボタンが有効になっている");
+        ((System.Windows.Input.ICommand)_mainViewModel.Deposit.QuickDepositCommand).CanExecute(null).ShouldBeFalse("出金中にクイック入金ボタンが有効になっている");
+    }
 }

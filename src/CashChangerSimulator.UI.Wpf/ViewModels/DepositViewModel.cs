@@ -125,7 +125,7 @@ public class DepositViewModel : IDisposable
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
-        BeginDepositCommand = IsJammed.CombineLatest(IsOverlapped, (jammed, overlapped) => !jammed && !overlapped)
+        BeginDepositCommand = IsJammed.CombineLatest(IsOverlapped, _isDispenseBusy, (jammed, overlapped, dispenseBusy) => !jammed && !overlapped && !dispenseBusy)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ =>
         {
@@ -186,8 +186,8 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        CanOperate = _isJammed.CombineLatest(_isOverlapped, IsInDepositMode, (jammed, overlapped, mode) => !jammed && !overlapped && !mode)
-            .ToBindableReactiveProperty(!_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value)
+        CanOperate = _isJammed.CombineLatest(_isOverlapped, IsInDepositMode, _isDispenseBusy, (jammed, overlapped, mode, dispenseBusy) => !jammed && !overlapped && !mode && !dispenseBusy)
+            .ToBindableReactiveProperty(!_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
         QuickDepositCommand = CanOperate

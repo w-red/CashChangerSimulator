@@ -103,8 +103,8 @@ public class DispenseViewModel : IDisposable
         IsJammed = _hardwareStatusManager.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         IsOverlapped = _hardwareStatusManager.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
-        CanOperate = IsBusy.CombineLatest(IsJammed, IsOverlapped, (busy, jammed, overlapped) => !busy && !jammed && !overlapped)
-            .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.CurrentValue && !IsOverlapped.CurrentValue)
+        CanOperate = IsBusy.CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
+            .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.CurrentValue && !IsOverlapped.CurrentValue && !_isInDepositMode.Value)
             .AddTo(_disposables);
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
@@ -141,7 +141,7 @@ public class DispenseViewModel : IDisposable
 
         DispenseCommand = DispenseAmountInput
             .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
-            .CombineLatest(IsBusy, IsJammed, IsOverlapped, (can, busy, jammed, overlapped) => can && !busy && !jammed && !overlapped)
+            .CombineLatest(IsBusy, IsJammed, IsOverlapped, _isInDepositMode, (can, busy, jammed, overlapped, deposit) => can && !busy && !jammed && !overlapped && !deposit)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
@@ -164,16 +164,16 @@ public class DispenseViewModel : IDisposable
 
         var canDispense = IsBusy.Select(busy => !busy);
 
-        // ShowBulkDispenseCommand should be disabled during hardware errors
+        // ShowBulkDispenseCommand should be disabled during hardware errors or deposit
         ShowBulkDispenseCommand = canDispense
-            .CombineLatest(IsJammed, IsOverlapped, (can, jammed, overlapped) => can && !jammed && !overlapped)
+            .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (can, jammed, overlapped, deposit) => can && !jammed && !overlapped && !deposit)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
         Denominations = getDenominations().ToList();
 
         QuickDispenseCommand = IsBusy
-            .CombineLatest(IsJammed, IsOverlapped, (busy, jammed, overlapped) => !busy && !jammed && !overlapped)
+            .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
             .ToReactiveCommand<DenominationViewModel>().AddTo(_disposables);
 
         QuickDispenseCommand.Subscribe(d =>
