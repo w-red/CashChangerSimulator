@@ -32,7 +32,11 @@ public class DepositViewModel : IDisposable
     /// <summary>現在の動作モードの表示名。</summary>
     public BindableReactiveProperty<string> CurrentModeName { get; }
     /// <summary>重なりエラーが発生しているかどうか。</summary>
-    public ReactiveProperty<bool> IsOverlapped { get; }
+    public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
+    private readonly BindableReactiveProperty<bool> _isOverlapped;
+    /// <summary>ジャムが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsJammed { get; }
+    private readonly BindableReactiveProperty<bool> _isJammed;
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
 
@@ -49,8 +53,14 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<Unit> StoreDepositCommand { get; }
     /// <summary>入金をキャンセル（返却）するコマンド。</summary>
     public ReactiveCommand<Unit> CancelDepositCommand { get; }
+    
+    // Phase 12: Error Reset
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
+    /// <summary>エラー状態を解消するコマンド。</summary>
+    public ReactiveCommand<Unit> ResetErrorCommand { get; }
+    /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateJamCommand { get; }
 
     // Bulk Deposit
     /// <summary>一括投入画面を表示するコマンド（View側で購読）。</summary>
@@ -59,6 +69,8 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>> InsertBulkCommand { get; }
     /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
+    /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
+    public BindableReactiveProperty<bool> CanOperate { get; }
 
     private readonly BindableReactiveProperty<bool> _isDispenseBusy;
     private readonly INotifyService _notifyService;
@@ -76,8 +88,11 @@ public class DepositViewModel : IDisposable
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DepositViewModel>();
-
-        IsOverlapped = _hardwareStatusManager.IsOverlapped;
+        
+        _isJammed = _hardwareStatusManager.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
+        IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
+        IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         IsInDepositMode = _depositController.Changed
@@ -110,15 +125,15 @@ public class DepositViewModel : IDisposable
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
-        // Commands
-        BeginDepositCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        BeginDepositCommand = IsJammed.CombineLatest(IsOverlapped, (jammed, overlapped) => !jammed && !overlapped)
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ =>
         {
             if (_isDispenseBusy.Value)
             {
-                _notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["StrWarnDepositDuringDispense"],
-                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                var msg = System.Windows.Application.Current?.Resources["StrWarnDepositDuringDispense"] as string ?? "Cannot begin deposit while dispense is in progress.";
+                var title = System.Windows.Application.Current?.Resources["StrWarn"] as string ?? "Warning";
+                _notifyService.ShowWarning(msg, title);
                 return;
             }
 
@@ -131,6 +146,7 @@ public class DepositViewModel : IDisposable
             catch (Exception ex)
             {
                 _logger.ZLogError(ex, $"Failed to begin deposit.");
+                _notifyService.ShowWarning(ex.Message, (string)System.Windows.Application.Current.Resources["StrError"]);
             }
         });
 
@@ -148,14 +164,17 @@ public class DepositViewModel : IDisposable
         StoreDepositCommand = IsDepositFixed.ToReactiveCommand<Unit>().AddTo(_disposables);
         StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
 
-        CancelDepositCommand = IsInDepositMode.ToReactiveCommand<Unit>().AddTo(_disposables);
+        CancelDepositCommand = IsInDepositMode
+            .CombineLatest(IsJammed, IsOverlapped, (mode, jammed, overlapped) => mode && !jammed && !overlapped)
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         CancelDepositCommand.Subscribe(_ =>
         {
             if (!_depositController.IsFixed) _depositController.FixDeposit();
             _depositController.EndDeposit(CashDepositAction.Repay);
         });
 
-        ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
+        ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, _isJammed, _isOverlapped, 
+            (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
 
         InsertBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
@@ -167,7 +186,12 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        QuickDepositCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        CanOperate = _isJammed.CombineLatest(_isOverlapped, IsInDepositMode, (jammed, overlapped, mode) => !jammed && !overlapped && !mode)
+            .ToBindableReactiveProperty(!_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value)
+            .AddTo(_disposables);
+
+        QuickDepositCommand = CanOperate
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         QuickDepositCommand.Subscribe(async _ =>
         {
             if (_isDispenseBusy.Value)
@@ -186,11 +210,23 @@ public class DepositViewModel : IDisposable
             await ExecuteQuickDepositAsync(getDenominations());
         });
 
+        // Phase 12: Error Reset
         SimulateOverlapCommand = IsInDepositMode
-            .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => mode && !fixed_ && !overlapped)
+            .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => !overlapped)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
+
+        ResetErrorCommand = IsOverlapped.CombineLatest(_hardwareStatusManager.IsJammed, (overlapped, jammed) => overlapped || jammed)
+            .ToReactiveCommand<Unit>()
+            .AddTo(_disposables);
+        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+
+        SimulateJamCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, IsJammed, (mode, fixed_, jammed) => !jammed)
+            .ToReactiveCommand<Unit>()
+            .AddTo(_disposables);
+        SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
     }
 
     private string GetModeName()
@@ -212,43 +248,59 @@ public class DepositViewModel : IDisposable
 
     internal async Task ExecuteQuickDepositAsync(IEnumerable<DenominationViewModel> denominations)
     {
+        if (_isJammed.Value || _isOverlapped.Value)
+        {
+            _notifyService.ShowWarning(
+                (string)System.Windows.Application.Current.Resources["StrErrorCannotOpenTerminalInError"],
+                (string)System.Windows.Application.Current.Resources["StrWarn"]);
+            return;
+        }
+
         if (!decimal.TryParse(QuickDepositAmountInput.Value, out var targetAmount)) return;
 
-        // Start Deposit
-        _depositController.BeginDeposit();
-
-        // Calculate greedy breakdown
-        var breakdown = new Dictionary<DenominationKey, int>();
-        var remaining = targetAmount;
-
-        // Sort denominations descending (e.g., 10000, 5000...)
-        var sortedDens = denominations
-            .OrderByDescending(d => d.Key.Value);
-
-        foreach (var den in sortedDens)
+        try
         {
-            if (den.Key.Value <= 0) continue;
-            int count = (int)(remaining / den.Key.Value);
-            if (count > 0)
+            // Start Deposit
+            _depositController.BeginDeposit();
+
+            // Calculate greedy breakdown
+            var breakdown = new Dictionary<DenominationKey, int>();
+            var remaining = targetAmount;
+
+            // Sort denominations descending (e.g., 10000, 5000...)
+            var sortedDens = denominations
+                .OrderByDescending(d => d.Key.Value);
+
+            foreach (var den in sortedDens)
             {
-                breakdown[den.Key] = count;
-                remaining -= count * den.Key.Value;
+                if (den.Key.Value <= 0) continue;
+                int count = (int)(remaining / den.Key.Value);
+                if (count > 0)
+                {
+                    breakdown[den.Key] = count;
+                    remaining -= count * den.Key.Value;
+                }
             }
-        }
 
-        // Insert
-        if (breakdown.Count > 0)
+            // Insert
+            if (breakdown.Count > 0)
+            {
+                _depositController.TrackBulkDeposit(breakdown);
+            }
+
+            // Auto Fix & Store
+            await Task.Delay(100);
+            _depositController.FixDeposit();
+            await Task.Delay(100);
+            _depositController.EndDeposit(CashDepositAction.NoChange);
+
+            QuickDepositAmountInput.Value = "";
+        }
+        catch (Exception ex)
         {
-            _depositController.TrackBulkDeposit(breakdown);
+            _logger.ZLogError(ex, $"Failed to execute quick deposit.");
+            _notifyService.ShowWarning(ex.Message, (string)System.Windows.Application.Current.Resources["StrError"]);
         }
-
-        // Auto Fix & Store
-        await Task.Delay(100);
-        _depositController.FixDeposit();
-        await Task.Delay(100);
-        _depositController.EndDeposit(CashDepositAction.NoChange);
-
-        QuickDepositAmountInput.Value = "";
     }
 
     /// <inheritdoc/>

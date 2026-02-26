@@ -17,6 +17,7 @@ public class DispenseViewModel : IDisposable
     private readonly Inventory _inventory;
     private readonly CashChangerManager _manager;
     private readonly DispenseController _controller;
+    private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly ConfigurationProvider _configProvider;
     private readonly ILogger<DispenseViewModel> _logger;
     private readonly INotifyService _notifyService;
@@ -50,23 +51,34 @@ public class DispenseViewModel : IDisposable
     public IEnumerable<DenominationViewModel> Denominations { get; }
     /// <summary>特定の金種を1枚出金するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> QuickDispenseCommand { get; }
-    /// <summary>エラー状態をクリアするコマンド。</summary>
-    public ReactiveCommand ClearErrorCommand { get; }
+    
+    // Phase 12: Error Reset
+    /// <summary>エラー状態を解消するコマンド。</summary>
+    public ReactiveCommand ResetErrorCommand { get; }
+    /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand SimulateJamCommand { get; }
+    /// <summary>ジャムが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsJammed { get; }
+    /// <summary>重なりエラーが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
+    /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
+    public BindableReactiveProperty<bool> CanOperate { get; }
 
     /// <summary>DispenseViewModel の新しいインスタンスを初期化します。</summary>
     public DispenseViewModel(
         Inventory inventory,
         CashChangerManager manager,
         DispenseController controller,
+        HardwareStatusManager hardwareStatusManager,
         ConfigurationProvider configProvider,
         BindableReactiveProperty<bool> isInDepositMode,
-        Observable<bool> isJammed,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         INotifyService notifyService)
     {
         _inventory = inventory;
         _manager = manager;
         _controller = controller;
+        _hardwareStatusManager = hardwareStatusManager;
         _configProvider = configProvider;
         _isInDepositMode = isInDepositMode;
         _notifyService = notifyService;
@@ -86,6 +98,13 @@ public class DispenseViewModel : IDisposable
         StatusName = Status
             .Select(s => s.ToString())
             .ToBindableReactiveProperty("Idle")
+            .AddTo(_disposables);
+
+        IsJammed = _hardwareStatusManager.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        IsOverlapped = _hardwareStatusManager.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
+
+        CanOperate = IsBusy.CombineLatest(IsJammed, IsOverlapped, (busy, jammed, overlapped) => !busy && !jammed && !overlapped)
+            .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.CurrentValue && !IsOverlapped.CurrentValue)
             .AddTo(_disposables);
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
@@ -111,18 +130,18 @@ public class DispenseViewModel : IDisposable
                 string.IsNullOrWhiteSpace(text)
                     ? null
                     : !decimal.TryParse(text, out var val)
-                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorEnterValidNumber"])
+                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorEnterValidNumber"] as string ?? "Enter a valid number")
                     : val <= 0
-                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorAmountPositive"])
+                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorAmountPositive"] as string ?? "Amount must be positive")
                     : val > TotalAmount.Value
-                    ? new Exception((string)System.Windows.Application.Current.Resources["StrErrorInsufficientFunds"])
+                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorInsufficientFunds"] as string ?? "Insufficient funds")
                     : null
             )
             .AddTo(_disposables);
 
         DispenseCommand = DispenseAmountInput
             .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
-            .CombineLatest(IsBusy, (can, busy) => can && !busy)
+            .CombineLatest(IsBusy, IsJammed, IsOverlapped, (can, busy, jammed, overlapped) => can && !busy && !jammed && !overlapped)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
@@ -130,9 +149,9 @@ public class DispenseViewModel : IDisposable
         {
             if (_isInDepositMode.Value)
             {
-                _notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["StrWarnDispenseDuringDeposit"],
-                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                var msg = System.Windows.Application.Current?.Resources["StrWarnDispenseDuringDeposit"] as string ?? "Cannot dispense while deposit is in progress.";
+                var title = System.Windows.Application.Current?.Resources["StrWarn"] as string ?? "Warning";
+                _notifyService.ShowWarning(msg, title);
                 return;
             }
 
@@ -145,13 +164,17 @@ public class DispenseViewModel : IDisposable
 
         var canDispense = IsBusy.Select(busy => !busy);
 
+        // ShowBulkDispenseCommand should be disabled during hardware errors
         ShowBulkDispenseCommand = canDispense
+            .CombineLatest(IsJammed, IsOverlapped, (can, jammed, overlapped) => can && !jammed && !overlapped)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
         Denominations = getDenominations().ToList();
 
-        QuickDispenseCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
+        QuickDispenseCommand = IsBusy
+            .CombineLatest(IsJammed, IsOverlapped, (busy, jammed, overlapped) => !busy && !jammed && !overlapped)
+            .ToReactiveCommand<DenominationViewModel>().AddTo(_disposables);
 
         QuickDispenseCommand.Subscribe(d =>
         {
@@ -177,13 +200,28 @@ public class DispenseViewModel : IDisposable
             }
         });
 
-        ClearErrorCommand = Status
+        // Phase 12: Error Reset
+        ResetErrorCommand = Status
             .Select(s => s == CashDispenseStatus.Error)
+            .CombineLatest(_hardwareStatusManager.IsJammed, _hardwareStatusManager.IsOverlapped, (err, jammed, overlapped) => err || jammed || overlapped)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
-        ClearErrorCommand.Subscribe(_ => _controller.ClearError());
+        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+
+        SimulateJamCommand = IsJammed.Select(jammed => !jammed)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+        SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
+
+        SimulateOverlapCommand = IsOverlapped.Select(o => !o)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+        SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
     }
+
+    /// <summary>重なりエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand SimulateOverlapCommand { get; }
 
     private void DispenseCash(decimal amount)
     {

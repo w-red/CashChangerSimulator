@@ -37,6 +37,8 @@ public class InventoryViewModel : IDisposable
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
     public ReactiveCommand OpenSettingsCommand { get; }
+    /// <summary>エラー解除コマンド。</summary>
+    public ReactiveCommand ResetErrorCommand { get; }
 
     /// <summary>InventoryViewModel の新しいインスタンスを初期化します。</summary>
     public InventoryViewModel(
@@ -99,6 +101,8 @@ public class InventoryViewModel : IDisposable
             .AddTo(_disposables);
 
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
         OpenSettingsCommand.Subscribe(_ =>
         {
             var settingsWindow = new SettingsWindow()
