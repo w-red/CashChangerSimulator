@@ -22,6 +22,7 @@
                     <TextBox Grid.Column="0" 
                              materialDesign:HintAssist.Hint="Enter amount"
                              Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                             IsEnabled="{Binding CanOperate.Value}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              FontSize="22" FontWeight="Light"
                              AutomationProperties.AutomationId="DispenseBox"/>
@@ -70,5 +71,32 @@
                 <TextBlock Text="{StaticResource StrBulkDispense}" FontSize="13"/>
             </StackPanel>
         </Button>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
+            <Button Command="{Binding ResetErrorCommand}"
+                    Content="{StaticResource ResetErrorName}"
+                    AutomationProperties.AutomationId="ResetErrorButton"
+                    FontSize="10" Padding="8,2"
+                    Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                    Command="{Binding SimulateJamCommand}"
+                    Content="Simulate Jam"
+                    AutomationProperties.AutomationId="SimulateJamButton"
+                    FontSize="10" Padding="8,2"/>
+        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -13,6 +13,7 @@
     <system:String x:Key="StrCashBalance">在庫合計金額</system:String>
     <system:String x:Key="StrActivityFeed">アクティビティフィード</system:String>
     <system:String x:Key="StrValidationError">入力エラー</system:String>
+    <system:String x:Key="StrJamError">ジャム発生</system:String>
 
     <!-- Validation Messages -->
     <system:String x:Key="StrErrorEnterValidNumber">有効な数値を入力してください</system:String>
@@ -48,6 +49,7 @@
     <system:String x:Key="StrDispenseError">出金エラー</system:String>
     <system:String x:Key="StrHardwareCheckRequired">ハードウェアを確認してください。</system:String>
     <system:String x:Key="StrClearError">エラー解除</system:String>
+    <system:String x:Key="ResetErrorName">エラー解除</system:String>
     <system:String x:Key="StrDispensing">出金中...</system:String>
     <system:String x:Key="StrWarnDispenseDuringDeposit">入金処理中のため、出金は実行できません。</system:String>
     <system:String x:Key="StrWarnDepositDuringDispense">出金処理中のため、入金は開始できません。</system:String>
@@ -66,6 +68,7 @@
     <!-- Footer Actions -->
     <system:String x:Key="StrCommitChanges">変更を保存</system:String>
     <system:String x:Key="StrDefault">デフォルト</system:String>
+    <system:String x:Key="StrSimulationSlot">現金投入口</system:String>
 
     <!-- Table Headers -->
     <system:String x:Key="StrHeaderIdentifier">識別子</system:String>
@@ -79,5 +82,6 @@
     <system:String x:Key="StrBulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
     <system:String x:Key="StrBulkDepositSubtitle">投入する数量を入力してください。</system:String>
     <system:String x:Key="StrBulkDispenseSubtitle">出金する数量を入力してください。</system:String>
+    <system:String x:Key="StrErrorCannotOpenTerminalInError">デバイスがエラー状態のため、ターミナルを開けません。先にエラーを解除してください。</system:String>
 
 </ResourceDictionary>
