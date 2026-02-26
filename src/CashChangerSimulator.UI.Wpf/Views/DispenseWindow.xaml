@@ -19,7 +19,7 @@
         ResizeMode="CanResize" MinWidth="360" MinHeight="450">
 
     <materialDesign:DialogHost Identifier="DispenseDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
-        <Border Padding="24">
+        <Border Padding="12">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
