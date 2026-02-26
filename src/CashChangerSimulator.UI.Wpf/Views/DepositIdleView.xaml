@@ -20,6 +20,39 @@
             </StackPanel>
         </Button>
 
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
+            <Button Command="{Binding ResetErrorCommand}"
+                    Content="{StaticResource ResetErrorName}"
+                    AutomationProperties.AutomationId="ResetErrorButton"
+                    FontSize="10" Padding="8,2"
+                    Margin="0,0,8,0" Cursor="Hand">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                    Command="{Binding SimulateOverlapCommand}"
+                    Content="Simulate Overlap"
+                    AutomationProperties.AutomationId="SimulateOverlapButton"
+                    FontSize="10" Padding="8,2"
+                    Margin="0,0,8,0"/>
+            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                    Command="{Binding SimulateJamCommand}"
+                    FontSize="10" Padding="8,2"
+                    AutomationProperties.AutomationId="SimulateJamButton"
+                    Content="Simulate Jam"/>
+        </StackPanel>
+
         <Separator Background="#1AFFFFFF" Margin="0,24"/>
 
         <!-- Quick Deposit Input -->
@@ -31,10 +64,12 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox materialDesign:HintAssist.Hint="Amount" 
-                     Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     FontSize="18"
-                     Margin="0,0,12,0">
+                      Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
+                      IsEnabled="{Binding CanOperate.Value}"
+                      Style="{StaticResource ModernTextBoxStyle}"
+                      AutomationProperties.AutomationId="QuickDepositBox"
+                      FontSize="18"
+                      Margin="0,0,12,0">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
                 </TextBox.InputBindings>

@@ -17,6 +17,10 @@
 
     <StackPanel VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,12">
+            <Border Background="#FF5252" Style="{StaticResource BadgeStyle}"
+                    Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}">
+                <TextBlock Text="{StaticResource StrJamError}"/>
+            </Border>
             <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock Text="{StaticResource StrValidationError}"/>
@@ -30,6 +34,27 @@
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <!-- Reset Error Button (Icon only as requested) -->
+            <Button Command="{Binding ResetErrorCommand}"
+                    Background="#FF5252" BorderBrush="#FF5252" Foreground="White"
+                    Width="32" Height="32" Margin="0,0,8,0"
+                    ToolTip="Reset Hardware Error">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ModernActionButtonStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
+            </Button>
+
             <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
                           IsChecked="{Binding IsJammed.Value}"
                           ToolTip="Simulate Mechanical Jam"

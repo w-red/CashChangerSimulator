@@ -20,10 +20,18 @@ public partial class DepositWindow : Window
         viewModel.ShowBulkInsertCommand.Subscribe(_ =>
         {
             var items = getDenominations().Select(d => new BulkAmountInputItemViewModel(d.Key, d.Name)).ToList();
+            var bulkVm = new BulkAmountInputViewModel(
+                items,
+                viewModel.SimulateOverlapCommand,
+                viewModel.SimulateJamCommand,
+                viewModel.ResetErrorCommand,
+                viewModel.IsJammed,
+                viewModel.IsOverlapped);
+
             var dialog = new BulkAmountInputWindow("BULK DEPOSIT", "Please enter the quantity to deposit.", "DEPOSIT")
             { 
                 Owner = this,
-                DataContext = items 
+                DataContext = bulkVm 
             };
 
             if (dialog.ShowDialog() == true)

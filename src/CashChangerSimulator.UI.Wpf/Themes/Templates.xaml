@@ -165,7 +165,27 @@
     <!-- View Switching Templates -->
     <DataTemplate x:Key="DispenseIdleTemplate"><views:DispenseIdleView /></DataTemplate>
     <DataTemplate x:Key="DispenseBusyTemplate"><views:DispenseBusyView /></DataTemplate>
-    <DataTemplate x:Key="DispenseErrorTemplate"><views:DispenseErrorView /></DataTemplate>
+    <DataTemplate x:Key="DispenseErrorTemplate">
+        <Grid>
+            <views:DispenseErrorView />
+            <Button Content="{StaticResource ResetErrorName}"
+                    Command="{Binding ResetErrorCommand}"
+                    Background="#FF5252" BorderBrush="Transparent" Foreground="White"
+                    Margin="0,0,0,20" Padding="30,10" FontSize="18" FontWeight="Bold"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DepositErrorTemplate">
+        <Grid>
+            <!-- DepositErrorView does not exist yet. Only showing reset button for now if ever used. -->
+            <Button Content="{StaticResource ResetErrorName}"
+                    Command="{Binding ResetErrorCommand}"
+                    Background="#FF5252" BorderBrush="Transparent" Foreground="White"
+                    Margin="0,0,0,20" Padding="30,10" FontSize="18" FontWeight="Bold"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+        </Grid>
+    </DataTemplate>
 
     <DataTemplate x:Key="DepositIdleTemplate"><views:DepositIdleView /></DataTemplate>
     <DataTemplate x:Key="DepositActiveTemplate"><views:DepositActiveView /></DataTemplate>

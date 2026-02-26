@@ -40,6 +40,21 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
     </Style>
 
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="TagButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="12"/>
+        <Setter Property="Height" Value="Auto"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
     <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
     </Style>
 
@@ -50,6 +65,12 @@
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="Width" Value="40"/>
         <Setter Property="Height" Value="40"/>
+    </Style>
+
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="Background" Value="#FF5252"/>
+        <Setter Property="BorderBrush" Value="#FF5252"/>
+        <Setter Property="Foreground" Value="White"/>
     </Style>
 
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
