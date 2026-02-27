@@ -28,6 +28,7 @@
             <BooleanToVisibilityConverter x:Key="VisibilityConv" />
             <conv:UIModeToVisibilityConverter x:Key="UIModeVisibilityConv" />
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
 
         </ResourceDictionary>
     </Application.Resources>

@@ -37,6 +37,7 @@
     <system:String x:Key="StrOposDeviceLog">OPOS デバイスログ</system:String>
     <system:String x:Key="StrStartSimulation">シミュレーション開始</system:String>
     <system:String x:Key="StrReadyForTransaction">取引可能</system:String>
+    <system:String x:Key="StrTargetAmountHint">目標金額</system:String>
     <system:String x:Key="StrInsertCashToContinue">現金を投入してください</system:String>
     <system:String x:Key="StrTransactionFinished">取引終了</system:String>
 
@@ -83,5 +84,5 @@
     <system:String x:Key="StrBulkDepositSubtitle">投入する数量を入力してください。</system:String>
     <system:String x:Key="StrBulkDispenseSubtitle">出金する数量を入力してください。</system:String>
     <system:String x:Key="StrErrorCannotOpenTerminalInError">デバイスがエラー状態のため、ターミナルを開けません。先にエラーを解除してください。</system:String>
-
+    <system:String x:Key="StrAdvancedSimulation">高度なシミュレーション操作</system:String>
 </ResourceDictionary>

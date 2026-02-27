@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using MicroResolver;
 
@@ -39,6 +40,7 @@ public static class DIContainer
         resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
+        resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
 
         // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);

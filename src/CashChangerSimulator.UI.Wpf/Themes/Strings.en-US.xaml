@@ -37,6 +37,7 @@
     <system:String x:Key="StrOposDeviceLog">OPOS DEVICE LOG</system:String>
     <system:String x:Key="StrStartSimulation">START SIMULATION</system:String>
     <system:String x:Key="StrReadyForTransaction">Ready for Transaction</system:String>
+    <system:String x:Key="StrTargetAmountHint">Target Amount</system:String>
     <system:String x:Key="StrInsertCashToContinue">Insert Cash to Continue</system:String>
     <system:String x:Key="StrTransactionFinished">Transaction Finished</system:String>
 
@@ -84,4 +85,6 @@
     <system:String x:Key="StrBulkDispenseSubtitle">Please enter the quantity to dispense.</system:String>
     <system:String x:Key="StrErrorCannotOpenTerminalInError">Cannot open terminal while the device is in an error state. Please reset the error first.</system:String>
 
+    <system:String x:Key="StrErrorCodeCannotReset">Cannot reset error state at this time.</system:String>
+    <system:String x:Key="StrAdvancedSimulation">ADVANCED SIM</system:String>
 </ResourceDictionary>
