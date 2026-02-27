@@ -5,6 +5,7 @@ using FlaUI.Core.Tools;
 using FlaUI.UIA3;
 using System.IO;
 using System.Reflection;
+using CashChangerSimulator.UI.Tests.Specs;
 
 namespace CashChangerSimulator.UI.Tests;
 
@@ -121,7 +122,7 @@ public class CashChangerTestApp : IDisposable
         catch { }
 
         // Final pause to let the OS/UIA clean up traces
-        Thread.Sleep(1000);
+        Thread.Sleep(UITestTimings.AppCleanupDelayMs);
         GC.SuppressFinalize(this);
     }
 }
