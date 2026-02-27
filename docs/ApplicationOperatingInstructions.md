@@ -19,7 +19,7 @@ Standard Mode is designed for direct manual interaction with the simulated devic
 
 ## 3. Manual Deposit (Deposit)
 
-![Deposit Status Display](images/deposit_status.png)
+![Deposit Window](images/deposit_window.png)
 
 1. Select the `Deposit` tab.
 2. Click "Begin Deposit".
@@ -27,6 +27,8 @@ Standard Mode is designed for direct manual interaction with the simulated devic
 4. Click "End Deposit" to finalize; change will be dispensed if applicable.
 
 ## 4. Manual Dispense (Dispense)
+
+![Dispense Window](images/dispense_window.png)
 
 1. Select the `Dispense` tab.
 2. **Amount Dispense (`DispenseChange`)**: Enter the total amount and click "Execute". The system automatically calculates the best denomination combination.

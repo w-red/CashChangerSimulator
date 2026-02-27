@@ -25,7 +25,7 @@ Use the following controls to simulate hardware failures and logic errors:
 
 ## 3. Scripted Automation
 
-![Script Editor Window](images/script_editor.png)
+![Advanced Simulation Window](images/advanced_simulation.png)
 *Fig: Scripted Automation Section*
 
 Load JSON script files to execute sequential scenario tests (e.g., Deposit -> Confirm -> Dispense -> Jam).
