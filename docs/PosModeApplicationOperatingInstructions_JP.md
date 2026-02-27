@@ -36,4 +36,7 @@ JSON 形式のスクリプトファイルを読み込むことで、連続した
 ## 5. DirectIO による特殊操作
 
 外部 POS アプリから `DirectIO` メソッドを通じて、本シミュレーター独自のコマンド（例：文字列による在庫の一括調整）を発行できます。
-詳細は [UPOS Compliance Mapping](UposComplianceMapping.md) を参照してください。
+詳細は [UPOS Compliance Mapping](UposComplianceMapping_JP.md) を参照してください。
+
+---
+*英語版については、[PosModeApplicationOperatingInstructions.md](PosModeApplicationOperatingInstructions.md) を参照してください。*

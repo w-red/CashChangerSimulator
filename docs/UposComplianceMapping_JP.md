@@ -48,3 +48,6 @@
 | **StatusUpdateEvent**   |   ✅    | 状態変化（OK, Jam, Removed, AsyncFinished等）の通知。              |
 | **ErrorEvent**          |   ✅    | 非同期操作等の失敗時に通知。                                       |
 | **OutputCompleteEvent** |   ✅    | 非同期操作完了時に通知。                                           |
+
+---
+*英語版については、[UposComplianceMapping.md](UposComplianceMapping.md) を参照してください。*

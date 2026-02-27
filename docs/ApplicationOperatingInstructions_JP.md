@@ -31,3 +31,6 @@
 
 - リアルタイムな挙動は **Activity Feed** で確認可能です。
 - 詳細なデバッグログは、アプリケーション実行ディレクトリの `logs/` フォルダ内に出力されます。
+
+---
+*英語版については、[ApplicationOperatingInstructions.md](ApplicationOperatingInstructions.md) を参照してください。*
