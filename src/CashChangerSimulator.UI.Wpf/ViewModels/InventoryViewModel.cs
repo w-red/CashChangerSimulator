@@ -23,6 +23,11 @@ public class InventoryViewModel : IDisposable
     private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly CompositeDisposable _disposables = [];
 
+    /// <summary>通貨記号のプレフィックス。</summary>
+    public string CurrencyPrefix { get; }
+    /// <summary>通貨記号のサフィックス。</summary>
+    public string CurrencySuffix { get; }
+
     /// <summary>金種ごとの ViewModel リスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
     /// <summary>デバイス全体の在庫ステータス（空・ニアエンプティ）。</summary>
@@ -62,6 +67,8 @@ public class InventoryViewModel : IDisposable
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
         _hardwareStatusManager = hardwareStatusManager;
+        CurrencyPrefix = _metadataProvider.SymbolPrefix;
+        CurrencySuffix = _metadataProvider.SymbolSuffix;
 
         IsJammed = _hardwareStatusManager.IsJammed;
         IsOverlapped = _hardwareStatusManager.IsOverlapped;

@@ -17,9 +17,10 @@
             
             <Viewbox Grid.Column="0" Stretch="Uniform" HorizontalAlignment="Left" MaxHeight="100">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="¥" FontSize="32" VerticalAlignment="Bottom" Margin="0,0,8,10" Foreground="{StaticResource PrimaryBrush}" FontWeight="Thin"/>
+                    <TextBlock Text="{Binding CurrencyPrefix}" FontSize="32" VerticalAlignment="Bottom" Margin="0,0,8,10" Foreground="{StaticResource PrimaryBrush}" FontWeight="Thin"/>
                     <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="64" FontWeight="Thin" Foreground="{StaticResource OnBackgroundBrush}"
                                AutomationProperties.AutomationId="TotalAmountText"/>
+                    <TextBlock Text="{Binding CurrencySuffix}" FontSize="32" VerticalAlignment="Bottom" Margin="8,0,0,10" Foreground="{StaticResource PrimaryBrush}" FontWeight="Thin"/>
                 </StackPanel>
             </Viewbox>
 

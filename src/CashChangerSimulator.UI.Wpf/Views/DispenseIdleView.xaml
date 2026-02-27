@@ -5,9 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:DispenseViewModel}"
              d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
+    </UserControl.Resources>
     <StackPanel>
         <!-- Simple Dispense -->
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
@@ -21,11 +25,13 @@
 
                     <TextBox Grid.Column="0" 
                              materialDesign:HintAssist.Hint="Enter amount"
+                             materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
                              Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                              IsEnabled="{Binding CanOperate.Value}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              FontSize="22" FontWeight="Light"
                              AutomationProperties.AutomationId="DispenseBox"/>
+                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
 
                     <Button Grid.Column="1" 
                             Style="{StaticResource PrimaryButtonStyle}" 
