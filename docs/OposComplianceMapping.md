@@ -1,30 +1,33 @@
 # OPOS Compliance Mapping
 
-本シミュレーターにおける OPOS (OLE for Retail POS) 標準との対応関係およびエラーマッピングについて記述します。
+This document describes the relationship between this simulator and the OPOS (OLE for Retail POS) standard, specifically focusing on error mapping.
 
 ## ResultCode Mapping
 
-本シミュレーターがスローする `PosControlException` は、以下の `ErrorCode` にマッピングされます。
+The `PosControlException` thrown by this simulator maps to the following standard UPOS/OPOS error codes:
 
-| ErrorCode          | OPOS 定数 (OPOS_E_*) | 発生条件                                                |
-| :----------------- | :------------------- | :------------------------------------------------------ |
-| **Success** (0)    | SUCCESS              | 正常終了。                                              |
-| **Illegal** (106)  | ILLEGAL              | 不正なパラメータ、順序、またはサポートされない引数。    |
-| **Failure** (111)  | FAILURE              | メカニカルトラブル（Jam等）が発生している状態での操作。 |
-| **Extended** (114) | EXTENDED             | デバイス固有の拡張エラー（在庫不足など）。              |
-| **Busy** (113)     | BUSY                 | 非同期処理実行中の二重呼び出し。                        |
+| ErrorCode          | OPOS Constant (OPOS_E_*) | Trigger Condition                                          |
+| :----------------- | :----------------------- | :--------------------------------------------------------- |
+| **Success** (0)    | SUCCESS                  | Operation completed successfully.                          |
+| **Illegal** (106)  | ILLEGAL                  | Invalid parameter, sequence, or unsupported argument.      |
+| **Failure** (111)  | FAILURE                  | Mechanical failure (e.g., Jam) detected during operation.  |
+| **Extended** (114) | EXTENDED                 | Device-specific extended error (e.g., Inventory shortage). |
+| **Busy** (113)     | BUSY                     | Simultaneous call during an active asynchronous operation. |
 
 ## ResultCodeExtended Mapping
 
-`ErrorCode.Extended` が発生した際の拡張エラー定義です。
+Specific extended error definitions for `ErrorCode.Extended`:
 
-| Extended Code | Member Name  | 意味                                                     |
-| :------------ | :----------: | :------------------------------------------------------- |
-| **201**       | OverDispense | 現金不足のため、指定された金額または金種を払い出せない。 |
+| Extended Code | Member Name  | Meaning                                                                 |
+| :------------ | :----------: | :---------------------------------------------------------------------- |
+| **201**       | OverDispense | Shortage of cash; requested amount or denomination cannot be dispensed. |
 
 > [!NOTE]
-> 実装コード上では `UposCashChangerErrorCodeExtended` 列挙型を使用して定数定義されています。
+> In the source code, these are defined in the `UposCashChangerErrorCodeExtended` enum to avoid magic numbers.
 
-## イベント通知
-OPOS コントロールへのイベント通知は `QueueEvent` メソッドを介して行われ、標準的な `DataEvent`, `StatusUpdateEvent` として配送されます。
-シミュレーターの UI 上では、これらのイベント発生履歴が「Activity Feed」に記録されます。
+## Event Notification
+Events are dispatched through the `QueueEvent` method, appearing as standard `DataEvent` or `StatusUpdateEvent` listeners.
+In the Simulator UI, these are logged chronologically in the "Activity Feed" for debugging purposes.
+
+---
+*For the Japanese version, see [OposComplianceMapping_JP.md](OposComplianceMapping_JP.md).*
