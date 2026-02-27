@@ -26,7 +26,7 @@ public class DispenseTest : IDisposable
         window.SetForeground();
 
         // 1. Get initial total (Main Window)
-        var totalAmountLabel = FindElement(window, "TotalAmountText", "¥")?.AsLabel();
+        var totalAmountLabel = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         totalAmountLabel.ShouldNotBeNull();
         decimal initialAmount = ParseAmount(totalAmountLabel.Text);
 
@@ -148,7 +148,7 @@ public class DispenseTest : IDisposable
 
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
-        var launchButton = FindElement(mainWindow, "LaunchDispenseButton", "DISPENSE")?.AsButton();
+        var launchButton = UiTestRetry.Find(() => mainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
         launchButton.ShouldNotBeNull();
         
         if (launchButton.Patterns.Invoke.IsSupported)
@@ -169,12 +169,15 @@ public class DispenseTest : IDisposable
 
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
-        return container == null
-            ? null
-            : UiTestRetry.Find(() =>
+        if (container == null) return null;
+        
+        return UiTestRetry.Find(() =>
         {
+            // Try by AutomationId first (highest priority)
             var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
             if (el != null) return el;
+            
+            // Fallback to text search if provided
             if (!string.IsNullOrEmpty(text))
             {
                 var elByText = container.FindFirstDescendant(cf => cf.ByText(text));

@@ -13,6 +13,7 @@ namespace CashChangerSimulator.UI.Tests.Performance;
 
 /// <summary>パフォーマンス測定のためのテストクラス。</summary>
 /// <param name="output">テスト出力ヘルパー。</param>
+/// <summary>Test class for providing PerformanceTest functionality.</summary>
 public class PerformanceTest(ITestOutputHelper output)
 {
     /// <summary>大量取引時のパフォーマンスを検証する。</summary>

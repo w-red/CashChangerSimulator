@@ -18,18 +18,19 @@ public class StateConflictTest : IAsyncLifetime
     {
         _fixture.Initialize();
         _mainViewModel = new MainViewModel(
-            inventory: _fixture.Inventory,
-            history: _fixture.History,
-            manager: _fixture.Manager,
-            monitorsProvider: _fixture.MonitorsProvider,
-            aggregatorProvider: _fixture.AggregatorProvider,
-            configProvider: _fixture.ConfigProvider,
-            metadataProvider: _fixture.MetadataProvider,
-            hardwareStatusManager: _fixture.HardwareManager,
-            depositController: _fixture.DepositController,
-            dispenseController: _fixture.MockDispenseController.Object,
-            cashChanger: _fixture.MockCashChanger.Object,
-            notifyService: _fixture.MockNotify.Object);
+            _fixture.Inventory,
+            _fixture.History,
+            _fixture.Manager,
+            _fixture.MonitorsProvider,
+            _fixture.AggregatorProvider,
+            _fixture.ConfigProvider,
+            _fixture.MetadataProvider,
+            _fixture.HardwareManager,
+            _fixture.DepositController,
+            _fixture.MockDispenseController.Object,
+            _fixture.MockCashChanger.Object,
+            _fixture.MockNotify.Object,
+            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
         await ValueTask.CompletedTask;
     }
 
@@ -93,7 +94,7 @@ public class StateConflictTest : IAsyncLifetime
 
     /// <summary>複数回の状態競合試行時に、各回ごとに警告が表示されることを検証する。</summary>
     [Fact]
-    public void MultipleConflictAttempts_ShouldShowWarningEachTime()
+    public void MultipleConflictAttemptsShouldShowWarningEachTime()
     {
         // Arrange
         _fixture.DepositController.BeginDeposit();

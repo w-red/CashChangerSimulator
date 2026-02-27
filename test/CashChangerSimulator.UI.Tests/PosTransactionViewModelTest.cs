@@ -8,6 +8,7 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
+/// <summary>Test class for providing PosTransactionViewModelTest functionality.</summary>
 public class PosTransactionViewModelTest : IDisposable
 {
     private readonly PosTransactionViewModelFixture _fixture = new();
@@ -58,7 +59,8 @@ public class PosTransactionViewModelTest : IDisposable
             _fixture.Hardware,
             () => [],
             isDispenseBusy,
-            notifyService);
+            notifyService,
+            _fixture.MetadataProvider);
         var dispVm = new DispenseViewModel(
             _fixture.Inventory,
             _fixture.Manager,
@@ -67,9 +69,10 @@ public class PosTransactionViewModelTest : IDisposable
             _fixture.ConfigProvider,
             isInDepositMode,
             () => [],
-            notifyService);
+            notifyService,
+            _fixture.MetadataProvider);
         
-        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger);
+        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger, _fixture.MetadataProvider);
     }
 
     /// <summary>取引完了時のOPOSシーケンス呼び出しを検証します。</summary>
@@ -153,7 +156,7 @@ public class PosTransactionViewModelTest : IDisposable
     [InlineData("-1000")]    // 負の値
     [InlineData("")]         // 空文字列
     [InlineData("0")]        // 0円
-    public void StartTransactionWithInvalidAmount_ShouldReject(string invalidAmount)
+    public void StartTransactionWithInvalidAmountShouldReject(string invalidAmount)
     {
         // Arrange
         var vm = CreateViewModel();
@@ -170,7 +173,7 @@ public class PosTransactionViewModelTest : IDisposable
     /// 現状の実装では正の数なら許可されるが、ビジネスロジック的に制限すべきか検討材料。
     /// </remarks>
     [Fact]
-    public void StartTransactionWithExtremelyLargeAmount_ShouldReject()
+    public void StartTransactionWithExtremelyLargeAmountShouldReject()
     {
         // Arrange
         var vm = CreateViewModel();
@@ -184,7 +187,7 @@ public class PosTransactionViewModelTest : IDisposable
 
     /// <summary>プロパティが適切にマップされ、バインディング例外を防ぐことを検証します。</summary>
     [Fact]
-    public void Properties_ShouldInitializeAndMapCorrectly()
+    public void PropertiesShouldInitializeAndMapCorrectly()
     {
         using var vm = CreateViewModel();
         
@@ -217,7 +220,7 @@ public class PosTransactionViewModelTest : IDisposable
     /// 3. デバイス解放（Release, Close）が呼ばれ、ステータスが待機中に戻る。
     /// </remarks>
     [Fact]
-    public void TransactionCancelledAfterPartialPayment_ShouldRepayAndClose()
+    public void TransactionCancelledAfterPartialPaymentShouldRepayAndClose()
     {
         // Arrange
         var vm = CreateViewModel();

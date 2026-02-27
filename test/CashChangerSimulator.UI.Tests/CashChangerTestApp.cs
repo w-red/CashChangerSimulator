@@ -36,7 +36,7 @@ public class CashChangerTestApp : IDisposable
         _executablePath = potentialPath;
     }
 
-    public void Launch()
+    public void Launch(string? customConfigToml = null)
     {
         string fullPath = Path.GetFullPath(_executablePath);
         string? appDir = Path.GetDirectoryName(fullPath);
@@ -49,6 +49,13 @@ public class CashChangerTestApp : IDisposable
             {
                 var filePath = Path.Combine(appDir, file);
                 try { if (File.Exists(filePath)) File.Delete(filePath); } catch { }
+            }
+
+            // Write custom config if provided
+            if (!string.IsNullOrEmpty(customConfigToml))
+            {
+                var configPath = Path.Combine(appDir, "config.toml");
+                File.WriteAllText(configPath, customConfigToml);
             }
         }
 

@@ -64,7 +64,8 @@ public class TerminalOperationTest
             _hardwareManager,
             () => Enumerable.Empty<DenominationViewModel>(),
             _isBusyShared,
-            new Mock<INotifyService>().Object);
+            new Mock<INotifyService>().Object,
+            new CurrencyMetadataProvider(new ConfigurationProvider()));
 
         // Assert: Initial (Normal)
         vm.CanOperate.Value.ShouldBeTrue();
@@ -106,7 +107,8 @@ public class TerminalOperationTest
             configProvider,
             _isBusyShared,
             () => Enumerable.Empty<DenominationViewModel>(),
-            new Mock<INotifyService>().Object);
+            new Mock<INotifyService>().Object,
+            new CurrencyMetadataProvider(configProvider));
 
         // Assert: Initial
         vm.CanOperate.Value.ShouldBeTrue();
@@ -142,7 +144,8 @@ public class TerminalOperationTest
             _hardwareManager,
             () => Enumerable.Empty<DenominationViewModel>(),
             _isBusyShared,
-            new Mock<INotifyService>().Object);
+            new Mock<INotifyService>().Object,
+            new CurrencyMetadataProvider(new ConfigurationProvider()));
 
         // --- Idle State (Not in Deposit Mode) ---
         // Assert: Begin and Quick are enabled, Bulk is disabled
@@ -204,7 +207,8 @@ public class TerminalOperationTest
             configProvider,
             _isBusyShared,
             () => Enumerable.Empty<DenominationViewModel>(),
-            new Mock<INotifyService>().Object);
+            new Mock<INotifyService>().Object,
+            new CurrencyMetadataProvider(configProvider));
 
         // Setup input to make DispenseCommand valid
         vm.DispenseAmountInput.Value = "100";

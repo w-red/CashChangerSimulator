@@ -4,10 +4,12 @@ using Xunit;
 
 namespace CashChangerSimulator.Core.Tests.Managers;
 
+/// <summary>Test class for providing HardwareStatusManagerTest functionality.</summary>
 public class HardwareStatusManagerTest
 {
+    /// <summary>Tests the behavior of ResetErrorShouldClearAllErrorFlags to ensure proper functionality.</summary>
     [Fact]
-    public void ResetError_ShouldClearAllErrorFlags()
+    public void ResetErrorShouldClearAllErrorFlags()
     {
         // Arrange
         using var manager = new HardwareStatusManager();
