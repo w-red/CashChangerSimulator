@@ -44,13 +44,13 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="UPOS Configuration" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
-                                <TextBlock Text="Enable Real Time Data Events" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{StaticResource StrUposConfig}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="{StaticResource StrRealTimeData}" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                             </StackPanel>
                             <ToggleButton Grid.Column="1" 
                                            IsChecked="{Binding IsRealTimeDataEnabled.Value}" 
                                            Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                           ToolTip="Toggles the UPOS CapRealTimeData status" />
+                                           ToolTip="{StaticResource StrRealTimeData}" />
                         </Grid>
                     </Border>
 
@@ -58,7 +58,7 @@
                     <Border Style="{StaticResource CardStyle}" Background="#106200EE" Margin="0,0,0,16" Padding="12"
                             Visibility="{Binding IsDepositInProgress.Value, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Tracking: " Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                            <TextBlock Text="{StaticResource StrCurrentDeposit}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
                             <TextBlock Text="{Binding CurrencyPrefix}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
                             <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
                             <TextBlock Text="{Binding CurrencySuffix}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
@@ -68,7 +68,7 @@
                     <!-- Scripts Section -->
                     <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="JSON TRANSACTION SCRIPT" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="{StaticResource StrScriptInput}" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
                             
                             <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource ModernTextBoxStyle}"
@@ -80,7 +80,7 @@
                                        FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
                             
                             <Button Style="{StaticResource PrimaryButtonStyle}" 
-                                    Content="EXECUTE" 
+                                    Content="{StaticResource StrExecute}" 
                                     AutomationProperties.AutomationId="ExecuteScriptButton"
                                     Command="{Binding ExecuteScriptCommand}" 
                                     HorizontalAlignment="Right" />

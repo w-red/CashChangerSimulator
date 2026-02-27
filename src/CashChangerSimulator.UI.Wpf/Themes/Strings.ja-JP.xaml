@@ -83,6 +83,10 @@
     <system:String x:Key="StrBulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
     <system:String x:Key="StrBulkDepositSubtitle">投入する数量を入力してください。</system:String>
     <system:String x:Key="StrBulkDispenseSubtitle">出金する数量を入力してください。</system:String>
-    <system:String x:Key="StrErrorCannotOpenTerminalInError">デバイスがエラー状態のため、ターミナルを開けません。先にエラーを解除してください。</system:String>
+    <system:String x:Key="StrErrorCodeCannotReset">エラー状態をリセットできません。</system:String>
     <system:String x:Key="StrAdvancedSimulation">高度なシミュレーション操作</system:String>
+    <system:String x:Key="StrExecute">実行</system:String>
+    <system:String x:Key="StrUposConfig">UPOS 構成設定</system:String>
+    <system:String x:Key="StrRealTimeData">リアルタイムデータイベントを有効にする</system:String>
+    <system:String x:Key="StrScriptInput">取引スクリプト (JSON)</system:String>
 </ResourceDictionary>
