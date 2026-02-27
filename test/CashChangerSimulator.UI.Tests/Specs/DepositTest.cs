@@ -23,10 +23,10 @@ public class DepositTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs * 2); // Wait longer for initial load
 
         // 1. Get initial total (Main Window)
-        var totalAmountText = FindElement(window, "TotalAmountText", "¥")?.AsLabel();
+        var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         totalAmountText.ShouldNotBeNull();
         decimal initialTotal = ParseAmount(totalAmountText.Text);
 
@@ -136,7 +136,7 @@ public class DepositTest : IDisposable
     public void ShouldRepayDepositWhenReturning()
     {
         var window = _app.MainWindow;
-        var totalAmountText = FindElement(window, "TotalAmountText", "¥")?.AsLabel();
+        var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         decimal initialTotal = ParseAmount(totalAmountText?.Text ?? "0");
 
         var depositWindow = OpenDepositTerminal(window);
@@ -257,7 +257,7 @@ public class DepositTest : IDisposable
 
     private Window OpenDepositTerminal(Window? mainWindow)
     {
-        var launchButton = FindElement(mainWindow, "LaunchDepositButton", "DEPOSIT")?.AsButton();
+        var launchButton = UiTestRetry.Find(() => mainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
         launchButton.ShouldNotBeNull();
         
         if (launchButton.Patterns.Invoke.IsSupported)
@@ -299,12 +299,15 @@ public class DepositTest : IDisposable
 
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
-        return container == null
-            ? null
-            : UiTestRetry.Find(() =>
+        if (container == null) return null;
+        
+        return UiTestRetry.Find(() =>
         {
+            // Try by AutomationId first (highest priority)
             var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
             if (el != null) return el;
+            
+            // Fallback to text search if provided
             if (!string.IsNullOrEmpty(text))
             {
                 var elByText = container.FindFirstDescendant(cf => cf.ByText(text));

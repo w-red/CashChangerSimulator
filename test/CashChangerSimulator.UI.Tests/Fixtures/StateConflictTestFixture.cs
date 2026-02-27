@@ -9,6 +9,7 @@ using R3;
 
 namespace CashChangerSimulator.UI.Tests.Fixtures;
 
+/// <summary>Test class for providing StateConflictTestFixture functionality.</summary>
 public class StateConflictTestFixture : IDisposable
 {
     public Inventory Inventory { get; private set; } = null!;

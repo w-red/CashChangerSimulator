@@ -48,18 +48,19 @@ public class DepositModeViewModelTest
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
 
         _mainViewModel = new MainViewModel(
-            inventory: _mockInventory.Object,
-            history: _mockHistory.Object,
-            manager: _mockManager.Object,
-            monitorsProvider: monitorsProvider,
-            aggregatorProvider: aggregatorProvider,
-            configProvider: configProvider,
-            metadataProvider: _metadataProvider,
-            hardwareStatusManager: hardwareManager,
-            depositController: _depositController,
-            dispenseController: _dispenseController,
-            cashChanger: new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
-            notifyService: new Mock<INotifyService>().Object);
+            _mockInventory.Object,
+            _mockHistory.Object,
+            _mockManager.Object,
+            monitorsProvider,
+            aggregatorProvider,
+            configProvider,
+            _metadataProvider,
+            hardwareManager,
+            _depositController,
+            _dispenseController,
+            new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
+            new Mock<INotifyService>().Object,
+            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
     }
 
     /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証します。</summary>

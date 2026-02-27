@@ -8,6 +8,7 @@ using Moq;
 
 namespace CashChangerSimulator.UI.Tests.Fixtures;
 
+/// <summary>Test class for providing PosTransactionViewModelFixture functionality.</summary>
 public class PosTransactionViewModelFixture : IDisposable
 {
     public Inventory Inventory { get; private set; } = null!;
@@ -18,6 +19,7 @@ public class PosTransactionViewModelFixture : IDisposable
     public DispenseController DispenseController { get; private set; } = null!;
     public SimulatorCashChanger CashChanger { get; private set; } = null!;
     public ConfigurationProvider ConfigProvider { get; private set; } = null!;
+    public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
 
     public void Initialize(string currencyCode = "JPY")
     {
@@ -31,8 +33,9 @@ public class PosTransactionViewModelFixture : IDisposable
         ConfigProvider = new ConfigurationProvider();
         ConfigProvider.Config.Inventory.TryAdd(currencyCode, new InventorySettings());
         ConfigProvider.Config.CurrencyCode = currencyCode;
+        MetadataProvider = new CurrencyMetadataProvider(ConfigProvider);
 
-        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, new CurrencyMetadataProvider(ConfigProvider));
+        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
 
         CashChanger = new SimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware)

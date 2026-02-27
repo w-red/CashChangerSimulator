@@ -48,11 +48,12 @@ public class ViewModelTest
             realAggregator,
             realConfig,
             realMetadata,
-            hardwareStatusManager: realHardware,
-            depositController: depositController,
-            dispenseController: dispenseController,
-            cashChanger: new SimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware),
-            notifyService: new Mock<INotifyService>().Object);
+            realHardware,
+            depositController,
+            dispenseController,
+            new SimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware),
+            new Mock<INotifyService>().Object,
+            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
 
         // Verify: ViewModel is properly initialized
         vm.Deposit.ShouldNotBeNull();
