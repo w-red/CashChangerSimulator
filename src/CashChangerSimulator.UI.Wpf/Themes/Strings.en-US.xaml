@@ -87,4 +87,8 @@
 
     <system:String x:Key="StrErrorCodeCannotReset">Cannot reset error state at this time.</system:String>
     <system:String x:Key="StrAdvancedSimulation">ADVANCED SIM</system:String>
+    <system:String x:Key="StrExecute">EXECUTE</system:String>
+    <system:String x:Key="StrUposConfig">UPOS CONFIGURATION</system:String>
+    <system:String x:Key="StrRealTimeData">Enable Real Time Data Events</system:String>
+    <system:String x:Key="StrScriptInput">JSON TRANSACTION SCRIPT</system:String>
 </ResourceDictionary>
