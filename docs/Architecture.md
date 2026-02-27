@@ -21,17 +21,19 @@ graph TD
         DispenseView["Dispense View / ViewModel"]
         PosView["POS Transaction ViewModel"]
         AdvancedSim["Advanced Simulation (Script, Events)"]
+        ActivityFeed["Activity Feed (Real-time Events)"]
     end
-    class MainWindow,DepositView,DispenseView,PosView,AdvancedSim uiLayer
+    class MainWindow,DepositView,DispenseView,PosView,AdvancedSim,ActivityFeed uiLayer
 
     %% Device/Service Layer
     subgraph Device ["Device Layer"]
         DepositController["DepositController"]
         DispenseController["DispenseController"]
         SimCashChanger["SimulatorCashChanger (Hardware facade)"]
+        CashCountParser["CashCountParser (UPOS String Parser)"]
         ScriptService["ScriptExecutionService"]
     end
-    class DepositController,DispenseController,SimCashChanger,ScriptService deviceLayer
+    class DepositController,DispenseController,SimCashChanger,CashCountParser,ScriptService deviceLayer
 
     %% Core Layer
     subgraph Core ["Core Business Logic"]
@@ -39,8 +41,9 @@ graph TD
         Inventory["Inventory Management"]
         History["Transaction History"]
         Calc["ChangeCalculator"]
+        OposCode["UPOS/OPOS Error Definitions"]
     end
-    class Manager,Inventory,History,Calc coreLayer
+    class Manager,Inventory,History,Calc,OposCode coreLayer
 
     %% Infrastructure
     subgraph Infrastructure ["Cross-Cutting / Infrastructure"]
@@ -54,6 +57,7 @@ graph TD
     MainWindow --> DispenseView
     MainWindow --> PosView
     MainWindow --> AdvancedSim
+    MainWindow --> ActivityFeed
 
     DepositView --> DepositController
     DispenseView --> DispenseController
@@ -68,12 +72,16 @@ graph TD
     
     ScriptService --> SimCashChanger
     
+    SimCashChanger --> CashCountParser
+    SimCashChanger --> OposCode
+    
     Manager --> Inventory
     Manager --> Calc
     Manager --> History
     
     SimCashChanger --> Logger
     Manager --> Logger
+    ActivityFeed --> History
 ```
 
 ## Key Components
@@ -81,15 +89,24 @@ graph TD
 1. **Presentation Layer (`CashChangerSimulator.UI.Wpf`)**
     - Built using **WPF (Windows Presentation Foundation)** with **MaterialDesignThemes**.
     - Utilizes **R3** (Reactive Extensions) for highly responsive and declarative View-ViewModel binding interactions.
+    - **Activity Feed**: Integrates directly with `TransactionHistory` to show real-time `DataEvent` and `StatusUpdateEvent` notifications, especially useful when `RealTimeDataEnabled` is active.
     - Components such as `AdvancedSimulationWindow` provide deep manipulation and stress-testing functionality via JSON script automation.
+
 2. **Device Layer (`CashChangerSimulator.Device`)**
-    - Coordinates between the high-level business operations and the simulated hardware.
-    - `DepositController` and `DispenseController` orchestrate operations by simulating real-world physics and timings (e.g., motor delay, cassette availability) before invoking the actual business counts.
-    - Allows simulating hardware failures automatically (e.g., jam tests).
+    - Coordinates between high-level business operations and simulated hardware.
+    - **`SimulatorCashChanger`**: The primary UPOS service object facade. It handles `DirectIO` extensions (e.g., bulk adjustment, discrepancy simulation) and manages asynchronous task states.
+    - **`CashCountParser`**: A specialized parser for UPOS-standard semicolon-separated strings (e.g., `Coins;Bills`). Supports currency factor scaling and decimal shorthands (e.g., `.5`).
+    - `DepositController` and `DispenseController` orchestrate operations by simulating real-world physics and timings before invoking the actual business counts.
+
 3. **Core Layer (`CashChangerSimulator.Core`)**
-    - Independent from UI and infrastructure.
+    - Independent of UI and infrastructure.
     - Holds the `CashChangerManager` containing invariants such as absolute inventory totals and log histories.
+    - **Error Handling**: Standardized via `UposCashChangerErrorCodeExtended` to ensure compliance with OPOS/UPOS extended result codes (e.g., `OverDispense`).
     - `ChangeCalculator` algorithms compute optimal denominations for dispensing operations based on the current available inventory structure.
+
 4. **Infrastructure Layer**
     - Uses **ZLogger** mapped dynamically at runtime to handle massive throughput of UPOS events without freezing the presentation thread.
+    - Configuration is managed via **TOML** files, allowing for easy customization of currencies and denominations.
 
+---
+*For the Japanese version, see [Architecture_JP.md](Architecture_JP.md).*
