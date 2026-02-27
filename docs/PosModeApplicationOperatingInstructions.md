@@ -1,39 +1,43 @@
-# POSモード操作説明書 (POS Mode Operating Instructions)
+# POS Mode Operating Instructions
 
-POSモードは、外部のPOSアプリケーションからの制御をシミュレートし、連携テストや異常系シナリオ（エラーハンドリング）の検証を行うためのモードです。
+POS Mode is optimized for integrating with external POS software and testing error-handling scenarios.
 
-## 1. POS ライフサイクルのシミュレーション
+## 1. Simulating POS Lifecycle
 
-シミュレーターの UI 上にある「Advanced Simulation」または「POS State」セクションから、以下の状態を擬似的に発生させることができます。
+Use the "Advanced Simulation" or "POS State" sections in the UI to emulate device lifecycle events:
 
-- **Connected/Disconnected**: デバイスの装着・取り外しイベントの発生。
-- **Claim/Release**: アプリケーションによる占有状態の切り替え。
+- **Connected/Disconnected**: Trigger device arrival (Inserted) and departure (Removed) events.
+- **Claim/Release**: Emulate the POS application taking or releasing ownership of the device.
 
-## 2. 異常系シナリオの実行
+## 2. Triggering Error Scenarios
 
-外部アプリとの通信エラーや物理的な故障をシミュレートするために、以下のコントロールを使用します。
+Use the following controls to simulate hardware failures and logic errors:
 
-### メカニカルジャム (Jam)
-- 「Simulate Jam」をONにすると、デバイスがジャム状態となります。
-- この状態で払出や入金などのメソッドを呼び出すと、UPOS 標準の `ErrorCode.Failure` が返されます。
+### Mechanical Jam
+- Toggle "Simulate Jam" to ON.
+- Any subsequent deposit or dispense calls will return the standard UPOS `ErrorCode.Failure`.
 
-### 在庫不足 (OverDispense)
-- 特定の金種を 0 に設定した状態で、その金種を要求する払出処理を実行すると、`UposCashChangerErrorCodeExtended.OverDispense` (201) が発生します。
+### Cash Shortage (OverDispense)
+- Set specific denominations to 0 in the inventory, then attempt an operation that requires them.
+- This will trigger a `UposCashChangerErrorCodeExtended.OverDispense` (201) error.
 
-## 3. スクリプトによる自動実行
+## 3. Scripted Automation
 
-JSON 形式のスクリプトファイルを読み込むことで、連続した操作シナリオ（例：入金 → 確定 → 払出 → ジャム発生）を自動的に実行できます。
+Load JSON script files to execute sequential scenario tests (e.g., Deposit -> Confirm -> Dispense -> Jam).
 
-1. `Scripts` タブを選択します。
-2. JSON ファイルをロードします。
-3. 「Run Script」をクリックして実行を開始します。実行状況はログウィンドウに逐次表示されます。
+1. Select the `Scripts` tab.
+2. Load a JSON scenario file.
+3. Click "Run Script". Progress and results will be shown in the log window.
 
-## 4. リアルタイム通知の検証
+## 4. Verifying Real-Time Notifications
 
-- `RealTimeDataEnabled` プロパティを ON に設定することで、入金中の各金種投入ごとに `DataEvent` が発生する挙動をテストできます。
-- POSアプリ側で中途の入金額を即座に表示したい場合の動作検証に有効です。
+- Enable the `RealTimeDataEnabled` property to test behavior where `DataEvent` is fired for every single coin/bill inserted. 
+- Useful for validating POS UIs that update the total amount incrementally.
 
-## 5. DirectIO による特殊操作
+## 5. DirectIO Special Operations
 
-外部 POS アプリから `DirectIO` メソッドを通じて、本シミュレーター独自のコマンド（例：文字列による在庫の一括調整）を発行できます。
-詳細は [UPOS Compliance Mapping](UposComplianceMapping.md) を参照してください。
+Communicate with the simulator using the `DirectIO` method for vendor-specific commands (e.g., bulk inventory adjustment via string).
+See the [UPOS Compliance Mapping](UposComplianceMapping.md) for a list of supported command codes.
+
+---
+*For the Japanese version, see [PosModeApplicationOperatingInstructions_JP.md](PosModeApplicationOperatingInstructions_JP.md).*
