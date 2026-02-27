@@ -1,4 +1,3 @@
-using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;

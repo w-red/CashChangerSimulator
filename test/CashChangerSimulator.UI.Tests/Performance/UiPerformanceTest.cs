@@ -2,7 +2,6 @@ using CashChangerSimulator.UI.Tests.Specs;
 using FlaUI.Core.AutomationElements;
 using Shouldly;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace CashChangerSimulator.UI.Tests.Performance;
