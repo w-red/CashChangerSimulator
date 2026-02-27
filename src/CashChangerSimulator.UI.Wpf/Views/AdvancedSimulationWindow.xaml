@@ -71,6 +71,7 @@
                             
                             <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource ModernTextBoxStyle}"
+                                     AutomationProperties.AutomationId="ScriptInputTextBox"
                                      AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="150" FontFamily="Consolas" Margin="0,0,0,8"/>
                             
                             <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" 
@@ -79,6 +80,7 @@
                             
                             <Button Style="{StaticResource PrimaryButtonStyle}" 
                                     Content="EXECUTE" 
+                                    AutomationProperties.AutomationId="ExecuteScriptButton"
                                     Command="{Binding ExecuteScriptCommand}" 
                                     HorizontalAlignment="Right" />
                         </StackPanel>
