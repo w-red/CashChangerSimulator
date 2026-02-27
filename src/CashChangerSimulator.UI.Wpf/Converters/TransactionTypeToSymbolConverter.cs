@@ -18,6 +18,7 @@ public class TransactionTypeToSymbolConverter : IValueConverter
                 TransactionType.Refill => PackIconKind.TrayArrowDown,
                 TransactionType.Collection => PackIconKind.TrayArrowUp,
                 TransactionType.Adjustment => PackIconKind.Tools,
+                TransactionType.DataEvent => PackIconKind.BellAlertOutline,
                 _ => PackIconKind.HelpCircleOutline
             }
             : PackIconKind.HelpCircleOutline;
