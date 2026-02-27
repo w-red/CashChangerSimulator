@@ -11,8 +11,11 @@ public static class UiTestRetry
     /// <param name="func">要素を返す関数。</param>
     /// <param name="timeout">タイムアウト時間。</param>
     /// <returns>見つかった要素。見つからない場合は null。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="func"/> が null の場合にスローされます。</exception>
     public static AutomationElement? Find(Func<AutomationElement?> func, TimeSpan timeout)
     {
+        ArgumentNullException.ThrowIfNull(func);
+
         AutomationElement? result = null;
         FlaUI.Core.Tools.Retry.WhileTrue(() =>
         {
@@ -28,9 +31,12 @@ public static class UiTestRetry
     /// <param name="title">ウィンドウのタイトル、または AutomationId。</param>
     /// <param name="timeout">検索のタイムアウト時間。</param>
     /// <returns>見つかったウィンドウ。見つからない場合は null。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="app"/>, <paramref name="automation"/>, または <paramref name="title"/> が null の場合にスローされます。</exception>
     public static Window? FindWindow(Application app, UIA3Automation automation, string title, TimeSpan timeout)
     {
-        if (app == null || automation == null) return null;
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(automation);
+        ArgumentNullException.ThrowIfNull(title);
 
         Window? result = null;
         var processId = app.ProcessId;
