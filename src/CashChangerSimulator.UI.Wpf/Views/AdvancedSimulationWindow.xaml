@@ -1,0 +1,90 @@
+<Window x:Class="CashChangerSimulator.UI.Wpf.Views.AdvancedSimulationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+        xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Advanced Simulation Controls" Height="500" Width="400"
+        Background="{StaticResource BackgroundBrush}"
+        TextElement.Foreground="{StaticResource TextPrimaryBrush}"
+        WindowStartupLocation="CenterOwner">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
+    </Window.Resources>
+    
+    <Border Padding="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="{StaticResource StrAdvancedSimulation}" 
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontWeight="Black"/>
+            </StackPanel>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Settings Section -->
+                    <Border Style="{StaticResource CardStyle}" Background="#05FFFFFF" Margin="0,0,0,16" Padding="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="UPOS Configuration" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="Enable Real Time Data Events" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1" 
+                                           IsChecked="{Binding IsRealTimeDataEnabled.Value}" 
+                                           Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                           ToolTip="Toggles the UPOS CapRealTimeData status" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Status Section (During Deposit) -->
+                    <Border Style="{StaticResource CardStyle}" Background="#106200EE" Margin="0,0,0,16" Padding="12"
+                            Visibility="{Binding IsDepositInProgress.Value, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Tracking: " Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding CurrencyPrefix}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrencySuffix}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Scripts Section -->
+                    <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="JSON TRANSACTION SCRIPT" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                            
+                            <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource ModernTextBoxStyle}"
+                                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="150" FontFamily="Consolas" Margin="0,0,0,8"/>
+                            
+                            <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" 
+                                       Visibility="{Binding ScriptError.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}" 
+                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                            
+                            <Button Style="{StaticResource PrimaryButtonStyle}" 
+                                    Content="EXECUTE" 
+                                    Command="{Binding ExecuteScriptCommand}" 
+                                    HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window>
