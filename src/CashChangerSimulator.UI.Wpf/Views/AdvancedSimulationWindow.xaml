@@ -8,6 +8,7 @@
         xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
         mc:Ignorable="d"
         Title="Advanced Simulation Controls" Height="500" Width="400"
+        AutomationProperties.AutomationId="AdvancedSimulationWindow"
         Background="{StaticResource BackgroundBrush}"
         TextElement.Foreground="{StaticResource TextPrimaryBrush}"
         WindowStartupLocation="CenterOwner">

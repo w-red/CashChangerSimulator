@@ -19,7 +19,7 @@
 
 ## 3. 手動入金操作 (Deposit)
 
-![入金ステータス表示](images/deposit_status.png)
+![入金ウィンドウ](images/deposit_window.png)
 
 1. `Deposit` タブを選択します。
 2. 「Begin Deposit」ボタンをクリックします。
