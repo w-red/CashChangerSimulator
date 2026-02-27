@@ -8,6 +8,9 @@ Standard Mode is designed for direct manual interaction with the simulated devic
 - **Deposit/Dispense Screen**: Perform manual deposit and dispense simulations.
 - **Activity Feed**: A chronological list of device events (e.g., DataEvent, StatusUpdateEvent).
 
+![Main Dashboard](images/main_dashboard.png)
+*Fig: Simulator Main Dashboard*
+
 ## 2. Inventory Management
 
 1. **Initial State**: Inventory is initialized based on `config.toml` at startup.
@@ -15,6 +18,8 @@ Standard Mode is designed for direct manual interaction with the simulated devic
 3. **Discrepancy Toggle**: Use the "Set Discrepancy" option in the simulation menu to simulate an inventory mismatch state.
 
 ## 3. Manual Deposit (Deposit)
+
+![Deposit Status Display](images/deposit_status.png)
 
 1. Select the `Deposit` tab.
 2. Click "Begin Deposit".
