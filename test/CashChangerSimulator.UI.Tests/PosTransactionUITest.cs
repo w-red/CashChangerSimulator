@@ -1,11 +1,9 @@
-using CashChangerSimulator.Core;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Shouldly;
 using CashChangerSimulator.Core.Services;
 using Moq;
 using R3;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests;
 
