@@ -93,7 +93,6 @@
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
         <Setter Property="Margin" Value="0,8,0,8"/>
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
-        <Setter Property="materialDesign:TextFieldAssist.PrefixText" Value="¥"/>
     </Style>
 
     <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
