@@ -14,14 +14,19 @@ Use the "Advanced Simulation" or "POS State" sections in the UI to emulate devic
 Use the following controls to simulate hardware failures and logic errors:
 
 ### Mechanical Jam
+
 - Toggle "Simulate Jam" to ON.
 - Any subsequent deposit or dispense calls will return the standard UPOS `ErrorCode.Failure`.
 
 ### Cash Shortage (OverDispense)
+
 - Set specific denominations to 0 in the inventory, then attempt an operation that requires them.
 - This will trigger a `UposCashChangerErrorCodeExtended.OverDispense` (201) error.
 
 ## 3. Scripted Automation
+
+![Script Editor Window](images/script_editor.png)
+*Fig: Scripted Automation Section*
 
 Load JSON script files to execute sequential scenario tests (e.g., Deposit -> Confirm -> Dispense -> Jam).
 
@@ -31,7 +36,7 @@ Load JSON script files to execute sequential scenario tests (e.g., Deposit -> Co
 
 ## 4. Verifying Real-Time Notifications
 
-- Enable the `RealTimeDataEnabled` property to test behavior where `DataEvent` is fired for every single coin/bill inserted. 
+- Enable the `RealTimeDataEnabled` property to test behavior where `DataEvent` is fired for every single coin/bill inserted.
 - Useful for validating POS UIs that update the total amount incrementally.
 
 ## 5. DirectIO Special Operations

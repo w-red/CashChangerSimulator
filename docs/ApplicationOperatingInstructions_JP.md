@@ -8,6 +8,9 @@
 - **Deposit/Dispense 画面**: 手動での入金および払出シミュレーションを行います。
 - **Activity Feed**: デバイス内で発生したイベント（DataEvent, StatusUpdateEvent等）が時系列で表示されます。
 
+![メインダッシュボード画面](images/main_dashboard.png)
+*図：シミュレーターのメインダッシュボード画面*
+
 ## 2. 在庫の調整 (Inventory Management)
 
 1. **初期値の設定**: アプリ起動時、`config.toml` に定義された内容で在庫が初期化されます。
@@ -15,6 +18,8 @@
 3. **Discrepancy (不一致) 設定**: シミュレーションメニューから「Set Discrepancy」を有効にすると、インベントリ情報の不一致状態をシミュレートできます。
 
 ## 3. 手動入金操作 (Deposit)
+
+![入金ステータス表示](images/deposit_status.png)
 
 1. `Deposit` タブを選択します。
 2. 「Begin Deposit」ボタンをクリックします。
