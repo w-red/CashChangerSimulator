@@ -26,10 +26,10 @@ public class PerformanceTest(ITestOutputHelper output)
         var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
 
         // JPY setup
-        var key1000 = new DenominationKey(1000m, CashType.Bill, "JPY");
-        inventory.SetCount(key1000, 10000);
+        var key1000 = new DenominationKey(PerformanceConstants.DispenseAmount, CashType.Bill, "JPY");
+        inventory.SetCount(key1000, PerformanceConstants.InitialInventoryCount);
 
-        const int iterations = 10000;
+        const int iterations = PerformanceConstants.BulkDispenseIterations;
         output.WriteLine($"Starting bulk dispense test with {iterations} iterations...");
 
         var sw = Stopwatch.StartNew();
@@ -37,7 +37,7 @@ public class PerformanceTest(ITestOutputHelper output)
 
         for (int i = 0; i < iterations; i++)
         {
-            manager.Dispense(1000m);
+            manager.Dispense(PerformanceConstants.DispenseAmount);
         }
 
         sw.Stop();
@@ -53,7 +53,7 @@ public class PerformanceTest(ITestOutputHelper output)
     [Fact]
     public void LoggingOverheadAnalysis()
     {
-        const int iterations = 50000;
+        const int iterations = PerformanceConstants.LoggingAnalysisIterations;
 
         // Scenario 1: No Logging
         LogProvider.Initialize(new LoggingSettings { EnableConsole = false, EnableFile = false, LogLevel = "None" });
