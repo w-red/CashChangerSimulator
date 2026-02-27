@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core;
+using CashChangerSimulator.Core.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
@@ -34,6 +35,9 @@ public class PosTransactionViewModel : IDisposable
     public BindableReactiveProperty<int> TransactionTimeoutSeconds { get; }
     /// <summary>OPOSアクションのログ。</summary>
     public ObservableCollection<string> OposLog { get; } = [];
+    /// <summary>通貨記号。</summary>
+    public string CurrencyPrefix { get; }
+    public string CurrencySuffix { get; }
 
     // Missing Binding Properties for UI
     public ReadOnlyReactiveProperty<string> StatusText { get; }
@@ -60,8 +64,10 @@ public class PosTransactionViewModel : IDisposable
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
     /// <summary>PosTransactionViewModel の新しいインスタンスを初期化します。</summary>
-    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger)
+    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, CurrencyMetadataProvider metadataProvider)
     {
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
         _deposit = deposit;
         _dispense = dispense;
         _cashChanger = cashChanger;

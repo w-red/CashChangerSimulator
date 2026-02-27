@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Services;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -22,6 +23,12 @@ public class MainViewModel : IDisposable
     public InventoryViewModel Inventory { get; }
     /// <summary>POS取引モード用の ViewModel。</summary>
     public PosTransactionViewModel PosTransaction { get; }
+    /// <summary>高度なシミュレーション設定 ViewModel。</summary>
+    public AdvancedSimulationViewModel AdvancedSimulation { get; }
+
+    /// <summary>通貨記号。</summary>
+    public string CurrencyPrefix { get; }
+    public string CurrencySuffix { get; }
 
     /// <summary>現在の UI 動作モード。</summary>
     public BindableReactiveProperty<UIMode> CurrentUIMode { get; }
@@ -30,6 +37,8 @@ public class MainViewModel : IDisposable
     public ReactiveCommand OpenDepositCommand { get; }
     /// <summary>出金ウィンドウを表示するコマンド。</summary>
     public ReactiveCommand OpenDispenseCommand { get; }
+    /// <summary>高度なシミュレーションウィンドウを表示するコマンド。</summary>
+    public ReactiveCommand OpenAdvancedSimulationCommand { get; }
 
     /// <summary>MainViewModel の新しいインスタンスを初期化します。</summary>
     public MainViewModel(
@@ -44,8 +53,11 @@ public class MainViewModel : IDisposable
         DepositController depositController,
         DispenseController dispenseController,
         SimulatorCashChanger cashChanger,
-        INotifyService notifyService)
+        INotifyService notifyService,
+        IScriptExecutionService scriptExecutionService)
     {
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
         var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
 
         // Sub-ViewModels
@@ -65,7 +77,8 @@ public class MainViewModel : IDisposable
             hardwareStatusManager,
             () => Inventory.Denominations,
             isDispenseBusy,
-            notifyService)
+            notifyService,
+            metadataProvider)
             .AddTo(_disposables);
 
         Dispense = new DispenseViewModel(
@@ -76,12 +89,14 @@ public class MainViewModel : IDisposable
             configProvider,
             Deposit.IsInDepositMode,
             () => Inventory.Denominations,
-            notifyService)
+            notifyService,
+            metadataProvider)
             .AddTo(_disposables);
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
-        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger).AddTo(_disposables);
+        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, metadataProvider).AddTo(_disposables);
+        AdvancedSimulation = new AdvancedSimulationViewModel(cashChanger, scriptExecutionService, depositController, metadataProvider).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.UIMode).AddTo(_disposables);
 
@@ -144,6 +159,14 @@ public class MainViewModel : IDisposable
                 var window = new DispenseWindow(Dispense, () => Inventory.Denominations);
                 window.Show();
             }
+        });
+
+        OpenAdvancedSimulationCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenAdvancedSimulationCommand.Subscribe(_ =>
+        {
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
+            var window = new AdvancedSimulationWindow(AdvancedSimulation) { Owner = mainWindow };
+            window.Show();
         });
     }
 

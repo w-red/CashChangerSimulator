@@ -39,6 +39,9 @@ public class DepositViewModel : IDisposable
     private readonly BindableReactiveProperty<bool> _isJammed;
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
+    /// <summary>通貨記号。</summary>
+    public string CurrencyPrefix { get; }
+    public string CurrencySuffix { get; }
 
     // Commands
     /// <summary>入金を開始するコマンド。</summary>
@@ -81,8 +84,11 @@ public class DepositViewModel : IDisposable
         HardwareStatusManager hardwareStatusManager,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         BindableReactiveProperty<bool> isDispenseBusy,
-        INotifyService notifyService)
+        INotifyService notifyService,
+        CurrencyMetadataProvider metadataProvider)
     {
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
         _depositController = depositController;
         _hardwareStatusManager = hardwareStatusManager;
         _isDispenseBusy = isDispenseBusy;

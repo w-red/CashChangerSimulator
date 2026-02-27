@@ -43,8 +43,18 @@
                 <ProgressBar Value="{Binding Progress.Value}" Height="4" Background="#15FFFFFF" Foreground="{StaticResource PrimaryBrush}"/>
                 
                 <Grid Margin="0,8,0,0">
-                    <TextBlock Text="{Binding CurrentAmount.Value, StringFormat=Input: ¥{0:N0}}" HorizontalAlignment="Left" FontSize="12" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding TotalTargetAmount.Value, StringFormat=Target: ¥{0:N0}}" HorizontalAlignment="Right" FontSize="12" Opacity="0.6"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <TextBlock Text="Input: " FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding CurrencyPrefix}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding CurrentAmount.Value, StringFormat='{}{0:N0}'}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding CurrencySuffix}" FontSize="12" FontWeight="Bold" Margin="2,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="Target: " FontSize="12" Opacity="0.6"/>
+                        <TextBlock Text="{Binding CurrencyPrefix}" FontSize="12" Opacity="0.6"/>
+                        <TextBlock Text="{Binding TotalTargetAmount.Value, StringFormat='{}{0:N0}'}" FontSize="12" Opacity="0.6"/>
+                        <TextBlock Text="{Binding CurrencySuffix}" FontSize="12" Opacity="0.6" Margin="2,0,0,0"/>
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
@@ -59,9 +69,15 @@
             <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,16,0">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <!-- Idle State -->
-                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
+                    <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
                         <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
                         <TextBlock Text="{StaticResource StrReadyForTransaction}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <TextBox Text="{Binding InputAmount.Value, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 materialDesign:HintAssist.Hint="Enter Target Amount"
+                                 materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
+                                 FontSize="24" FontWeight="Bold" Height="60" Margin="0,8,0,0"/>
+                        <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,12,12" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
                         <Button Style="{StaticResource PrimaryButtonStyle}" 
                                 Content="{StaticResource StrStartSimulation}" 
                                 Command="{Binding StartCommand}"
@@ -69,7 +85,7 @@
                     </StackPanel>
 
                     <!-- Waiting for Cash State -->
-                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=WaitingForCash}">
+                    <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=WaitingForCash}">
                         <TextBlock Text="{StaticResource StrInsertCashToContinue}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,16"/>
                         <ItemsControl ItemsSource="{Binding AvailableDenominations}"
                                       ItemsPanel="{StaticResource CenteredWrapPanelItemsPanel}"
@@ -78,7 +94,7 @@
                     </StackPanel>
 
                     <!-- Completed State -->
-                    <StackPanel Visibility="{Binding Status.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Completed}">
+                    <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Completed}">
                         <materialDesign:PackIcon Kind="CheckCircle" Width="64" Height="64" HorizontalAlignment="Center" Foreground="LightGreen" Margin="0,0,0,16"/>
                         <TextBlock Text="{StaticResource StrTransactionFinished}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
                         <Button Style="{StaticResource ModernFlatButtonStyle}" 

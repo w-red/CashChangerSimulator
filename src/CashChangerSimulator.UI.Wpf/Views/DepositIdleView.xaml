@@ -5,9 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:DepositViewModel}"
              d:DesignHeight="300" d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
+    </UserControl.Resources>
     <StackPanel>
         <Button Style="{StaticResource PrimaryButtonStyle}" 
                 Command="{Binding BeginDepositCommand}"
@@ -64,6 +68,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox materialDesign:HintAssist.Hint="Amount" 
+                      materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
                       Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
                       IsEnabled="{Binding CanOperate.Value}"
                       Style="{StaticResource ModernTextBoxStyle}"
@@ -74,6 +79,7 @@
                     <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
                 </TextBox.InputBindings>
             </TextBox>
+            <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
             <Button Grid.Column="1" 
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding QuickDepositCommand}"

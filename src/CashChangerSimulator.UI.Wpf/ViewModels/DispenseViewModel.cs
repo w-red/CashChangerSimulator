@@ -31,6 +31,9 @@ public class DispenseViewModel : IDisposable
     public BindableReactiveProperty<string> DispenseAmountInput { get; }
     /// <summary>出金を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
+    /// <summary>通貨記号。</summary>
+    public string CurrencyPrefix { get; }
+    public string CurrencySuffix { get; }
 
     // Bulk Dispense
     /// <summary>一括出金画面を表示するコマンド（View側で購読）。</summary>
@@ -73,8 +76,11 @@ public class DispenseViewModel : IDisposable
         ConfigurationProvider configProvider,
         BindableReactiveProperty<bool> isInDepositMode,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
-        INotifyService notifyService)
+        INotifyService notifyService,
+        CurrencyMetadataProvider metadataProvider)
     {
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
         _inventory = inventory;
         _manager = manager;
         _controller = controller;
