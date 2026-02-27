@@ -64,6 +64,8 @@
                                 </Border>
                                 <!-- Hardaware Status Indicators -->
                                 <ctrl:StatusHeaderControl DataContext="{Binding Inventory}" />
+                                
+
                             </StackPanel>
                         </StackPanel>
                     </Grid>
