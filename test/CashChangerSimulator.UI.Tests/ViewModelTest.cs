@@ -1,8 +1,8 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Managers;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
@@ -27,7 +27,7 @@ public class ViewModelTest
         mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
 
         var realConfig = new ConfigurationProvider();
-        realConfig.Config.CurrencyCode = "JPY";
+        realConfig.Config.System.CurrencyCode = "JPY";
 
         var realMetadata = new CurrencyMetadataProvider(realConfig);
         var realMonitors = new MonitorsProvider(mockInventory.Object, realConfig, realMetadata);

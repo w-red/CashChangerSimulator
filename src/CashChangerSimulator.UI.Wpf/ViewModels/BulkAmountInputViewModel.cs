@@ -1,5 +1,5 @@
-using System.Windows.Input;
 using R3;
+using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 

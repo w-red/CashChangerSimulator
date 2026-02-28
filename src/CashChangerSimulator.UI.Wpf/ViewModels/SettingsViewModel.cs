@@ -131,12 +131,12 @@ public class SettingsViewModel : IDisposable
     /// <summary>設定オブジェクトから ViewModel の各プロパティへ値を読み込む。</summary>
     private void LoadFromConfig(SimulatorConfiguration config)
     {
-        CurrencyCode.Value = config.CurrencyCode;
+        CurrencyCode.Value = config.System.CurrencyCode;
         NearEmpty.Value = config.Thresholds.NearEmpty;
         NearFull.Value = config.Thresholds.NearFull;
         Full.Value = config.Thresholds.Full;
-        ActiveUIMode.Value = config.UIMode;
-        CultureCode.Value = config.CultureCode ?? "en-US";
+        ActiveUIMode.Value = config.System.UIMode;
+        CultureCode.Value = config.System.CultureCode ?? "en-US";
 
         DenominationSettings.Clear();
 
@@ -145,7 +145,7 @@ public class SettingsViewModel : IDisposable
             var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
 
             // 個別設定がある場合はそれを使用、ない場合はデフォルト値を適用
-            if (config.Inventory.TryGetValue(config.CurrencyCode, out var inventory) &&
+            if (config.Inventory.TryGetValue(config.System.CurrencyCode, out var inventory) &&
                 inventory.Denominations.TryGetValue(keyStr, out var setting))
             {
                 DenominationSettings.Add(new DenominationSettingItem(
@@ -173,18 +173,18 @@ public class SettingsViewModel : IDisposable
     private void Save()
     {
         var config = _configProvider.Config;
-        config.CurrencyCode = CurrencyCode.Value;
+        config.System.CurrencyCode = CurrencyCode.Value;
         config.Thresholds.NearEmpty = NearEmpty.Value;
         config.Thresholds.NearFull = NearFull.Value;
         config.Thresholds.Full = Full.Value;
 
-        config.UIMode = ActiveUIMode.Value;
-        config.CultureCode = CultureCode.Value;
+        config.System.UIMode = ActiveUIMode.Value;
+        config.System.CultureCode = CultureCode.Value;
 
-        if (!config.Inventory.TryGetValue(config.CurrencyCode, out InventorySettings? activeInventory))
+        if (!config.Inventory.TryGetValue(config.System.CurrencyCode, out InventorySettings? activeInventory))
         {
             activeInventory = new InventorySettings();
-            config.Inventory[config.CurrencyCode] = activeInventory;
+            config.Inventory[config.System.CurrencyCode] = activeInventory;
         }
 
         activeInventory.Denominations.Clear();
@@ -214,10 +214,8 @@ public class SettingsViewModel : IDisposable
     /// <summary>設定をデフォルト値（初期値）に戻す。</summary>
     private void ResetToDefault()
     {
-        var defaultConfig = new SimulatorConfiguration
-        {
-            CurrencyCode = CurrencyCode.Value
-        };
+        var defaultConfig = new SimulatorConfiguration();
+        defaultConfig.System.CurrencyCode = CurrencyCode.Value;
         LoadFromConfig(defaultConfig);
     }
 

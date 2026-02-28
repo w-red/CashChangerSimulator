@@ -2,10 +2,10 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
-using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.UI.Wpf.Views;
+using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Views;
 using R3;
 using System.Collections.ObjectModel;
 
@@ -82,7 +82,7 @@ public class InventoryViewModel : IDisposable
             var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
             string? displayName = null;
             var currentConfig = _configProvider.Config;
-            if (currentConfig.Inventory.TryGetValue(currentConfig.CurrencyCode, out var inventorySettings) &&
+            if (currentConfig.Inventory.TryGetValue(currentConfig.System.CurrencyCode, out var inventorySettings) &&
                 inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
             {
                 displayName = setting.DisplayName;
