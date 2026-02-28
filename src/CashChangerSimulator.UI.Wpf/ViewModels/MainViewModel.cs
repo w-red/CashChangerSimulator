@@ -1,11 +1,11 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Views;
 using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -98,10 +98,10 @@ public class MainViewModel : IDisposable
         PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, metadataProvider).AddTo(_disposables);
         AdvancedSimulation = new AdvancedSimulationViewModel(cashChanger, scriptExecutionService, depositController, metadataProvider).AddTo(_disposables);
 
-        CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.UIMode).AddTo(_disposables);
+        CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
 
         configProvider.Reloaded
-            .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.UIMode)
+            .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.System.UIMode)
             .AddTo(_disposables);
 
         GlobalModeName = Deposit.CurrentModeName

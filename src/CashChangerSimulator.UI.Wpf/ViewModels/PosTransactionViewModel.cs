@@ -1,10 +1,10 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
-using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 

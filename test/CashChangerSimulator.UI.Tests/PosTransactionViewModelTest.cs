@@ -1,7 +1,7 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.Core.Services;
 using Moq;
 using R3;
 using Shouldly;

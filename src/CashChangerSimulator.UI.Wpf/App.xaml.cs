@@ -1,7 +1,7 @@
 ﻿using CashChangerSimulator.Core;
-using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.UI.Wpf.Views;
 using R3;
 using System.IO;
 using System.Windows;
@@ -32,7 +32,7 @@ public partial class App : Application
             DIContainer.Initialize();
             
             // Apply language setting
-            UpdateLanguage(config.CultureCode);
+            UpdateLanguage(config.System.CultureCode);
 
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;

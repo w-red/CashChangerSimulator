@@ -32,7 +32,7 @@ public class AdvancedSimulationViewModelTest : IDisposable
         _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
         
         var configProvider = new ConfigurationProvider();
-        configProvider.Config.CurrencyCode = "JPY";
+        configProvider.Config.System.CurrencyCode = "JPY";
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
 
         _viewModel = new AdvancedSimulationViewModel(_cashChanger, _mockScriptExecutionService.Object, _mockDepositController.Object, metadataProvider);

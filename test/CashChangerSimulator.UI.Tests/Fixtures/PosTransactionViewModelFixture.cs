@@ -32,7 +32,7 @@ public class PosTransactionViewModelFixture : IDisposable
         DispenseController = new DispenseController(Manager, null, new Mock<IDeviceSimulator>().Object);
         ConfigProvider = new ConfigurationProvider();
         ConfigProvider.Config.Inventory.TryAdd(currencyCode, new InventorySettings());
-        ConfigProvider.Config.CurrencyCode = currencyCode;
+        ConfigProvider.Config.System.CurrencyCode = currencyCode;
         MetadataProvider = new CurrencyMetadataProvider(ConfigProvider);
 
         var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);

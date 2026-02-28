@@ -1,5 +1,5 @@
-using System.Windows.Controls;
 using System.Windows; // Added for Visibility
+using System.Windows.Controls;
 
 namespace CashChangerSimulator.UI.Wpf.Views;
 

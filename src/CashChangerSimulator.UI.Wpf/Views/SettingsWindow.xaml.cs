@@ -1,6 +1,6 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Wpf.ViewModels;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.Views;

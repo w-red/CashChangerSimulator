@@ -1,9 +1,9 @@
-using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core;
-using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
 using R3;
@@ -115,11 +115,11 @@ public class DispenseViewModel : IDisposable
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
 
-        TotalAmount = new BindableReactiveProperty<decimal>(_inventory.CalculateTotal(_configProvider.Config.CurrencyCode)).AddTo(_disposables);
+        TotalAmount = new BindableReactiveProperty<decimal>(_inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode)).AddTo(_disposables);
         _inventory.Changed
             .Subscribe(_ =>
             {
-                var total = _inventory.CalculateTotal(_configProvider.Config.CurrencyCode);
+                var total = _inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode);
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke(() => TotalAmount.Value = total);
@@ -234,7 +234,7 @@ public class DispenseViewModel : IDisposable
         try
         {
             DispensingAmount.Value = amount;
-            _ = _controller.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.CurrencyCode);
+            _ = _controller.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode);
         }
         catch (Exception ex)
         {

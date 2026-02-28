@@ -1,16 +1,13 @@
-namespace CashChangerSimulator.UI.Tests;
-
-using R3;
-
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Services;
-using Shouldly;
-using Xunit;
+using CashChangerSimulator.UI.Wpf.ViewModels;
 using MoneyKind4Opos.Currencies.Interfaces;
+using R3;
+using Shouldly;
 using System.IO;
-using System.Linq;
+
+namespace CashChangerSimulator.UI.Tests;
 
 /// <summary>設定の保存と再読み込みの統合動作を検証するテスト。</summary>
 public class SettingsIntegrationTest
@@ -19,7 +16,11 @@ public class SettingsIntegrationTest
 
     public SettingsIntegrationTest()
     {
-        _tempConfigPath = Path.Combine(Path.GetTempPath(), "config_test.toml");
+        _tempConfigPath =
+            Path
+            .Combine(
+                Path.GetTempPath(),
+                "config_test.toml");
         if (File.Exists(_tempConfigPath)) File.Delete(_tempConfigPath);
     }
 
@@ -29,7 +30,7 @@ public class SettingsIntegrationTest
     {
         // Arrange
         var configProvider = new ConfigurationProvider();
-        configProvider.Config.CurrencyCode = "JPY"; // 明示的に初期化
+        configProvider.Config.System.CurrencyCode = "JPY"; // 明示的に初期化
         // 開発環境の config.toml を汚さないように、一時的に保存先をモックするか、
         // もしくは ConfigurationLoader.Save が使うパスを制御できるようにリファクタリングするべきですが、
         // 現状は Loader が直接カレントディレクトリの config.toml を見るため、
@@ -39,7 +40,10 @@ public class SettingsIntegrationTest
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
 
-        using var vm = new SettingsViewModel(configProvider, monitorsProvider, metadataProvider);
+        using var vm = new SettingsViewModel(
+            configProvider,
+            monitorsProvider,
+            metadataProvider);
 
         // Act: 値を変更
         vm.NearEmpty.Value = 12;
@@ -56,7 +60,11 @@ public class SettingsIntegrationTest
         
         // Assert: MonitorsProvider にも通知が届き、閾値が更新されていること
         // (MonitorsProvider は内部で各モニターの UpdateThresholds を呼ぶ)
-        var monitor = monitorsProvider.Monitors.First(m => m.Key.Value == 1000 && m.Key.Type == CashType.Bill);
+        var monitor = monitorsProvider
+            .Monitors
+            .First(
+                m => m.Key.Value == 1000
+                && m.Key.Type == CashType.Bill);
         // ... (検証ロジックを簡略化)
     }
 }

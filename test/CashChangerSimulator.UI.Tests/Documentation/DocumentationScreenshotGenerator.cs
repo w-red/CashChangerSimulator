@@ -1,11 +1,7 @@
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Tools;
-using System;
 using System.IO;
-using System.Linq;
-using Xunit;
-using CashChangerSimulator.UI.Tests;
 
 namespace CashChangerSimulator.UI.Tests.Documentation;
 

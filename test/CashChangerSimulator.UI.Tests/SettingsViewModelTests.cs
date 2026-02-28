@@ -1,15 +1,13 @@
-namespace CashChangerSimulator.UI.Tests;
-
-using R3;
 
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Wpf.ViewModels;
+using R3;
 using Shouldly;
-using Xunit;
 using System.Windows.Input;
 
+namespace CashChangerSimulator.UI.Tests;
 /// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
 public class SettingsViewModelTests
 {
@@ -22,7 +20,7 @@ public class SettingsViewModelTests
     {
         _inventory = new Inventory();
         _configProvider = new ConfigurationProvider();
-        _configProvider.Config.CurrencyCode = "JPY"; // 明示的に初期化
+        _configProvider.Config.System.CurrencyCode = "JPY"; // 明示的に初期化
         _metadataProvider = new CurrencyMetadataProvider(_configProvider);
         _monitorsProvider = new MonitorsProvider(_inventory, _configProvider, _metadataProvider);
     }
@@ -35,7 +33,7 @@ public class SettingsViewModelTests
     public void LoadFromConfigShouldSetInitialValues()
     {
         // Arrange
-        _configProvider.Config.CurrencyCode = "USD";
+        _configProvider.Config.System.CurrencyCode = "USD";
         _configProvider.Config.Thresholds.NearEmpty = 10;
         _configProvider.Config.Thresholds.NearFull = 90;
         _configProvider.Config.Thresholds.Full = 100;
