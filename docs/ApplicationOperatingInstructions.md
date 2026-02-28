@@ -39,5 +39,86 @@ Standard Mode is designed for direct manual interaction with the simulated devic
 - Real-time behavior is visible in the **Activity Feed**.
 - Detailed technical logs are stored in the `logs/` directory of the application's root folder.
 
+## 6. Configuration File (config.toml)
+
+You can customize the simulator behavior by editing `config.toml` located in the application's working directory. The file is auto-generated with default values on first launch.
+
+### `[System]` — General Settings
+
+| Key            | Type   | Default      | Description                             |
+| -------------- | ------ | ------------ | --------------------------------------- |
+| `CurrencyCode` | string | `"JPY"`      | Active currency code (ISO 4217)         |
+| `CultureCode`  | string | `"en-US"`    | UI locale setting                       |
+| `UIMode`       | string | `"Standard"` | UI mode (`Standard` / `PosTransaction`) |
+
+### `[Inventory.<CurrencyCode>.Denominations.<DenomKey>]` — Inventory Settings
+
+Per-currency denomination configuration. Denomination keys use `B` (bill) or `C` (coin) prefix followed by the face value (e.g., `B1000`, `C100`).
+
+| Key            | Type   | Default | Description                                     |
+| -------------- | ------ | ------- | ----------------------------------------------- |
+| `DisplayName`  | string | —       | Display name shown in the UI (e.g., `"1000円"`) |
+| `InitialCount` | int    | `0`     | Initial count at startup                        |
+| `NearEmpty`    | int    | `5`     | NearEmpty threshold (at or below this count)    |
+| `NearFull`     | int    | `90`    | NearFull threshold (at or above this count)     |
+| `Full`         | int    | `100`   | Full threshold (at or above this count)         |
+
+### `[Thresholds]` — Default Thresholds
+
+Global threshold values applied when no per-denomination override is set.
+
+| Key         | Type | Default | Description         |
+| ----------- | ---- | ------- | ------------------- |
+| `NearEmpty` | int  | `5`     | NearEmpty threshold |
+| `NearFull`  | int  | `90`    | NearFull threshold  |
+| `Full`      | int  | `100`   | Full threshold      |
+
+### `[Logging]` — Log Settings
+
+| Key             | Type   | Default         | Description                                            |
+| --------------- | ------ | --------------- | ------------------------------------------------------ |
+| `EnableConsole` | bool   | `true`          | Enable/disable console output                          |
+| `EnableFile`    | bool   | `true`          | Enable/disable file output                             |
+| `LogLevel`      | string | `"Information"` | Log level (`Debug`, `Information`, `Warning`, `Error`) |
+| `LogDirectory`  | string | `"logs"`        | Log output directory                                   |
+| `LogFileName`   | string | `"app.log"`     | Log file name                                          |
+
+### `[Simulation]` — Simulation Behavior
+
+| Key               | Type | Default | Description                                    |
+| ----------------- | ---- | ------- | ---------------------------------------------- |
+| `DispenseDelayMs` | int  | `500`   | Dispense operation delay in milliseconds (≥ 0) |
+
+### Example Configuration
+
+```toml
+[System]
+CurrencyCode = "JPY"
+CultureCode = "ja-JP"
+UIMode = "Standard"
+
+[Inventory.JPY.Denominations.B1000]
+DisplayName = "1000円"
+InitialCount = 50
+NearEmpty = 5
+NearFull = 90
+Full = 100
+
+[Thresholds]
+NearEmpty = 5
+NearFull = 90
+Full = 100
+
+[Logging]
+EnableConsole = true
+EnableFile = true
+LogLevel = "Information"
+LogDirectory = "logs"
+LogFileName = "app.log"
+
+[Simulation]
+DispenseDelayMs = 500
+```
+
 ---
 *For the Japanese version, see [ApplicationOperatingInstructions_JP.md](ApplicationOperatingInstructions_JP.md).*

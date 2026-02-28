@@ -37,5 +37,86 @@
 - リアルタイムな挙動は **Activity Feed** で確認可能です。
 - 詳細なデバッグログは、アプリケーション実行ディレクトリの `logs/` フォルダ内に出力されます。
 
+## 6. 設定ファイル (config.toml)
+
+アプリケーション実行ディレクトリの `config.toml` を編集することで、シミュレーターの動作をカスタマイズできます。アプリ初回起動時にデフォルト値で自動生成されます。
+
+### `[System]` — システム全般
+
+| キー           | 型     | デフォルト   | 説明                                      |
+| -------------- | ------ | ------------ | ----------------------------------------- |
+| `CurrencyCode` | string | `"JPY"`      | 使用する通貨コード（ISO 4217）            |
+| `CultureCode`  | string | `"en-US"`    | UIのロケール設定                          |
+| `UIMode`       | string | `"Standard"` | UIモード（`Standard` / `PosTransaction`） |
+
+### `[Inventory.<通貨コード>.Denominations.<金種キー>]` — 在庫設定
+
+通貨ごとの金種別初期設定。金種キーは `B` (紙幣) または `C` (硬貨) + 額面で構成されます（例: `B1000`, `C100`）。
+
+| キー           | 型     | デフォルト | 説明                                   |
+| -------------- | ------ | ---------- | -------------------------------------- |
+| `DisplayName`  | string | —          | UIに表示される金種名（例: `"1000円"`） |
+| `InitialCount` | int    | `0`        | 起動時の初期保有枚数                   |
+| `NearEmpty`    | int    | `5`        | NearEmpty 判定しきい値（この枚数以下） |
+| `NearFull`     | int    | `90`       | NearFull 判定しきい値（この枚数以上）  |
+| `Full`         | int    | `100`      | Full 判定しきい値（この枚数以上）      |
+
+### `[Thresholds]` — デフォルトしきい値
+
+金種個別設定がない場合に適用されるグローバルしきい値。
+
+| キー        | 型  | デフォルト | 説明             |
+| ----------- | --- | ---------- | ---------------- |
+| `NearEmpty` | int | `5`        | NearEmpty 判定値 |
+| `NearFull`  | int | `90`       | NearFull 判定値  |
+| `Full`      | int | `100`      | Full 判定値      |
+
+### `[Logging]` — ログ設定
+
+| キー            | 型     | デフォルト      | 説明                                                     |
+| --------------- | ------ | --------------- | -------------------------------------------------------- |
+| `EnableConsole` | bool   | `true`          | コンソール出力の有効/無効                                |
+| `EnableFile`    | bool   | `true`          | ファイル出力の有効/無効                                  |
+| `LogLevel`      | string | `"Information"` | ログレベル（`Debug`, `Information`, `Warning`, `Error`） |
+| `LogDirectory`  | string | `"logs"`        | ログ保存ディレクトリ                                     |
+| `LogFileName`   | string | `"app.log"`     | ログファイル名                                           |
+
+### `[Simulation]` — シミュレーション動作
+
+| キー              | 型  | デフォルト | 説明                                    |
+| ----------------- | --- | ---------- | --------------------------------------- |
+| `DispenseDelayMs` | int | `500`      | 払い出し操作の遅延時間（ミリ秒、0以上） |
+
+### 設定例
+
+```toml
+[System]
+CurrencyCode = "JPY"
+CultureCode = "ja-JP"
+UIMode = "Standard"
+
+[Inventory.JPY.Denominations.B1000]
+DisplayName = "1000円"
+InitialCount = 50
+NearEmpty = 5
+NearFull = 90
+Full = 100
+
+[Thresholds]
+NearEmpty = 5
+NearFull = 90
+Full = 100
+
+[Logging]
+EnableConsole = true
+EnableFile = true
+LogLevel = "Information"
+LogDirectory = "logs"
+LogFileName = "app.log"
+
+[Simulation]
+DispenseDelayMs = 500
+```
+
 ---
 *英語版については、[ApplicationOperatingInstructions.md](ApplicationOperatingInstructions.md) を参照してください。*
