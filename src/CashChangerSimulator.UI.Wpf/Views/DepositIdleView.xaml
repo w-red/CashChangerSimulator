@@ -67,8 +67,8 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox materialDesign:HintAssist.Hint="Amount" 
-                      materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
+            <TextBox materialDesign:HintAssist.Hint="{StaticResource StrAmountHint}" 
+                      materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
                       Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
                       IsEnabled="{Binding CanOperate.Value}"
                       Style="{StaticResource ModernTextBoxStyle}"
@@ -79,7 +79,7 @@
                     <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
                 </TextBox.InputBindings>
             </TextBox>
-            <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
+            <TextBlock Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
             <Button Grid.Column="1" 
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding QuickDepositCommand}"
