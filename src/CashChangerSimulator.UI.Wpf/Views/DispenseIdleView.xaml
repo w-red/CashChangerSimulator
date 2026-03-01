@@ -24,14 +24,14 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Column="0" 
-                             materialDesign:HintAssist.Hint="Enter amount"
-                             materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
+                             materialDesign:HintAssist.Hint="{StaticResource StrAmountHint}"
+                             materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
                              Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                              IsEnabled="{Binding CanOperate.Value}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              FontSize="22" FontWeight="Light"
                              AutomationProperties.AutomationId="DispenseBox"/>
-                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
+                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
 
                     <Button Grid.Column="1" 
                             Style="{StaticResource PrimaryButtonStyle}" 

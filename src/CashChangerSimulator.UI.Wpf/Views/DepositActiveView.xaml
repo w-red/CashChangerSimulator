@@ -16,11 +16,11 @@
                 <TextBlock Text="{StaticResource StrCurrentDeposit}" FontSize="10" FontWeight="Bold" 
                            Opacity="0.5" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding CurrencyPrefix}" FontSize="20" VerticalAlignment="Bottom" Margin="0,0,4,8" Opacity="0.7"/>
+                    <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="0,0,4,8" Opacity="0.7"/>
                     <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat={}{0:N0}}"  
                                FontSize="40" FontWeight="Thin"
                                AutomationProperties.AutomationId="CurrentDepositText"/>
-                    <TextBlock Text="{Binding CurrencySuffix}" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,8" Opacity="0.7"/>
+                    <TextBlock Text="{Binding CurrencySuffix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,8" Opacity="0.7"/>
                 </StackPanel>
             </StackPanel>
         </Border>
