@@ -14,6 +14,10 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 public class MainViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
+    private readonly ConfigurationProvider _configProvider;
+
+    /// <summary>設定プロバイダー。</summary>
+    public ConfigurationProvider ConfigProvider => _configProvider;
 
     /// <summary>入金管理用の ViewModel。</summary>
     public DepositViewModel Deposit { get; }
@@ -56,6 +60,7 @@ public class MainViewModel : IDisposable
         INotifyService notifyService,
         IScriptExecutionService scriptExecutionService)
     {
+        _configProvider = configProvider;
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
         var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);

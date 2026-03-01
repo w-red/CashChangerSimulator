@@ -1,3 +1,4 @@
+using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
@@ -24,11 +25,23 @@ public class DenominationViewModel
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
     /// <summary>DenominationViewModel の新しいインスタンスを初期化します。</summary>
-    public DenominationViewModel(Inventory inventory, DenominationKey key, CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, string? displayName = null)
+    public DenominationViewModel(Inventory inventory, DenominationKey key, CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, ConfigurationProvider configProvider)
     {
         _inventory = inventory;
         Key = key;
-        Name = !string.IsNullOrEmpty(displayName) ? displayName : metadataProvider.GetDenominationName(key);
+
+        var cultureCode = configProvider.Config.System.CultureCode ?? "en-US";
+        var isJapanese = cultureCode.StartsWith("ja", StringComparison.OrdinalIgnoreCase);
+        var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
+
+        string? name = null;
+        if (configProvider.Config.Inventory.TryGetValue(key.CurrencyCode, out var inventorySettings) &&
+            inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
+        {
+            name = isJapanese ? (setting.DisplayNameJP ?? setting.DisplayName) : setting.DisplayName;
+        }
+
+        Name = !string.IsNullOrEmpty(name) ? name : metadataProvider.GetDenominationName(key);
         Status = monitor.Status.ToBindableReactiveProperty();
         _count = new BindableReactiveProperty<int>(_inventory.GetCount(key));
         Count = _count;
