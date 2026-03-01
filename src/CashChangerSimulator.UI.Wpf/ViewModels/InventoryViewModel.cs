@@ -79,16 +79,7 @@ public class InventoryViewModel : IDisposable
         foreach (var monitor in monitorsProvider.Monitors)
         {
             var key = monitor.Key;
-            var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
-            string? displayName = null;
-            var currentConfig = _configProvider.Config;
-            if (currentConfig.Inventory.TryGetValue(currentConfig.System.CurrencyCode, out var inventorySettings) &&
-                inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
-            {
-                displayName = setting.DisplayName;
-            }
-
-            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, displayName));
+            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider));
         }
 
         _history.Added

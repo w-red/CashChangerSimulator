@@ -150,21 +150,25 @@ public class SettingsViewModel : IDisposable
             {
                 DenominationSettings.Add(new DenominationSettingItem(
                     key,
-                    setting.DisplayName ?? _metadataProvider.GetDenominationName(key),
+                    setting.DisplayName ?? _metadataProvider.GetDenominationName(key, "en-US"),
+                    setting.DisplayNameJP ?? _metadataProvider.GetDenominationName(key, "ja-JP"),
                     setting.InitialCount,
                     setting.NearEmpty,
                     setting.NearFull,
-                    setting.Full));
+                    setting.Full,
+                    setting.IsRecyclable));
             }
             else
             {
                 DenominationSettings.Add(new DenominationSettingItem(
                     key,
-                    _metadataProvider.GetDenominationName(key),
+                    _metadataProvider.GetDenominationName(key, "en-US"),
+                    _metadataProvider.GetDenominationName(key, "ja-JP"),
                     0,
                     NearEmpty.Value,
                     NearFull.Value,
-                    Full.Value));
+                    Full.Value,
+                    true));
             }
         }
     }
@@ -194,10 +198,12 @@ public class SettingsViewModel : IDisposable
             activeInventory.Denominations[keyStr] = new DenominationSettings
             {
                 DisplayName = item.DisplayName.Value,
+                DisplayNameJP = item.DisplayNameJP.Value,
                 InitialCount = item.Count.Value,
                 NearEmpty = item.NearEmpty.Value,
                 NearFull = item.NearFull.Value,
-                Full = item.Full.Value
+                Full = item.Full.Value,
+                IsRecyclable = item.IsRecyclable.Value
             };
         }
 
