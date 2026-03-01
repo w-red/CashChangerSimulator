@@ -31,8 +31,8 @@ public class MainViewModel : IDisposable
     public AdvancedSimulationViewModel AdvancedSimulation { get; }
 
     /// <summary>通貨記号。</summary>
-    public string CurrencyPrefix { get; }
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     /// <summary>現在の UI 動作モード。</summary>
     public BindableReactiveProperty<UIMode> CurrentUIMode { get; }

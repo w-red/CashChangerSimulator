@@ -32,8 +32,8 @@ public class DispenseViewModel : IDisposable
     /// <summary>出金を実行するコマンド。</summary>
     public ReactiveCommand DispenseCommand { get; }
     /// <summary>通貨記号。</summary>
-    public string CurrencyPrefix { get; }
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     // Bulk Dispense
     /// <summary>一括出金画面を表示するコマンド（View側で購読）。</summary>

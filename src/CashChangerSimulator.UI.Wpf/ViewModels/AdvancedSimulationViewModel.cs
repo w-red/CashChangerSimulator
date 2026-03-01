@@ -19,8 +19,8 @@ public class AdvancedSimulationViewModel : IDisposable
     public BindableReactiveProperty<string> ScriptInput { get; }
     public BindableReactiveProperty<string?> ScriptError { get; }
     public ReactiveCommand<Unit> ExecuteScriptCommand { get; }
-    public string CurrencyPrefix { get; }
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
     
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
     public BindableReactiveProperty<bool> IsDepositInProgress { get; }
