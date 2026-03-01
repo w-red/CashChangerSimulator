@@ -1,0 +1,104 @@
+using CashChangerSimulator.Core;
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Managers;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Services;
+using MicroResolver;
+using Microsoft.Extensions.Logging;
+using ZLogger;
+
+namespace CashChangerSimulator.UI.Cli;
+
+public static class CliDIContainer
+{
+    private static ObjectResolver _resolver = null!;
+
+    public static void Initialize()
+    {
+        var resolver = ObjectResolver.Create();
+
+        // Logging
+        LogProvider.Initialize(new LoggingSettings
+        {
+            LogLevel = "Information",
+            EnableConsole = true,
+            EnableFile = false
+        });
+        // Providers
+        resolver.Register<ConfigurationProvider, ConfigurationProvider>(Lifestyle.Singleton);
+        resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
+        resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
+        resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
+        resolver.Register<INotifyService, CliNotifyService>(Lifestyle.Singleton);
+
+        // Core Services
+        resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
+        resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
+        resolver.Register<ChangeCalculator, ChangeCalculator>(Lifestyle.Singleton);
+        resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
+        resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
+
+        // Simulator / Devices
+        resolver.Register<SimulatorCashChanger, SimulatorCashChanger>(Lifestyle.Singleton);
+        resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
+        resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
+        resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
+
+        resolver.Compile();
+        _resolver = resolver;
+
+        SimulatorServices.Provider = new CliResolverServiceProvider(_resolver);
+
+        // Initialize Inventory
+        var configProvider = _resolver.Resolve<ConfigurationProvider>();
+        var inventory = _resolver.Resolve<Inventory>();
+        var state = ConfigurationLoader.LoadInventoryState();
+        if (state?.Counts != null && state.Counts.Count > 0)
+        {
+            inventory.LoadFromDictionary(state.Counts);
+        }
+        else
+        {
+            foreach (var currencyEntry in configProvider.Config.Inventory)
+            {
+                var currencyCode = currencyEntry.Key;
+                foreach (var item in currencyEntry.Value.Denominations)
+                {
+                    if (DenominationKey.TryParse(item.Key, currencyCode, out var key) && key != null)
+                    {
+                        inventory.SetCount(key, item.Value.InitialCount);
+                    }
+                }
+            }
+        }
+
+        // Initialize History
+        var history = _resolver.Resolve<TransactionHistory>();
+        var historyState = ConfigurationLoader.LoadHistoryState();
+        if (historyState?.Entries != null && historyState.Entries.Count > 0)
+        {
+            history.FromState(historyState);
+        }
+    }
+
+    public static T Resolve<T>() => _resolver.Resolve<T>();
+}
+
+internal sealed class CliResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider
+{
+    public T Resolve<T>() where T : class => resolver.Resolve<T>();
+}
+
+public class CliNotifyService : INotifyService
+{
+    public void ShowWarning(string message, string title)
+    {
+        var color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"[{title}] {message}");
+        Console.ForegroundColor = color;
+    }
+}
