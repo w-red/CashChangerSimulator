@@ -19,6 +19,7 @@
     <system:String x:Key="StrErrorEnterValidNumber">Enter a valid number</system:String>
     <system:String x:Key="StrErrorAmountPositive">Amount must be positive</system:String>
     <system:String x:Key="StrErrorInsufficientFunds">Insufficient funds</system:String>
+    <system:String x:Key="StrAmountHint">Amount</system:String>
 
     <!-- Main Window / Settings -->
     <system:String x:Key="StrSystemSettings">SYSTEM SETTINGS</system:String>

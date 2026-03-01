@@ -19,6 +19,7 @@
     <system:String x:Key="StrErrorEnterValidNumber">有効な数値を入力してください</system:String>
     <system:String x:Key="StrErrorAmountPositive">正の値を入力してください</system:String>
     <system:String x:Key="StrErrorInsufficientFunds">残高不足です</system:String>
+    <system:String x:Key="StrAmountHint">金額を入力</system:String>
 
     <!-- Main Window / Settings -->
     <system:String x:Key="StrSystemSettings">システム設定</system:String>
