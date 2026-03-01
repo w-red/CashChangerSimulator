@@ -36,8 +36,8 @@ public class PosTransactionViewModel : IDisposable
     /// <summary>OPOSアクションのログ。</summary>
     public ObservableCollection<string> OposLog { get; } = [];
     /// <summary>通貨記号。</summary>
-    public string CurrencyPrefix { get; }
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     // Missing Binding Properties for UI
     public ReadOnlyReactiveProperty<string> StatusText { get; }

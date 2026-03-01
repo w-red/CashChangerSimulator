@@ -40,8 +40,8 @@ public class DepositViewModel : IDisposable
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
     /// <summary>通貨記号。</summary>
-    public string CurrencyPrefix { get; }
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     // Commands
     /// <summary>入金を開始するコマンド。</summary>

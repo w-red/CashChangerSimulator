@@ -24,9 +24,9 @@ public class InventoryViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨記号のプレフィックス。</summary>
-    public string CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
     /// <summary>通貨記号のサフィックス。</summary>
-    public string CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     /// <summary>金種ごとの ViewModel リスト。</summary>
     public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
