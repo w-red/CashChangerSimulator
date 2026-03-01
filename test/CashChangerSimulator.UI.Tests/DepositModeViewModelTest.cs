@@ -73,7 +73,8 @@ public class DepositModeViewModelTest
         // Arrange
         var config = new DenominationSettings();
         var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
-        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, "1000");
+        var configProvider = _mainViewModel.ConfigProvider;
+        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, configProvider);
         _depositController.BeginDeposit();
 
         // Assert: Running
