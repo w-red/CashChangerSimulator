@@ -48,8 +48,22 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Header="{StaticResource StrHeaderIdentifier}"
+                        Header="Name (EN)"
                         Binding="{Binding DisplayName.Value}"
+                        Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style
+                                TargetType="TextBlock"
+                                BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter
+                                    Property="FontWeight"
+                                    Value="Bold" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Header="Name (JP)"
+                        Binding="{Binding DisplayNameJP.Value}"
                         Width="*">
                         <DataGridTextColumn.ElementStyle>
                             <Style
@@ -68,14 +82,36 @@
                     <DataGridTextColumn
                         Header="{StaticResource StrHeaderNearEmpty}"
                         Binding="{Binding NearEmpty.Value}"
-                        Width="80"/>
+                        Width="80">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="ToolTip" Value="Set to -1 to disable check" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn
                         Header="{StaticResource StrHeaderNearFull}"
                         Binding="{Binding NearFull.Value}"
-                        Width="80"/>
+                        Width="80">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="ToolTip" Value="Set to -1 to disable check" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn
                         Header="{StaticResource StrHeaderMaxCap}"
                         Binding="{Binding Full.Value}"
+                        Width="80">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="ToolTip" Value="Set to -1 to disable check" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridCheckBoxColumn
+                        Header="Recycle"
+                        Binding="{Binding IsRecyclable.Value}"
                         Width="80"/>
                 </DataGrid.Columns>
             </DataGrid>
