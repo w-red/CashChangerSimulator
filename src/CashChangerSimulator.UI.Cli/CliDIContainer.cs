@@ -16,7 +16,7 @@ public static class CliDIContainer
 {
     private static ObjectResolver _resolver = null!;
 
-    public static void Initialize()
+    public static void Initialize(string[] args)
     {
         var resolver = ObjectResolver.Create();
 
@@ -28,8 +28,8 @@ public static class CliDIContainer
             EnableFile = false
         });
         // Providers
-        resolver.Register<ConfigurationProvider, ConfigurationProvider>(Lifestyle.Singleton);
-        resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
+        resolver.Register<ConfigurationProvider, CliConfigurationProvider>(Lifestyle.Singleton);
+        resolver.Register<ICurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
         resolver.Register<INotifyService, CliNotifyService>(Lifestyle.Singleton);
@@ -43,7 +43,7 @@ public static class CliDIContainer
 
         // Simulator / Devices
         resolver.Register<SimulatorCashChanger, SimulatorCashChanger>(Lifestyle.Singleton);
-        resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
+        resolver.Register<IDeviceSimulator, CliHardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
 
@@ -52,8 +52,18 @@ public static class CliDIContainer
 
         SimulatorServices.Provider = new CliResolverServiceProvider(_resolver);
 
-        // Initialize Inventory
+        // Override Configuration from args
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "--currency" && i + 1 < args.Length)
+            {
+                var currencyCode = args[++i].ToUpperInvariant();
+                configProvider.Config.System.CurrencyCode = currencyCode;
+            }
+        }
+
+        // Initialize Inventory
         var inventory = _resolver.Resolve<Inventory>();
         var state = ConfigurationLoader.LoadInventoryState();
         if (state?.Counts != null && state.Counts.Count > 0)

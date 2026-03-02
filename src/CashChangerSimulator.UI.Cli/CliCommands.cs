@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using Microsoft.PointOfService;
+using MoneyKind4Opos.Currencies.Interfaces;
 using R3;
 
 namespace CashChangerSimulator.UI.Cli;
@@ -13,13 +14,13 @@ public partial class CliCommands
 {
     private readonly SimulatorCashChanger _changer;
     private readonly Inventory _inventory;
-    private readonly CurrencyMetadataProvider _metadata;
+    private readonly ICurrencyMetadataProvider _metadata;
     private readonly TransactionHistory _history;
 
     public CliCommands(
         SimulatorCashChanger changer,
         Inventory inventory,
-        CurrencyMetadataProvider metadata,
+        ICurrencyMetadataProvider metadata,
         TransactionHistory history)
     {
         _changer = changer;
@@ -88,10 +89,27 @@ public partial class CliCommands
         try {
             var counts = _changer.ReadCashCounts();
             Console.WriteLine("Cash counts updated from device.");
+            Console.WriteLine();
+            var symbol = _metadata.SymbolPrefix.CurrentValue;
+            var suffix = _metadata.SymbolSuffix.CurrentValue;
+
+            Console.WriteLine($"{"Denomination",-20} | {"Count",6} | {"Amount",14}");
+            Console.WriteLine(new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16));
+
             foreach (var cc in counts.Counts)
             {
-                Console.WriteLine($"{cc.NominalValue}: {cc.Count}");
+                // Find matching DenominationKey to get DisplayName from TOML
+                var key = _metadata.SupportedDenominations.FirstOrDefault(k => k.Type == (CashType)cc.Type && k.Value == cc.NominalValue);
+                var name = key != null ? _metadata.GetDenominationName(key) : cc.NominalValue.ToString();
+                var amount = cc.NominalValue * cc.Count;
+
+                Console.WriteLine($"{name,-20} | {cc.Count,6} | {symbol}{amount,12:N0}{suffix}");
             }
+            
+            var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
+            Console.WriteLine(new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16));
+            Console.WriteLine($"{"Total",-20} | {"",6} | {symbol}{total,12:N0}{suffix}");
+
         } catch (Exception ex) {
             Console.WriteLine($"Failed to read cash counts: {ex.Message}");
         }
