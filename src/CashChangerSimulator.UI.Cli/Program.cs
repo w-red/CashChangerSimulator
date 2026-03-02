@@ -6,7 +6,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        CliDIContainer.Initialize();
+        CliDIContainer.Initialize(args);
 
         var app = ConsoleApp.Create();
         app.Add<CliCommands>();
