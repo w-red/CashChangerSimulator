@@ -46,6 +46,7 @@ public static class CliDIContainer
         resolver.Register<IDeviceSimulator, CliHardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
+        resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
 
         resolver.Compile();
         _resolver = resolver;

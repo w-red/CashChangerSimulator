@@ -7,6 +7,9 @@ using CashChangerSimulator.Core.Transactions;
 using Microsoft.PointOfService;
 using MoneyKind4Opos.Currencies.Interfaces;
 using R3;
+using System.IO;
+using System.Threading.Tasks;
+using CashChangerSimulator.Device.Services;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -16,17 +19,43 @@ public partial class CliCommands
     private readonly Inventory _inventory;
     private readonly ICurrencyMetadataProvider _metadata;
     private readonly TransactionHistory _history;
+    private readonly IScriptExecutionService _scriptService;
 
     public CliCommands(
         SimulatorCashChanger changer,
         Inventory inventory,
         ICurrencyMetadataProvider metadata,
-        TransactionHistory history)
+        TransactionHistory history,
+        IScriptExecutionService scriptService)
     {
         _changer = changer;
         _inventory = inventory;
         _metadata = metadata;
         _history = history;
+        _scriptService = scriptService;
+    }
+
+    /// <summary>指定された JSON スクリプトファイルを実行します。</summary>
+    [Command("run-script")]
+    public async Task RunScript(string path)
+    {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine($"Error: File not found: {path}");
+            return;
+        }
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(path);
+            Console.WriteLine($"Executing script: {path}...");
+            await _scriptService.ExecuteScriptAsync(json);
+            Console.WriteLine("Script execution completed.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error executing script: {ex.Message}");
+        }
     }
 
     /// <summary>デバイスの状態と現在の在高を表示します。</summary>
