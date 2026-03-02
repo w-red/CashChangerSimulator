@@ -1,4 +1,5 @@
 using System;
+using Kokuban;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
@@ -124,9 +125,6 @@ public class CliNotifyService : INotifyService
 {
     public void ShowWarning(string message, string title)
     {
-        var color = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"[{title}] {message}");
-        Console.ForegroundColor = color;
+        Console.WriteLine(Chalk.Yellow[$"[{title}] {message}"]);
     }
 }
