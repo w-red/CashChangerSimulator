@@ -1,3 +1,4 @@
+using System;
 using ConsoleAppFramework;
 
 namespace CashChangerSimulator.UI.Cli;
@@ -8,6 +9,7 @@ public class Program
     {
         CliDIContainer.Initialize(args);
 
+        ConsoleApp.ServiceProvider = new CliResolverServiceProvider(CliDIContainer.Resolver);
         var app = ConsoleApp.Create();
         app.Add<CliCommands>();
         

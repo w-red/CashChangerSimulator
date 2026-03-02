@@ -1,3 +1,4 @@
+using System;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
@@ -47,6 +48,7 @@ public static class CliDIContainer
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
         resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
+        resolver.Register<CliCommands, CliCommands>(Lifestyle.Transient);
 
         resolver.Compile();
         _resolver = resolver;
@@ -95,12 +97,27 @@ public static class CliDIContainer
         }
     }
 
+    public static ObjectResolver Resolver => _resolver;
+
     public static T Resolve<T>() => _resolver.Resolve<T>();
 }
 
-internal sealed class CliResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider
+internal sealed class CliResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider, IServiceProvider
 {
+    private static readonly System.Reflection.MethodInfo _resolveMethod =
+        typeof(ObjectResolver).GetMethod("Resolve", Type.EmptyTypes)!;
+
     public T Resolve<T>() where T : class => resolver.Resolve<T>();
+
+    public object? GetService(Type serviceType)
+    {
+        try {
+            var generic = _resolveMethod.MakeGenericMethod(serviceType);
+            return generic.Invoke(resolver, null);
+        } catch {
+            return null;
+        }
+    }
 }
 
 public class CliNotifyService : INotifyService
