@@ -117,6 +117,8 @@ public class Program
             {
                 Console.WriteLine(Chalk.Red[$"Error: {ex.Message}"]);
             }
+            // Wait briefly for async log messages to flush before showing prompt
+            Thread.Sleep(100);
         }
     }
 

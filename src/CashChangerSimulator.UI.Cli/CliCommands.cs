@@ -152,10 +152,6 @@ public partial class CliCommands
     [Command("deposit")]
     public void Deposit(int amount)
     {
-        if (_changer.State == Microsoft.PointOfService.ControlState.Closed || !_changer.DeviceEnabled) {
-             Console.WriteLine("Device must be Opened and Enabled to deposit.");
-             return;
-        }
         try {
             _changer.BeginDeposit();
             Console.WriteLine($"Depositing {Chalk.Yellow[amount.ToString()]}...");
