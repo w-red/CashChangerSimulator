@@ -10,6 +10,7 @@ using R3;
 using System.IO;
 using System.Threading.Tasks;
 using CashChangerSimulator.Device.Services;
+using Kokuban;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -41,20 +42,20 @@ public partial class CliCommands
     {
         if (!File.Exists(path))
         {
-            Console.WriteLine($"Error: File not found: {path}");
+            Console.WriteLine(Chalk.Red[$"Error: File not found: {path}"]);
             return;
         }
 
         try
         {
             var json = await File.ReadAllTextAsync(path);
-            Console.WriteLine($"Executing script: {path}...");
+            Console.WriteLine(Chalk.Cyan[$"Executing script: {path}..."]);
             await _scriptService.ExecuteScriptAsync(json);
-            Console.WriteLine("Script execution completed.");
+            Console.WriteLine(Chalk.Green["Script execution completed."]);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error executing script: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Error executing script: {ex.Message}"]);
         }
     }
 
@@ -62,17 +63,18 @@ public partial class CliCommands
     [Command("status")]
     public void Status()
     {
-        Console.WriteLine($"--- Device Status ---");
-        Console.WriteLine($"State: {_changer.State}");
-        Console.WriteLine($"Currency: {_metadata.CurrencyCode}");
+        Console.WriteLine(Chalk.Cyan.Bold["--- Device Status ---"]);
+        Console.WriteLine($"State: {Chalk.Yellow[_changer.State.ToString()]}");
+        Console.WriteLine($"Enabled: {(_changer.DeviceEnabled ? Chalk.Green["True"] : Chalk.Red["False"])}");
         Console.WriteLine();
-        Console.WriteLine($"--- Inventory ---");
+        Console.WriteLine(Chalk.Cyan.Bold["--- Inventory ---"]);
         foreach (var key in _metadata.SupportedDenominations)
         {
             var count = _inventory.GetCount(key);
             Console.WriteLine($"{_metadata.GetDenominationName(key)}: {count}");
         }
-        Console.WriteLine($"Total: {_metadata.SymbolPrefix.CurrentValue}{_inventory.CalculateTotal(_metadata.CurrencyCode):N0}{_metadata.SymbolSuffix.CurrentValue}");
+        var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
+        Console.WriteLine($"{Chalk.Yellow.Bold["Total"]}: {Chalk.Yellow.Bold[$"{_metadata.SymbolPrefix.CurrentValue}{total:N0}{_metadata.SymbolSuffix.CurrentValue}"]}");
     }
 
     /// <summary>デバイスを初期化してオープンします。</summary>
@@ -81,9 +83,9 @@ public partial class CliCommands
     {
         try {
             _changer.Open();
-            Console.WriteLine("Device opened successfully.");
+            Console.WriteLine(Chalk.Green["Device opened successfully."]);
         } catch (Exception ex) {
-            Console.WriteLine($"Failed to open device: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Failed to open device: {ex.Message}"]);
         }
     }
 
@@ -93,9 +95,9 @@ public partial class CliCommands
     {
         try {
             _changer.Claim(timeout);
-            Console.WriteLine("Device claimed successfully.");
+            Console.WriteLine(Chalk.Green["Device claimed successfully."]);
         } catch (Exception ex) {
-            Console.WriteLine($"Failed to claim device: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Failed to claim device: {ex.Message}"]);
         }
     }
 
@@ -105,9 +107,9 @@ public partial class CliCommands
     {
         try {
             _changer.DeviceEnabled = true;
-            Console.WriteLine("Device enabled.");
+            Console.WriteLine(Chalk.Green["Device enabled."]);
         } catch (Exception ex) {
-            Console.WriteLine($"Failed to enable device: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Failed to enable device: {ex.Message}"]);
         }
     }
 
@@ -117,13 +119,14 @@ public partial class CliCommands
     {
         try {
             var counts = _changer.ReadCashCounts();
-            Console.WriteLine("Cash counts updated from device.");
+            Console.WriteLine(Chalk.Green["Cash counts updated from device."]);
             Console.WriteLine();
             var symbol = _metadata.SymbolPrefix.CurrentValue;
             var suffix = _metadata.SymbolSuffix.CurrentValue;
 
-            Console.WriteLine($"{"Denomination",-20} | {"Count",6} | {"Amount",14}");
-            Console.WriteLine(new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16));
+            // Header: Cyan and Bold
+            Console.WriteLine(Chalk.Cyan.Bold[$"{"Denomination",-20} | {"Count",6} | {"Amount",14}"]);
+            Console.WriteLine(Chalk.Gray[new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16)]);
 
             foreach (var cc in counts.Counts)
             {
@@ -136,11 +139,12 @@ public partial class CliCommands
             }
             
             var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
-            Console.WriteLine(new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16));
-            Console.WriteLine($"{"Total",-20} | {"",6} | {symbol}{total,12:N0}{suffix}");
+            Console.WriteLine(Chalk.Gray[new string('─', 21) + "┼" + new string('─', 8) + "┼" + new string('─', 16)]);
+            // Total: Yellow and Bold
+            Console.WriteLine(Chalk.Yellow.Bold[$"{"Total",-20} | {"",6} | {symbol}{total,12:N0}{suffix}"]);
 
         } catch (Exception ex) {
-            Console.WriteLine($"Failed to read cash counts: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Failed to read cash counts: {ex.Message}"]);
         }
     }
 
@@ -154,14 +158,14 @@ public partial class CliCommands
         }
         try {
             _changer.BeginDeposit();
-            Console.WriteLine($"Depositing {amount}...");
+            Console.WriteLine($"Depositing {Chalk.Yellow[amount.ToString()]}...");
             // Simulator workaround: In real UPOS, deposit happens hardware-side.
             // Here we can use FixDeposit or just let the simulator handle it.
             _changer.FixDeposit();
             _changer.EndDeposit(CashDepositAction.Change);
-            Console.WriteLine("Deposit completed.");
+            Console.WriteLine(Chalk.Green["Deposit completed."]);
         } catch (Exception ex) {
-            Console.WriteLine($"Deposit failed: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Deposit failed: {ex.Message}"]);
         }
     }
 
@@ -171,9 +175,9 @@ public partial class CliCommands
     {
         try {
             _changer.DispenseChange(amount);
-            Console.WriteLine($"Dispensed {amount} successfully.");
+            Console.WriteLine(Chalk.Green[$"Dispensed {amount} successfully."]);
         } catch (Exception ex) {
-            Console.WriteLine($"Dispense failed: {ex.Message}");
+            Console.WriteLine(Chalk.Red[$"Dispense failed: {ex.Message}"]);
         }
     }
 
@@ -194,7 +198,7 @@ public partial class CliCommands
     public void Disable()
     {
         _changer.DeviceEnabled = false;
-        Console.WriteLine("Device disabled.");
+        Console.WriteLine(Chalk.Yellow["Device disabled."]);
     }
 
     /// <summary>排他的アクセス権を解放します。</summary>
@@ -202,7 +206,7 @@ public partial class CliCommands
     public void Release()
     {
         _changer.Release();
-        Console.WriteLine("Device released.");
+        Console.WriteLine(Chalk.Green["Device released."]);
     }
 
     /// <summary>デバイスをクローズします。</summary>
@@ -210,6 +214,6 @@ public partial class CliCommands
     public void Close()
     {
         _changer.Close();
-        Console.WriteLine("Device closed.");
+        Console.WriteLine(Chalk.Green["Device closed."]);
     }
 }

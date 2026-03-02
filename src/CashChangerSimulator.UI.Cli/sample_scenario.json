@@ -1,0 +1,11 @@
+[
+  { "Op": "BeginDeposit" },
+  { "Op": "TrackDeposit", "Currency": "JPY", "Value": 1000, "Count": 5, "Type": "Bill" },
+  { "Op": "TrackDeposit", "Currency": "JPY", "Value": 500, "Count": 2, "Type": "Coin" },
+  { "Op": "Delay", "Value": 500 },
+  { "Op": "FixDeposit" },
+  { "Op": "EndDeposit", "Action": "Store" },
+  { "Op": "Delay", "Value": 200 },
+  { "Op": "Dispense", "Value": 1000 },
+  { "Op": "Delay", "Value": 500 }
+]
