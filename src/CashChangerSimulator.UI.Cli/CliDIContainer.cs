@@ -11,6 +11,8 @@ using CashChangerSimulator.Device.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ZLogger;
+using CashChangerSimulator.UI.Cli.Localization;
+using Microsoft.Extensions.Localization;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -45,6 +47,10 @@ public static class CliDIContainer
         services.AddSingleton<INotifyService, CliNotifyService>();
         services.AddSingleton<CliSessionOptions>();
         services.AddSingleton<IAnsiConsole>(AnsiConsole.Console);
+        
+        // Localization
+        services.AddSingleton<IStringLocalizerFactory, TomlStringLocalizerFactory>();
+        services.AddTransient<IStringLocalizer>(sp => sp.GetRequiredService<IStringLocalizerFactory>().Create(typeof(CliCommands)));
 
         // Core Services
         services.AddSingleton<Inventory>();
