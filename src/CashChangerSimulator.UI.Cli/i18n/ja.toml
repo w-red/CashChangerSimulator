@@ -63,5 +63,17 @@ ScriptExecuting = "スクリプト実行中: {0}..."
 ScriptCompleted = "スクリプトの実行が完了しました。"
 # {0}: エラーメッセージ
 ScriptFailed = "スクリプトの実行中にエラーが発生しました: {0}"
-# {0}: ファイルパス
-FileNotFound = "エラー: ファイルが見つかりません: {0}"
+# エラー表示
+ErrorFormat = "[red][{0}: {1} ({2})] {3}[/]"
+HintFormat = "[yellow]ヒント: {0}[/]"
+
+# 主要なエラーコードに対するヒント
+ErrorHint_Closed = "デバイスがオープンされていません。先に 'open' コマンドを実行してください。"
+ErrorHint_Claimed = "デバイスが他のプロセスによって占有されています。"
+ErrorHint_Illegal = "現在の状態（{0}）ではこの操作を実行できません。"
+ErrorHint_Timeout = "操作がタイムアウトしました。"
+ErrorHint_Empty = "在高が不足しています。"
+ErrorHint_Failure = "デバイスで予期しないエラーが発生しました。"
+ErrorHint_NoExistence = "デバイスが見つかりませんでした。"
+ErrorHint_NotEnabled = "デバイスが有効化（enable）されていません。"
+ErrorHint_Generic = "操作を完了できませんでした。接続や状態を確認してください。"

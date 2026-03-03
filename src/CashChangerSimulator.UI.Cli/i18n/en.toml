@@ -65,3 +65,18 @@ ScriptCompleted = "Script execution completed."
 ScriptFailed = "Error executing script: {0}"
 # {0}: File path
 FileNotFound = "Error: File not found: {0}"
+
+# Error Display
+ErrorFormat = "[red][{0}: {1} ({2})] {3}[/]"
+HintFormat = "[yellow]Hint: {0}[/]"
+
+# Hints for main error codes
+ErrorHint_Closed = "Device is not open. Please run the 'open' command first."
+ErrorHint_Claimed = "Device is claimed by another process."
+ErrorHint_Illegal = "Cannot execute this operation in the current state ({0})."
+ErrorHint_Timeout = "Operation timed out."
+ErrorHint_Empty = "Insufficient cash in the device."
+ErrorHint_Failure = "An unexpected device failure occurred."
+ErrorHint_NoExistence = "Device was not found."
+ErrorHint_NotEnabled = "Device is not enabled. Please run 'enable' first."
+ErrorHint_Generic = "Operation could not be completed. Check connection and state."
