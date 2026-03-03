@@ -427,7 +427,7 @@ public class PosTransactionViewModel : IDisposable
         {
             _cashChanger.FixDeposit();
             LogOpos("FixDeposit()");
-            _cashChanger.EndDeposit(Microsoft.PointOfService.CashDepositAction.NoChange);
+            _cashChanger.EndDeposit(CashDepositAction.NoChange);
             LogOpos("EndDeposit(NoChange)");
 
             var inserted = InsertedAmount.Value;

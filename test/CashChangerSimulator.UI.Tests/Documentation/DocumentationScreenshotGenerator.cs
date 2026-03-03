@@ -34,7 +34,7 @@ public class DocumentationScreenshotGenerator : IDisposable
     public void GenerateScreenshots()
     {
         // 1. メインダッシュボードのキャプチャ
-        System.Threading.Thread.Sleep(3000);
+        Thread.Sleep(3000);
         Assert.NotNull(_app.MainWindow);
         CaptureElement(_app.MainWindow, "main_dashboard.png");
 
@@ -51,8 +51,11 @@ public class DocumentationScreenshotGenerator : IDisposable
     private void CaptureSubWindow(string buttonId, string windowId, string fileName)
     {
         // AutomationId で見つからない場合のフォールバックとして Name でも試行
-        var button = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))?.AsButton()
-                     ?? _app.MainWindow.FindFirstDescendant(cf => cf.ByName(buttonId.Replace("Launch", "")))?.AsButton();
+        var button =
+            _app.MainWindow
+            ?.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))
+            ?.AsButton()
+            ?? _app.MainWindow?.FindFirstDescendant(cf => cf.ByName(buttonId.Replace("Launch", "")))?.AsButton();
 
         if (button == null)
         {
@@ -66,8 +69,12 @@ public class DocumentationScreenshotGenerator : IDisposable
         var window = Retry.WhileNull(() => 
         {
             var desktop = _app.Automation.GetDesktop();
-            var win = desktop.FindFirstChild(cf => cf.ByAutomationId(windowId)) 
-                      ?? _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(windowId));
+            var win = 
+                desktop.FindFirstChild(
+                    cf => cf.ByAutomationId(windowId)) 
+                ?? _app.MainWindow
+                    ?.FindFirstDescendant(
+                        cf => cf.ByAutomationId(windowId));
             
             if (win != null) return win.AsWindow();
 
@@ -76,19 +83,15 @@ public class DocumentationScreenshotGenerator : IDisposable
                     .FirstOrDefault(w => w.Name != null && (w.Name.Contains("TERMINAL") || w.Name.Contains("Simulation") || w.Name.Contains("Controls")));
             
             return win?.AsWindow();
-        }, TimeSpan.FromSeconds(10)).Result;
-
-        if (window == null)
-        {
-            throw new Exception($"Window '{windowId}' not found after clicking '{buttonId}'.");
-        }
+        }, TimeSpan.FromSeconds(10)).Result
+        ?? throw new Exception($"Window '{windowId}' not found after clicking '{buttonId}'.");
 
         window.SetForeground();
-        System.Threading.Thread.Sleep(2000);
+        Thread.Sleep(2000);
         CaptureElement(window, fileName);
         
         window.Close();
-        System.Threading.Thread.Sleep(1000);
+        Thread.Sleep(1000);
     }
 
     private void CaptureElement(AutomationElement element, string fileName)

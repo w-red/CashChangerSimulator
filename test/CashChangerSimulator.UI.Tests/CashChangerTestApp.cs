@@ -111,10 +111,17 @@ public class CashChangerTestApp : IDisposable
                 var processId = Application.ProcessId;
                 Application.Close();
                 // Force kill if it doesn't close within 2 seconds
-                using var process = System.Diagnostics.Process.GetProcessById(processId);
-                if (process != null && !process.WaitForExit(2000))
+                try
                 {
-                    process.Kill();
+                    using var process = System.Diagnostics.Process.GetProcessById(processId);
+                    if (!process.WaitForExit(2000))
+                    {
+                        process.Kill();
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // Process already exited
                 }
                 Application.Dispose();
             }
