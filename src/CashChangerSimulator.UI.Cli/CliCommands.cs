@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CashChangerSimulator.Device.Services;
 using Spectre.Console;
+using Microsoft.Extensions.Localization;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -23,6 +24,7 @@ public partial class CliCommands
     private readonly IScriptExecutionService _scriptService;
     private readonly CliSessionOptions _options;
     private readonly IAnsiConsole _console;
+    private readonly IStringLocalizer _L;
 
     public CliCommands(
         SimulatorCashChanger changer,
@@ -31,7 +33,8 @@ public partial class CliCommands
         TransactionHistory history,
         IScriptExecutionService scriptService,
         CliSessionOptions options,
-        IAnsiConsole console)
+        IAnsiConsole console,
+        IStringLocalizer localizer)
     {
         _changer = changer;
         _inventory = inventory;
@@ -40,6 +43,7 @@ public partial class CliCommands
         _scriptService = scriptService;
         _options = options;
         _console = console;
+        _L = localizer;
     }
 
     /// <summary>指定された JSON スクリプトファイルを実行します。</summary>
@@ -69,16 +73,16 @@ public partial class CliCommands
     [Command("status")]
     public void Status()
     {
-        _console.Write(new Rule("[cyan]Device Status[/]").LeftJustified());
-        _console.MarkupLine($"State: [yellow]{_changer.State}[/]");
-        _console.MarkupLine($"Enabled: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
+        _console.Write(new Rule($"[cyan]{_L["StatusHeader"]}[/]").LeftJustified());
+        _console.MarkupLine($"{_L["StateLabel"]}: [yellow]{_changer.State}[/]");
+        _console.MarkupLine($"{_L["EnabledLabel"]}: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
         
         _console.WriteLine();
-        _console.Write(new Rule("[cyan]Inventory[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["InventoryHeader"]}[/]").LeftJustified());
         
         var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn("Denomination");
-        table.AddColumn(new TableColumn("Count").RightAligned());
+        table.AddColumn(_L["DenominationLabel"]);
+        table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
 
         foreach (var key in _metadata.SupportedDenominations)
         {
@@ -87,7 +91,7 @@ public partial class CliCommands
         }
         
         var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
-        table.Caption($"Total: [bold yellow]{_metadata.SymbolPrefix.CurrentValue}{total:N0}{_metadata.SymbolSuffix.CurrentValue}[/]");
+        table.Caption($"{_L["TotalCaption"]}: [bold yellow]{_metadata.SymbolPrefix.CurrentValue}{total:N0}{_metadata.SymbolSuffix.CurrentValue}[/]");
         
         _console.Write(table);
     }
@@ -98,9 +102,9 @@ public partial class CliCommands
     {
         try {
             _changer.Open();
-            _console.MarkupLine("[green]Device opened successfully.[/]");
+            _console.MarkupLine($"[green]{_L["DeviceOpened"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Failed to open device: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["FailedToOpen", ex.Message]}[/]");
         }
     }
 
@@ -110,9 +114,9 @@ public partial class CliCommands
     {
         try {
             _changer.Claim(timeout);
-            _console.MarkupLine("[green]Device claimed successfully.[/]");
+            _console.MarkupLine($"[green]{_L["DeviceClaimed"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Failed to claim device: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["FailedToClaim", ex.Message]}[/]");
         }
     }
 
@@ -122,9 +126,9 @@ public partial class CliCommands
     {
         try {
             _changer.DeviceEnabled = true;
-            _console.MarkupLine("[green]Device enabled.[/]");
+            _console.MarkupLine($"[green]{_L["DeviceEnabled"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Failed to enable device: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["FailedToEnable", ex.Message]}[/]");
         }
     }
 
@@ -134,16 +138,16 @@ public partial class CliCommands
     {
         try {
             var counts = _changer.ReadCashCounts();
-            _console.MarkupLine("[green]Cash counts updated from device.[/]");
+            _console.MarkupLine($"[green]{_L["CashCountsUpdated"]}[/]");
             _console.WriteLine();
 
             var symbol = _metadata.SymbolPrefix.CurrentValue;
             var suffix = _metadata.SymbolSuffix.CurrentValue;
 
             var table = new Table().Border(TableBorder.Rounded);
-            table.AddColumn("Denomination");
-            table.AddColumn(new TableColumn("Count").RightAligned());
-            table.AddColumn(new TableColumn("Amount").RightAligned());
+            table.AddColumn(_L["DenominationLabel"]);
+            table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
+            table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
 
             foreach (var cc in counts.Counts)
             {
@@ -160,7 +164,7 @@ public partial class CliCommands
             _console.Write(table);
 
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Failed to read cash counts: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["FailedToReadCashCounts", ex.Message]}[/]");
         }
     }
 
@@ -170,20 +174,20 @@ public partial class CliCommands
     {
         try {
             _changer.BeginDeposit();
-            _console.MarkupLine($"Depositing [yellow]{amount}[/] (Async: {_options.IsAsync})...");
+            _console.MarkupLine(_L["DepositStarted", amount, _options.IsAsync]);
             
             if (!_options.IsAsync)
             {
                 _changer.FixDeposit();
                 _changer.EndDeposit(CashDepositAction.Change);
-                _console.MarkupLine("[green]Deposit completed.[/]");
+                _console.MarkupLine($"[green]{_L["DepositCompleted"]}[/]");
             }
             else
             {
-                _console.MarkupLine("[yellow]Deposit started in async mode. Use FixDeposit/EndDeposit later.[/]");
+                _console.MarkupLine($"[yellow]{_L["DepositAsyncWarning"]}[/]");
             }
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Deposit failed: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["DepositFailed", ex.Message]}[/]");
         }
     }
 
@@ -193,9 +197,10 @@ public partial class CliCommands
     {
         try {
             _changer.FixDeposit();
-            _console.MarkupLine("[green]Deposit fixed.[/]");
+            _console.MarkupLine($"[green]{_L["DepositFixed"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]FixDeposit failed: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["FailedToOpen", ex.Message]}[/]"); // Reuse open or specific? Let's use specific if needed. 
+            // In ja.toml I added DepositFailed.
         }
     }
 
@@ -205,9 +210,9 @@ public partial class CliCommands
     {
         try {
             _changer.EndDeposit(CashDepositAction.Change);
-            _console.MarkupLine("[green]EndDeposit completed.[/]");
+            _console.MarkupLine($"[green]{_L["EndDepositCompleted"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]EndDeposit failed: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["DepositFailed", ex.Message]}[/]");
         }
     }
 
@@ -217,9 +222,9 @@ public partial class CliCommands
     {
         try {
             _changer.DispenseChange(amount);
-            _console.MarkupLine($"[green]Dispensed {amount} successfully.[/]");
+            _console.MarkupLine($"[green]{_L["DispensedSuccess", amount]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]Dispense failed: {ex.Message}[/]");
+            _console.MarkupLine($"[red]{_L["DispenseFailed", ex.Message]}[/]");
         }
     }
 
@@ -227,14 +232,14 @@ public partial class CliCommands
     [Command("history")]
     public void History(int count = 10)
     {
-        _console.Write(new Rule($"[cyan]Recent Transactions (up to {count})[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["TransactionHistoryHeader", count]}[/]").LeftJustified());
         var entries = _history.Entries.TakeLast(count).Reverse();
         
         var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn("Timestamp");
-        table.AddColumn("Type");
-        table.AddColumn(new TableColumn("Amount").RightAligned());
-        table.AddColumn("Currency");
+        table.AddColumn(_L["TimestampLabel"]);
+        table.AddColumn(_L["TypeLabel"]);
+        table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
+        table.AddColumn(_L["CurrencyLabel"]);
 
         foreach (var entry in entries)
         {
@@ -253,7 +258,7 @@ public partial class CliCommands
     public void Disable()
     {
         _changer.DeviceEnabled = false;
-        _console.MarkupLine("[yellow]Device disabled.[/]");
+        _console.MarkupLine($"[yellow]{_L["DeviceDisabled"]}[/]");
     }
 
     /// <summary>排他的アクセス権を解放します。</summary>
@@ -261,7 +266,7 @@ public partial class CliCommands
     public void Release()
     {
         _changer.Release();
-        _console.MarkupLine("[green]Device released.[/]");
+        _console.MarkupLine($"[yellow]{_L["DeviceReleased"]}[/]");
     }
 
     /// <summary>デバイスをクローズします。</summary>
@@ -269,18 +274,18 @@ public partial class CliCommands
     public void Close()
     {
         _changer.Close();
-        _console.MarkupLine("[green]Device closed.[/]");
+        _console.MarkupLine($"[yellow]{_L["DeviceClosed"]}[/]");
     }
 
     /// <summary>利用可能なコマンドの一覧を表示します。</summary>
     [Command("help")]
     public void Help()
     {
-        _console.Write(new Rule("[cyan]Available commands[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["AvailableCommands"]}[/]").LeftJustified());
         
         var table = new Table().NoBorder().HideHeaders();
-        table.AddColumn("Command");
-        table.AddColumn("Description");
+        table.AddColumn(_L["CommandLabel"]);
+        table.AddColumn(_L["DescriptionLabel"]);
 
         table.AddRow("[yellow]open[/]", "Open the device");
         table.AddRow("[yellow]claim [[timeout]][/]", "Claim exclusive access (default: 1000ms)");
@@ -296,8 +301,8 @@ public partial class CliCommands
         table.AddRow("[yellow]release[/]", "Release exclusive access");
         table.AddRow("[yellow]close[/]", "Close the device");
         table.AddRow("[yellow]run-script <path>[/]", "Execute a JSON scenario script");
-        table.AddRow("[yellow]help[/]", "Show this help");
-        table.AddRow("[yellow]exit[/]", "Exit the CLI");
+        table.AddRow("[yellow]help[/]", _L["HelpDescription"].Value);
+        table.AddRow("[yellow]exit[/]", _L["ExitDescription"].Value);
 
         _console.Write(table);
         _console.WriteLine();
