@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
+using CashChangerSimulator.Device.Services;
 
 namespace CashChangerSimulator.UI.Cli;
 
+/// <summary>CLI からシミュレータを操作するためのコマンドを提供します。</summary>
 public partial class CliCommands
 {
     private readonly CliDeviceService _deviceService;
@@ -19,6 +21,7 @@ public partial class CliCommands
     private readonly IAnsiConsole _console;
     private readonly IStringLocalizer _L;
 
+    /// <summary>CliCommands の新しいインスタンスを初期化します。</summary>
     public CliCommands(
         SimulatorCashChanger changer,
         CliDeviceService deviceService,
@@ -37,11 +40,9 @@ public partial class CliCommands
         _scriptService = scriptService;
         _console = console;
         _L = localizer;
-
-        // Subscribing to ErrorEvent for async error reporting
-        _changer.ErrorEvent += HandleAsyncError;
     }
 
+    /// <summary>非同期エラーイベントをハンドリングし、エラーメッセージを表示します。</summary>
     public void HandleAsyncError(object sender, DeviceErrorEventArgs e)
     {
         _console.WriteLine();
@@ -128,15 +129,19 @@ public partial class CliCommands
     [Command("config")]
     public void Config() => _console.MarkupLine("[yellow]Usage: config <list|get|set|save>[/]");
 
+    /// <summary>設定項目を一覧表示します。</summary>
     [Command("config list")]
     public void ConfigList() => _configService.List();
 
+    /// <summary>特定の設定値を取得します。</summary>
     [Command("config get")]
     public void ConfigGet(string key) => _configService.Get(key);
 
+    /// <summary>設定値を一時的に更新します。</summary>
     [Command("config set")]
     public void ConfigSet(string key, string value) => _configService.Set(key, value);
 
+    /// <summary>更新した設定を TOML ファイルに保存します。</summary>
     [Command("config save")]
     public void ConfigSave() => _configService.Save();
 
