@@ -71,8 +71,7 @@ public class PosTransactionViewModelTest : IDisposable
             () => [],
             notifyService,
             _fixture.MetadataProvider);
-        
-        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger, _fixture.MetadataProvider);
+        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger, _fixture.Hardware, _fixture.MetadataProvider, () => [], _fixture.DepositController);
     }
 
     /// <summary>取引完了時のOPOSシーケンス呼び出しを検証します。</summary>
