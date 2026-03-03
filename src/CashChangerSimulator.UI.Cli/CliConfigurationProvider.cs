@@ -9,7 +9,7 @@ namespace CashChangerSimulator.UI.Cli;
 /// </summary>
 public class CliConfigurationProvider : ConfigurationProvider
 {
-    public CliConfigurationProvider() : base(null)
+    public CliConfigurationProvider()
     {
     }
 }
