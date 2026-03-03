@@ -44,6 +44,52 @@ public partial class CliCommands
         _options = options;
         _console = console;
         _L = localizer;
+
+        // Subscribing to ErrorEvent for async error reporting
+        _changer.ErrorEvent += (sender, e) =>
+        {
+            _console.WriteLine();
+            var hint = GetHint(e.ErrorCode);
+            var errMsg = _L["ErrorFormat", "Async Error", (int)e.ErrorCode, e.ErrorCodeExtended, "Async operation failed"];
+            _console.MarkupLine(errMsg);
+            if (!string.IsNullOrEmpty(hint))
+            {
+                _console.MarkupLine(_L["HintFormat", hint]);
+            }
+        };
+    }
+
+    private void HandleException(Exception ex)
+    {
+        if (ex is PosControlException pex)
+        {
+            var hint = GetHint(pex.ErrorCode);
+            var errMsg = _L["ErrorFormat", "Error", (int)pex.ErrorCode, pex.ErrorCodeExtended, pex.Message];
+            _console.MarkupLine(errMsg);
+            if (!string.IsNullOrEmpty(hint))
+            {
+                _console.MarkupLine(_L["HintFormat", hint]);
+            }
+        }
+        else
+        {
+            _console.MarkupLine($"[red]Error: {ex.Message}[/]");
+        }
+    }
+
+    private string GetHint(ErrorCode errorCode)
+    {
+        var hintKey = $"ErrorHint_{errorCode}";
+        var hint = _L[hintKey];
+        if (hint.ResourceNotFound)
+        {
+            // Fallback for special cases
+            if (errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled)
+                return _L["ErrorHint_NotEnabled"];
+            
+            return _L["ErrorHint_Generic"];
+        }
+        return hint;
     }
 
     /// <summary>指定された JSON スクリプトファイルを実行します。</summary>
@@ -52,20 +98,20 @@ public partial class CliCommands
     {
         if (!File.Exists(path))
         {
-            _console.MarkupLine($"[red]Error: File not found: {path}[/]");
+            _console.MarkupLine(_L["FileNotFound", path]);
             return;
         }
 
         try
         {
             var json = await File.ReadAllTextAsync(path);
-            _console.MarkupLine($"[cyan]Executing script: {path}...[/]");
+            _console.MarkupLine(_L["ScriptExecuting", path]);
             await _scriptService.ExecuteScriptAsync(json);
-            _console.MarkupLine("[green]Script execution completed.[/]");
+            _console.MarkupLine(_L["ScriptCompleted"]);
         }
         catch (Exception ex)
         {
-            _console.MarkupLine($"[red]Error executing script: {ex.Message}[/]");
+            HandleException(ex);
         }
     }
 
@@ -104,7 +150,7 @@ public partial class CliCommands
             _changer.Open();
             _console.MarkupLine($"[green]{_L["DeviceOpened"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["FailedToOpen", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -116,7 +162,7 @@ public partial class CliCommands
             _changer.Claim(timeout);
             _console.MarkupLine($"[green]{_L["DeviceClaimed"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["FailedToClaim", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -128,7 +174,7 @@ public partial class CliCommands
             _changer.DeviceEnabled = true;
             _console.MarkupLine($"[green]{_L["DeviceEnabled"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["FailedToEnable", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -164,7 +210,7 @@ public partial class CliCommands
             _console.Write(table);
 
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["FailedToReadCashCounts", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -187,7 +233,7 @@ public partial class CliCommands
                 _console.MarkupLine($"[yellow]{_L["DepositAsyncWarning"]}[/]");
             }
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["DepositFailed", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -199,8 +245,7 @@ public partial class CliCommands
             _changer.FixDeposit();
             _console.MarkupLine($"[green]{_L["DepositFixed"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["FailedToOpen", ex.Message]}[/]"); // Reuse open or specific? Let's use specific if needed. 
-            // In ja.toml I added DepositFailed.
+            HandleException(ex);
         }
     }
 
@@ -212,7 +257,7 @@ public partial class CliCommands
             _changer.EndDeposit(CashDepositAction.Change);
             _console.MarkupLine($"[green]{_L["EndDepositCompleted"]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["DepositFailed", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -224,7 +269,7 @@ public partial class CliCommands
             _changer.DispenseChange(amount);
             _console.MarkupLine($"[green]{_L["DispensedSuccess", amount]}[/]");
         } catch (Exception ex) {
-            _console.MarkupLine($"[red]{_L["DispenseFailed", ex.Message]}[/]");
+            HandleException(ex);
         }
     }
 
@@ -257,24 +302,36 @@ public partial class CliCommands
     [Command("disable")]
     public void Disable()
     {
-        _changer.DeviceEnabled = false;
-        _console.MarkupLine($"[yellow]{_L["DeviceDisabled"]}[/]");
+        try {
+            _changer.DeviceEnabled = false;
+            _console.MarkupLine($"[yellow]{_L["DeviceDisabled"]}[/]");
+        } catch (Exception ex) {
+            HandleException(ex);
+        }
     }
 
     /// <summary>排他的アクセス権を解放します。</summary>
     [Command("release")]
     public void Release()
     {
-        _changer.Release();
-        _console.MarkupLine($"[yellow]{_L["DeviceReleased"]}[/]");
+        try {
+            _changer.Release();
+            _console.MarkupLine($"[yellow]{_L["DeviceReleased"]}[/]");
+        } catch (Exception ex) {
+            HandleException(ex);
+        }
     }
 
     /// <summary>デバイスをクローズします。</summary>
     [Command("close")]
     public void Close()
     {
-        _changer.Close();
-        _console.MarkupLine($"[yellow]{_L["DeviceClosed"]}[/]");
+        try {
+            _changer.Close();
+            _console.MarkupLine($"[yellow]{_L["DeviceClosed"]}[/]");
+        } catch (Exception ex) {
+            HandleException(ex);
+        }
     }
 
     /// <summary>利用可能なコマンドの一覧を表示します。</summary>
