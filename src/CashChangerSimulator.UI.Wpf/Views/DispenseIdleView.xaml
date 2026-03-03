@@ -95,6 +95,9 @@
                             <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
