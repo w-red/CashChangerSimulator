@@ -9,6 +9,8 @@
     <system:String x:Key="Reset">RESET</system:String>
     <system:String x:Key="Warn">WARNING</system:String>
     <system:String x:Key="Busy">BUSY</system:String>
+    <system:String x:Key="DeviceClosed">CLOSED</system:String>
+    <system:String x:Key="Connect">Connect</system:String>
 
     <system:String x:Key="CashBalance">CASH BALANCE</system:String>
     <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>
