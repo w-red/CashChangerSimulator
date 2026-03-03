@@ -93,6 +93,8 @@
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
         <Setter Property="Margin" Value="0,8,0,8"/>
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
+        <!-- Ensure AutomationProperties.Name is not null to avoid template bindings assigning null to Name -->
+        <Setter Property="AutomationProperties.Name" Value="" />
     </Style>
 
     <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">

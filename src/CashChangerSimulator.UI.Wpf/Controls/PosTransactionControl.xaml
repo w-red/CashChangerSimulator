@@ -72,7 +72,7 @@
                     <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
                         <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
                         <TextBlock Text="{StaticResource StrReadyForTransaction}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
-                        <TextBox Text="{Binding InputAmount.Value, UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Text="{Binding TargetAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource ModernTextBoxStyle}"
                                  materialDesign:HintAssist.Hint="Enter Target Amount"
                                  materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"

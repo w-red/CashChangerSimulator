@@ -72,7 +72,9 @@
                             
                             <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource ModernTextBoxStyle}"
+                                     AutomationProperties.Name="ScriptInputTextBox"
                                      AutomationProperties.AutomationId="ScriptInputTextBox"
+                                     materialDesign:HintAssist.Hint="JSON Script"
                                      AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="150" FontFamily="Consolas" Margin="0,0,0,8"/>
                             
                             <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" 
