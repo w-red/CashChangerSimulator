@@ -37,6 +37,8 @@ public class DepositViewModel : IDisposable
     /// <summary>ジャムが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsJammed { get; }
     private readonly BindableReactiveProperty<bool> _isJammed;
+    /// <summary>デバイスエラーが発生しているかどうか。</summary>
+    public BindableReactiveProperty<bool> IsDeviceError { get; }
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
     /// <summary>通貨記号。</summary>
@@ -99,6 +101,7 @@ public class DepositViewModel : IDisposable
         IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
         IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        IsDeviceError = _hardwareStatusManager.IsDeviceError;
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         IsInDepositMode = _depositController.Changed
@@ -148,6 +151,12 @@ public class DepositViewModel : IDisposable
             try
             {
                 _depositController.BeginDeposit();
+            }
+            catch (PosControlException pcEx)
+            {
+                _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+                _logger.ZLogError(pcEx, $"Failed to begin deposit.");
+                _notifyService.ShowWarning(pcEx.Message, (string)System.Windows.Application.Current.Resources["StrError"]);
             }
             catch (Exception ex)
             {
@@ -301,6 +310,12 @@ public class DepositViewModel : IDisposable
             _depositController.EndDeposit(CashDepositAction.NoChange);
 
             QuickDepositAmountInput.Value = "";
+        }
+        catch (PosControlException pcEx)
+        {
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
+            _notifyService.ShowWarning(pcEx.Message, (string)System.Windows.Application.Current.Resources["StrError"]);
         }
         catch (Exception ex)
         {

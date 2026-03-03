@@ -6,6 +6,7 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
+using Microsoft.PointOfService;
 using R3;
 using ZLogger;
 
@@ -66,6 +67,8 @@ public class DispenseViewModel : IDisposable
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
     /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
     public BindableReactiveProperty<bool> CanOperate { get; }
+    /// <summary>デバイスエラーが発生しているかどうか。</summary>
+    public BindableReactiveProperty<bool> IsDeviceError { get; }
 
     /// <summary>DispenseViewModel の新しいインスタンスを初期化します。</summary>
     public DispenseViewModel(
@@ -89,6 +92,8 @@ public class DispenseViewModel : IDisposable
         _isInDepositMode = isInDepositMode;
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DispenseViewModel>();
+
+        IsDeviceError = _hardwareStatusManager.IsDeviceError;
 
         // State Mapping
         Status = _controller.Changed
@@ -236,6 +241,12 @@ public class DispenseViewModel : IDisposable
             DispensingAmount.Value = amount;
             _ = _controller.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode);
         }
+        catch (PosControlException pcEx)
+        {
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _logger.ZLogError(pcEx, $"Failed to dispense {amount}.");
+            System.Windows.MessageBox.Show(pcEx.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to dispense {amount}.");
@@ -250,6 +261,12 @@ public class DispenseViewModel : IDisposable
             var total = counts.Sum(x => x.Key.Value * x.Value);
             DispensingAmount.Value = total;
             _ = _controller.DispenseCashAsync(counts, true, (code, ext) => { });
+        }
+        catch (PosControlException pcEx)
+        {
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _logger.ZLogError(pcEx, $"Failed to dispense cash (bulk).");
+            System.Windows.MessageBox.Show(pcEx.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
         catch (Exception ex)
         {

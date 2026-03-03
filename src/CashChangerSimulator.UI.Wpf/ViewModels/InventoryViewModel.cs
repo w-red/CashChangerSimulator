@@ -38,6 +38,10 @@ public class InventoryViewModel : IDisposable
     public ReactiveProperty<bool> IsJammed { get; }
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsOverlapped { get; }
+    /// <summary>デバイスエラーが発生しているかどうか。</summary>
+    public BindableReactiveProperty<bool> IsDeviceError { get; }
+    /// <summary>現在のエラーコード。</summary>
+    public BindableReactiveProperty<int?> CurrentErrorCode { get; }
     /// <summary>最近の取引履歴リスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
@@ -72,6 +76,8 @@ public class InventoryViewModel : IDisposable
 
         IsJammed = _hardwareStatusManager.IsJammed;
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
+        IsDeviceError = _hardwareStatusManager.IsDeviceError;
+        CurrentErrorCode = _hardwareStatusManager.CurrentErrorCode;
         OverallStatus = _statusAggregator.DeviceStatus;
         FullStatus = _statusAggregator.FullStatus;
 
