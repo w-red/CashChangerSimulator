@@ -3,91 +3,91 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- Common Strings -->
-    <system:String x:Key="StrCancel">キャンセル</system:String>
-    <system:String x:Key="StrOk">OK</system:String>
-    <system:String x:Key="StrError">エラー</system:String>
-    <system:String x:Key="StrReset">リセット</system:String>
-    <system:String x:Key="StrWarn">警告</system:String>
-    <system:String x:Key="StrBusy">ビジー</system:String>
+    <system:String x:Key="Cancel">キャンセル</system:String>
+    <system:String x:Key="Ok">OK</system:String>
+    <system:String x:Key="Error">エラー</system:String>
+    <system:String x:Key="Reset">リセット</system:String>
+    <system:String x:Key="Warn">警告</system:String>
+    <system:String x:Key="Busy">ビジー</system:String>
 
-    <system:String x:Key="StrCashBalance">在庫合計金額</system:String>
-    <system:String x:Key="StrActivityFeed">アクティビティフィード</system:String>
-    <system:String x:Key="StrValidationError">入力エラー</system:String>
-    <system:String x:Key="StrJamError">ジャム発生</system:String>
+    <system:String x:Key="CashBalance">在庫合計金額</system:String>
+    <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
+    <system:String x:Key="ValidationError">入力エラー</system:String>
+    <system:String x:Key="JamError">ジャム発生</system:String>
 
     <!-- Validation Messages -->
-    <system:String x:Key="StrErrorEnterValidNumber">有効な数値を入力してください</system:String>
-    <system:String x:Key="StrErrorAmountPositive">正の値を入力してください</system:String>
-    <system:String x:Key="StrErrorInsufficientFunds">残高不足です</system:String>
-    <system:String x:Key="StrAmountHint">金額を入力</system:String>
+    <system:String x:Key="ErrorEnterValidNumber">有効な数値を入力してください</system:String>
+    <system:String x:Key="ErrorAmountPositive">正の値を入力してください</system:String>
+    <system:String x:Key="ErrorInsufficientFunds">残高不足です</system:String>
+    <system:String x:Key="AmountHint">金額を入力</system:String>
 
     <!-- Main Window / Settings -->
-    <system:String x:Key="StrSystemSettings">システム設定</system:String>
-    <system:String x:Key="StrSettingsSubtitle">デバイスの動作および通貨パラメータの設定</system:String>
-    <system:String x:Key="StrCoreParameters">基本パラメータ</system:String>
-    <system:String x:Key="StrRestartRequired">* 在庫再調整のため再起動が必要です。</system:String>
-    <system:String x:Key="StrUIBehaviorNote">* ユーザーインターフェースの動作パターンを変更します。</system:String>
-    <system:String x:Key="StrGlobalThresholds">共通しきい値</system:String>
-    <system:String x:Key="StrDenomCalibration">金種別設定</system:String>
+    <system:String x:Key="SystemSettings">システム設定</system:String>
+    <system:String x:Key="SettingsSubtitle">デバイスの動作および通貨パラメータの設定</system:String>
+    <system:String x:Key="CoreParameters">基本パラメータ</system:String>
+    <system:String x:Key="RestartRequired">* 在庫再調整のため再起動が必要です。</system:String>
+    <system:String x:Key="UIBehaviorNote">* ユーザーインターフェースの動作パターンを変更します。</system:String>
+    <system:String x:Key="GlobalThresholds">共通しきい値</system:String>
+    <system:String x:Key="DenomCalibration">金種別設定</system:String>
 
     <!-- Simulation Page -->
-    <system:String x:Key="StrTerminalAccess">各ターミナルへのアクセス</system:String>
-    <system:String x:Key="StrDeposit">入金</system:String>
-    <system:String x:Key="StrDispense">出金</system:String>
-    <system:String x:Key="StrTransactionStatus">取引ステータス</system:String>
-    <system:String x:Key="StrOposDeviceLog">OPOS デバイスログ</system:String>
-    <system:String x:Key="StrStartSimulation">シミュレーション開始</system:String>
-    <system:String x:Key="StrReadyForTransaction">取引可能</system:String>
-    <system:String x:Key="StrTargetAmountHint">目標金額</system:String>
-    <system:String x:Key="StrInsertCashToContinue">現金を投入してください</system:String>
-    <system:String x:Key="StrTransactionFinished">取引終了</system:String>
+    <system:String x:Key="TerminalAccess">各ターミナルへのアクセス</system:String>
+    <system:String x:Key="Deposit">入金</system:String>
+    <system:String x:Key="Dispense">出金</system:String>
+    <system:String x:Key="TransactionStatus">取引ステータス</system:String>
+    <system:String x:Key="OposDeviceLog">OPOS デバイスログ</system:String>
+    <system:String x:Key="StartSimulation">シミュレーション開始</system:String>
+    <system:String x:Key="ReadyForTransaction">取引可能</system:String>
+    <system:String x:Key="TargetAmountHint">目標金額</system:String>
+    <system:String x:Key="InsertCashToContinue">現金を投入してください</system:String>
+    <system:String x:Key="TransactionFinished">取引終了</system:String>
 
     <!-- Terminals -->
-    <system:String x:Key="StrDispenseTerminal">出金ターミナル</system:String>
-    <system:String x:Key="StrDepositTerminal">入金ターミナル</system:String>
-    <system:String x:Key="StrAmountDispense">金額指定出金</system:String>
-    <system:String x:Key="StrQuickDispense">クイック出金</system:String>
-    <system:String x:Key="StrBulkDispense">一括出金</system:String>
-    <system:String x:Key="StrDispenseError">出金エラー</system:String>
-    <system:String x:Key="StrHardwareCheckRequired">ハードウェアを確認してください。</system:String>
-    <system:String x:Key="StrClearError">エラー解除</system:String>
-    <system:String x:Key="ResetErrorName">エラー解除</system:String>
-    <system:String x:Key="StrDispensing">出金中...</system:String>
-    <system:String x:Key="StrWarnDispenseDuringDeposit">入金処理中のため、出金は実行できません。</system:String>
-    <system:String x:Key="StrWarnDepositDuringDispense">出金処理中のため、入金は開始できません。</system:String>
+    <system:String x:Key="DispenseTerminal">出金ターミナル</system:String>
+    <system:String x:Key="DepositTerminal">入金ターミナル</system:String>
+    <system:String x:Key="AmountDispense">金額指定出金</system:String>
+    <system:String x:Key="QuickDispense">クイック出金</system:String>
+    <system:String x:Key="BulkDispense">一括出金</system:String>
+    <system:String x:Key="DispenseError">出金エラー</system:String>
+    <system:String x:Key="HardwareCheckRequired">ハードウェアを確認してください。</system:String>
+    <system:String x:Key="ClearError">エラー解除</system:String>
+    <system:String x:Key="ResetError">エラー解除</system:String>
+    <system:String x:Key="Dispensing">出金中...</system:String>
+    <system:String x:Key="WarnDispenseDuringDeposit">入金処理中のため、出金は実行できません。</system:String>
+    <system:String x:Key="WarnDepositDuringDispense">出金処理中のため、入金は開始できません。</system:String>
 
-    <system:String x:Key="StrCurrentDeposit">現在の投入金額</system:String>
-    <system:String x:Key="StrStartDeposit">入金開始</system:String>
-    <system:String x:Key="StrQuickDeposit">クイック入金</system:String>
-    <system:String x:Key="StrAutoCalcDenoms">枚数を自動計算して投入します</system:String>
-    <system:String x:Key="StrBulk">一括</system:String>
-    <system:String x:Key="StrFinishCounting">計数終了</system:String>
-    <system:String x:Key="StrPause">一時停止</system:String>
-    <system:String x:Key="StrResume">再開</system:String>
-    <system:String x:Key="StrStore">収納</system:String>
-    <system:String x:Key="StrReturn">返却</system:String>
+    <system:String x:Key="CurrentDeposit">現在の投入金額</system:String>
+    <system:String x:Key="StartDeposit">入金開始</system:String>
+    <system:String x:Key="QuickDeposit">クイック入金</system:String>
+    <system:String x:Key="AutoCalcDenoms">枚数を自動計算して投入します</system:String>
+    <system:String x:Key="Bulk">一括</system:String>
+    <system:String x:Key="FinishCounting">計数終了</system:String>
+    <system:String x:Key="Pause">一時停止</system:String>
+    <system:String x:Key="Resume">再開</system:String>
+    <system:String x:Key="Store">収納</system:String>
+    <system:String x:Key="Return">返却</system:String>
 
     <!-- Footer Actions -->
-    <system:String x:Key="StrCommitChanges">変更を保存</system:String>
-    <system:String x:Key="StrDefault">デフォルト</system:String>
-    <system:String x:Key="StrSimulationSlot">現金投入口</system:String>
+    <system:String x:Key="CommitChanges">変更を保存</system:String>
+    <system:String x:Key="Default">デフォルト</system:String>
+    <system:String x:Key="SimulationSlot">現金投入口</system:String>
 
     <!-- Table Headers -->
-    <system:String x:Key="StrHeaderIdentifier">識別子</system:String>
-    <system:String x:Key="StrHeaderBaseQty">基準枚数</system:String>
-    <system:String x:Key="StrHeaderNearEmpty">ニアエンプティ</system:String>
-    <system:String x:Key="StrHeaderNearFull">ニアフル</system:String>
-    <system:String x:Key="StrHeaderMaxCap">最大容量</system:String>
+    <system:String x:Key="HeaderIdentifier">識別子</system:String>
+    <system:String x:Key="HeaderBaseQty">基準枚数</system:String>
+    <system:String x:Key="HeaderNearEmpty">ニアエンプティ</system:String>
+    <system:String x:Key="HeaderNearFull">ニアフル</system:String>
+    <system:String x:Key="HeaderMaxCap">最大容量</system:String>
 
     <!-- Bulk Input Dialog -->
-    <system:String x:Key="StrBulkInput">一括投入</system:String>
-    <system:String x:Key="StrBulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
-    <system:String x:Key="StrBulkDepositSubtitle">投入する数量を入力してください。</system:String>
-    <system:String x:Key="StrBulkDispenseSubtitle">出金する数量を入力してください。</system:String>
-    <system:String x:Key="StrErrorCodeCannotReset">エラー状態をリセットできません。</system:String>
-    <system:String x:Key="StrAdvancedSimulation">高度なシミュレーション操作</system:String>
-    <system:String x:Key="StrExecute">実行</system:String>
-    <system:String x:Key="StrUposConfig">UPOS 構成設定</system:String>
-    <system:String x:Key="StrRealTimeData">リアルタイムデータイベントを有効にする</system:String>
-    <system:String x:Key="StrScriptInput">取引スクリプト (JSON)</system:String>
+    <system:String x:Key="BulkInput">一括投入</system:String>
+    <system:String x:Key="BulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
+    <system:String x:Key="BulkDepositSubtitle">投入する数量を入力してください。</system:String>
+    <system:String x:Key="BulkDispenseSubtitle">出金する数量を入力してください。</system:String>
+    <system:String x:Key="ErrorCodeCannotReset">エラー状態をリセットできません。</system:String>
+    <system:String x:Key="AdvancedSimulation">高度なシミュレーション操作</system:String>
+    <system:String x:Key="Execute">実行</system:String>
+    <system:String x:Key="UposConfig">UPOS 構成設定</system:String>
+    <system:String x:Key="RealTimeData">リアルタイムデータイベントを有効にする</system:String>
+    <system:String x:Key="ScriptInput">取引スクリプト (JSON)</system:String>
 </ResourceDictionary>

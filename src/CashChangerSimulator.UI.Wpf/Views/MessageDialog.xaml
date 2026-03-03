@@ -27,7 +27,7 @@
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
                     Padding="16,4" MinWidth="80">
-                <TextBlock Text="{StaticResource StrOk}" FontWeight="Bold" />
+                <TextBlock Text="{StaticResource Ok}" FontWeight="Bold" />
             </Button>
         </StackPanel>
     </Grid>

@@ -29,12 +29,12 @@
         <!-- Title -->
         <StackPanel Margin="0,0,0,32">
             <TextBlock 
-                Text="{StaticResource StrSystemSettings}"
+                Text="{StaticResource SystemSettings}"
                 FontSize="24"
                 FontWeight="Black"
                 Foreground="{StaticResource PrimaryBrush}"/>
             <TextBlock
-                Text="{StaticResource StrSettingsSubtitle}"
+                Text="{StaticResource SettingsSubtitle}"
                 FontSize="12"
                 Opacity="0.6"
                 Margin="0,4,0,0"/>
@@ -64,7 +64,7 @@
             </Grid.ColumnDefinitions>
 
             <Button
-                Content="{StaticResource StrDefault}"
+                Content="{StaticResource Default}"
                 Command="{Binding ResetToDefaultCommand}"
                 Style="{StaticResource MaterialDesignOutlinedButton}"
                 BorderBrush="#33FFFFFF"
@@ -73,14 +73,14 @@
 
             <Button
                 Grid.Column="2"
-                Content="{StaticResource StrCancel}"
+                Content="{StaticResource Cancel}"
                 IsCancel="True"
                 Style="{StaticResource ModernFlatButtonStyle}"
                 Margin="0,0,16,0"/>
 
             <Button
                 Grid.Column="3"
-                Content="{StaticResource StrCommitChanges}"
+                Content="{StaticResource CommitChanges}"
                 Command="{Binding SaveCommand}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Width="180"

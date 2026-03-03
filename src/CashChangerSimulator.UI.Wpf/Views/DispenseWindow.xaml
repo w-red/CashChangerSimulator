@@ -28,7 +28,7 @@
 
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <TextBlock Text="{StaticResource StrDispenseTerminal}" 
+                    <TextBlock Text="{StaticResource DispenseTerminal}" 
                                Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
                                Foreground="{StaticResource TextSecondaryBrush}"
                                FontWeight="Black"/>

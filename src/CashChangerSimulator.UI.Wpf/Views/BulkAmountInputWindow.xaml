@@ -28,11 +28,11 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,8">
-            <TextBlock x:Name="TitleText" Text="{StaticResource StrBulkInput}" 
+            <TextBlock x:Name="TitleText" Text="{StaticResource BulkInput}" 
                        Style="{StaticResource MaterialDesignHeadline5TextBlock}" 
                        Foreground="{StaticResource TextSecondaryBrush}"
                        FontWeight="Black"/>
-            <TextBlock x:Name="SubtitleText" Text="{StaticResource StrBulkInputDefaultSubtitle}" FontSize="11" Opacity="0.4" Margin="0,2,0,0"/>
+            <TextBlock x:Name="SubtitleText" Text="{StaticResource BulkInputDefaultSubtitle}" FontSize="11" Opacity="0.4" Margin="0,2,0,0"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" Margin="0,0,0,12" VerticalScrollBarVisibility="Auto">
@@ -75,12 +75,12 @@
         </Border>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{StaticResource StrCancel}" Click="CancelButton_Click" 
+            <Button Content="{StaticResource Cancel}" Click="CancelButton_Click" 
                     Style="{StaticResource SecondaryButtonStyle}" 
                     Margin="0,0,12,0" 
                     AutomationProperties.AutomationId="BulkCancelButton"
                     Width="100" Height="40"/>
-            <Button x:Name="ConfirmButton" Content="{StaticResource StrOk}" Click="OkButton_Click" 
+            <Button x:Name="ConfirmButton" Content="{StaticResource Ok}" Click="OkButton_Click" 
                     Style="{StaticResource PrimaryButtonStyle}" 
                     AutomationProperties.AutomationId="BulkConfirmButton"
                     MinWidth="100" Height="40"/>

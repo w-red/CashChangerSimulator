@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:DispenseViewModel}">
     <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{StaticResource StrCashBalance}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black"/>
+        <TextBlock Text="{StaticResource CashBalance}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black"/>
         <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />

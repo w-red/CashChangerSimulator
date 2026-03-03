@@ -18,7 +18,7 @@
 
     <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}">
         <StackPanel>
-            <TextBlock Text="{StaticResource StrAdvancedSimulation}" FontSize="12" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+            <TextBlock Text="{StaticResource AdvancedSimulation}" FontSize="12" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
             
             <StackPanel Margin="0,0,0,16">
                 <!-- Settings Toggle Section -->
@@ -27,24 +27,24 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="{StaticResource StrRealTimeData}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="{StaticResource RealTimeData}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                     <ToggleButton Grid.Column="1" 
                                    IsChecked="{Binding IsRealTimeDataEnabled.Value}" 
                                    Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                   ToolTip="{StaticResource StrRealTimeData}" />
+                                   ToolTip="{StaticResource RealTimeData}" />
                 </Grid>
 
                 <Separator Background="{StaticResource TextPrimaryBrush}" Opacity="0.3" Margin="0,8"/>
 
                 <!-- Scripts Section -->
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,12" Visibility="{Binding IsDepositInProgress.Value, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="{StaticResource StrCurrentDeposit}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                    <TextBlock Text="{StaticResource CurrentDeposit}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
                     <TextBlock Text="{Binding CurrencyPrefix}" Foreground="{DynamicResource SecondaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
                     <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{DynamicResource SecondaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
                     <TextBlock Text="{Binding CurrencySuffix}" Foreground="{DynamicResource SecondaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
                 </StackPanel>
 
-                <TextBlock Text="{StaticResource StrScriptInput}" FontSize="13" FontWeight="Bold" Margin="0,8,0,8" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="{StaticResource ScriptInput}" FontSize="13" FontWeight="Bold" Margin="0,8,0,8" Foreground="{StaticResource TextPrimaryBrush}"/>
                 <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                          Style="{StaticResource ModernTextBoxStyle}" Foreground="{StaticResource TextPrimaryBrush}"
                          materialDesign:HintAssist.Hint="" materialDesign:HintAssist.IsFloating="False"
@@ -52,10 +52,10 @@
                          AutomationProperties.Name="JSON Transaction Script Input"
                          AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="150" FontFamily="Consolas" Margin="0,0,0,8"/>
                 
-                <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" Visibility="{Binding ScriptError.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" Visibility="{Binding ScriptError.Value, Converter={StaticResource ingNullOrEmptyToVisibilityConv}}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
                 
                 <Button Style="{StaticResource PrimaryButtonStyle}" 
-                        Content="{StaticResource StrOk}" 
+                        Content="{StaticResource Ok}" 
                         Command="{Binding ExecuteScriptCommand}" 
                         HorizontalAlignment="Right" Margin="0,8,0,0" />
             </StackPanel>
