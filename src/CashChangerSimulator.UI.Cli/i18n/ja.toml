@@ -1,0 +1,67 @@
+# CLI 日本語翻訳ファイル
+
+# デバイス操作
+DeviceOpened = "デバイスが正常にオープンされました。"
+# {0}: エラーメッセージ
+FailedToOpen = "デバイスのオープンに失敗しました: {0}"
+DeviceClaimed = "排他的アクセス権を取得しました。"
+# {0}: エラーメッセージ
+FailedToClaim = "アクセス権の取得に失敗しました: {0}"
+DeviceEnabled = "デバイスが有効になりました。"
+# {0}: エラーメッセージ
+FailedToEnable = "デバイスの有効化に失敗しました: {0}"
+DeviceDisabled = "デバイスが無効になりました。"
+DeviceReleased = "排他的アクセス権を解放しました。"
+DeviceClosed = "デバイスが正常にクローズされました。"
+
+# 入出金操作
+CashCountsUpdated = "デバイスから在高情報を更新しました。"
+# {0}: エラーメッセージ
+FailedToReadCashCounts = "在高情報の読み取りに失敗しました: {0}"
+# {0}: 入金金額, {1}: 非同期フラグ(true/false)
+DepositStarted = "入金中: {0} (非同期: {1})..."
+DepositCompleted = "入金が完了しました。"
+DepositAsyncWarning = "非同期モードで入金を開始しました。後で fixDeposit/endDeposit を実行してください。"
+DepositFixed = "入金が確定されました。"
+EndDepositCompleted = "入金終了処理が完了しました。"
+# {0}: エラーメッセージ
+DepositFailed = "入金に失敗しました: {0}"
+# {0}: 出金金額
+DispensedSuccess = "{0} の出金に成功しました。"
+# {0}: エラーメッセージ
+DispenseFailed = "出金に失敗しました: {0}"
+
+# 履歴・ステータス
+StatusHeader = "デバイスステータス"
+StateLabel = "状態"
+EnabledLabel = "有効"
+InventoryHeader = "在庫状況"
+DenominationLabel = "金種"
+CountLabel = "枚数"
+AmountLabel = "金額"
+TotalCaption = "合計"
+# {0}: 最大表示件数
+TransactionHistoryHeader = "最近の取引 (最大 {0} 件)"
+TimestampLabel = "日時"
+TypeLabel = "種別"
+CurrencyLabel = "通貨"
+
+# ヘルプ・共通
+AvailableCommands = "利用可能なコマンド"
+CommandLabel = "コマンド"
+DescriptionLabel = "説明"
+HelpDescription = "このヘルプを表示します"
+ExitDescription = "CLI を終了します"
+
+# 終了確認
+ExitConfirmPrompt = "本当に終了しますか？（デバイスは自動的にクローズされます）"
+ExitProcessingWarning = "警告: デバイスがまだオープンされているか、処理中の可能性があります。"
+
+# スクリプト
+# {0}: スクリプトのパス
+ScriptExecuting = "スクリプト実行中: {0}..."
+ScriptCompleted = "スクリプトの実行が完了しました。"
+# {0}: エラーメッセージ
+ScriptFailed = "スクリプトの実行中にエラーが発生しました: {0}"
+# {0}: ファイルパス
+FileNotFound = "エラー: ファイルが見つかりません: {0}"
