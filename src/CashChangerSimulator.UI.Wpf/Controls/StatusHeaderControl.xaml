@@ -18,6 +18,10 @@
     <StackPanel VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,12">
             <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
+                    Visibility="{Binding IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                <TextBlock Text="{StaticResource DeviceClosed}" />
+            </Border>
+            <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsDeviceError.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock>
                     <Run Text="Device Error [" /><Run Text="{Binding CurrentErrorCode.Value}" /><Run Text="]" />
@@ -31,10 +35,12 @@
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock Text="{StaticResource ValidationError}"/>
             </Border>
-            <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}">
+            <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}"
+                    Visibility="{Binding IsConnected.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock Text="{Binding OverallStatus.Value}"/>
             </Border>
-            <Border Background="{Binding FullStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}" Margin="0">
+            <Border Background="{Binding FullStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}" Margin="0"
+                    Visibility="{Binding IsConnected.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock Text="{Binding FullStatus.Value}"/>
             </Border>
         </StackPanel>
@@ -62,6 +68,19 @@
                     </Style>
                 </Button.Style>
                 <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
+            </Button>
+
+            <!-- Connect Button (New) -->
+            <Button Command="{Binding ConnectCommand}"
+                    Style="{StaticResource TagButtonStyle}"
+                    Background="{StaticResource PrimaryBrush}"
+                    Foreground="Black"
+                    Height="32" Margin="0,0,8,0"
+                    Visibility="{Binding IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Power" Width="16" Height="16" Margin="0,0,4,0"/>
+                    <TextBlock Text="{StaticResource Connect}" VerticalAlignment="Center"/>
+                </StackPanel>
             </Button>
 
             <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"

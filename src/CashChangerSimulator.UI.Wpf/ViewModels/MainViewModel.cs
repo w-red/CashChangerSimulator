@@ -1,3 +1,4 @@
+using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
@@ -6,7 +7,9 @@ using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Views;
+using Microsoft.Extensions.Logging;
 using R3;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -74,7 +77,8 @@ public class MainViewModel : IDisposable
             monitorsProvider,
             metadataProvider,
             hardwareStatusManager,
-            depositController)
+            depositController,
+            cashChanger)
             .AddTo(_disposables);
 
         Deposit = new DepositViewModel(
@@ -108,6 +112,20 @@ public class MainViewModel : IDisposable
         configProvider.Reloaded
             .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.System.UIMode)
             .AddTo(_disposables);
+
+        // Auto-open device if NOT ColdStart
+        if (!configProvider.Config.Simulation.ColdStart)
+        {
+            try
+            {
+                cashChanger.Open();
+                // Optionally Claim/Enable here if needed for deeper HOT start
+            }
+            catch (Exception ex)
+            {
+                LogProvider.CreateLogger<MainViewModel>().LogError(ex, "Failed to auto-open device during Hot Start.");
+            }
+        }
 
         GlobalModeName = Deposit.CurrentModeName
             .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) =>

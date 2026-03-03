@@ -6,6 +6,7 @@ using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.Views;
+using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
 
@@ -42,6 +43,10 @@ public class InventoryViewModel : IDisposable
     public BindableReactiveProperty<bool> IsDeviceError { get; }
     /// <summary>現在のエラーコード。</summary>
     public BindableReactiveProperty<int?> CurrentErrorCode { get; }
+    /// <summary>デバイスが接続（Open）されているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsConnected { get; }
+    /// <summary>デバイスを接続（Open）するコマンド。</summary>
+    public ReactiveCommand ConnectCommand { get; }
     /// <summary>最近の取引履歴リスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
@@ -62,7 +67,8 @@ public class InventoryViewModel : IDisposable
         MonitorsProvider monitorsProvider,
         CurrencyMetadataProvider metadataProvider,
         HardwareStatusManager hardwareStatusManager,
-        DepositController depositController)
+        DepositController depositController,
+        SimulatorCashChanger cashChanger)
     {
         _inventory = inventory;
         _history = history;
@@ -78,6 +84,7 @@ public class InventoryViewModel : IDisposable
         IsOverlapped = _hardwareStatusManager.IsOverlapped;
         IsDeviceError = _hardwareStatusManager.IsDeviceError;
         CurrentErrorCode = _hardwareStatusManager.CurrentErrorCode;
+        IsConnected = _hardwareStatusManager.IsConnected;
         OverallStatus = _statusAggregator.DeviceStatus;
         FullStatus = _statusAggregator.FullStatus;
 
@@ -111,6 +118,22 @@ public class InventoryViewModel : IDisposable
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+
+        ConnectCommand = new ReactiveCommand().AddTo(_disposables);
+        ConnectCommand.Subscribe(_ =>
+        {
+            try
+            {
+                cashChanger.Open();
+                // Simulation will trigger HardwareStatusManager.IsConnected = true
+            }
+            catch (Exception)
+            {
+                // Simple logging for now
+                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+            }
+        });
+
         OpenSettingsCommand.Subscribe(_ =>
         {
             var settingsWindow = new SettingsWindow()
