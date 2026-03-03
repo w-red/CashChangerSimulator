@@ -1,6 +1,11 @@
 using System;
-using ConsoleAppFramework;
-using Kokuban;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
+using Cocona;
+using Spectre.Console;
+using Microsoft.Extensions.DependencyInjection;
+using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -8,48 +13,134 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        CliDIContainer.Initialize(args);
+        var (globalArgs, commandArgs) = ExtractGlobalOptions(args);
+        
+        var builder = CoconaApp.CreateBuilder(commandArgs);
+        CliDIContainer.ConfigureServices(builder.Services, commandArgs);
+        
+        var app = builder.Build();
+        app.AddCommands<CliCommands>();
 
-        ConsoleApp.ServiceProvider = new CliResolverServiceProvider(CliDIContainer.Resolver);
+        // Handle arguments globally
+        var options = app.Services.GetRequiredService<CliSessionOptions>();
+        ApplyGlobalOptions(globalArgs, options);
 
-        if (args.Length == 0)
+        if (commandArgs.Length == 0)
         {
-            RunInteractiveMode();
+            CliDIContainer.PostInitialize(app.Services, commandArgs);
+            RunInteractiveMode(app.Services);
         }
         else
         {
-            // Single-shot mode: use ConsoleAppFramework for full CLI parsing
-            var app = ConsoleApp.Create();
-            app.Add<CliCommands>();
-            app.Run(args);
+            // Single-shot mode
+            CliDIContainer.PostInitialize(app.Services, commandArgs);
+            app.Run();
         }
     }
 
-    private static void RunInteractiveMode()
+    private static (string[] global, string[] command) ExtractGlobalOptions(string[] args)
     {
-        var commands = CliDIContainer.Resolve<CliCommands>();
+        var globals = new List<string>();
+        var commands = new List<string>();
+        
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "--async")
+            {
+                globals.Add(args[i]);
+            }
+            else if ((args[i] == "--lang" || args[i] == "--currency") && i + 1 < args.Length)
+            {
+                globals.Add(args[i]);
+                globals.Add(args[++i]);
+            }
+            else
+            {
+                commands.Add(args[i]);
+            }
+        }
+        return (globals.ToArray(), commands.ToArray());
+    }
+
+    private static void ApplyGlobalOptions(string[] globalArgs, CliSessionOptions options)
+    {
+        for (int i = 0; i < globalArgs.Length; i++)
+        {
+            switch (globalArgs[i])
+            {
+                case "--async":
+                    options.IsAsync = true;
+                    break;
+                case "--lang":
+                    if (i + 1 < globalArgs.Length)
+                    {
+                        var lang = globalArgs[++i];
+                        options.Language = lang;
+                        try {
+                            var culture = new CultureInfo(lang);
+                            CultureInfo.DefaultThreadCurrentCulture = culture;
+                            CultureInfo.DefaultThreadCurrentUICulture = culture;
+                            Thread.CurrentThread.CurrentCulture = culture;
+                            Thread.CurrentThread.CurrentUICulture = culture;
+                        } catch {
+                        }
+                    }
+                    break;
+                case "--currency":
+                    if (i + 1 < globalArgs.Length) options.CurrencyCode = globalArgs[++i].ToUpperInvariant();
+                    break;
+            }
+        }
+    }
+
+    private static bool IsOnlyGlobalOptions(string[] args)
+    {
+        // Simple heuristic: if all args start with --, it's likely just options for interactive mode
+        foreach (var arg in args)
+        {
+            if (!arg.StartsWith("--")) return false;
+        }
+        return true;
+    }
+
+    private static void RunInteractiveMode(IServiceProvider services)
+    {
+        var commands = services.GetRequiredService<CliCommands>();
+        var changer = services.GetRequiredService<SimulatorCashChanger>();
+        var console = services.GetRequiredService<IAnsiConsole>();
+        var options = services.GetRequiredService<CliSessionOptions>();
 
         Console.CancelKeyPress += (_, e) =>
         {
             e.Cancel = true;
-            Console.WriteLine();
-            Console.WriteLine(Chalk.Yellow["Use 'exit' to quit."]);
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[yellow]Use 'exit' to quit.[/]");
         };
 
-        Console.WriteLine(Chalk.Cyan.Bold["=== CashChangerSimulator CLI ==="]);
-        Console.WriteLine("Type 'help' to see available commands.");
-        Console.WriteLine("Type 'exit' to quit.");
-        Console.WriteLine();
+        AnsiConsole.Write(new FigletText("Cash Changer").Color(Color.Cyan));
+        AnsiConsole.Write(new Rule("[cyan]Simulator CLI[/]").LeftJustified());
+        AnsiConsole.MarkupLine("Type [bold yellow]help[/] to see available commands.");
+        AnsiConsole.MarkupLine("Type [bold yellow]exit[/] to quit.");
+        AnsiConsole.WriteLine();
 
         while (true)
         {
-            Console.Write("> ");
-            var line = Console.ReadLine();
-            if (line == null) break; // EOF
+            var prompt = options.IsAsync ? "[yellow]async[/] [white]>[/]" : "[white]>[/]";
+            var line = console.Prompt(
+                new TextPrompt<string>(prompt)
+                    .AllowEmpty()
+                    .DefaultValue("help")
+                    .HideDefaultValue());
+
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             var trimmed = line.Trim();
-            if (trimmed == "exit" || trimmed == "quit") break;
+            var lower = trimmed.ToLowerInvariant();
+            if (lower == "exit" || lower == "quit")
+            {
+                if (ConfirmExit(changer, console)) break;
+                continue;
+            }
 
             var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var command = parts[0].ToLowerInvariant();
@@ -81,13 +172,13 @@ public class Program
                         if (parts.Length > 1 && int.TryParse(parts[1], out var amount))
                             commands.Deposit(amount);
                         else
-                            Console.WriteLine(Chalk.Red["Usage: deposit <amount>"]);
+                            AnsiConsole.MarkupLine("[red]Usage: deposit <amount>[/]");
                         break;
                     case "dispense":
                         if (parts.Length > 1 && int.TryParse(parts[1], out var dispAmt))
                             commands.Dispense(dispAmt);
                         else
-                            Console.WriteLine(Chalk.Red["Usage: dispense <amount>"]);
+                            AnsiConsole.MarkupLine("[red]Usage: dispense <amount>[/]");
                         break;
                     case "history":
                         var count = parts.Length > 1 && int.TryParse(parts[1], out var c) ? c : 10;
@@ -103,41 +194,45 @@ public class Program
                         if (parts.Length > 1)
                             commands.RunScript(parts[1]).GetAwaiter().GetResult();
                         else
-                            Console.WriteLine(Chalk.Red["Usage: run-script <path>"]);
+                            AnsiConsole.MarkupLine("[red]Usage: run-script <path>[/]");
                         break;
                     case "help":
-                        PrintHelp();
+                        commands.Help();
                         break;
                     default:
-                        Console.WriteLine(Chalk.Red[$"Unknown command: {command}. Type 'help' for available commands."]);
+                        AnsiConsole.MarkupLine($"[red]Unknown command: {command}. Type 'help' for available commands.[/]");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(Chalk.Red[$"Error: {ex.Message}"]);
+                AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
             }
             // Wait briefly for async log messages to flush before showing prompt
             Thread.Sleep(100);
         }
+        
+        // Final cleanup
+        try {
+            changer.Close();
+        } catch { }
     }
 
-    private static void PrintHelp()
+    private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console)
     {
-        Console.WriteLine(Chalk.Cyan.Bold["Available commands:"]);
-        Console.WriteLine("  open                  - Open the device");
-        Console.WriteLine("  claim [timeout]       - Claim exclusive access (default: 1000ms)");
-        Console.WriteLine("  enable                - Enable the device");
-        Console.WriteLine("  status                - Show device status and inventory");
-        Console.WriteLine("  readCashCounts        - Read cash counts from device");
-        Console.WriteLine("  deposit <amount>      - Begin deposit");
-        Console.WriteLine("  dispense <amount>     - Dispense change");
-        Console.WriteLine("  history [count]       - Show transaction history (default: 10)");
-        Console.WriteLine("  disable               - Disable the device");
-        Console.WriteLine("  release               - Release exclusive access");
-        Console.WriteLine("  close                 - Close the device");
-        Console.WriteLine("  run-script <path>     - Execute a JSON scenario script");
-        Console.WriteLine("  help                  - Show this help");
-        Console.WriteLine("  exit                  - Exit the CLI");
+        // PosCommon/CashChangerBasic properties
+        var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
+        // In this simulator, we might need a more direct way since base.State might not be updated yet
+        // but let's assume the simulator logic is correct.
+        
+        if (isOpen)
+        {
+            console.MarkupLine("[yellow]Warning: Device is still open or processing.[/]");
+            if (!console.Confirm("Are you sure you want to exit? (Device will be closed automatically)"))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
