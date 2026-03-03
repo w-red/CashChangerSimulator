@@ -15,7 +15,7 @@
             Margin="0,0,0,24">
             <StackPanel>
                 <TextBlock
-                    Text="{StaticResource StrCoreParameters}"
+                    Text="{StaticResource CoreParameters}"
                     FontSize="11"
                     FontWeight="Black"
                     Foreground="{StaticResource TextSecondaryBrush}"
@@ -26,7 +26,7 @@
                     SelectedItem="{Binding CurrencyCode.Value}"
                     Style="{StaticResource ModernComboBoxStyle}"/>
                 <TextBlock
-                    Text="{StaticResource StrRestartRequired}"
+                    Text="{StaticResource RestartRequired}"
                     FontSize="10"
                     Foreground="{StaticResource SecondaryBrush}"
                     Margin="4,4,0,0"/>
@@ -38,7 +38,7 @@
                     Style="{StaticResource ModernComboBoxStyle}"
                     Margin="0,16,0,0"/>
                 <TextBlock
-                    Text="{StaticResource StrUIBehaviorNote}"
+                    Text="{StaticResource UIBehaviorNote}"
                     FontSize="10"
                     Foreground="{StaticResource SecondaryBrush}"
                     Margin="4,4,0,0"/>
@@ -58,7 +58,7 @@
             Margin="0,0,0,24">
             <StackPanel>
                 <TextBlock
-                    Text="{StaticResource StrGlobalThresholds}"
+                    Text="{StaticResource GlobalThresholds}"
                     FontSize="11"
                     FontWeight="Black"
                     Foreground="{StaticResource TextSecondaryBrush}"

@@ -1,4 +1,4 @@
-﻿using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using System.Windows;

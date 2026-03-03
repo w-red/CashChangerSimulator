@@ -16,7 +16,7 @@
         <!-- Simple Dispense -->
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="{StaticResource StrAmountDispense}" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,12"/>
+                <TextBlock Text="{StaticResource AmountDispense}" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,12"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -24,14 +24,14 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Column="0" 
-                             materialDesign:HintAssist.Hint="{StaticResource StrAmountHint}"
+                             materialDesign:HintAssist.Hint="{StaticResource AmountHint}"
                              materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
                              Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                              IsEnabled="{Binding CanOperate.Value}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              FontSize="22" FontWeight="Light"
                              AutomationProperties.AutomationId="DispenseBox"/>
-                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
+                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource ingNullOrEmptyToVisibilityConv}}"/>
 
                     <Button Grid.Column="1" 
                             Style="{StaticResource PrimaryButtonStyle}" 
@@ -48,7 +48,7 @@
 
         <Separator Background="#1AFFFFFF" Margin="0,4,0,16"/>
 
-        <TextBlock Text="{StaticResource StrQuickDispense}" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,12" HorizontalAlignment="Center"/>
+        <TextBlock Text="{StaticResource QuickDispense}" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,12" HorizontalAlignment="Center"/>
 
         <ItemsControl ItemsSource="{Binding Denominations}"
                       ItemsPanel="{StaticResource CenteredWrapPanelItemsPanel}"
@@ -75,13 +75,13 @@
                 AutomationProperties.AutomationId="BulkDispenseShowButton">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="PlaylistCheck" Margin="0,0,8,0"/>
-                <TextBlock Text="{StaticResource StrBulkDispense}" FontSize="12" FontWeight="Bold"/>
+                <TextBlock Text="{StaticResource BulkDispense}" FontSize="12" FontWeight="Bold"/>
             </StackPanel>
         </Button>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
             <Button Command="{Binding ResetErrorCommand}"
-                    Content="{StaticResource ResetErrorName}"
+                    Content="{StaticResource ResetError}"
                     AutomationProperties.AutomationId="ResetErrorButton"
                     FontSize="10" Padding="8,2"
                     Margin="0,0,8,0">

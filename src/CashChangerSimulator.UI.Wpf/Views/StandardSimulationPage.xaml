@@ -28,7 +28,7 @@
                 <!-- Terminal Launchers -->
                 <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="{StaticResource StrTerminalAccess}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                        <TextBlock Text="{StaticResource TerminalAccess}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                         
                         <Grid>
                             <Grid.RowDefinitions>
@@ -48,7 +48,7 @@
                                     AutomationProperties.AutomationId="LaunchDepositButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
-                                    <TextBlock Text="{StaticResource StrDeposit}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
+                                    <TextBlock Text="{StaticResource Deposit}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
                                 </StackPanel>
                             </Button>
                             
@@ -60,7 +60,7 @@
                                     AutomationProperties.AutomationId="LaunchDispenseButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
-                                    <TextBlock Text="{StaticResource StrDispense}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
+                                    <TextBlock Text="{StaticResource Dispense}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
                                 </StackPanel>
                             </Button>
 
@@ -72,7 +72,7 @@
                                     AutomationProperties.AutomationId="LaunchAdvancedSimulationButton">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Terminal" Width="20" Height="20" Margin="0,0,8,0" Foreground="White"/>
-                                    <TextBlock Text="{StaticResource StrAdvancedSimulation}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="{StaticResource AdvancedSimulation}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Foreground="White"/>
                                 </StackPanel>
                             </Button>
                         </Grid>

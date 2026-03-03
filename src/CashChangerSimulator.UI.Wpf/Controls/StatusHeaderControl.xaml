@@ -25,11 +25,11 @@
             </Border>
             <Border Background="#FF5252" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="{StaticResource StrJamError}"/>
+                <TextBlock Text="{StaticResource JamError}"/>
             </Border>
             <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="{StaticResource StrValidationError}"/>
+                <TextBlock Text="{StaticResource ValidationError}"/>
             </Border>
             <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}">
                 <TextBlock Text="{Binding OverallStatus.Value}"/>

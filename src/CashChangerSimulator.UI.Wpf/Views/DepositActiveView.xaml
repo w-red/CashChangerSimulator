@@ -13,7 +13,7 @@
         <!-- Current Amount Display -->
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
             <StackPanel HorizontalAlignment="Center">
-                <TextBlock Text="{StaticResource StrCurrentDeposit}" FontSize="10" FontWeight="Bold" 
+                <TextBlock Text="{StaticResource CurrentDeposit}" FontSize="10" FontWeight="Bold" 
                            Opacity="0.5" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="0,0,4,8" Opacity="0.7"/>
@@ -39,7 +39,7 @@
                         AutomationProperties.AutomationId="BulkInsertButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrBulk}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{StaticResource Bulk}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
@@ -48,7 +48,7 @@
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrError}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{StaticResource Error}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -58,7 +58,7 @@
                     AutomationProperties.AutomationId="FixDepositButton">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Check" Margin="0,0,12,0" />
-                    <TextBlock Text="{StaticResource StrFinishCounting}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{StaticResource FinishCounting}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold" FontSize="14"/>
                 </StackPanel>
             </Button>
         </StackPanel>
@@ -80,7 +80,7 @@
                             AutomationProperties.AutomationId="PauseDepositButton">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Pause" Margin="0,0,8,0"/>
-                            <TextBlock Text="{StaticResource StrPause}" FontSize="12" FontWeight="Bold"/>
+                            <TextBlock Text="{StaticResource Pause}" FontSize="12" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource PrimaryButtonStyle}" 
@@ -90,7 +90,7 @@
                             AutomationProperties.AutomationId="ResumeDepositButton">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Play" Margin="0,0,8,0"/>
-                            <TextBlock Text="{StaticResource StrResume}"/>
+                            <TextBlock Text="{StaticResource Resume}"/>
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -102,7 +102,7 @@
                         Margin="4" Height="44" AutomationProperties.AutomationId="StoreDepositButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Wallet" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrStore}" FontSize="14"/>
+                        <TextBlock Text="{StaticResource Store}" FontSize="14"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -115,12 +115,12 @@
                         AutomationProperties.AutomationId="RepayDepositButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Cancel" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource StrReturn}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{StaticResource Return}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 <!-- RESET ERROR during active session -->
                 <Button Command="{Binding ResetErrorCommand}"
-                        Content="{StaticResource ResetErrorName}"
+                        Content="{StaticResource ResetError}"
                         Margin="4" Height="40"
                         AutomationProperties.AutomationId="ActiveResetErrorButton">
                     <Button.Style>

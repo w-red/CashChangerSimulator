@@ -3,93 +3,93 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- Common Strings -->
-    <system:String x:Key="StrCancel">CANCEL</system:String>
-    <system:String x:Key="StrOk">OK</system:String>
-    <system:String x:Key="StrError">ERROR</system:String>
-    <system:String x:Key="StrReset">RESET</system:String>
-    <system:String x:Key="StrWarn">WARNING</system:String>
-    <system:String x:Key="StrBusy">BUSY</system:String>
+    <system:String x:Key="Cancel">CANCEL</system:String>
+    <system:String x:Key="Ok">OK</system:String>
+    <system:String x:Key="Error">ERROR</system:String>
+    <system:String x:Key="Reset">RESET</system:String>
+    <system:String x:Key="Warn">WARNING</system:String>
+    <system:String x:Key="Busy">BUSY</system:String>
 
-    <system:String x:Key="StrCashBalance">CASH BALANCE</system:String>
-    <system:String x:Key="StrActivityFeed">ACTIVITY FEED</system:String>
-    <system:String x:Key="StrValidationError">VAL ERROR</system:String>
-    <system:String x:Key="StrJamError">JAM ERROR</system:String>
+    <system:String x:Key="CashBalance">CASH BALANCE</system:String>
+    <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>
+    <system:String x:Key="ValidationError">VAL ERROR</system:String>
+    <system:String x:Key="JamError">JAM ERROR</system:String>
 
     <!-- Validation Messages -->
-    <system:String x:Key="StrErrorEnterValidNumber">Enter a valid number</system:String>
-    <system:String x:Key="StrErrorAmountPositive">Amount must be positive</system:String>
-    <system:String x:Key="StrErrorInsufficientFunds">Insufficient funds</system:String>
-    <system:String x:Key="StrAmountHint">Amount</system:String>
+    <system:String x:Key="ErrorEnterValidNumber">Enter a valid number</system:String>
+    <system:String x:Key="ErrorAmountPositive">Amount must be positive</system:String>
+    <system:String x:Key="ErrorInsufficientFunds">Insufficient funds</system:String>
+    <system:String x:Key="AmountHint">Amount</system:String>
 
     <!-- Main Window / Settings -->
-    <system:String x:Key="StrSystemSettings">SYSTEM SETTINGS</system:String>
-    <system:String x:Key="StrSettingsSubtitle">Configure device behavior and currency parameters</system:String>
-    <system:String x:Key="StrCoreParameters">CORE PARAMETERS</system:String>
-    <system:String x:Key="StrRestartRequired">* Requires restart for inventory recalibration.</system:String>
-    <system:String x:Key="StrUIBehaviorNote">* Change the user interface behavior pattern.</system:String>
-    <system:String x:Key="StrGlobalThresholds">GLOBAL THRESHOLDS</system:String>
-    <system:String x:Key="StrDenomCalibration">DENOMINATION CALIBRATION</system:String>
+    <system:String x:Key="SystemSettings">SYSTEM SETTINGS</system:String>
+    <system:String x:Key="SettingsSubtitle">Configure device behavior and currency parameters</system:String>
+    <system:String x:Key="CoreParameters">CORE PARAMETERS</system:String>
+    <system:String x:Key="RestartRequired">* Requires restart for inventory recalibration.</system:String>
+    <system:String x:Key="UIBehaviorNote">* Change the user interface behavior pattern.</system:String>
+    <system:String x:Key="GlobalThresholds">GLOBAL THRESHOLDS</system:String>
+    <system:String x:Key="DenomCalibration">DENOMINATION CALIBRATION</system:String>
 
     <!-- Simulation Page -->
-    <system:String x:Key="StrTerminalAccess">TERMINAL ACCESS</system:String>
-    <system:String x:Key="StrDeposit">DEPOSIT</system:String>
-    <system:String x:Key="StrDispense">DISPENSE</system:String>
-    <system:String x:Key="StrTransactionStatus">TRANSACTION STATUS</system:String>
-    <system:String x:Key="StrOposDeviceLog">OPOS DEVICE LOG</system:String>
-    <system:String x:Key="StrStartSimulation">START SIMULATION</system:String>
-    <system:String x:Key="StrReadyForTransaction">Ready for Transaction</system:String>
-    <system:String x:Key="StrTargetAmountHint">Target Amount</system:String>
-    <system:String x:Key="StrInsertCashToContinue">Insert Cash to Continue</system:String>
-    <system:String x:Key="StrTransactionFinished">Transaction Finished</system:String>
+    <system:String x:Key="TerminalAccess">TERMINAL ACCESS</system:String>
+    <system:String x:Key="Deposit">DEPOSIT</system:String>
+    <system:String x:Key="Dispense">DISPENSE</system:String>
+    <system:String x:Key="TransactionStatus">TRANSACTION STATUS</system:String>
+    <system:String x:Key="OposDeviceLog">OPOS DEVICE LOG</system:String>
+    <system:String x:Key="StartSimulation">START SIMULATION</system:String>
+    <system:String x:Key="ReadyForTransaction">Ready for Transaction</system:String>
+    <system:String x:Key="TargetAmountHint">Target Amount</system:String>
+    <system:String x:Key="InsertCashToContinue">Insert Cash to Continue</system:String>
+    <system:String x:Key="TransactionFinished">Transaction Finished</system:String>
 
     <!-- Terminals -->
-    <system:String x:Key="StrDispenseTerminal">DISPENSE TERMINAL</system:String>
-    <system:String x:Key="StrDepositTerminal">DEPOSIT TERMINAL</system:String>
-    <system:String x:Key="StrAmountDispense">AMOUNT DISPENSE</system:String>
-    <system:String x:Key="StrQuickDispense">QUICK DISPENSE</system:String>
-    <system:String x:Key="StrBulkDispense">BULK DISPENSE</system:String>
-    <system:String x:Key="StrDispenseError">DISPENSE ERROR</system:String>
-    <system:String x:Key="StrHardwareCheckRequired">Hardware check required.</system:String>
-    <system:String x:Key="StrClearError">CLEAR ERROR</system:String>
-    <system:String x:Key="ResetErrorName">RESET ERROR</system:String>
-    <system:String x:Key="StrDispensing">DISPENSING...</system:String>
-    <system:String x:Key="StrWarnDispenseDuringDeposit">Cannot dispense while a deposit is in progress.</system:String>
-    <system:String x:Key="StrWarnDepositDuringDispense">Cannot start deposit while a dispense is in progress.</system:String>
+    <system:String x:Key="DispenseTerminal">DISPENSE TERMINAL</system:String>
+    <system:String x:Key="DepositTerminal">DEPOSIT TERMINAL</system:String>
+    <system:String x:Key="AmountDispense">AMOUNT DISPENSE</system:String>
+    <system:String x:Key="QuickDispense">QUICK DISPENSE</system:String>
+    <system:String x:Key="BulkDispense">BULK DISPENSE</system:String>
+    <system:String x:Key="DispenseError">DISPENSE ERROR</system:String>
+    <system:String x:Key="HardwareCheckRequired">Hardware check required.</system:String>
+    <system:String x:Key="ClearError">CLEAR ERROR</system:String>
+    <system:String x:Key="ResetError">RESET ERROR</system:String>
+    <system:String x:Key="Dispensing">DISPENSING...</system:String>
+    <system:String x:Key="WarnDispenseDuringDeposit">Cannot dispense while a deposit is in progress.</system:String>
+    <system:String x:Key="WarnDepositDuringDispense">Cannot start deposit while a dispense is in progress.</system:String>
 
-    <system:String x:Key="StrCurrentDeposit">CURRENT DEPOSIT</system:String>
-    <system:String x:Key="StrStartDeposit">START DEPOSIT</system:String>
-    <system:String x:Key="StrQuickDeposit">QUICK DEPOSIT</system:String>
-    <system:String x:Key="StrAutoCalcDenoms">Calculates denominations automatically</system:String>
-    <system:String x:Key="StrBulk">BULK</system:String>
-    <system:String x:Key="StrFinishCounting">FINISH COUNTING</system:String>
-    <system:String x:Key="StrPause">PAUSE</system:String>
-    <system:String x:Key="StrResume">RESUME</system:String>
-    <system:String x:Key="StrStore">STORE</system:String>
-    <system:String x:Key="StrReturn">RETURN</system:String>
+    <system:String x:Key="CurrentDeposit">CURRENT DEPOSIT</system:String>
+    <system:String x:Key="StartDeposit">START DEPOSIT</system:String>
+    <system:String x:Key="QuickDeposit">QUICK DEPOSIT</system:String>
+    <system:String x:Key="AutoCalcDenoms">Calculates denominations automatically</system:String>
+    <system:String x:Key="Bulk">BULK</system:String>
+    <system:String x:Key="FinishCounting">FINISH COUNTING</system:String>
+    <system:String x:Key="Pause">PAUSE</system:String>
+    <system:String x:Key="Resume">RESUME</system:String>
+    <system:String x:Key="Store">STORE</system:String>
+    <system:String x:Key="Return">RETURN</system:String>
 
     <!-- Footer Actions -->
-    <system:String x:Key="StrCommitChanges">COMMIT CHANGES</system:String>
-    <system:String x:Key="StrDefault">DEFAULT</system:String>
-    <system:String x:Key="StrSimulationSlot">INSERT HERE</system:String>
+    <system:String x:Key="CommitChanges">COMMIT CHANGES</system:String>
+    <system:String x:Key="Default">DEFAULT</system:String>
+    <system:String x:Key="SimulationSlot">INSERT HERE</system:String>
 
     <!-- Table Headers -->
-    <system:String x:Key="StrHeaderIdentifier">IDENTIFIER</system:String>
-    <system:String x:Key="StrHeaderBaseQty">BASE QTY</system:String>
-    <system:String x:Key="StrHeaderNearEmpty">N.EMPTY</system:String>
-    <system:String x:Key="StrHeaderNearFull">N.FULL</system:String>
-    <system:String x:Key="StrHeaderMaxCap">MAX CAP</system:String>
+    <system:String x:Key="HeaderIdentifier">IDENTIFIER</system:String>
+    <system:String x:Key="HeaderBaseQty">BASE QTY</system:String>
+    <system:String x:Key="HeaderNearEmpty">N.EMPTY</system:String>
+    <system:String x:Key="HeaderNearFull">N.FULL</system:String>
+    <system:String x:Key="HeaderMaxCap">MAX CAP</system:String>
 
     <!-- Bulk Input Dialog -->
-    <system:String x:Key="StrBulkInput">BULK INPUT</system:String>
-    <system:String x:Key="StrBulkInputDefaultSubtitle">Please enter the quantity for each denomination.</system:String>
-    <system:String x:Key="StrBulkDepositSubtitle">Please enter the quantity to deposit.</system:String>
-    <system:String x:Key="StrBulkDispenseSubtitle">Please enter the quantity to dispense.</system:String>
-    <system:String x:Key="StrErrorCannotOpenTerminalInError">Cannot open terminal while the device is in an error state. Please reset the error first.</system:String>
+    <system:String x:Key="BulkInput">BULK INPUT</system:String>
+    <system:String x:Key="BulkInputDefaultSubtitle">Please enter the quantity for each denomination.</system:String>
+    <system:String x:Key="BulkDepositSubtitle">Please enter the quantity to deposit.</system:String>
+    <system:String x:Key="BulkDispenseSubtitle">Please enter the quantity to dispense.</system:String>
+    <system:String x:Key="ErrorCannotOpenTerminalInError">Cannot open terminal while the device is in an error state. Please reset the error first.</system:String>
 
-    <system:String x:Key="StrErrorCodeCannotReset">Cannot reset error state at this time.</system:String>
-    <system:String x:Key="StrAdvancedSimulation">ADVANCED SIM</system:String>
-    <system:String x:Key="StrExecute">EXECUTE</system:String>
-    <system:String x:Key="StrUposConfig">UPOS CONFIGURATION</system:String>
-    <system:String x:Key="StrRealTimeData">Enable Real Time Data Events</system:String>
-    <system:String x:Key="StrScriptInput">JSON TRANSACTION SCRIPT</system:String>
+    <system:String x:Key="ErrorCodeCannotReset">Cannot reset error state at this time.</system:String>
+    <system:String x:Key="AdvancedSimulation">ADVANCED SIM</system:String>
+    <system:String x:Key="Execute">EXECUTE</system:String>
+    <system:String x:Key="UposConfig">UPOS CONFIGURATION</system:String>
+    <system:String x:Key="RealTimeData">Enable Real Time Data Events</system:String>
+    <system:String x:Key="ScriptInput">JSON TRANSACTION SCRIPT</system:String>
 </ResourceDictionary>

@@ -16,7 +16,7 @@
                 DockPanel.Dock="Top"
                 Padding="15,15,15,10">
                 <TextBlock
-                    Text="{StaticResource StrDenomCalibration}"
+                    Text="{StaticResource DenomCalibration}"
                     FontSize="11"
                     FontWeight="Black"
                     Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -76,11 +76,11 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn
-                        Header="{StaticResource StrHeaderBaseQty}"
+                        Header="{StaticResource HeaderBaseQty}"
                         Binding="{Binding Count.Value}"
                         Width="80"/>
                     <DataGridTextColumn
-                        Header="{StaticResource StrHeaderNearEmpty}"
+                        Header="{StaticResource HeaderNearEmpty}"
                         Binding="{Binding NearEmpty.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>
@@ -90,7 +90,7 @@
                         </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn
-                        Header="{StaticResource StrHeaderNearFull}"
+                        Header="{StaticResource HeaderNearFull}"
                         Binding="{Binding NearFull.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>
@@ -100,7 +100,7 @@
                         </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn
-                        Header="{StaticResource StrHeaderMaxCap}"
+                        Header="{StaticResource HeaderMaxCap}"
                         Binding="{Binding Full.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>

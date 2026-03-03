@@ -124,8 +124,8 @@ public class MainViewModel : IDisposable
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
             {
                 notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["StrErrorCannotOpenTerminalInError"],
-                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                    (string)System.Windows.Application.Current.Resources["ErrorCannotOpenTerminalInError"],
+                    (string)System.Windows.Application.Current.Resources["Warn"]);
                 return;
             }
 
@@ -148,8 +148,8 @@ public class MainViewModel : IDisposable
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
             {
                 notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["StrErrorCannotOpenTerminalInError"],
-                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                    (string)System.Windows.Application.Current.Resources["ErrorCannotOpenTerminalInError"],
+                    (string)System.Windows.Application.Current.Resources["Warn"]);
                 return;
             }
 

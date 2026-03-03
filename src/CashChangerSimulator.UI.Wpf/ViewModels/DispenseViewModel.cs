@@ -141,11 +141,11 @@ public class DispenseViewModel : IDisposable
                 string.IsNullOrWhiteSpace(text)
                     ? null
                     : !decimal.TryParse(text, out var val)
-                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorEnterValidNumber"] as string ?? "Enter a valid number")
+                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorEnterValidNumber"] as string ?? "Enter a valid number")
                     : val <= 0
-                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorAmountPositive"] as string ?? "Amount must be positive")
+                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorAmountPositive"] as string ?? "Amount must be positive")
                     : val > TotalAmount.Value
-                    ? new Exception(System.Windows.Application.Current?.Resources["StrErrorInsufficientFunds"] as string ?? "Insufficient funds")
+                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorInsufficientFunds"] as string ?? "Insufficient funds")
                     : null
             )
             .AddTo(_disposables);
@@ -160,8 +160,8 @@ public class DispenseViewModel : IDisposable
         {
             if (_isInDepositMode.Value)
             {
-                var msg = System.Windows.Application.Current?.Resources["StrWarnDispenseDuringDeposit"] as string ?? "Cannot dispense while deposit is in progress.";
-                var title = System.Windows.Application.Current?.Resources["StrWarn"] as string ?? "Warning";
+                var msg = System.Windows.Application.Current?.Resources["WarnDispenseDuringDeposit"] as string ?? "Cannot dispense while deposit is in progress.";
+                var title = System.Windows.Application.Current?.Resources["Warn"] as string ?? "Warning";
                 _notifyService.ShowWarning(msg, title);
                 return;
             }
@@ -194,8 +194,8 @@ public class DispenseViewModel : IDisposable
             if (_isInDepositMode.Value)
             {
                 _notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["StrWarnDispenseDuringDeposit"],
-                    (string)System.Windows.Application.Current.Resources["StrWarn"]);
+                    (string)System.Windows.Application.Current.Resources["WarnDispenseDuringDeposit"],
+                    (string)System.Windows.Application.Current.Resources["Warn"]);
                 return;
             }
 

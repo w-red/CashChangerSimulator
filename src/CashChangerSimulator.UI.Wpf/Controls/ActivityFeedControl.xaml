@@ -18,7 +18,7 @@
 
     <Border Style="{StaticResource CardStyle}">
         <DockPanel>
-            <TextBlock DockPanel.Dock="Top" Text="{StaticResource StrActivityFeed}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+            <TextBlock DockPanel.Dock="Top" Text="{StaticResource ActivityFeed}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
             
             <ListBox ItemsSource="{Binding RecentTransactions}" 
                      Background="Transparent" BorderThickness="0"
