@@ -1,0 +1,67 @@
+# CLI English Translation File
+
+# Device Lifecycle
+DeviceOpened = "Device opened successfully."
+# {0}: Error message
+FailedToOpen = "Failed to open device: {0}"
+DeviceClaimed = "Device claimed successfully."
+# {0}: Error message
+FailedToClaim = "Failed to claim device: {0}"
+DeviceEnabled = "Device enabled."
+# {0}: Error message
+FailedToEnable = "Failed to enable device: {0}"
+DeviceDisabled = "Device disabled."
+DeviceReleased = "Device released."
+DeviceClosed = "Device closed successfully."
+
+# Cash Operations
+CashCountsUpdated = "Cash counts updated from device."
+# {0}: Error message
+FailedToReadCashCounts = "Failed to read cash counts: {0}"
+# {0}: Deposit amount, {1}: Async flag (true/false)
+DepositStarted = "Depositing [yellow]{0}[/] (Async: {1})..."
+DepositCompleted = "Deposit completed."
+DepositAsyncWarning = "Deposit started in async mode. Use fixDeposit/endDeposit later."
+DepositFixed = "Deposit fixed."
+EndDepositCompleted = "EndDeposit completed."
+# {0}: Error message
+DepositFailed = "Deposit failed: {0}"
+# {0}: Dispense amount
+DispensedSuccess = "Dispensed {0} successfully."
+# {0}: Error message
+DispenseFailed = "Dispense failed: {0}"
+
+# Status and History
+StatusHeader = "Device Status"
+StateLabel = "State"
+EnabledLabel = "Enabled"
+InventoryHeader = "Inventory"
+DenominationLabel = "Denomination"
+CountLabel = "Count"
+AmountLabel = "Amount"
+TotalCaption = "Total"
+# {0}: Max history entries
+TransactionHistoryHeader = "Recent Transactions (up to {0})"
+TimestampLabel = "Timestamp"
+TypeLabel = "Type"
+CurrencyLabel = "Currency"
+
+# Help and Common
+AvailableCommands = "Available commands"
+CommandLabel = "Command"
+DescriptionLabel = "Description"
+HelpDescription = "Show this help"
+ExitDescription = "Exit the CLI"
+
+# Exit Confirmation
+ExitConfirmPrompt = "Are you sure you want to exit? (Device will be closed automatically)"
+ExitProcessingWarning = "Warning: Device is still open or processing."
+
+# Scripts
+# {0}: Script path
+ScriptExecuting = "Executing script: {0}..."
+ScriptCompleted = "Script execution completed."
+# {0}: Error message
+ScriptFailed = "Error executing script: {0}"
+# {0}: File path
+FileNotFound = "Error: File not found: {0}"
