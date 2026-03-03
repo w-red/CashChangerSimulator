@@ -78,7 +78,7 @@ public partial class App : Application
     /// <param name="cultureCode">カルチャコード（"en-US", "ja-JP" など）</param>
     public static void UpdateLanguage(string cultureCode)
     {
-        if (Application.Current == null) return;
+        if (Current == null) return;
 
         try
         {
@@ -88,7 +88,7 @@ public partial class App : Application
                 Source = new Uri($"pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/{resourceName}")
             };
 
-            var dictionaries = Application.Current.Resources.MergedDictionaries;
+            var dictionaries = Current.Resources.MergedDictionaries;
             
             // Find and replace existing Strings dictionary
             for (int i = 0; i < dictionaries.Count; i++)
