@@ -1,5 +1,5 @@
 using System;
-using Kokuban;
+using Spectre.Console;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
@@ -8,7 +8,7 @@ using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
-using MicroResolver;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 
@@ -16,12 +16,19 @@ namespace CashChangerSimulator.UI.Cli;
 
 public static class CliDIContainer
 {
-    private static ObjectResolver _resolver = null!;
+    private static IServiceProvider _serviceProvider = null!;
 
     public static void Initialize(string[] args)
     {
-        var resolver = ObjectResolver.Create();
+        var services = new ServiceCollection();
+        ConfigureServices(services, args);
+        _serviceProvider = services.BuildServiceProvider();
+        
+        SimulatorServices.Provider = new CliResolverServiceProvider(_serviceProvider);
+    }
 
+    public static void ConfigureServices(IServiceCollection services, string[] args)
+    {
         // Logging
         LogProvider.Initialize(new LoggingSettings
         {
@@ -29,35 +36,38 @@ public static class CliDIContainer
             EnableConsole = true,
             EnableFile = false
         });
+
         // Providers
-        resolver.Register<ConfigurationProvider, CliConfigurationProvider>(Lifestyle.Singleton);
-        resolver.Register<ICurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
-        resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
-        resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
-        resolver.Register<INotifyService, CliNotifyService>(Lifestyle.Singleton);
+        services.AddSingleton<ConfigurationProvider, CliConfigurationProvider>();
+        services.AddSingleton<ICurrencyMetadataProvider, CurrencyMetadataProvider>();
+        services.AddSingleton<MonitorsProvider>();
+        services.AddSingleton<OverallStatusAggregatorProvider>();
+        services.AddSingleton<INotifyService, CliNotifyService>();
+        services.AddSingleton<CliSessionOptions>();
+        services.AddSingleton<IAnsiConsole>(AnsiConsole.Console);
 
         // Core Services
-        resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
-        resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
-        resolver.Register<ChangeCalculator, ChangeCalculator>(Lifestyle.Singleton);
-        resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
-        resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
+        services.AddSingleton<Inventory>();
+        services.AddSingleton<TransactionHistory>();
+        services.AddSingleton<ChangeCalculator>();
+        services.AddSingleton<CashChangerManager>();
+        services.AddSingleton<HardwareStatusManager>();
 
         // Simulator / Devices
-        resolver.Register<SimulatorCashChanger, SimulatorCashChanger>(Lifestyle.Singleton);
-        resolver.Register<IDeviceSimulator, CliHardwareSimulator>(Lifestyle.Singleton);
-        resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
-        resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
-        resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
-        resolver.Register<CliCommands, CliCommands>(Lifestyle.Transient);
+        services.AddSingleton<SimulatorCashChanger>();
+        services.AddSingleton<IDeviceSimulator, CliHardwareSimulator>();
+        services.AddSingleton<DepositController>();
+        services.AddSingleton<DispenseController>();
+        services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
+        services.AddTransient<CliCommands>();
+    }
 
-        resolver.Compile();
-        _resolver = resolver;
-
-        SimulatorServices.Provider = new CliResolverServiceProvider(_resolver);
-
+    public static void PostInitialize(IServiceProvider provider, string[] args)
+    {
+        _serviceProvider = provider;
+        
         // Override Configuration from args
-        var configProvider = _resolver.Resolve<ConfigurationProvider>();
+        var configProvider = provider.GetRequiredService<ConfigurationProvider>();
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--currency" && i + 1 < args.Length)
@@ -68,7 +78,7 @@ public static class CliDIContainer
         }
 
         // Initialize Inventory
-        var inventory = _resolver.Resolve<Inventory>();
+        var inventory = provider.GetRequiredService<Inventory>();
         var state = ConfigurationLoader.LoadInventoryState();
         if (state?.Counts != null && state.Counts.Count > 0)
         {
@@ -90,7 +100,7 @@ public static class CliDIContainer
         }
 
         // Initialize History
-        var history = _resolver.Resolve<TransactionHistory>();
+        var history = provider.GetRequiredService<TransactionHistory>();
         var historyState = ConfigurationLoader.LoadHistoryState();
         if (historyState?.Entries != null && historyState.Entries.Count > 0)
         {
@@ -98,33 +108,22 @@ public static class CliDIContainer
         }
     }
 
-    public static ObjectResolver Resolver => _resolver;
+    public static IServiceProvider ServiceProvider => _serviceProvider;
 
-    public static T Resolve<T>() => _resolver.Resolve<T>();
+    public static T Resolve<T>() where T : notnull => _serviceProvider.GetRequiredService<T>();
 }
 
-internal sealed class CliResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider, IServiceProvider
+internal sealed class CliResolverServiceProvider(IServiceProvider provider) : ISimulatorServiceProvider, IServiceProvider
 {
-    private static readonly System.Reflection.MethodInfo _resolveMethod =
-        typeof(ObjectResolver).GetMethod("Resolve", Type.EmptyTypes)!;
+    public T Resolve<T>() where T : class => provider.GetRequiredService<T>();
 
-    public T Resolve<T>() where T : class => resolver.Resolve<T>();
-
-    public object? GetService(Type serviceType)
-    {
-        try {
-            var generic = _resolveMethod.MakeGenericMethod(serviceType);
-            return generic.Invoke(resolver, null);
-        } catch {
-            return null;
-        }
-    }
+    public object? GetService(Type serviceType) => provider.GetService(serviceType);
 }
 
 public class CliNotifyService : INotifyService
 {
     public void ShowWarning(string message, string title)
     {
-        Console.WriteLine(Chalk.Yellow[$"[{title}] {message}"]);
+        AnsiConsole.MarkupLine($"[yellow][[{title}]] {message}[/]");
     }
 }
