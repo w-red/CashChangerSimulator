@@ -4,6 +4,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Services;
 using Moq;
 
 namespace CashChangerSimulator.UI.Tests.Fixtures;
@@ -20,6 +21,12 @@ public class PosTransactionViewModelFixture : IDisposable
     public SimulatorCashChanger CashChanger { get; private set; } = null!;
     public ConfigurationProvider ConfigProvider { get; private set; } = null!;
     public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
+    public IScriptExecutionService ScriptExecutionService { get; private set; } = null!;
+
+    public PosTransactionViewModelFixture()
+    {
+        Initialize();
+    }
 
     public void Initialize(string currencyCode = "JPY")
     {
@@ -37,6 +44,8 @@ public class PosTransactionViewModelFixture : IDisposable
 
         var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
+
+        ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
 
         CashChanger = new SimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware)
         {
