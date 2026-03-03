@@ -123,14 +123,15 @@ public class Program
         AnsiConsole.MarkupLine("Type [bold yellow]exit[/] to quit.");
         AnsiConsole.WriteLine();
 
+        // Setup ReadLine
+        var commandList = new[] { "open", "claim", "enable", "disable", "status", "readcashcounts", "deposit", "dispense", "history", "release", "close", "run-script", "help", "exit", "quit" };
+        ReadLine.AutoCompletionHandler = new CliAutoCompleteHandler(commandList);
+        ReadLine.HistoryEnabled = true;
+
         while (true)
         {
-            var prompt = options.IsAsync ? "[yellow]async[/] [white]>[/]" : "[white]>[/]";
-            var line = console.Prompt(
-                new TextPrompt<string>(prompt)
-                    .AllowEmpty()
-                    .DefaultValue("help")
-                    .HideDefaultValue());
+            var prompt = options.IsAsync ? "async > " : "> ";
+            var line = ReadLine.Read(prompt);
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 
@@ -140,6 +141,13 @@ public class Program
             {
                 if (ConfirmExit(changer, console)) break;
                 continue;
+            }
+
+            // Add to history if not empty and different from last
+            if (!string.IsNullOrWhiteSpace(trimmed))
+            {
+                // ReadLine handles history internally normally when Read is called, 
+                // but we can also manually manage it if needed.
             }
 
             var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -220,19 +228,40 @@ public class Program
 
     private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console)
     {
-        // PosCommon/CashChangerBasic properties
         var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
-        // In this simulator, we might need a more direct way since base.State might not be updated yet
-        // but let's assume the simulator logic is correct.
         
         if (isOpen)
         {
             console.MarkupLine("[yellow]Warning: Device is still open or processing.[/]");
+            // Note: ReadLine doesn't support Confirm directly, but we can still use Spectre.Console for confirming exit
             if (!console.Confirm("Are you sure you want to exit? (Device will be closed automatically)"))
             {
                 return false;
             }
         }
         return true;
+    }
+}
+
+/// <summary>
+/// CLI コマンドの自動補完ハンドラ。
+/// </summary>
+public class CliAutoCompleteHandler : IAutoCompleteHandler
+{
+    private readonly string[] _commands;
+
+    public CliAutoCompleteHandler(string[] commands)
+    {
+        _commands = commands;
+    }
+
+    public char[] Separators { get; set; } = new char[] { ' ' };
+
+    public string[] GetSuggestions(string text, int index)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return _commands;
+
+        return _commands.Where(c => c.StartsWith(text, StringComparison.OrdinalIgnoreCase)).ToArray();
     }
 }

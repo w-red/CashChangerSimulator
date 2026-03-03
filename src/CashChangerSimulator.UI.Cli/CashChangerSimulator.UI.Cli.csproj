@@ -24,6 +24,7 @@
     <PackageReference Include="MicroResolver" Version="2.3.5" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+    <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.3" />
     <PackageReference Include="Tomlyn" Version="0.20.0" />
