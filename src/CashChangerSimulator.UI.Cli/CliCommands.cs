@@ -1,47 +1,40 @@
 using Cocona;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Core.Managers;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Transactions;
 using Microsoft.PointOfService;
-using MoneyKind4Opos.Currencies.Interfaces;
-using R3;
-using System.IO;
 using System.Threading.Tasks;
-using CashChangerSimulator.Device.Services;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
+using CashChangerSimulator.UI.Cli.Services;
 
 namespace CashChangerSimulator.UI.Cli;
 
 public partial class CliCommands
 {
+    private readonly CliDeviceService _deviceService;
+    private readonly CliCashService _cashService;
+    private readonly CliConfigService _configService;
+    private readonly CliViewService _viewService;
+    private readonly CliScriptService _scriptService;
     private readonly SimulatorCashChanger _changer;
-    private readonly Inventory _inventory;
-    private readonly ICurrencyMetadataProvider _metadata;
-    private readonly TransactionHistory _history;
-    private readonly IScriptExecutionService _scriptService;
-    private readonly CliSessionOptions _options;
     private readonly IAnsiConsole _console;
     private readonly IStringLocalizer _L;
 
     public CliCommands(
         SimulatorCashChanger changer,
-        Inventory inventory,
-        ICurrencyMetadataProvider metadata,
-        TransactionHistory history,
-        IScriptExecutionService scriptService,
-        CliSessionOptions options,
+        CliDeviceService deviceService,
+        CliCashService cashService,
+        CliConfigService configService,
+        CliViewService viewService,
+        CliScriptService scriptService,
         IAnsiConsole console,
         IStringLocalizer localizer)
     {
         _changer = changer;
-        _inventory = inventory;
-        _metadata = metadata;
-        _history = history;
+        _deviceService = deviceService;
+        _cashService = cashService;
+        _configService = configService;
+        _viewService = viewService;
         _scriptService = scriptService;
-        _options = options;
         _console = console;
         _L = localizer;
 
@@ -59,31 +52,12 @@ public partial class CliCommands
         };
     }
 
-    private void HandleException(Exception ex)
-    {
-        if (ex is PosControlException pex)
-        {
-            var hint = GetHint(pex.ErrorCode);
-            var errMsg = _L["ErrorFormat", "Error", (int)pex.ErrorCode, pex.ErrorCodeExtended, pex.Message];
-            _console.MarkupLine(errMsg);
-            if (!string.IsNullOrEmpty(hint))
-            {
-                _console.MarkupLine(_L["HintFormat", hint]);
-            }
-        }
-        else
-        {
-            _console.MarkupLine($"[red]Error: {ex.Message}[/]");
-        }
-    }
-
     private string GetHint(ErrorCode errorCode)
     {
         var hintKey = $"ErrorHint_{errorCode}";
         var hint = _L[hintKey];
         if (hint.ResourceNotFound)
         {
-            // Fallback for special cases
             if (errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled)
                 return _L["ErrorHint_NotEnabled"];
             
@@ -94,274 +68,103 @@ public partial class CliCommands
 
     /// <summary>指定された JSON スクリプトファイルを実行します。</summary>
     [Command("run-script")]
-    public async Task RunScript(string path)
-    {
-        if (!File.Exists(path))
-        {
-            _console.MarkupLine(_L["FileNotFound", path]);
-            return;
-        }
-
-        try
-        {
-            var json = await File.ReadAllTextAsync(path);
-            _console.MarkupLine(_L["ScriptExecuting", path]);
-            await _scriptService.ExecuteScriptAsync(json);
-            _console.MarkupLine(_L["ScriptCompleted"]);
-        }
-        catch (Exception ex)
-        {
-            HandleException(ex);
-        }
-    }
+    public Task RunScript(string path) => _scriptService.RunScriptAsync(path);
 
     /// <summary>デバイスの状態と現在の在高を表示します。</summary>
     [Command("status")]
-    public void Status()
-    {
-        _console.Write(new Rule($"[cyan]{_L["StatusHeader"]}[/]").LeftJustified());
-        _console.MarkupLine($"{_L["StateLabel"]}: [yellow]{_changer.State}[/]");
-        _console.MarkupLine($"{_L["EnabledLabel"]}: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
-        
-        _console.WriteLine();
-        _console.Write(new Rule($"[cyan]{_L["InventoryHeader"]}[/]").LeftJustified());
-        
-        var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn(_L["DenominationLabel"]);
-        table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
-
-        foreach (var key in _metadata.SupportedDenominations)
-        {
-            var count = _inventory.GetCount(key);
-            table.AddRow(_metadata.GetDenominationName(key), count.ToString());
-        }
-        
-        var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
-        table.Caption($"{_L["TotalCaption"]}: [bold yellow]{_metadata.SymbolPrefix.CurrentValue}{total:N0}{_metadata.SymbolSuffix.CurrentValue}[/]");
-        
-        _console.Write(table);
-    }
-
-    /// <summary>デバイスを初期化してオープンします。</summary>
-    [Command("open")]
-    public void Open()
-    {
-        try {
-            _changer.Open();
-            _console.MarkupLine($"[green]{_L["DeviceOpened"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>排他的アクセス権を取得します。</summary>
-    [Command("claim")]
-    public void Claim(int timeout = 1000)
-    {
-        try {
-            _changer.Claim(timeout);
-            _console.MarkupLine($"[green]{_L["DeviceClaimed"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>デバイスを使用可能状態にします。</summary>
-    [Command("enable")]
-    public void Enable()
-    {
-        try {
-            _changer.DeviceEnabled = true;
-            _console.MarkupLine($"[green]{_L["DeviceEnabled"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>在高を読み取ります。</summary>
-    [Command("readCashCounts")]
-    public void ReadCashCounts()
-    {
-        try {
-            var counts = _changer.ReadCashCounts();
-            _console.MarkupLine($"[green]{_L["CashCountsUpdated"]}[/]");
-            _console.WriteLine();
-
-            var symbol = _metadata.SymbolPrefix.CurrentValue;
-            var suffix = _metadata.SymbolSuffix.CurrentValue;
-
-            var table = new Table().Border(TableBorder.Rounded);
-            table.AddColumn(_L["DenominationLabel"]);
-            table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
-            table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
-
-            foreach (var cc in counts.Counts)
-            {
-                var key = _metadata.SupportedDenominations.FirstOrDefault(k => k.Type == (CashType)cc.Type && k.Value == cc.NominalValue);
-                var name = key != null ? _metadata.GetDenominationName(key) : cc.NominalValue.ToString();
-                var amount = cc.NominalValue * cc.Count;
-
-                table.AddRow(name, cc.Count.ToString(), $"{symbol}{amount:N0}{suffix}");
-            }
-            
-            var total = _inventory.CalculateTotal(_metadata.CurrencyCode);
-            table.Columns[2].Footer($"{symbol}{total:N0}{suffix}");
-            
-            _console.Write(table);
-
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>入金処理を開始します。</summary>
-    [Command("deposit")]
-    public void Deposit(int amount)
-    {
-        try {
-            _changer.BeginDeposit();
-            _console.MarkupLine(_L["DepositStarted", amount, _options.IsAsync]);
-            
-            if (!_options.IsAsync)
-            {
-                _changer.FixDeposit();
-                _changer.EndDeposit(CashDepositAction.Change);
-                _console.MarkupLine($"[green]{_L["DepositCompleted"]}[/]");
-            }
-            else
-            {
-                _console.MarkupLine($"[yellow]{_L["DepositAsyncWarning"]}[/]");
-            }
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>投入された現金を確定します。</summary>
-    [Command("fixDeposit")]
-    public void FixDeposit()
-    {
-        try {
-            _changer.FixDeposit();
-            _console.MarkupLine($"[green]{_L["DepositFixed"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>入金処理を終了します。</summary>
-    [Command("endDeposit")]
-    public void EndDeposit()
-    {
-        try {
-            _changer.EndDeposit(CashDepositAction.Change);
-            _console.MarkupLine($"[green]{_L["EndDepositCompleted"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
-
-    /// <summary>出金処理を実行します。</summary>
-    [Command("dispense")]
-    public void Dispense(int amount)
-    {
-        try {
-            _changer.DispenseChange(amount);
-            _console.MarkupLine($"[green]{_L["DispensedSuccess", amount]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
+    public void Status() => _viewService.Status();
 
     /// <summary>取引履歴を表示します。</summary>
     [Command("history")]
-    public void History(int count = 10)
-    {
-        _console.Write(new Rule($"[cyan]{_L["TransactionHistoryHeader", count]}[/]").LeftJustified());
-        var entries = _history.Entries.TakeLast(count).Reverse();
-        
-        var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn(_L["TimestampLabel"]);
-        table.AddColumn(_L["TypeLabel"]);
-        table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
-        table.AddColumn(_L["CurrencyLabel"]);
+    public void History([Option('c', Description = "表示件数")] int count = 10) => _viewService.History(count);
 
-        foreach (var entry in entries)
-        {
-            table.AddRow(
-                entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                entry.Type.ToString(),
-                entry.Amount.ToString("N0"),
-                _metadata.CurrencyCode
-            );
-        }
-        _console.Write(table);
-    }
+    /// <summary>デバイスをオープンします。</summary>
+    [Command("open")]
+    public void Open() => _deviceService.Open();
+
+    /// <summary>デバイスを占有します。</summary>
+    [Command("claim")]
+    public void Claim([Option('t', Description = "タイムアウト(ms)")] int timeout = 5000) => _deviceService.Claim(timeout);
+
+    /// <summary>デバイスを有効化します。</summary>
+    [Command("enable")]
+    public void Enable() => _deviceService.Enable();
+
+    /// <summary>現在の在高を読み取ります。</summary>
+    [Command("read-counts")]
+    public void ReadCashCounts() => _cashService.ReadCashCounts();
+
+    /// <summary>入金を開始します。</summary>
+    [Command("deposit")]
+    public void Deposit(int? amount = null) => _cashService.Deposit(amount);
+
+    /// <summary>入金を確定します。</summary>
+    [Command("fix-deposit")]
+    public void FixDeposit() => _cashService.FixDeposit();
+
+    /// <summary>入金を終了します。</summary>
+    [Command("end-deposit")]
+    public void EndDeposit() => _cashService.EndDeposit();
+
+    /// <summary>出金を実行します。</summary>
+    [Command("dispense")]
+    public void Dispense(int amount) => _cashService.Dispense(amount);
 
     /// <summary>デバイスを無効化します。</summary>
     [Command("disable")]
-    public void Disable()
-    {
-        try {
-            _changer.DeviceEnabled = false;
-            _console.MarkupLine($"[yellow]{_L["DeviceDisabled"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
+    public void Disable() => _deviceService.Disable();
 
-    /// <summary>排他的アクセス権を解放します。</summary>
+    /// <summary>デバイスの占有を解除します。</summary>
     [Command("release")]
-    public void Release()
-    {
-        try {
-            _changer.Release();
-            _console.MarkupLine($"[yellow]{_L["DeviceReleased"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
+    public void Release() => _deviceService.Release();
 
     /// <summary>デバイスをクローズします。</summary>
     [Command("close")]
-    public void Close()
-    {
-        try {
-            _changer.Close();
-            _console.MarkupLine($"[yellow]{_L["DeviceClosed"]}[/]");
-        } catch (Exception ex) {
-            HandleException(ex);
-        }
-    }
+    public void Close() => _deviceService.Close();
+
+    /// <summary>設定を一覧表示または変更します。</summary>
+    [Command("config")]
+    public void Config() => _console.MarkupLine("[yellow]Usage: config <list|get|set|save>[/]");
+
+    [Command("config list")]
+    public void ConfigList() => _configService.List();
+
+    [Command("config get")]
+    public void ConfigGet(string key) => _configService.Get(key);
+
+    [Command("config set")]
+    public void ConfigSet(string key, string value) => _configService.Set(key, value);
+
+    [Command("config save")]
+    public void ConfigSave() => _configService.Save();
 
     /// <summary>利用可能なコマンドの一覧を表示します。</summary>
     [Command("help")]
     public void Help()
     {
         _console.Write(new Rule($"[cyan]{_L["AvailableCommands"]}[/]").LeftJustified());
-        
-        var table = new Table().NoBorder().HideHeaders();
+        var table = new Table().Border(TableBorder.None);
         table.AddColumn(_L["CommandLabel"]);
         table.AddColumn(_L["DescriptionLabel"]);
 
-        table.AddRow("[yellow]open[/]", "Open the device");
-        table.AddRow("[yellow]claim [[timeout]][/]", "Claim exclusive access (default: 1000ms)");
-        table.AddRow("[yellow]enable[/]", "Enable the device");
-        table.AddRow("[yellow]status[/]", "Show device status and inventory");
-        table.AddRow("[yellow]readCashCounts[/]", "Read cash counts from device");
-        table.AddRow("[yellow]deposit <amount>[/]", "Begin deposit");
-        table.AddRow("[yellow]fixDeposit[/]", "Fix current deposit (Async mode)");
-        table.AddRow("[yellow]endDeposit[/]", "End deposit and dispense change (Async mode)");
-        table.AddRow("[yellow]dispense <amount>[/]", "Dispense change");
-        table.AddRow("[yellow]history [[count]][/]", "Show transaction history (default: 10)");
-        table.AddRow("[yellow]disable[/]", "Disable the device");
-        table.AddRow("[yellow]release[/]", "Release exclusive access");
-        table.AddRow("[yellow]close[/]", "Close the device");
-        table.AddRow("[yellow]run-script <path>[/]", "Execute a JSON scenario script");
-        table.AddRow("[yellow]help[/]", _L["HelpDescription"].Value);
-        table.AddRow("[yellow]exit[/]", _L["ExitDescription"].Value);
+        table.AddRow(Markup.Escape("open"), "Open device");
+        table.AddRow(Markup.Escape("claim"), "Claim device");
+        table.AddRow(Markup.Escape("enable"), "Enable device");
+        table.AddRow(Markup.Escape("status"), "Show status & inventory");
+        table.AddRow(Markup.Escape("read-counts"), "Read cash counts");
+        table.AddRow(Markup.Escape("deposit [amount]"), "Start deposit");
+        table.AddRow(Markup.Escape("fix-deposit"), "Fix current deposit");
+        table.AddRow(Markup.Escape("end-deposit"), "End deposit session");
+        table.AddRow(Markup.Escape("dispense <amount>"), "Dispense change");
+        table.AddRow(Markup.Escape("disable"), "Disable device");
+        table.AddRow(Markup.Escape("release"), "Release device");
+        table.AddRow(Markup.Escape("close"), "Close device");
+        table.AddRow(Markup.Escape("history"), "Show transaction history");
+        table.AddRow(Markup.Escape("config <list|get|set|save>"), "Manage configuration");
+        table.AddRow(Markup.Escape("run-script <path>"), "Run JSON script");
+        table.AddRow(Markup.Escape("help"), Markup.Escape(_L["HelpDescription"] ?? ""));
+        table.AddRow(Markup.Escape("exit"), Markup.Escape(_L["ExitDescription"] ?? ""));
 
         _console.Write(table);
-        _console.WriteLine();
     }
 }

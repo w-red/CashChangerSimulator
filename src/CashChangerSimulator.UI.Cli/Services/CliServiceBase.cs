@@ -1,0 +1,51 @@
+using System;
+using Microsoft.PointOfService;
+using Spectre.Console;
+using Microsoft.Extensions.Localization;
+using CashChangerSimulator.Device;
+
+namespace CashChangerSimulator.UI.Cli.Services;
+
+/// <summary>
+/// CLI の各サービスクラスの基底クラス。
+/// </summary>
+public abstract class CliServiceBase
+{
+    protected readonly IAnsiConsole _console;
+    protected readonly IStringLocalizer _L;
+
+    protected CliServiceBase(IAnsiConsole console, IStringLocalizer localizer)
+    {
+        _console = console;
+        _L = localizer;
+    }
+
+    public void HandleException(Exception ex)
+    {
+        if (ex is PosControlException pex)
+        {
+            var hint = GetHint(pex.ErrorCode);
+            var errMsg = _L["ErrorFormat", "Error", (int)pex.ErrorCode, pex.ErrorCodeExtended, pex.Message];
+            _console.MarkupLine(errMsg);
+            if (!string.IsNullOrEmpty(hint))
+            {
+                _console.MarkupLine(_L["HintFormat", hint]);
+            }
+        }
+        else
+        {
+            _console.MarkupLine($"[red]Error: {ex.Message}[/]");
+        }
+    }
+
+    protected virtual string GetHint(ErrorCode errorCode)
+    {
+        var hintKey = $"ErrorHint_{errorCode}";
+        var hint = _L[hintKey];
+        if (hint.ResourceNotFound)
+        {
+            return _L["ErrorHint_Generic"];
+        }
+        return hint;
+    }
+}
