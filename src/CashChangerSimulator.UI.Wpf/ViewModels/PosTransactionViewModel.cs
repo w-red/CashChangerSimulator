@@ -1,10 +1,12 @@
 using CashChangerSimulator.Core;
+using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using CashChangerSimulator.Core.Models;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -14,6 +16,7 @@ public class PosTransactionViewModel : IDisposable
     private readonly DepositViewModel _deposit;
     private readonly DispenseViewModel _dispense;
     private readonly SimulatorCashChanger _cashChanger;
+    private readonly HardwareStatusManager _hardwareStatusManager;
     private readonly ILogger<PosTransactionViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
     private CancellationTokenSource? _timeoutCts;
@@ -51,6 +54,13 @@ public class PosTransactionViewModel : IDisposable
     public ReactiveCommand<Unit> StartCommand { get; }
     /// <summary>取引をキャンセルするコマンド。</summary>
     public ReactiveCommand<Unit> CancelCommand { get; }
+    /// <summary>取引完了後にリセットするコマンド。</summary>
+    public ReactiveCommand<Unit> ResetCommand { get; }
+
+    /// <summary>現金投入用の金種ボタンリスト。</summary>
+    public ObservableCollection<DenominationViewModel> AvailableDenominations { get; }
+    /// <summary>金種を投入するコマンド。</summary>
+    public ReactiveCommand<DenominationViewModel> InsertCashCommand { get; }
 
     /// <summary>手動：Open/Claim/Enable コマンド。</summary>
     public ReactiveCommand<Unit> ManualOpenCommand { get; }
@@ -64,13 +74,14 @@ public class PosTransactionViewModel : IDisposable
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
     /// <summary>PosTransactionViewModel の新しいインスタンスを初期化します。</summary>
-    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, CurrencyMetadataProvider metadataProvider)
+    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController)
     {
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
         _deposit = deposit;
         _dispense = dispense;
         _cashChanger = cashChanger;
+        _hardwareStatusManager = hardwareStatusManager;
         _logger = LogProvider.CreateLogger<PosTransactionViewModel>();
 
         TargetAmountInput = new BindableReactiveProperty<string>("")
@@ -157,6 +168,31 @@ public class PosTransactionViewModel : IDisposable
         ManualCloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ManualCloseCommand.Subscribe(_ => ExecuteManualClose());
 
+        ResetCommand = _status
+            .Select(s => s == PosTransactionStatus.Completed)
+            .ToReactiveCommand<Unit>()
+            .AddTo(_disposables);
+        ResetCommand.Subscribe(_ =>
+        {
+            _status.Value = PosTransactionStatus.Idle;
+            TargetAmountInput.Value = "";
+            OposLog.Clear();
+        });
+
+        // Available denominations for cash insertion
+        AvailableDenominations = new ObservableCollection<DenominationViewModel>(
+            getDenominations());
+
+        InsertCashCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
+        InsertCashCommand.Subscribe(den =>
+        {
+            if (_status.Value == PosTransactionStatus.WaitingForCash)
+            {
+                depositController.TrackDeposit(den.Key);
+                LogOpos($"Cash inserted: {den.Name}");
+            }
+        });
+
         // Process Transaction Logic
         Observable.CombineLatest(InsertedAmount, _status, (inserted, status) => (inserted, status))
             .Subscribe(async x =>
@@ -201,6 +237,13 @@ public class PosTransactionViewModel : IDisposable
 
             _status.Value = PosTransactionStatus.WaitingForCash;
             ResetTimeout();
+        }
+        catch (PosControlException pcEx)
+        {
+            _logger.LogError(pcEx, "Failed to start OPOS sequence: {0}", pcEx.Message);
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _status.Value = PosTransactionStatus.Idle;
         }
         catch (Exception ex)
         {
@@ -262,6 +305,11 @@ public class PosTransactionViewModel : IDisposable
             LogOpos("Close()");
             _cashChanger.Close();
         }
+        catch (PosControlException pcEx)
+        {
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}] during cancel: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+        }
         catch (Exception ex)
         {
             LogOpos($"Error during cancel: {ex.Message}");
@@ -308,6 +356,12 @@ public class PosTransactionViewModel : IDisposable
 
             LogOpos("--- Sequence Completed ---");
         }
+        catch (PosControlException pcEx)
+        {
+            _logger.LogError(pcEx, "Failed to complete OPOS sequence: {0}", pcEx.Message);
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to complete OPOS sequence: {0}", ex.Message);
@@ -335,6 +389,11 @@ public class PosTransactionViewModel : IDisposable
             _cashChanger.DataEventEnabled = true;
             LogOpos("DataEventEnabled = true");
         }
+        catch (PosControlException pcEx)
+        {
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+        }
         catch (Exception ex)
         {
             LogOpos($"ERROR: {ex.Message}");
@@ -349,6 +408,11 @@ public class PosTransactionViewModel : IDisposable
             _cashChanger.BeginDeposit();
             LogOpos("BeginDeposit()");
             _status.Value = PosTransactionStatus.WaitingForCash;
+        }
+        catch (PosControlException pcEx)
+        {
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
@@ -376,6 +440,11 @@ public class PosTransactionViewModel : IDisposable
                 LogOpos($"DispenseChange({changeToDispense})");
             }
         }
+        catch (PosControlException pcEx)
+        {
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+        }
         catch (Exception ex)
         {
             LogOpos($"ERROR: {ex.Message}");
@@ -394,6 +463,11 @@ public class PosTransactionViewModel : IDisposable
             _cashChanger.Close();
             LogOpos("Close()");
             _status.Value = PosTransactionStatus.Idle;
+        }
+        catch (PosControlException pcEx)
+        {
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {

@@ -63,8 +63,7 @@ public class PosTransactionUITest : IDisposable
             () => [],
             notifyService,
             _fixture.MetadataProvider);
-        
-        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger, _fixture.MetadataProvider);
+        return new PosTransactionViewModel(depVm, dispVm, _fixture.CashChanger, _fixture.Hardware, _fixture.MetadataProvider, () => [], _fixture.DepositController);
     }
 
     public void Dispose()

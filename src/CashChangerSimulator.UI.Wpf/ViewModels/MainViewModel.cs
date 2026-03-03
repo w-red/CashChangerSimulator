@@ -100,7 +100,7 @@ public class MainViewModel : IDisposable
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
-        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, metadataProvider).AddTo(_disposables);
+        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, hardwareStatusManager, metadataProvider, () => Inventory.Denominations, depositController).AddTo(_disposables);
         AdvancedSimulation = new AdvancedSimulationViewModel(cashChanger, scriptExecutionService, depositController, metadataProvider).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
