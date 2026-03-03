@@ -47,6 +47,7 @@
     <!-- Terminals -->
     <system:String x:Key="DispenseTerminal">出金ターミナル</system:String>
     <system:String x:Key="DepositTerminal">入金ターミナル</system:String>
+    <system:String x:Key="BulkDeposit">一括入金</system:String>
     <system:String x:Key="AmountDispense">金額指定出金</system:String>
     <system:String x:Key="QuickDispense">クイック出金</system:String>
     <system:String x:Key="BulkDispense">一括出金</system:String>
@@ -80,6 +81,9 @@
     <system:String x:Key="HeaderNearEmpty">ニアエンプティ</system:String>
     <system:String x:Key="HeaderNearFull">ニアフル</system:String>
     <system:String x:Key="HeaderMaxCap">最大容量</system:String>
+    <system:String x:Key="HeaderNameEn">名称 (英)</system:String>
+    <system:String x:Key="HeaderNameJp">名称 (日)</system:String>
+    <system:String x:Key="HeaderRecycle">リサイクル</system:String>
 
     <!-- Bulk Input Dialog -->
     <system:String x:Key="BulkInput">一括投入</system:String>
@@ -92,4 +96,14 @@
     <system:String x:Key="UposConfig">UPOS 構成設定</system:String>
     <system:String x:Key="RealTimeData">リアルタイムデータイベントを有効にする</system:String>
     <system:String x:Key="ScriptInput">取引スクリプト (JSON)</system:String>
+
+    <system:String x:Key="SimulateOverlap">重なりシミュレート</system:String>
+    <system:String x:Key="SimulateJam">ジャムシミュレート</system:String>
+    <system:String x:Key="LabelInput">投入額: </system:String>
+    <system:String x:Key="LabelTarget">目標額: </system:String>
+    <system:String x:Key="BulkOperations">一括操作</system:String>
+    <system:String x:Key="ActionFill">満杯補充</system:String>
+    <system:String x:Key="ActionEmpty">全回収</system:String>
+    <system:String x:Key="ErrorDevicePrefix">デバイスエラー [</system:String>
+    <system:String x:Key="ErrorDeviceSuffix">]</system:String>
 </ResourceDictionary>

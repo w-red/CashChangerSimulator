@@ -31,7 +31,7 @@
                              Style="{StaticResource ModernTextBoxStyle}"
                              FontSize="22" FontWeight="Light"
                              AutomationProperties.AutomationId="DispenseBox"/>
-                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource ingNullOrEmptyToVisibilityConv}}"/>
+                    <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
 
                     <Button Grid.Column="1" 
                             Style="{StaticResource PrimaryButtonStyle}" 
@@ -104,7 +104,7 @@
             </Button>
             <Button Style="{StaticResource SecondaryButtonStyle}" 
                     Command="{Binding SimulateJamCommand}"
-                    Content="Simulate Jam"
+                    Content="{StaticResource SimulateJam}"
                     AutomationProperties.AutomationId="SimulateJamButton"
                     FontSize="10" Padding="8,2"/>
         </StackPanel>

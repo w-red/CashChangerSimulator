@@ -24,7 +24,7 @@
             <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsDeviceError.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock>
-                    <Run Text="Device Error [" /><Run Text="{Binding CurrentErrorCode.Value}" /><Run Text="]" />
+                    <Run Text="{StaticResource ErrorDevicePrefix}" /><Run Text="{Binding CurrentErrorCode.Value}" /><Run Text="{StaticResource ErrorDeviceSuffix}" />
                 </TextBlock>
             </Border>
             <Border Background="#FF5252" Style="{StaticResource BadgeStyle}"

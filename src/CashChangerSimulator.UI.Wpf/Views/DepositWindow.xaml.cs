@@ -28,7 +28,10 @@ public partial class DepositWindow : Window
                 viewModel.IsJammed,
                 viewModel.IsOverlapped);
 
-            var dialog = new BulkAmountInputWindow("BULK DEPOSIT", "Please enter the quantity to deposit.", "DEPOSIT")
+            var dialog = new BulkAmountInputWindow(
+                FindResource("BulkDeposit").ToString()!,
+                FindResource("BulkDepositSubtitle").ToString(),
+                FindResource("Deposit").ToString())
             { 
                 Owner = this,
                 DataContext = bulkVm 

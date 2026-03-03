@@ -28,7 +28,10 @@ public partial class DispenseWindow : Window
                 viewModel.IsJammed,
                 viewModel.IsOverlapped);
 
-            var dialog = new BulkAmountInputWindow("BULK DISPENSE", "Please enter the quantity to dispense.", "DISPENSE")
+            var dialog = new BulkAmountInputWindow(
+                FindResource("BulkDispense").ToString()!,
+                FindResource("BulkDispenseSubtitle").ToString(),
+                FindResource("Dispense").ToString())
             { 
                 Owner = this,
                 DataContext = bulkVm 

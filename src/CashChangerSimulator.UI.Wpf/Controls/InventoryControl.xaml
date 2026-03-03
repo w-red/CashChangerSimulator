@@ -46,7 +46,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
                         <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
                                 Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                            <TextBlock Text="VAL ERROR"/>
+                            <TextBlock Text="{StaticResource ValidationError}"/>
                         </Border>
                         <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}">
                             <TextBlock Text="{Binding OverallStatus.Value}"/>
@@ -81,7 +81,7 @@
             <!-- Bulk Operations -->
             <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="BULK OPERATIONS" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,12"/>
+                    <TextBlock Text="{StaticResource BulkOperations}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,12"/>
                     <UniformGrid Columns="2">
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding ReplenishAllCommand}"
@@ -91,7 +91,7 @@
                                 Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="HandCoin" Foreground="{StaticResource SuccessBrush}" Margin="0,0,4,0"/>
-                                <TextBlock Text="FILL" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{StaticResource ActionFill}" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
@@ -102,7 +102,7 @@
                                 BorderBrush="OrangeRed">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="DeleteSweep" Foreground="OrangeRed" Margin="0,0,4,0"/>
-                                <TextBlock Text="EMPTY" Foreground="OrangeRed" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{StaticResource ActionEmpty}" Foreground="OrangeRed" FontWeight="Bold" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </UniformGrid>
@@ -112,7 +112,7 @@
             <!-- Activity Feed -->
             <Border Grid.Row="2" Style="{StaticResource CardStyle}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="ACTIVITY FEED" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource ActivityFeed}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
                     
                     <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0"
                              ItemContainerStyle="{StaticResource TransactionListStyle}"
