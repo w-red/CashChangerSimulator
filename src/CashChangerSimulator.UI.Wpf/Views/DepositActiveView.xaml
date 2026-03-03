@@ -48,7 +48,7 @@
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource Error}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{StaticResource JamError}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>

@@ -48,7 +48,7 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Header="Name (EN)"
+                        Header="{StaticResource HeaderNameEn}"
                         Binding="{Binding DisplayName.Value}"
                         Width="*">
                         <DataGridTextColumn.ElementStyle>
@@ -62,7 +62,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn
-                        Header="Name (JP)"
+                        Header="{StaticResource HeaderNameJp}"
                         Binding="{Binding DisplayNameJP.Value}"
                         Width="*">
                         <DataGridTextColumn.ElementStyle>
@@ -110,7 +110,7 @@
                         </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
                     <DataGridCheckBoxColumn
-                        Header="Recycle"
+                        Header="{StaticResource HeaderRecycle}"
                         Binding="{Binding IsRecyclable.Value}"
                         Width="80"/>
                 </DataGrid.Columns>

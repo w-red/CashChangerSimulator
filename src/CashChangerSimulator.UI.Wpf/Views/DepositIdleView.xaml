@@ -49,7 +49,7 @@
             </Button>
             <Button Style="{StaticResource SecondaryButtonStyle}" 
                     Command="{Binding SimulateOverlapCommand}"
-                    Content="Simulate Overlap"
+                    Content="{StaticResource SimulateOverlap}"
                     AutomationProperties.AutomationId="SimulateOverlapButton"
                     FontSize="10" Padding="8,2"
                     Margin="0,0,8,0"/>
@@ -57,7 +57,7 @@
                     Command="{Binding SimulateJamCommand}"
                     FontSize="10" Padding="8,2"
                     AutomationProperties.AutomationId="SimulateJamButton"
-                    Content="Simulate Jam"/>
+                    Content="{StaticResource SimulateJam}"/>
         </StackPanel>
 
         <Separator Background="#1AFFFFFF" Margin="0,24"/>
@@ -82,7 +82,7 @@
                     <KeyBinding Key="Enter" Command="{Binding QuickDepositCommand}"/>
                 </TextBox.InputBindings>
             </TextBox>
-            <TextBlock Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource ingNullOrEmptyToVisibilityConv}}"/>
+            <TextBlock Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
             <Button Grid.Column="1" 
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding QuickDepositCommand}"

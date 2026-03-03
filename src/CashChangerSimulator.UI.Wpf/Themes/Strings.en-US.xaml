@@ -47,6 +47,7 @@
     <!-- Terminals -->
     <system:String x:Key="DispenseTerminal">DISPENSE TERMINAL</system:String>
     <system:String x:Key="DepositTerminal">DEPOSIT TERMINAL</system:String>
+    <system:String x:Key="BulkDeposit">BULK DEPOSIT</system:String>
     <system:String x:Key="AmountDispense">AMOUNT DISPENSE</system:String>
     <system:String x:Key="QuickDispense">QUICK DISPENSE</system:String>
     <system:String x:Key="BulkDispense">BULK DISPENSE</system:String>
@@ -80,6 +81,9 @@
     <system:String x:Key="HeaderNearEmpty">N.EMPTY</system:String>
     <system:String x:Key="HeaderNearFull">N.FULL</system:String>
     <system:String x:Key="HeaderMaxCap">MAX CAP</system:String>
+    <system:String x:Key="HeaderNameEn">Name (EN)</system:String>
+    <system:String x:Key="HeaderNameJp">Name (JP)</system:String>
+    <system:String x:Key="HeaderRecycle">Recycle</system:String>
 
     <!-- Bulk Input Dialog -->
     <system:String x:Key="BulkInput">BULK INPUT</system:String>
@@ -94,4 +98,14 @@
     <system:String x:Key="UposConfig">UPOS CONFIGURATION</system:String>
     <system:String x:Key="RealTimeData">Enable Real Time Data Events</system:String>
     <system:String x:Key="ScriptInput">JSON TRANSACTION SCRIPT</system:String>
+
+    <system:String x:Key="SimulateOverlap">SIM OVERLAP</system:String>
+    <system:String x:Key="SimulateJam">SIM JAM</system:String>
+    <system:String x:Key="LabelInput">Input: </system:String>
+    <system:String x:Key="LabelTarget">Target: </system:String>
+    <system:String x:Key="BulkOperations">BULK OPERATIONS</system:String>
+    <system:String x:Key="ActionFill">FILL</system:String>
+    <system:String x:Key="ActionEmpty">EMPTY</system:String>
+    <system:String x:Key="ErrorDevicePrefix">Device Error [</system:String>
+    <system:String x:Key="ErrorDeviceSuffix">]</system:String>
 </ResourceDictionary>
