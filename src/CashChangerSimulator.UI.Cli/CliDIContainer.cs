@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 using CashChangerSimulator.UI.Cli.Localization;
+using CashChangerSimulator.UI.Cli.Services;
 using Microsoft.Extensions.Localization;
 
 namespace CashChangerSimulator.UI.Cli;
@@ -64,7 +65,13 @@ public static class CliDIContainer
         services.AddSingleton<IDeviceSimulator, CliHardwareSimulator>();
         services.AddSingleton<DepositController>();
         services.AddSingleton<DispenseController>();
-        services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
+        // CLI Services
+        services.AddSingleton<CliDeviceService>();
+        services.AddSingleton<CliCashService>();
+        services.AddSingleton<CliConfigService>();
+        services.AddSingleton<CliViewService>();
+        services.AddSingleton<CliScriptService>();
+
         services.AddTransient<CliCommands>();
     }
 

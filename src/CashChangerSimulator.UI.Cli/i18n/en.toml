@@ -66,6 +66,18 @@ ScriptFailed = "Error executing script: {0}"
 # {0}: File path
 FileNotFound = "Error: File not found: {0}"
 
+# Configuration Operations
+ConfigHeader = "Configuration List"
+# {0}: Key, {1}: Value
+ConfigUpdated = "Updated configuration '{0}' to '{1}'."
+ConfigSaved = "Configuration saved to config.toml."
+# {0}: Key
+InvalidConfigKey = "Error: Configuration key '{0}' not found."
+ConfigListDescription = "List all current configurations"
+ConfigGetDescription = "Get the value of a specific configuration key"
+ConfigSetDescription = "Set the value of a specific configuration key"
+ConfigSaveDescription = "Save current configurations to file"
+
 # Error Display
 ErrorFormat = "[red][{0}: {1} ({2})] {3}[/]"
 HintFormat = "[yellow]Hint: {0}[/]"

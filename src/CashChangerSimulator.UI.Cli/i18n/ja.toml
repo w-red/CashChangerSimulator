@@ -63,6 +63,18 @@ ScriptExecuting = "スクリプト実行中: {0}..."
 ScriptCompleted = "スクリプトの実行が完了しました。"
 # {0}: エラーメッセージ
 ScriptFailed = "スクリプトの実行中にエラーが発生しました: {0}"
+# 設定操作
+ConfigHeader = "設定一覧"
+# {0}: キー, {1}: 値
+ConfigUpdated = "設定 '{0}' を '{1}' に更新しました。"
+ConfigSaved = "設定を config.toml に保存しました。"
+# {0}: キー
+InvalidConfigKey = "エラー: 設定キー '{0}' が見つかりません。"
+ConfigListDescription = "現在の全設定を表示します"
+ConfigGetDescription = "指定したキーの設定値を取得します"
+ConfigSetDescription = "指定したキーの設定値を変更します"
+ConfigSaveDescription = "現在の設定をファイルに保存します"
+
 # エラー表示
 ErrorFormat = "[red][{0}: {1} ({2})] {3}[/]"
 HintFormat = "[yellow]ヒント: {0}[/]"
