@@ -39,17 +39,19 @@ public partial class CliCommands
         _L = localizer;
 
         // Subscribing to ErrorEvent for async error reporting
-        _changer.ErrorEvent += (sender, e) =>
+        _changer.ErrorEvent += HandleAsyncError;
+    }
+
+    public void HandleAsyncError(object sender, DeviceErrorEventArgs e)
+    {
+        _console.WriteLine();
+        var hint = GetHint(e.ErrorCode);
+        var errMsg = _L["ErrorFormat", "Async Error", (int)e.ErrorCode, e.ErrorCodeExtended, "Async operation failed"];
+        _console.MarkupLine(errMsg);
+        if (!string.IsNullOrEmpty(hint))
         {
-            _console.WriteLine();
-            var hint = GetHint(e.ErrorCode);
-            var errMsg = _L["ErrorFormat", "Async Error", (int)e.ErrorCode, e.ErrorCodeExtended, "Async operation failed"];
-            _console.MarkupLine(errMsg);
-            if (!string.IsNullOrEmpty(hint))
-            {
-                _console.MarkupLine(_L["HintFormat", hint]);
-            }
-        };
+            _console.MarkupLine(_L["HintFormat", hint]);
+        }
     }
 
     private string GetHint(ErrorCode errorCode)
