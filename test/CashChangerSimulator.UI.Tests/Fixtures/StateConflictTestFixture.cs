@@ -34,7 +34,8 @@ public class StateConflictTestFixture : IDisposable
         History = new TransactionHistory();
         Manager = new CashChangerManager(Inventory, History, new ChangeCalculator());
         HardwareManager = new HardwareStatusManager();
-        DepositController = new DepositController(Inventory);
+        HardwareManager.SetConnected(true); // Tests in this class expect an open device by default
+        DepositController = new DepositController(Inventory, HardwareManager);
         ConfigProvider = new ConfigurationProvider();
         MetadataProvider = new CurrencyMetadataProvider(ConfigProvider);
         MonitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);

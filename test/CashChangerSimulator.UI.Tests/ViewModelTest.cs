@@ -36,9 +36,9 @@ public class ViewModelTest
         var mockManager = new Mock<CashChangerManager>(mockInventory.Object, mockHistory.Object, new ChangeCalculator());
 
         var realHardware = new HardwareStatusManager();
-        var depositController = new DepositController(mockInventory.Object);
+        var depositController = new DepositController(mockInventory.Object, realHardware);
         var mockSimulator = new Mock<IDeviceSimulator>();
-        var dispenseController = new DispenseController(mockManager.Object, null, mockSimulator.Object);
+        var dispenseController = new DispenseController(mockManager.Object, realHardware, mockSimulator.Object);
 
         var vm = new MainViewModel(
             mockInventory.Object,
