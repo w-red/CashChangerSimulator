@@ -1,0 +1,58 @@
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Tests.Fixtures;
+using System.Diagnostics;
+using Xunit;
+using Shouldly;
+using CashChangerSimulator.Core;
+
+namespace CashChangerSimulator.UI.Tests.Performance;
+
+public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFixture>
+{
+    private readonly PosTransactionViewModelFixture _fixture;
+
+    public PerformanceBenchmarkTest(PosTransactionViewModelFixture fixture)
+    {
+        _fixture = fixture;
+        _fixture.Initialize();
+        
+        // Ensure Logging is initialized for the benchmark
+        LogProvider.Initialize(new LoggingSettings
+        {
+            LogLevel = "Information",
+            EnableConsole = false, // Outputting to console during benchmark is slow
+            EnableFile = false
+        });
+    }
+
+    [Fact]
+    public void Benchmark10000Transactions()
+    {
+        var changer = _fixture.CashChanger;
+        changer.Open();
+        changer.Claim(1000);
+        changer.DeviceEnabled = true;
+
+        const int iterations = 10000;
+        var sw = Stopwatch.StartNew();
+        
+        for (int i = 0; i < iterations; i++)
+        {
+            changer.BeginDeposit();
+            // Simulate some deposits
+            _fixture.DepositController.TrackDeposit(new DenominationKey(100, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin, "JPY"));
+            changer.FixDeposit();
+            changer.EndDeposit(Microsoft.PointOfService.CashDepositAction.NoChange);
+        }
+
+        sw.Stop();
+        
+        var totalMs = sw.ElapsedMilliseconds;
+        var avgMs = (double)totalMs / iterations;
+        
+        // Assert some reasonable performance (e.g., < 10s for 10k operations in-memory)
+        totalMs.ShouldBeLessThan(10000, "10,000 transactions should be processed within 10 seconds in simulator.");
+    }
+}

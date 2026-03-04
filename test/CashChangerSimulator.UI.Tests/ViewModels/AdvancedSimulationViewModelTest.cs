@@ -2,6 +2,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
@@ -24,16 +25,34 @@ public class AdvancedSimulationViewModelTest : IDisposable
 
     public AdvancedSimulationViewModelTest()
     {
-        _mockCashChanger = new Mock<SimulatorCashChanger>();
+        var configProvider = new ConfigurationProvider();
+        configProvider.Config.System.CurrencyCode = "JPY";
+        var inventory = new Inventory();
+        var history = new TransactionHistory();
+        var hardware = new HardwareStatusManager();
+        var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
+        var metadataProvider = new CurrencyMetadataProvider(configProvider);
+        var monitors = new MonitorsProvider(inventory, configProvider, metadataProvider);
+        var aggregator = new OverallStatusAggregatorProvider(monitors);
+        
+        _mockDepositController = new Mock<DepositController>(inventory, hardware);
+        _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
+
+        var dummyDispense = new DispenseController(manager, hardware, new Mock<IDeviceSimulator>().Object);
+
+        _mockCashChanger = new Mock<SimulatorCashChanger>(
+            configProvider, 
+            inventory, 
+            history, 
+            manager, 
+            _mockDepositController.Object, 
+            dummyDispense, 
+            aggregator, 
+            hardware);
+            
         _mockCashChanger.SetupProperty(x => x.RealTimeDataEnabled);
         _cashChanger = _mockCashChanger.Object;
         _mockScriptExecutionService = new Mock<IScriptExecutionService>();
-        _mockDepositController = new Mock<DepositController>(new Inventory(), new HardwareStatusManager());
-        _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
-        
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.System.CurrencyCode = "JPY";
-        var metadataProvider = new CurrencyMetadataProvider(configProvider);
 
         _viewModel = new AdvancedSimulationViewModel(_cashChanger, _mockScriptExecutionService.Object, _mockDepositController.Object, metadataProvider);
     }

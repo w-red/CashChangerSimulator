@@ -34,9 +34,9 @@ public class PosTransactionViewModelFixture : IDisposable
         History = new TransactionHistory();
         Manager = new CashChangerManager(Inventory, History, new ChangeCalculator());
         Hardware = new HardwareStatusManager();
-        DepositController = new DepositController(Inventory);
+        DepositController = new DepositController(Inventory, Hardware);
         
-        DispenseController = new DispenseController(Manager, null, new Mock<IDeviceSimulator>().Object);
+        DispenseController = new DispenseController(Manager, Hardware, new Mock<IDeviceSimulator>().Object);
         ConfigProvider = new ConfigurationProvider();
         ConfigProvider.Config.Inventory.TryAdd(currencyCode, new InventorySettings());
         ConfigProvider.Config.System.CurrencyCode = currencyCode;

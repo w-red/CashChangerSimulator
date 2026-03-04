@@ -52,16 +52,15 @@ public class DocumentationScreenshotGenerator : IDisposable
     {
         // AutomationId で見つからない場合のフォールバックとして Name でも試行
         var button =
-            _app.MainWindow
+            (_app.MainWindow
             ?.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))
             ?.AsButton()
-            ?? _app.MainWindow?.FindFirstDescendant(cf => cf.ByName(buttonId.Replace("Launch", "")))?.AsButton();
-
-        if (button == null)
-        {
-            throw new Exception($"Button '{buttonId}' not found in MainWindow.");
-        }
-
+            ?? _app.MainWindow
+                ?.FindFirstDescendant(
+                    cf => cf
+                        .ByName(buttonId.Replace("Launch", "")))
+                ?.AsButton())
+                ?? throw new Exception($"Button '{buttonId}' not found in MainWindow.");
         button.WaitUntilClickable();
         button.Click();
         

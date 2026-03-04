@@ -37,7 +37,7 @@ public class CashChangerTestApp : IDisposable
         _executablePath = potentialPath;
     }
 
-    public void Launch(string? customConfigToml = null)
+    public void Launch(string? customConfigToml = null, bool hotStart = true)
     {
         string fullPath = Path.GetFullPath(_executablePath);
         string? appDir = Path.GetDirectoryName(fullPath);
@@ -52,11 +52,21 @@ public class CashChangerTestApp : IDisposable
                 try { if (File.Exists(filePath)) File.Delete(filePath); } catch { }
             }
 
-            // Write custom config if provided
+            // Write custom config or default with hotStart properly set
             if (!string.IsNullOrEmpty(customConfigToml))
             {
                 var configPath = Path.Combine(appDir, "config.toml");
                 File.WriteAllText(configPath, customConfigToml);
+            }
+            else
+            {
+                // Create a basic config that enforces the desired HotStart state for the test
+                var configPath = Path.Combine(appDir, "config.toml");
+                var configContent = $@"[Simulation]
+DispenseDelayMs = 500
+HotStart = {hotStart.ToString().ToLower()}
+";
+                File.WriteAllText(configPath, configContent);
             }
         }
 

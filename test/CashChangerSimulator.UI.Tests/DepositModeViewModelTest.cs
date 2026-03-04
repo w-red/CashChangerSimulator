@@ -39,6 +39,7 @@ public class DepositModeViewModelTest
 
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
         var hardwareManager = new HardwareStatusManager();
+        hardwareManager.SetConnected(true);
         _depositController = new DepositController(_mockInventory.Object, hardwareManager);
         var mockSimulator = new Mock<IDeviceSimulator>();
         _dispenseController = new DispenseController(_mockManager.Object, hardwareManager, mockSimulator.Object);
