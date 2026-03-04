@@ -113,8 +113,8 @@ public class MainViewModel : IDisposable
             .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.System.UIMode)
             .AddTo(_disposables);
 
-        // Auto-open device if NOT ColdStart
-        if (!configProvider.Config.Simulation.ColdStart)
+        // Auto-open device ONLY if HotStart is enabled
+        if (configProvider.Config.Simulation.HotStart)
         {
             try
             {

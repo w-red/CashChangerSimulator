@@ -18,13 +18,6 @@ public partial class StandardSimulationPage : Page
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         // 1000px 未満ならサイドバーを非表示にする（リキッド・レスポンシブ対応）
-        if (e.NewSize.Width < 1000)
-        {
-            SidebarContent.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-            SidebarContent.Visibility = Visibility.Visible;
-        }
+        SidebarContent.Visibility = e.NewSize.Width < 1000 ? Visibility.Collapsed : Visibility.Visible;
     }
 }

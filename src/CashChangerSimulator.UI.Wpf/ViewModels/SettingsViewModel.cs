@@ -44,6 +44,9 @@ public class SettingsViewModel : IDisposable
     /// <summary>Full と判定するデフォルト枚数。</summary>
     public BindableReactiveProperty<int> Full { get; }
 
+    /// <summary>起動時に自動オープンするかどうか (Hot Start)。</summary>
+    public BindableReactiveProperty<bool> HotStart { get; }
+
 
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
@@ -101,6 +104,9 @@ public class SettingsViewModel : IDisposable
                 : null)
             .AddTo(_disposables);
 
+        HotStart = new BindableReactiveProperty<bool>(false)
+            .AddTo(_disposables);
+
 
         SaveSucceeded =
             new BindableReactiveProperty<bool>(false)
@@ -137,6 +143,7 @@ public class SettingsViewModel : IDisposable
         Full.Value = config.Thresholds.Full;
         ActiveUIMode.Value = config.System.UIMode;
         CultureCode.Value = config.System.CultureCode ?? "en-US";
+        HotStart.Value = config.Simulation.HotStart;
 
         DenominationSettings.Clear();
 
@@ -184,6 +191,7 @@ public class SettingsViewModel : IDisposable
 
         config.System.UIMode = ActiveUIMode.Value;
         config.System.CultureCode = CultureCode.Value;
+        config.Simulation.HotStart = HotStart.Value;
 
         if (!config.Inventory.TryGetValue(config.System.CurrencyCode, out InventorySettings? activeInventory))
         {
