@@ -41,6 +41,7 @@ public static class DIContainer
         resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
+        resolver.Register<DeviceEventHistoryObserver, DeviceEventHistoryObserver>(Lifestyle.Singleton);
         resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
 
         // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
@@ -56,6 +57,9 @@ public static class DIContainer
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
+        
+        // Ensure the event history observer is instantiated and listening
+        _resolver.Resolve<DeviceEventHistoryObserver>();
 
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();
