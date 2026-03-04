@@ -61,6 +61,7 @@ public static class CliDIContainer
         services.AddSingleton<IDeviceSimulator, CliHardwareSimulator>();
         services.AddSingleton<DepositController>();
         services.AddSingleton<DispenseController>();
+        services.AddSingleton<DeviceEventHistoryObserver>();
         // CLI Services
         services.AddSingleton<CliDeviceService>();
         services.AddSingleton<CliCashService>();
@@ -115,6 +116,9 @@ public static class CliDIContainer
         {
             history.FromState(historyState);
         }
+
+        // Initialize Observers
+        provider.GetRequiredService<DeviceEventHistoryObserver>();
     }
 
     public static IServiceProvider ServiceProvider => _serviceProvider;
