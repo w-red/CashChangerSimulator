@@ -93,11 +93,13 @@
     <system:String x:Key="ErrorCannotOpenTerminalInError">Cannot open terminal while the device is in an error state. Please reset the error first.</system:String>
 
     <system:String x:Key="ErrorCodeCannotReset">Cannot reset error state at this time.</system:String>
-    <system:String x:Key="AdvancedSimulation">ADVANCED SIM</system:String>
+    <system:String x:Key="AdvancedSimulation">Advanced Simulation Controls</system:String>
     <system:String x:Key="Execute">EXECUTE</system:String>
     <system:String x:Key="UposConfig">UPOS CONFIGURATION</system:String>
     <system:String x:Key="RealTimeData">Enable Real Time Data Events</system:String>
     <system:String x:Key="ScriptInput">JSON TRANSACTION SCRIPT</system:String>
+    <system:String x:Key="HotStart">Hot Start (Auto Connect)</system:String>
+    <system:String x:Key="HotStartDescription">Automatically opens and connects the device on startup.</system:String>
 
     <system:String x:Key="SimulateOverlap">SIM OVERLAP</system:String>
     <system:String x:Key="SimulateJam">SIM JAM</system:String>

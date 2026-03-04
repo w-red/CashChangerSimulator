@@ -96,6 +96,8 @@
     <system:String x:Key="UposConfig">UPOS 構成設定</system:String>
     <system:String x:Key="RealTimeData">リアルタイムデータイベントを有効にする</system:String>
     <system:String x:Key="ScriptInput">取引スクリプト (JSON)</system:String>
+    <system:String x:Key="HotStart">ホットスタート (自動接続)</system:String>
+    <system:String x:Key="HotStartDescription">起動時にデバイスを自動的にオープンし、接続状態にします。</system:String>
 
     <system:String x:Key="SimulateOverlap">重なりシミュレート</system:String>
     <system:String x:Key="SimulateJam">ジャムシミュレート</system:String>

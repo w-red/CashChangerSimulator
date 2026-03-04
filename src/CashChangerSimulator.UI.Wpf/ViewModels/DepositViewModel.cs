@@ -315,12 +315,14 @@ public class DepositViewModel : IDisposable
         {
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
-            _notifyService.ShowWarning(pcEx.Message, (string)System.Windows.Application.Current.Resources["Error"]);
+            var title = System.Windows.Application.Current?.Resources["Error"] as string ?? "Error";
+            _notifyService.ShowWarning(pcEx.Message, title);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to execute quick deposit.");
-            _notifyService.ShowWarning(ex.Message, (string)System.Windows.Application.Current.Resources["Error"]);
+            var title = System.Windows.Application.Current?.Resources["Error"] as string ?? "Error";
+            _notifyService.ShowWarning(ex.Message, title);
         }
     }
 

@@ -49,6 +49,21 @@
                     SelectedItem="{Binding CultureCode.Value}"
                     Style="{StaticResource ModernComboBoxStyle}"
                     Margin="0,16,0,0"/>
+
+                <Grid Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource HotStart}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBlock Text="{StaticResource HotStartDescription}" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" TextWrapping="Wrap" MaxWidth="300"/>
+                    </StackPanel>
+                    <ToggleButton Grid.Column="1" 
+                                   IsChecked="{Binding HotStart.Value}" 
+                                   Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                   VerticalAlignment="Center"/>
+                </Grid>
             </StackPanel>
         </Border>
 
