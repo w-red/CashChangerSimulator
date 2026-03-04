@@ -9,7 +9,6 @@ using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.Extensions.Logging;
 using R3;
-using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
