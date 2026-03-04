@@ -6,6 +6,7 @@ using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.Core;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -145,6 +146,25 @@ public partial class CliCommands
     [Command("config save")]
     public void ConfigSave() => _configService.Save();
 
+    /// <summary>設定をファイルから再読み込みします。</summary>
+    [Command("config reload")]
+    public void ConfigReload() => _configService.Reload();
+
+    /// <summary>ログの詳細度を変更します。</summary>
+    [Command("log-level")]
+    public void LogLevel(string level)
+    {
+        if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out var logLevel))
+        {
+            LogProvider.SetLogLevel(level);
+            _console.MarkupLine(_L["LogLevelUpdated", level]);
+        }
+        else
+        {
+            _console.MarkupLine(_L["InvalidLogLevel", level]);
+        }
+    }
+
     /// <summary>利用可能なコマンドの一覧を表示します。</summary>
     [Command("help")]
     public void Help()
@@ -167,7 +187,8 @@ public partial class CliCommands
         table.AddRow(Markup.Escape("release"), "Release device");
         table.AddRow(Markup.Escape("close"), "Close device");
         table.AddRow(Markup.Escape("history"), "Show transaction history");
-        table.AddRow(Markup.Escape("config <list|get|set|save>"), "Manage configuration");
+        table.AddRow(Markup.Escape("config <list|get|set|save|reload>"), "Manage configuration");
+        table.AddRow(Markup.Escape("log-level <level>"), _L["LogLevelDescription"] ?? "Change log level");
         table.AddRow(Markup.Escape("run-script <path>"), "Run JSON script");
         table.AddRow(Markup.Escape("help"), Markup.Escape(_L["HelpDescription"] ?? ""));
         table.AddRow(Markup.Escape("exit"), Markup.Escape(_L["ExitDescription"] ?? ""));

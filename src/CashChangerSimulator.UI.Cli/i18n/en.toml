@@ -77,6 +77,13 @@ ConfigListDescription = "List all current configurations"
 ConfigGetDescription = "Get the value of a specific configuration key"
 ConfigSetDescription = "Set the value of a specific configuration key"
 ConfigSaveDescription = "Save current configurations to file"
+ConfigReloadDescription = "Reload configurations from file"
+ConfigReloaded = "Configuration reloaded."
+# {0}: Log level
+LogLevelUpdated = "Log level updated to {0}."
+LogLevelDescription = "Change the logging level (Trace, Debug, Information, Warning, Error)"
+# {0}: Log level
+InvalidLogLevel = "Error: Invalid log level '{0}'. Use: Trace, Debug, Information, Warning, Error"
 
 # Error Display
 ErrorFormat = "[red][{0}: {1} ({2})] {3}[/]"
