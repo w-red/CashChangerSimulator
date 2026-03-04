@@ -1,7 +1,5 @@
-using System;
 using System.Reflection;
 using System.Collections;
-using System.Linq;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Core.Configuration;

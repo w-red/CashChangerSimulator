@@ -1,8 +1,6 @@
-using System;
 using Microsoft.PointOfService;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
-using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli.Services;
 

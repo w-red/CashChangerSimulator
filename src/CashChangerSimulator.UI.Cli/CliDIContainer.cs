@@ -1,4 +1,3 @@
-using System;
 using Spectre.Console;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
@@ -7,10 +6,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using ZLogger;
 using CashChangerSimulator.UI.Cli.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using Microsoft.Extensions.Localization;

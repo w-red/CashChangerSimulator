@@ -1,4 +1,3 @@
-using System;
 using Microsoft.PointOfService;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;

@@ -1,9 +1,7 @@
-using System;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Services;
 
