@@ -31,7 +31,10 @@ public class CliScriptService : CliServiceBase
         {
             var json = await File.ReadAllTextAsync(path);
             _console.MarkupLine(_L["ScriptExecuting", path]);
-            await _scriptExecutionService.ExecuteScriptAsync(json);
+            await _scriptExecutionService.ExecuteScriptAsync(json, op => 
+            {
+                _console.MarkupLine($"  [blue]>[/] Executing [cyan]{op}[/]");
+            });
             _console.MarkupLine(_L["ScriptCompleted"]);
         }
         catch (Exception ex)
