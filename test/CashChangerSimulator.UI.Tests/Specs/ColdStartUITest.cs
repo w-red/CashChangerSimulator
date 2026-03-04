@@ -1,9 +1,6 @@
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
-using Xunit;
-using System;
-using System.Threading;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 

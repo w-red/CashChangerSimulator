@@ -1,9 +1,7 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using System.Diagnostics;
-using Xunit;
 using Shouldly;
 using CashChangerSimulator.Core;
 
