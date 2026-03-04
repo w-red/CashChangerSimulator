@@ -204,6 +204,31 @@ public class Program
                         else
                             AnsiConsole.MarkupLine("[red]Usage: run-script <path>[/]");
                         break;
+                    case "config":
+                        if (parts.Length > 1)
+                        {
+                            var sub = parts[1].ToLowerInvariant();
+                            switch (sub)
+                            {
+                                case "list": commands.ConfigList(); break;
+                                case "get": if (parts.Length > 2) commands.ConfigGet(parts[2]); break;
+                                case "set": if (parts.Length > 3) commands.ConfigSet(parts[2], parts[3]); break;
+                                case "save": commands.ConfigSave(); break;
+                                case "reload": commands.ConfigReload(); break;
+                                default: commands.Config(); break;
+                            }
+                        }
+                        else
+                        {
+                            commands.Config();
+                        }
+                        break;
+                    case "log-level":
+                        if (parts.Length > 1)
+                            commands.LogLevel(parts[1]);
+                        else
+                            AnsiConsole.MarkupLine("[red]Usage: log-level <level>[/]");
+                        break;
                     case "help":
                         commands.Help();
                         break;

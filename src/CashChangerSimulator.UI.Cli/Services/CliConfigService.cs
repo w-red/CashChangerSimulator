@@ -92,6 +92,19 @@ public class CliConfigService : CliServiceBase
         }
     }
 
+    public void Reload()
+    {
+        try
+        {
+            _configProvider.Reload();
+            _console.MarkupLine(_L["ConfigReloaded"]);
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
+        }
+    }
+
     private (bool Success, object? Value) GetPropertyByPath(object obj, string path)
     {
         var parts = path.Split('.');
@@ -127,15 +140,9 @@ public class CliConfigService : CliServiceBase
 
         try
         {
-            object? convertedValue;
-            if (finalProp.PropertyType.IsEnum)
-            {
-                convertedValue = Enum.Parse(finalProp.PropertyType, value, true);
-            }
-            else
-            {
-                convertedValue = Convert.ChangeType(value, finalProp.PropertyType);
-            }
+            object? convertedValue = finalProp.PropertyType.IsEnum
+                ? Enum.Parse(finalProp.PropertyType, value, true)
+                : Convert.ChangeType(value, finalProp.PropertyType);
             finalProp.SetValue(current, convertedValue);
             return true;
         }
