@@ -34,6 +34,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -45,6 +46,7 @@
                                     Height="60" Margin="4"
                                     Background="#0A8F08" BorderBrush="#0A8F08"
                                     Command="{Binding OpenDepositCommand}"
+                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchDepositButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
@@ -57,6 +59,7 @@
                                     Height="60" Margin="4"
                                     Background="#6200EE" BorderBrush="#6200EE"
                                     Command="{Binding OpenDispenseCommand}"
+                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchDispenseButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
@@ -69,10 +72,40 @@
                                     Background="#37474F" BorderBrush="#37474F"
                                     Height="50" Margin="4,8,4,4"
                                     Command="{Binding OpenAdvancedSimulationCommand}"
+                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchAdvancedSimulationButton">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Terminal" Width="20" Height="20" Margin="0,0,8,0" Foreground="White"/>
                                     <TextBlock Text="{StaticResource AdvancedSimulation}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Foreground="White"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Open/Close Device Buttons -->
+                            <Button Grid.Row="2" Grid.Column="0"
+                                    Style="{StaticResource TagButtonStyle}"
+                                    Height="40" Margin="4,8,4,4"
+                                    Background="{StaticResource PrimaryBrush}"
+                                    Foreground="Black"
+                                    Command="{Binding Inventory.OpenCommand}"
+                                    Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}"
+                                    AutomationProperties.AutomationId="DeviceOpenButton">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Power" Width="18" Height="18" Margin="0,0,6,0"/>
+                                    <TextBlock Text="{StaticResource Open}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Grid.Row="2" Grid.ColumnSpan="2"
+                                    Style="{StaticResource TagButtonStyle}"
+                                    Height="40" Margin="4,8,4,4"
+                                    Background="#B0BEC5"
+                                    Foreground="Black"
+                                    Command="{Binding Inventory.CloseCommand}"
+                                    Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource VisibilityConv}}"
+                                    AutomationProperties.AutomationId="DeviceCloseButton">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="PowerOff" Width="18" Height="18" Margin="0,0,6,0"/>
+                                    <TextBlock Text="{StaticResource Close}" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </Grid>

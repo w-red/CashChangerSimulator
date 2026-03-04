@@ -16,7 +16,7 @@
     </UserControl.Resources>
 
     <StackPanel VerticalAlignment="Center">
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,12">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
             <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}">
                 <TextBlock Text="{StaticResource DeviceClosed}" />
@@ -46,7 +46,7 @@
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <!-- Reset Error Button (Icon only as requested) -->
+            <!-- Reset Error Button -->
             <Button Command="{Binding ResetErrorCommand}"
                     Background="#FF5252" BorderBrush="#FF5252" Foreground="White"
                     Width="32" Height="32" Margin="0,0,8,0"
@@ -68,19 +68,6 @@
                     </Style>
                 </Button.Style>
                 <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
-            </Button>
-
-            <!-- Connect Button (New) -->
-            <Button Command="{Binding ConnectCommand}"
-                    Style="{StaticResource TagButtonStyle}"
-                    Background="{StaticResource PrimaryBrush}"
-                    Foreground="Black"
-                    Height="32" Margin="0,0,8,0"
-                    Visibility="{Binding IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Power" Width="16" Height="16" Margin="0,0,4,0"/>
-                    <TextBlock Text="{StaticResource Connect}" VerticalAlignment="Center"/>
-                </StackPanel>
             </Button>
 
             <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"

@@ -127,13 +127,19 @@ public class MainViewModel : IDisposable
             }
         }
 
-        GlobalModeName = Deposit.CurrentModeName
-            .CombineLatest(Dispense.StatusName, (depositMode, dispenseMode) =>
+        GlobalModeName = hardwareStatusManager.IsConnected
+            .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
+                if (!isConnected)
+                {
+                    return System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED";
+                }
                 return dispenseMode == "Busy"
                     ? "DISPENSING" : depositMode;
             })
-            .ToBindableReactiveProperty("IDLE")
+            .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value 
+                ? "IDLE" 
+                : (System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED"))
             .AddTo(_disposables);
 
         OpenDepositCommand = new ReactiveCommand().AddTo(_disposables);
