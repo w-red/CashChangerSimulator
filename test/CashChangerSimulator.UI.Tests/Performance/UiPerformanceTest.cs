@@ -41,6 +41,7 @@ Full = 100
 
 [Simulation]
 DispenseDelayMs = 0
+HotStart = true
 """;
         _app.Launch(customConfig);
         var window = _app.MainWindow;

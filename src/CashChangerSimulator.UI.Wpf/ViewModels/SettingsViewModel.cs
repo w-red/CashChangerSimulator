@@ -1,5 +1,6 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using Microsoft.Extensions.Logging;
 using R3;
@@ -149,7 +150,7 @@ public class SettingsViewModel : IDisposable
 
         foreach (var key in _metadataProvider.SupportedDenominations)
         {
-            var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
+            var keyStr = (key.Type == CurrencyCashType.Bill ? "B" : "C") + key.Value.ToString();
 
             // 個別設定がある場合はそれを使用、ない場合はデフォルト値を適用
             if (config.Inventory.TryGetValue(config.System.CurrencyCode, out var inventory) &&
@@ -202,7 +203,7 @@ public class SettingsViewModel : IDisposable
         activeInventory.Denominations.Clear();
         foreach (var item in DenominationSettings)
         {
-            var keyStr = (item.Key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + item.Key.Value.ToString();
+            var keyStr = (item.Key.Type == CurrencyCashType.Bill ? "B" : "C") + item.Key.Value.ToString();
             activeInventory.Denominations[keyStr] = new DenominationSettings
             {
                 DisplayName = item.DisplayName.Value,

@@ -40,7 +40,7 @@ public class TerminalOperationTest
         _mockDispenseController.SetupGet(c => c.IsBusy).Returns(false);
 
         // Set up DepositController mock
-        _mockDepositController = new Mock<DepositController>(_mockInventory.Object, _hardwareManager);
+        _mockDepositController = new Mock<DepositController>(_mockInventory.Object, _hardwareManager, _mockCashChangerManager.Object);
         _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
         _mockDepositController.SetupGet(c => c.IsDepositInProgress).Returns(false);
         _mockDepositController.SetupGet(c => c.DepositAmount).Returns(0m);

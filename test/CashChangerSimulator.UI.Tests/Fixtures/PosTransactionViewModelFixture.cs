@@ -18,7 +18,7 @@ public class PosTransactionViewModelFixture : IDisposable
     public HardwareStatusManager Hardware { get; private set; } = null!;
     public DepositController DepositController { get; private set; } = null!;
     public DispenseController DispenseController { get; private set; } = null!;
-    public SimulatorCashChanger CashChanger { get; private set; } = null!;
+    public InternalSimulatorCashChanger CashChanger { get; private set; } = null!;
     public ConfigurationProvider ConfigProvider { get; private set; } = null!;
     public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
     public IScriptExecutionService ScriptExecutionService { get; private set; } = null!;
@@ -47,7 +47,7 @@ public class PosTransactionViewModelFixture : IDisposable
 
         ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
 
-        CashChanger = new SimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware)
+        CashChanger = new InternalSimulatorCashChanger(ConfigProvider, Inventory, History, Manager, DepositController, DispenseController, aggregatorProvider, Hardware)
         {
             SkipStateVerification = true,
             CurrencyCode = currencyCode

@@ -58,7 +58,7 @@ public class QuickDepositAndPosModeTest
             hardwareManager,
             _depositController,
             _dispenseController,
-            new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
+            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
     }
@@ -68,17 +68,17 @@ public class QuickDepositAndPosModeTest
     public async Task QuickDepositCommandShouldCalculateBreakdownAndCompleteDeposit()
     {
         // Arrange
-        var monitor = new CashStatusMonitor(_mockInventory.Object, new DenominationKey(1, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), 5, 90, 100);
+        var monitor = new CashStatusMonitor(_mockInventory.Object, new DenominationKey(1, CurrencyCashType.Bill), 5, 90, 100);
 
         var configProvider = _mainViewModel.ConfigProvider;
 
         var denoms = new List<DenominationViewModel>
         {
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(10000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(5000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(500, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(100, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
+            new DenominationViewModel(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new DenominationViewModel(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new DenominationViewModel(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new DenominationViewModel(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
+            new DenominationViewModel(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
         };
 
         var depositVm = _mainViewModel.Deposit;

@@ -37,7 +37,8 @@ public static class DIContainer
         resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
 
         // 3. Simulator / Devices (Singleton)
-        resolver.Register<SimulatorCashChanger, SimulatorCashChanger>(Lifestyle.Singleton);
+        resolver.Register<CashChangerSimulator.Device.InternalSimulatorCashChanger, CashChangerSimulator.Device.InternalSimulatorCashChanger>(Lifestyle.Singleton);
+        resolver.Register<CashChangerSimulator.Device.SimulatorCashChanger, CashChangerSimulator.Device.InternalSimulatorCashChanger>(Lifestyle.Singleton);
         resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
         resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
         resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);

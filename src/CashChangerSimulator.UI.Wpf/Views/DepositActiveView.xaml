@@ -32,7 +32,8 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Style="{StaticResource SecondaryButtonStyle}" 
+                <Button x:Name="BulkInsertButton"
+                        Grid.Column="0" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding ShowBulkInsertCommand}"
                         Margin="4" Height="40"
                         IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}"
@@ -42,7 +43,8 @@
                         <TextBlock Text="{StaticResource Bulk}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
+                <Button x:Name="SimulateOverlapButton"
+                        Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
                         Margin="4" Height="40" Foreground="Orange"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
@@ -53,7 +55,8 @@
                 </Button>
             </Grid>
 
-            <Button Command="{Binding FixDepositCommand}" Style="{StaticResource SecondaryButtonStyle}"
+            <Button x:Name="FinishCountingButton"
+                    Command="{Binding FixDepositCommand}" Style="{StaticResource SecondaryButtonStyle}"
                     HorizontalAlignment="Stretch" Margin="4,4,4,12" Height="44"
                     AutomationProperties.AutomationId="FixDepositButton">
                 <StackPanel Orientation="Horizontal">
@@ -73,7 +76,7 @@
             <StackPanel Grid.Column="0">
                 <!-- Pause/Resume -->
                 <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                    <Button Style="{StaticResource SecondaryButtonStyle}" 
+                    <Button x:Name="PauseDepositButton" Style="{StaticResource SecondaryButtonStyle}" 
                             Command="{Binding PauseDepositCommand}"
                             Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
                             Margin="4" Height="40"
@@ -83,7 +86,7 @@
                             <TextBlock Text="{StaticResource Pause}" FontSize="12" FontWeight="Bold"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource PrimaryButtonStyle}" 
+                    <Button x:Name="ResumeDepositButton" Style="{StaticResource PrimaryButtonStyle}" 
                             Command="{Binding ResumeDepositCommand}"
                             Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
                             Margin="4" Height="40"
@@ -96,9 +99,11 @@
                 </Grid>
 
                 <!-- Store (Fixed state) -->
-                <Button Style="{StaticResource PrimaryButtonStyle}" 
+                <Button x:Name="StoreDepositButton"
+                        Style="{StaticResource PrimaryButtonStyle}" 
                         Command="{Binding StoreDepositCommand}"
                         Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}"
+                        IsEnabled="{Binding CanOperate.Value}"
                         Margin="4" Height="44" AutomationProperties.AutomationId="StoreDepositButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Wallet" Margin="0,0,8,0" />
@@ -108,7 +113,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1">
-                <Button Style="{StaticResource SecondaryButtonStyle}" 
+                <Button x:Name="RepayDepositButton" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding CancelDepositCommand}"
                         Foreground="IndianRed"
                         Margin="4" Height="40"
@@ -119,7 +124,7 @@
                     </StackPanel>
                 </Button>
                 <!-- RESET ERROR during active session -->
-                <Button Command="{Binding ResetErrorCommand}"
+                <Button x:Name="ActiveResetErrorButton" Command="{Binding ResetErrorCommand}"
                         Content="{StaticResource ResetError}"
                         Margin="4" Height="40"
                         AutomationProperties.AutomationId="ActiveResetErrorButton">
