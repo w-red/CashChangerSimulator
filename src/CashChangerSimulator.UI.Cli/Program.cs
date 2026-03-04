@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Threading;
 using Cocona;
 using Spectre.Console;
 using Microsoft.Extensions.DependencyInjection;
@@ -137,7 +134,7 @@ public class Program
 
             var trimmed = line.Trim();
             var lower = trimmed.ToLowerInvariant();
-            if (lower == "exit" || lower == "quit")
+            if (lower is "exit" or "quit")
             {
                 if (ConfirmExit(changer, console)) break;
                 continue;
@@ -268,25 +265,22 @@ public class Program
     }
 }
 
-/// <summary>
-/// CLI コマンドの自動補完ハンドラ。
-/// </summary>
-public class CliAutoCompleteHandler : IAutoCompleteHandler
+/// <summary>CLI コマンドの自動補完ハンドラ。</summary>
+public class CliAutoCompleteHandler(string[] commands)
+    : IAutoCompleteHandler
 {
-    private readonly string[] _commands;
-
-    public CliAutoCompleteHandler(string[] commands)
-    {
-        _commands = commands;
-    }
+    private readonly string[] _commands = commands;
 
     public char[] Separators { get; set; } = new char[] { ' ' };
 
     public string[] GetSuggestions(string text, int index)
     {
-        if (string.IsNullOrWhiteSpace(text))
-            return _commands;
-
-        return _commands.Where(c => c.StartsWith(text, StringComparison.OrdinalIgnoreCase)).ToArray();
+        return string.IsNullOrWhiteSpace(text)
+            ? _commands
+            : [.. _commands.Where(
+                c => c
+                    .StartsWith(
+                        text,
+                        StringComparison.OrdinalIgnoreCase))];
     }
 }

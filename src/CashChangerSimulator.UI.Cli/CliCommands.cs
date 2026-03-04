@@ -1,11 +1,9 @@
 using Cocona;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
-using System.Threading.Tasks;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
-using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Core;
 
 namespace CashChangerSimulator.UI.Cli;

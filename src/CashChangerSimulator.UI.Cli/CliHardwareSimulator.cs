@@ -1,4 +1,3 @@
-using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli;
