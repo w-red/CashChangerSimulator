@@ -22,7 +22,7 @@ public class DepositModeViewModelTest
     private readonly DispenseController _dispenseController;
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly DenominationKey _testKey = new(1000, MoneyKind4Opos.Currencies.Interfaces.CashType.Bill);
+    private readonly DenominationKey _testKey = new(1000, CurrencyCashType.Bill);
 
     /// <summary>DepositModeViewModelTest の新しいインスタンスを初期化します。</summary>
     public DepositModeViewModelTest()
@@ -59,7 +59,7 @@ public class DepositModeViewModelTest
             hardwareManager,
             _depositController,
             _dispenseController,
-            new SimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
+            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
     }

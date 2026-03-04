@@ -5,7 +5,6 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using Microsoft.Extensions.Logging;
-using MoneyKind4Opos.Currencies.Interfaces;
 using System.Diagnostics;
 using System.IO;
 
@@ -26,7 +25,7 @@ public class PerformanceTest(ITestOutputHelper output)
         var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
 
         // JPY setup
-        var key1000 = new DenominationKey(PerformanceConstants.DispenseAmount, CashType.Bill, "JPY");
+        var key1000 = new DenominationKey(PerformanceConstants.DispenseAmount, CurrencyCashType.Bill, "JPY");
         inventory.SetCount(key1000, PerformanceConstants.InitialInventoryCount);
 
         const int iterations = PerformanceConstants.BulkDispenseIterations;

@@ -23,7 +23,8 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" 
+                    <TextBox x:Name="DispenseBox"
+                             Grid.Column="0" 
                              materialDesign:HintAssist.Hint="{StaticResource AmountHint}"
                              materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
                              Text="{Binding DispenseAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
@@ -33,7 +34,8 @@
                              AutomationProperties.AutomationId="DispenseBox"/>
                     <TextBlock Grid.Column="0" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,32,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
 
-                    <Button Grid.Column="1" 
+                    <Button x:Name="DispenseExecuteButton"
+                            Grid.Column="1" 
                             Style="{StaticResource PrimaryButtonStyle}" 
                             Command="{Binding DispenseCommand}" 
                             VerticalAlignment="Center"
@@ -69,7 +71,8 @@
         <Separator Background="#1AFFFFFF" Margin="0,2,0,10"/>
 
         <!-- Bulk Dispense (Dialog) -->
-        <Button Style="{StaticResource SecondaryButtonStyle}"
+        <Button x:Name="BulkDispenseShowButton"
+                Style="{StaticResource SecondaryButtonStyle}"
                 Command="{Binding ShowBulkDispenseCommand}"
                 HorizontalAlignment="Stretch" Height="40" Margin="0,0,0,12"
                 AutomationProperties.AutomationId="BulkDispenseShowButton">
@@ -80,7 +83,7 @@
         </Button>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
-            <Button Command="{Binding ResetErrorCommand}"
+            <Button x:Name="ResetErrorButton" Command="{Binding ResetErrorCommand}"
                     Content="{StaticResource ResetError}"
                     AutomationProperties.AutomationId="ResetErrorButton"
                     FontSize="10" Padding="8,2"
@@ -102,7 +105,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button Style="{StaticResource SecondaryButtonStyle}" 
+            <Button x:Name="SimulateJamButton" Style="{StaticResource SecondaryButtonStyle}" 
                     Command="{Binding SimulateJamCommand}"
                     Content="{StaticResource SimulateJam}"
                     AutomationProperties.AutomationId="SimulateJamButton"

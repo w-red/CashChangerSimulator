@@ -2,7 +2,6 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using MoneyKind4Opos.Currencies.Interfaces;
 using R3;
 using Shouldly;
 using System.IO;
@@ -64,7 +63,7 @@ public class SettingsIntegrationTest
             .Monitors
             .First(
                 m => m.Key.Value == 1000
-                && m.Key.Type == CashType.Bill);
+                && m.Key.Type == CurrencyCashType.Bill);
         // ... (検証ロジックを簡略化)
     }
 }

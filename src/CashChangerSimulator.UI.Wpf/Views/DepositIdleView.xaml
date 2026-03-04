@@ -13,7 +13,8 @@
         <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
     </UserControl.Resources>
     <StackPanel>
-        <Button Style="{StaticResource PrimaryButtonStyle}" 
+        <Button x:Name="BeginDepositButton"
+                Style="{StaticResource PrimaryButtonStyle}" 
                 Command="{Binding BeginDepositCommand}"
                 Width="260" Height="48"
                 HorizontalAlignment="Center" Margin="0,16"
@@ -70,7 +71,8 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox materialDesign:HintAssist.Hint="{StaticResource AmountHint}" 
+            <TextBox x:Name="QuickDepositBox"
+                      materialDesign:HintAssist.Hint="{StaticResource AmountHint}" 
                       materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
                       Text="{Binding QuickDepositAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
                       IsEnabled="{Binding CanOperate.Value}"
@@ -83,7 +85,8 @@
                 </TextBox.InputBindings>
             </TextBox>
             <TextBlock Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,24,12" FontWeight="Bold" Opacity="0.5" Visibility="{Binding CurrencySuffix.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
-            <Button Grid.Column="1" 
+            <Button x:Name="QuickDepositButton"
+                    Grid.Column="1" 
                     Style="{StaticResource PrimaryButtonStyle}"
                     Command="{Binding QuickDepositCommand}"
                     Padding="12,0" Height="40"

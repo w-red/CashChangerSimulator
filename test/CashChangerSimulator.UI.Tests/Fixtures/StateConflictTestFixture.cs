@@ -23,7 +23,7 @@ public class StateConflictTestFixture : IDisposable
     public OverallStatusAggregatorProvider AggregatorProvider { get; private set; } = null!;
     
     public Mock<DispenseController> MockDispenseController { get; private set; } = null!;
-    public Mock<SimulatorCashChanger> MockCashChanger { get; } = new();
+    public Mock<InternalSimulatorCashChanger> MockCashChanger { get; } = new();
     public Mock<INotifyService> MockNotify { get; } = new();
     
     public Subject<Unit> DispenseChanged { get; } = new();

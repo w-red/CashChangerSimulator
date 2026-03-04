@@ -41,7 +41,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             
-                            <Button Grid.Row="0" Grid.Column="0" 
+                            <Button x:Name="LaunchDepositButton"
+                                    Grid.Row="0" Grid.Column="0" 
                                     Style="{StaticResource PrimaryButtonStyle}" 
                                     Height="60" Margin="4"
                                     Background="#0A8F08" BorderBrush="#0A8F08"
@@ -54,7 +55,8 @@
                                 </StackPanel>
                             </Button>
                             
-                            <Button Grid.Row="0" Grid.Column="1" 
+                            <Button x:Name="LaunchDispenseButton"
+                                    Grid.Row="0" Grid.Column="1" 
                                     Style="{StaticResource PrimaryButtonStyle}" 
                                     Height="60" Margin="4"
                                     Background="#6200EE" BorderBrush="#6200EE"
@@ -67,7 +69,8 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Grid.Row="1" Grid.ColumnSpan="2"
+                            <Button x:Name="LaunchAdvancedSimulationButton"
+                                    Grid.Row="1" Grid.ColumnSpan="2"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Background="#37474F" BorderBrush="#37474F"
                                     Height="50" Margin="4,8,4,4"
@@ -81,7 +84,8 @@
                             </Button>
 
                             <!-- Open/Close Device Buttons -->
-                            <Button Grid.Row="2" Grid.Column="0"
+                            <Button x:Name="DeviceOpenButton"
+                                    Grid.Row="2" Grid.Column="0"
                                     Style="{StaticResource TagButtonStyle}"
                                     Height="40" Margin="4,8,4,4"
                                     Background="{StaticResource PrimaryBrush}"
@@ -95,7 +99,8 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Grid.Row="2" Grid.ColumnSpan="2"
+                            <Button x:Name="DeviceCloseButton"
+                                    Grid.Row="2" Grid.Column="1"
                                     Style="{StaticResource TagButtonStyle}"
                                     Height="40" Margin="4,8,4,4"
                                     Background="#B0BEC5"

@@ -32,7 +32,7 @@ public class DenominationViewModel
 
         var cultureCode = configProvider.Config.System.CultureCode ?? "en-US";
         var isJapanese = cultureCode.StartsWith("ja", StringComparison.OrdinalIgnoreCase);
-        var keyStr = (key.Type == MoneyKind4Opos.Currencies.Interfaces.CashType.Bill ? "B" : "C") + key.Value.ToString();
+        var keyStr = (key.Type == CurrencyCashType.Bill ? "B" : "C") + key.Value.ToString();
 
         string? name = null;
         if (configProvider.Config.Inventory.TryGetValue(key.CurrencyCode, out var inventorySettings) &&

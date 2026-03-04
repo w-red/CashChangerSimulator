@@ -31,7 +31,7 @@ public class ColdStartTest
         _configProvider.Update(config);
 
         // Act
-        var cashChanger = new SimulatorCashChanger(
+        var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
             null,
@@ -55,7 +55,7 @@ public class ColdStartTest
         _configProvider.Update(config);
 
         var depositController = new DepositController(_inventory, _hardwareStatusManager);
-        var cashChanger = new SimulatorCashChanger(
+        var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
             null,
@@ -84,7 +84,7 @@ public class ColdStartTest
         config.Simulation.HotStart = false;
         _configProvider.Update(config);
 
-        var cashChanger = new SimulatorCashChanger(
+        var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
             null,
@@ -113,7 +113,7 @@ public class ColdStartTest
         config.Simulation.HotStart = false;
         _configProvider.Update(config);
 
-        var cashChanger = new SimulatorCashChanger(
+        var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
             null,
@@ -143,7 +143,7 @@ public class ColdStartTest
         config.Simulation.HotStart = false;
         _configProvider.Update(config);
 
-        var cashChanger = new SimulatorCashChanger(
+        var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
             null,

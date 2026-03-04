@@ -17,8 +17,8 @@ namespace CashChangerSimulator.UI.Tests.ViewModels;
 /// </summary>
 public class AdvancedSimulationViewModelTest : IDisposable
 {
-    private readonly Mock<SimulatorCashChanger> _mockCashChanger;
-    private readonly SimulatorCashChanger _cashChanger;
+    private readonly Mock<InternalSimulatorCashChanger> _mockCashChanger;
+    private readonly InternalSimulatorCashChanger _cashChanger;
     private readonly Mock<IScriptExecutionService> _mockScriptExecutionService;
     private readonly Mock<DepositController> _mockDepositController;
     private readonly AdvancedSimulationViewModel _viewModel;
@@ -35,12 +35,12 @@ public class AdvancedSimulationViewModelTest : IDisposable
         var monitors = new MonitorsProvider(inventory, configProvider, metadataProvider);
         var aggregator = new OverallStatusAggregatorProvider(monitors);
         
-        _mockDepositController = new Mock<DepositController>(inventory, hardware);
+        _mockDepositController = new Mock<DepositController>(inventory, hardware, manager);
         _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
 
         var dummyDispense = new DispenseController(manager, hardware, new Mock<IDeviceSimulator>().Object);
 
-        _mockCashChanger = new Mock<SimulatorCashChanger>(
+        _mockCashChanger = new Mock<InternalSimulatorCashChanger>(
             configProvider, 
             inventory, 
             history, 

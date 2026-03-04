@@ -40,7 +40,7 @@ public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFix
         {
             changer.BeginDeposit();
             // Simulate some deposits
-            _fixture.DepositController.TrackDeposit(new DenominationKey(100, MoneyKind4Opos.Currencies.Interfaces.CashType.Coin, "JPY"));
+            _fixture.DepositController.TrackDeposit(new DenominationKey(100, CurrencyCashType.Coin, "JPY"));
             changer.FixDeposit();
             changer.EndDeposit(Microsoft.PointOfService.CashDepositAction.NoChange);
         }

@@ -51,7 +51,7 @@ public class ViewModelTest
             realHardware,
             depositController,
             dispenseController,
-            new SimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware),
+            new InternalSimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
 

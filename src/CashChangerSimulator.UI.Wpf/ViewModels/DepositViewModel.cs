@@ -172,11 +172,12 @@ public class DepositViewModel : IDisposable
         ResumeDepositCommand = IsDepositPaused.ToReactiveCommand<Unit>().AddTo(_disposables);
         ResumeDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Restart));
 
-        FixDepositCommand = IsInDepositMode.CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
+        FixDepositCommand = IsInDepositMode.CombineLatest(IsDepositFixed, IsJammed, IsOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         FixDepositCommand.Subscribe(_ => _depositController.FixDeposit());
 
-        StoreDepositCommand = IsDepositFixed.ToReactiveCommand<Unit>().AddTo(_disposables);
+        StoreDepositCommand = IsDepositFixed.CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
         StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
 
         CancelDepositCommand = IsInDepositMode

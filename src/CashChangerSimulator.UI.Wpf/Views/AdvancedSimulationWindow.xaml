@@ -70,7 +70,8 @@
                         <StackPanel>
                             <TextBlock Text="{StaticResource ScriptInput}" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
                             
-                            <TextBox Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                            <TextBox x:Name="ScriptInputTextBox"
+                                     Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource ModernTextBoxStyle}"
                                      AutomationProperties.Name="ScriptInputTextBox"
                                      AutomationProperties.AutomationId="ScriptInputTextBox"
@@ -81,7 +82,8 @@
                                        Visibility="{Binding ScriptError.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}" 
                                        FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
                             
-                            <Button Style="{StaticResource PrimaryButtonStyle}" 
+                            <Button x:Name="ExecuteScriptButton"
+                                    Style="{StaticResource PrimaryButtonStyle}" 
                                     Content="{StaticResource Execute}" 
                                     AutomationProperties.AutomationId="ExecuteScriptButton"
                                     Command="{Binding ExecuteScriptCommand}" 

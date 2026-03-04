@@ -29,7 +29,7 @@
         <sys:Boolean x:Key="False">False</sys:Boolean>
     </Window.Resources>
 
-    <materialDesign:DialogHost Identifier="RootDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+    <materialDesign:DialogHost x:Name="RootDialogHost" Identifier="RootDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
         <Grid>
             <Grid Margin="24">
                 <Grid.ColumnDefinitions>
@@ -51,7 +51,7 @@
                         </Grid.ColumnDefinitions>
                         
                         <!-- Left: Balance -->
-                        <ctrl:BalanceDisplayControl DataContext="{Binding Dispense}" HorizontalAlignment="Left" />
+                        <ctrl:BalanceDisplayControl x:Name="GlobalBalanceDisplay" DataContext="{Binding Dispense}" HorizontalAlignment="Left" />
                         
                         <!-- Right: Status / Mode / Jam -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -64,7 +64,7 @@
                                                AutomationProperties.AutomationId="ModeIndicatorText"/>
                                 </Border>
                                 <!-- Hardaware Status Indicators -->
-                                <ctrl:StatusHeaderControl DataContext="{Binding Inventory}" />
+                                <ctrl:StatusHeaderControl x:Name="GlobalStatusHeader" DataContext="{Binding Inventory}" />
                                 
 
                             </StackPanel>
