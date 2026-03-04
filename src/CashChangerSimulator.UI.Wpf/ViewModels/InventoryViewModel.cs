@@ -45,8 +45,10 @@ public class InventoryViewModel : IDisposable
     public BindableReactiveProperty<int?> CurrentErrorCode { get; }
     /// <summary>デバイスが接続（Open）されているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsConnected { get; }
-    /// <summary>デバイスを接続（Open）するコマンド。</summary>
-    public ReactiveCommand ConnectCommand { get; }
+    /// <summary>デバイスを物理的にオープンするコマンド。</summary>
+    public ReactiveCommand OpenCommand { get; }
+    /// <summary>デバイスを物理的にクローズするコマンド。</summary>
+    public ReactiveCommand CloseCommand { get; }
     /// <summary>最近の取引履歴リスト。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
     /// <summary>設定画面を開くコマンド。</summary>
@@ -116,24 +118,6 @@ public class InventoryViewModel : IDisposable
             .AddTo(_disposables);
 
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
-
-        ConnectCommand = new ReactiveCommand().AddTo(_disposables);
-        ConnectCommand.Subscribe(_ =>
-        {
-            try
-            {
-                cashChanger.Open();
-                // Simulation will trigger HardwareStatusManager.IsConnected = true
-            }
-            catch (Exception)
-            {
-                // Simple logging for now
-                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
-            }
-        });
-
         OpenSettingsCommand.Subscribe(_ =>
         {
             var settingsWindow = new SettingsWindow()
@@ -141,6 +125,35 @@ public class InventoryViewModel : IDisposable
                 Owner = System.Windows.Application.Current.MainWindow
             };
             settingsWindow.ShowDialog();
+        });
+
+        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+
+        OpenCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenCommand.Subscribe(_ =>
+        {
+            try
+            {
+                cashChanger.Open();
+            }
+            catch (Exception)
+            {
+                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+            }
+        });
+
+        CloseCommand = new ReactiveCommand().AddTo(_disposables);
+        CloseCommand.Subscribe(_ =>
+        {
+            try
+            {
+                cashChanger.Close();
+            }
+            catch (Exception)
+            {
+                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+            }
         });
         
         CollectAllCommand = new ReactiveCommand().AddTo(_disposables);

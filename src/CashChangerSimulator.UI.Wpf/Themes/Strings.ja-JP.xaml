@@ -11,6 +11,8 @@
     <system:String x:Key="Busy">ビジー</system:String>
     <system:String x:Key="DeviceClosed">CLOSED</system:String>
     <system:String x:Key="Connect">接続</system:String>
+    <system:String x:Key="Open">オープン</system:String>
+    <system:String x:Key="Close">クローズ</system:String>
 
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
