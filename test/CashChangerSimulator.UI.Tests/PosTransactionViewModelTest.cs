@@ -7,14 +7,9 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
-public class PosTransactionViewModelTest : IClassFixture<PosTransactionViewModelFixture>
+public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>
 {
-    private readonly PosTransactionViewModelFixture _fixture;
-
-    public PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
-    {
-        _fixture = fixture;
-    }
+    private readonly PosTransactionViewModelFixture _fixture = fixture;
 
     private PosTransactionViewModel CreateViewModel()
     {

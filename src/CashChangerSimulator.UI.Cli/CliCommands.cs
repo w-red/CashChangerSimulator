@@ -9,37 +9,24 @@ using CashChangerSimulator.Core;
 namespace CashChangerSimulator.UI.Cli;
 
 /// <summary>CLI からシミュレータを操作するためのコマンドを提供します。</summary>
-public partial class CliCommands
+public partial class CliCommands(
+    SimulatorCashChanger changer,
+    CliDeviceService deviceService,
+    CliCashService cashService,
+    CliConfigService configService,
+    CliViewService viewService,
+    CliScriptService scriptService,
+    IAnsiConsole console,
+    IStringLocalizer localizer)
 {
-    private readonly CliDeviceService _deviceService;
-    private readonly CliCashService _cashService;
-    private readonly CliConfigService _configService;
-    private readonly CliViewService _viewService;
-    private readonly CliScriptService _scriptService;
-    private readonly SimulatorCashChanger _changer;
-    private readonly IAnsiConsole _console;
-    private readonly IStringLocalizer _L;
-
-    /// <summary>CliCommands の新しいインスタンスを初期化します。</summary>
-    public CliCommands(
-        SimulatorCashChanger changer,
-        CliDeviceService deviceService,
-        CliCashService cashService,
-        CliConfigService configService,
-        CliViewService viewService,
-        CliScriptService scriptService,
-        IAnsiConsole console,
-        IStringLocalizer localizer)
-    {
-        _changer = changer;
-        _deviceService = deviceService;
-        _cashService = cashService;
-        _configService = configService;
-        _viewService = viewService;
-        _scriptService = scriptService;
-        _console = console;
-        _L = localizer;
-    }
+    private readonly CliDeviceService _deviceService = deviceService;
+    private readonly CliCashService _cashService = cashService;
+    private readonly CliConfigService _configService = configService;
+    private readonly CliViewService _viewService = viewService;
+    private readonly CliScriptService _scriptService = scriptService;
+    private readonly SimulatorCashChanger _changer = changer;
+    private readonly IAnsiConsole _console = console;
+    private readonly IStringLocalizer _L = localizer;
 
     /// <summary>非同期エラーイベントをハンドリングし、エラーメッセージを表示します。</summary>
     public void HandleAsyncError(object sender, DeviceErrorEventArgs e)

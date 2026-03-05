@@ -6,15 +6,10 @@ using Tomlyn.Model;
 
 namespace CashChangerSimulator.UI.Cli.Localization;
 
-public class TomlStringLocalizer : IStringLocalizer
+public class TomlStringLocalizer(string basePath) : IStringLocalizer
 {
     private static readonly ConcurrentDictionary<string, TomlTable> _cache = new();
-    private readonly string _basePath;
-
-    public TomlStringLocalizer(string basePath)
-    {
-        _basePath = basePath;
-    }
+    private readonly string _basePath = basePath;
 
     public LocalizedString this[string name]
     {
