@@ -48,7 +48,8 @@ public class PosTransactionViewModelTest : IClassFixture<PosTransactionViewModel
             _fixture.Hardware, 
             _fixture.MetadataProvider, 
             () => [], 
-            _fixture.DepositController);
+            _fixture.DepositController,
+            notifyService);
     }
 
     [Fact]
