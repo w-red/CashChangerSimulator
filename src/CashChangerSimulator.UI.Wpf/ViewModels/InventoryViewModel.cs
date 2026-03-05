@@ -136,6 +136,11 @@ public class InventoryViewModel : IDisposable
             try
             {
                 cashChanger.Open();
+                if (cashChanger.SkipStateVerification)
+                {
+                    cashChanger.Claim(0);
+                    cashChanger.DeviceEnabled = true;
+                }
             }
             catch (Exception)
             {

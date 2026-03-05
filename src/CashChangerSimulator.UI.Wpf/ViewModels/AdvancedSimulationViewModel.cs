@@ -13,7 +13,7 @@ public class AdvancedSimulationViewModel : IDisposable
 {
     private readonly SimulatorCashChanger _cashChanger;
     private readonly IScriptExecutionService _scriptExecutionService;
-    private readonly CompositeDisposable _disposables = new();
+    private readonly CompositeDisposable _disposables = [];
 
     public BindableReactiveProperty<bool> IsRealTimeDataEnabled { get; }
     public BindableReactiveProperty<string> ScriptInput { get; }

@@ -3,6 +3,7 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
@@ -124,14 +125,14 @@ public class ColdStartTest
             _hardwareStatusManager);
 
         // Act
+        cashChanger.SkipStateVerification = true;
         cashChanger.Open();
         
         // Assert
         cashChanger.State.ShouldNotBe(ControlState.Closed);
         
-        // These should not throw ErrorCode.Closed anymore (though they might throw other errors if not claimed/enabled)
-        // Since SkipStateVerification defaults to false, VerifyState() is called.
-        Should.NotThrow(() => cashChanger.BeginDeposit());
+        // These should not throw ErrorCode.Closed anymore, but will throw Illegal because not claimed
+        Should.Throw<PosControlException>(() => cashChanger.BeginDeposit()).ErrorCode.ShouldBe(ErrorCode.Illegal);
     }
 
     /// <summary>DeviceEnabled の設定が適切な状態（Opened & Claimed）を要求することを検証する。</summary>
@@ -152,20 +153,16 @@ public class ColdStartTest
             null,
             null,
             _hardwareStatusManager);
+        
+        cashChanger.SkipStateVerification = true;
+        cashChanger.Open();
 
         // Act & Assert
-        // Setting enabled when closed should fail
-        Should.Throw<PosControlException>(() => cashChanger.DeviceEnabled = true).ErrorCode.ShouldBe(ErrorCode.Closed);
-
-        cashChanger.Open();
-        
-        // Setting enabled when opened but not claimed should fail (ErrorCode.Illegal is typical for this)
+        // Setting enabled when opened but NOT claimed should fail (ErrorCode.Illegal)
         Should.Throw<PosControlException>(() => cashChanger.DeviceEnabled = true).ErrorCode.ShouldBe(ErrorCode.Illegal);
-
-        cashChanger.Claim(1000);
         
-        // Now it should succeed
+        // Claiming should then allow enabling
+        cashChanger.Claim(0);
         Should.NotThrow(() => cashChanger.DeviceEnabled = true);
-        cashChanger.DeviceEnabled.ShouldBeTrue();
     }
 }

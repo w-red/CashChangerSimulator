@@ -271,7 +271,7 @@ public class CliAutoCompleteHandler(string[] commands)
 {
     private readonly string[] _commands = commands;
 
-    public char[] Separators { get; set; } = new char[] { ' ' };
+    public char[] Separators { get; set; } = [' '];
 
     public string[] GetSuggestions(string text, int index)
     {

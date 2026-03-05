@@ -49,11 +49,7 @@ public class TomlStringLocalizer : IStringLocalizer
     private string? GetString(string name)
     {
         var table = GetCurrentTable();
-        if (table != null && table.TryGetValue(name, out var value))
-        {
-            return value?.ToString();
-        }
-        return null;
+        return table != null && table.TryGetValue(name, out var value) ? (value?.ToString()) : null;
     }
 
     private TomlTable? GetCurrentTable()

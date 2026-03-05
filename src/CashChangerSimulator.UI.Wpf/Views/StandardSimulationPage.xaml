@@ -47,7 +47,6 @@
                                     Height="60" Margin="4"
                                     Background="#0A8F08" BorderBrush="#0A8F08"
                                     Command="{Binding OpenDepositCommand}"
-                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchDepositButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
@@ -61,7 +60,6 @@
                                     Height="60" Margin="4"
                                     Background="#6200EE" BorderBrush="#6200EE"
                                     Command="{Binding OpenDispenseCommand}"
-                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchDispenseButton">
                                 <StackPanel>
                                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
@@ -75,7 +73,6 @@
                                     Background="#37474F" BorderBrush="#37474F"
                                     Height="50" Margin="4,8,4,4"
                                     Command="{Binding OpenAdvancedSimulationCommand}"
-                                    IsEnabled="{Binding Inventory.IsConnected.Value}"
                                     AutomationProperties.AutomationId="LaunchAdvancedSimulationButton">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Terminal" Width="20" Height="20" Margin="0,0,8,0" Foreground="White"/>

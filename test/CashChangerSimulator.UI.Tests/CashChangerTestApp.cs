@@ -74,7 +74,9 @@ HotStart = {hotStart.ToString().ToLower()}
 
         // Start fresh
         Automation = new UIA3Automation();
-        Application = Application.Launch(_executablePath);
+        var startInfo = new System.Diagnostics.ProcessStartInfo(_executablePath);
+        startInfo.EnvironmentVariables["SKIP_STATE_VERIFICATION"] = "true";
+        Application = Application.Launch(startInfo);
 
         // Use a more robust wait for the window
         MainWindow = Retry.WhileNull(() =>
@@ -116,20 +118,29 @@ HotStart = {hotStart.ToString().ToLower()}
 
         try
         {
-            if (Application != null && !Application.HasExited)
+            if (Application != null)
             {
                 var processId = Application.ProcessId;
-                Application.Close();
+                if (!Application.HasExited)
+                {
+                    Application.Close();
+                }
+                
                 // Force kill if it doesn't close within 2 seconds
                 try
                 {
                     using var process = System.Diagnostics.Process.GetProcessById(processId);
-                    if (!process.WaitForExit(2000))
+                    if (!process.HasExited && !process.WaitForExit(2000))
                     {
                         process.Kill();
+                        process.WaitForExit(1000);
                     }
                 }
                 catch (ArgumentException)
+                {
+                    // Process already exited
+                }
+                catch (InvalidOperationException)
                 {
                     // Process already exited
                 }

@@ -35,8 +35,7 @@ public class DispenseTest : IDisposable
 
         // 3. Open Bulk Dispense Window
         var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", "BULK")?.AsButton();
-        showBulkButton.ShouldNotBeNull();
-        showBulkButton.Click();
+        showBulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Find the new dialog window
@@ -50,15 +49,7 @@ public class DispenseTest : IDisposable
 
         // 5. Execute
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
-        executeButton.ShouldNotBeNull();
-        if (executeButton.Patterns.Invoke.IsSupported)
-        {
-            executeButton.Patterns.Invoke.Pattern.Invoke();
-        }
-        else
-        {
-            executeButton.Click();
-        }
+        executeButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 6. Verify total decreased (Check on Main Window)
@@ -81,15 +72,7 @@ public class DispenseTest : IDisposable
 
         // 2. Click Dispense
         var dispenseButton = FindElement(dispenseWindow, "DispenseButton", null)?.AsButton();
-        dispenseButton.ShouldNotBeNull();
-        if (dispenseButton.Patterns.Invoke.IsSupported)
-        {
-            dispenseButton.Patterns.Invoke.Pattern.Invoke();
-        }
-        else
-        {
-            dispenseButton.Click();
-        }
+        dispenseButton.SmartClick();
 
         // 3. Verify Busy state appears on terminal
         var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")), UITestTimings.RetryShortTimeout);
@@ -125,8 +108,7 @@ public class DispenseTest : IDisposable
 
         // Simulate Jam
         var simulateJamButton = FindElement(dispenseWindow, "SimulateJamButton", null)?.AsButton();
-        simulateJamButton.ShouldNotBeNull();
-        simulateJamButton.Click();
+        simulateJamButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Verify disabled state
@@ -136,8 +118,7 @@ public class DispenseTest : IDisposable
 
         // Reset Error
         var resetErrorButton = FindElement(dispenseWindow, "ResetErrorButton", null)?.AsButton();
-        resetErrorButton.ShouldNotBeNull();
-        resetErrorButton.Click();
+        resetErrorButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Verify enabled state
@@ -149,16 +130,7 @@ public class DispenseTest : IDisposable
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
         var launchButton = UiTestRetry.Find(() => mainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
-        launchButton.ShouldNotBeNull();
-        
-        if (launchButton.Patterns.Invoke.IsSupported)
-        {
-            launchButton.Patterns.Invoke.Pattern.Invoke();
-        }
-        else
-        {
-            launchButton.Click();
-        }
+        launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
         var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", UITestTimings.RetryLongTimeout);
@@ -169,14 +141,14 @@ public class DispenseTest : IDisposable
 
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
-        if (container == null) return null;
-        
-        return UiTestRetry.Find(() =>
+        return container == null
+            ? null
+            : UiTestRetry.Find(() =>
         {
             // Try by AutomationId first (highest priority)
             var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
             if (el != null) return el;
-            
+
             // Fallback to text search if provided
             if (!string.IsNullOrEmpty(text))
             {

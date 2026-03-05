@@ -118,7 +118,11 @@ public class MainViewModel : IDisposable
             try
             {
                 cashChanger.Open();
-                // Optionally Claim/Enable here if needed for deeper HOT start
+                if (cashChanger.SkipStateVerification)
+                {
+                    cashChanger.Claim(0);
+                    cashChanger.DeviceEnabled = true;
+                }
             }
             catch (Exception ex)
             {
@@ -129,11 +133,9 @@ public class MainViewModel : IDisposable
         GlobalModeName = hardwareStatusManager.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
-                if (!isConnected)
-                {
-                    return System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED";
-                }
-                return dispenseMode == "Busy"
+                return !isConnected
+                    ? System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED"
+                    : dispenseMode == "Busy"
                     ? "DISPENSING" : depositMode;
             })
             .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value 
@@ -141,7 +143,7 @@ public class MainViewModel : IDisposable
                 : (System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED"))
             .AddTo(_disposables);
 
-        OpenDepositCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenDepositCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenDepositCommand.Subscribe(_ =>
         {
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
@@ -165,7 +167,7 @@ public class MainViewModel : IDisposable
             }
         });
 
-        OpenDispenseCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenDispenseCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenDispenseCommand.Subscribe(_ =>
         {
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
@@ -189,7 +191,7 @@ public class MainViewModel : IDisposable
             }
         });
 
-        OpenAdvancedSimulationCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenAdvancedSimulationCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
             var mainWindow = System.Windows.Application.Current?.MainWindow;

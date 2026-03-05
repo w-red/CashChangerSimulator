@@ -74,15 +74,41 @@ public class ColdStartUITest : IDisposable
         dispenseButton.ShouldNotBeNull();
 
         Retry.WhileFalse(() => depositButton.IsEnabled, UITestTimings.RetryLongTimeout);
-        dispenseButton.IsEnabled.ShouldBeTrue();
+        Retry.WhileFalse(() => dispenseButton.IsEnabled, UITestTimings.RetryLongTimeout);
+        
+        // Final re-fetch and check
+        // Final re-fetch and check
+        AutomationElement? finalDispenseButton = null;
+        Retry.WhileTrue(() => 
+        {
+            try
+            {
+                finalDispenseButton = FindElement(window, "LaunchDispenseButton");
+                return finalDispenseButton == null || !finalDispenseButton.AsButton().IsEnabled;
+            }
+            catch { return true; } // Ignore COM exceptions during property retrieval
+        }, UITestTimings.RetryLongTimeout);
+        
+        finalDispenseButton.ShouldNotBeNull();
+        finalDispenseButton.AsButton().IsEnabled.ShouldBeTrue();
 
         // Assert - Open button should be hidden, Close button should be visible
         var openBtnAfter = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"));
         (openBtnAfter == null || openBtnAfter.IsOffscreen).ShouldBeTrue();
 
-        var closeButton = FindElement(window, "DeviceCloseButton")?.AsButton();
+        AutomationElement? closeButton = null;
+        Retry.WhileTrue(() => 
+        {
+            try
+            {
+                closeButton = FindElement(window, "DeviceCloseButton");
+                return closeButton == null || closeButton.AsButton().IsOffscreen;
+            }
+            catch { return true; }
+        }, UITestTimings.RetryLongTimeout);
+
         closeButton.ShouldNotBeNull();
-        closeButton.IsOffscreen.ShouldBeFalse();
+        closeButton.AsButton().IsOffscreen.ShouldBeFalse();
     }
 
     /// <summary>クローズ操作によってUIが再び制限されることを検証する。</summary>
@@ -106,9 +132,21 @@ public class ColdStartUITest : IDisposable
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Assert - UI should be restricted again
-        var depositButton = FindElement(window, "LaunchDepositButton")?.AsButton();
-        depositButton.ShouldNotBeNull();
-        Retry.WhileTrue(() => depositButton.IsEnabled, UITestTimings.RetryLongTimeout);
+        // Assert - UI should be restricted again
+        AutomationElement? finalDepositButton = null;
+        Retry.WhileTrue(() => 
+        {
+            try
+            {
+                finalDepositButton = FindElement(window, "LaunchDepositButton");
+                // Here we want it to be disabled (IsEnabled == false), so we retry while it is true
+                return finalDepositButton == null || finalDepositButton.AsButton().IsEnabled;
+            }
+            catch { return true; }
+        }, UITestTimings.RetryLongTimeout);
+
+        finalDepositButton.ShouldNotBeNull();
+        finalDepositButton.AsButton().IsEnabled.ShouldBeFalse();
 
         var openBtnAgain = FindElement(window, "DeviceOpenButton")?.AsButton();
         openBtnAgain.ShouldNotBeNull();
@@ -117,8 +155,9 @@ public class ColdStartUITest : IDisposable
 
     private static FlaUI.Core.AutomationElements.AutomationElement? FindElement(FlaUI.Core.AutomationElements.AutomationElement? container, string automationId)
     {
-        if (container == null) return null;
-        return UiTestRetry.Find(() => container.FindFirstDescendant(cf => cf.ByAutomationId(automationId)), UITestTimings.RetryLongTimeout);
+        return container == null
+            ? null
+            : UiTestRetry.Find(() => container.FindFirstDescendant(cf => cf.ByAutomationId(automationId)), UITestTimings.RetryLongTimeout);
     }
 
     public void Dispose()

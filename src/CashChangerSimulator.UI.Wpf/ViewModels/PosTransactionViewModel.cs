@@ -118,8 +118,7 @@ public class PosTransactionViewModel : IDisposable
 
         Progress = TargetAmount.CombineLatest(CurrentAmount, (target, current) =>
         {
-            if (target <= 0) return 0.0;
-            return Math.Min(100.0, (double)(current / target) * 100.0);
+            return target <= 0 ? 0.0 : Math.Min(100.0, (double)(current / target) * 100.0);
         }).ToReadOnlyReactiveProperty(0.0).AddTo(_disposables);
 
         StatusText = _status.Select(s => s switch

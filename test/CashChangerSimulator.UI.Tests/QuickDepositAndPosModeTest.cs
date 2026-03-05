@@ -61,6 +61,7 @@ public class QuickDepositAndPosModeTest
             new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+        hardwareManager.SetConnected(true);
     }
 
     /// <summary>クイック入金コマンドが内訳を計算し、入金を完了させることを検証する。</summary>

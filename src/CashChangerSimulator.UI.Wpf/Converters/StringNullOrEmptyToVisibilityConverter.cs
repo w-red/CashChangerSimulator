@@ -15,12 +15,7 @@ public class StringNullOrEmptyToVisibilityConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var str = value as string;
-        if (string.IsNullOrEmpty(str))
-        {
-            return NullOrEmptyValue;
-        }
-
-        return HasValueValue;
+        return string.IsNullOrEmpty(str) ? NullOrEmptyValue : HasValueValue;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
