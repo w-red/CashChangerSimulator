@@ -16,8 +16,20 @@
         </ResourceDictionary>
     </UserControl.Resources>
     
-    <ItemsControl ItemsSource="{Binding Denominations}"
-                  ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
-                  ItemTemplate="{StaticResource InventoryTileTemplate}">
-    </ItemsControl>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+            <ItemsControl ItemsSource="{Binding BillDenominations}"
+                          ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
+                          ItemTemplate="{StaticResource InventoryTileTemplate}"
+                          Margin="0,0,0,16">
+            </ItemsControl>
+
+            <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+            <ItemsControl ItemsSource="{Binding CoinDenominations}"
+                          ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
+                          ItemTemplate="{StaticResource InventoryTileTemplate}">
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
