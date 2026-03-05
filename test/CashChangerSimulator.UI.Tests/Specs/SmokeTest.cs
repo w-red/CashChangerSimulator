@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>アプリケーションの起動と基本表示を検証するスモークテスト。</summary>
@@ -17,8 +19,8 @@ public class SmokeTest : IDisposable
     public void ShouldHaveCorrectTitle()
     {
         var window = _app.MainWindow;
-        Assert.NotNull(window);
-        Assert.Equal("Cash Changer Simulator v1.1.0 (Componentized)", window.Title);
+        window.ShouldNotBeNull();
+        window.Title.ShouldBe("Cash Changer Simulator v1.1.0 (Componentized)");
     }
 
     /// <summary>合計金額のラベルが表示されていることを検証する。</summary>
@@ -26,7 +28,7 @@ public class SmokeTest : IDisposable
     public void TotalAmountShouldBeVisible()
     {
         var totalAmountLabel = _app.MainWindow!.FindFirstDescendant(cf => cf.ByText("CASH BALANCE"));
-        Assert.NotNull(totalAmountLabel);
+        totalAmountLabel.ShouldNotBeNull();
     }
 
     /// <inheritdoc/>

@@ -7,6 +7,7 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
+/// <summary>POSトランザクションViewModelの動作を検証するテストクラス。</summary>
 public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>
 {
     private readonly PosTransactionViewModelFixture _fixture = fixture;
@@ -47,6 +48,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
             notifyService);
     }
 
+    /// <summary>初期化時にトランザクションステータスが Idle になることを検証します。</summary>
     [Fact]
     public void ConstructorShouldInitializeCorrectly()
     {
