@@ -73,7 +73,7 @@ public class ColdStartTest
         Should.Throw<PosControlException>(() => cashChanger.BeginDeposit()).ErrorCode.ShouldBe(ErrorCode.Closed);
         Should.Throw<PosControlException>(() => cashChanger.DispenseChange(1000)).ErrorCode.ShouldBe(ErrorCode.Closed);
         Should.Throw<PosControlException>(() => cashChanger.ReadCashCounts()).ErrorCode.ShouldBe(ErrorCode.Closed);
-        Should.Throw<PosControlException>(() => cashChanger.AdjustCashCounts(Array.Empty<CashCount>())).ErrorCode.ShouldBe(ErrorCode.Closed);
+        Should.Throw<PosControlException>(() => cashChanger.AdjustCashCounts([])).ErrorCode.ShouldBe(ErrorCode.Closed);
     }
 
     /// <summary>Closed 状態では Open 以外のライフサイクル操作が制限されることを検証する。</summary>
