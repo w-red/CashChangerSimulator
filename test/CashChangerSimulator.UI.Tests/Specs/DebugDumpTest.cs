@@ -1,5 +1,6 @@
 using FlaUI.Core.Definitions;
 using System.IO;
+using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 

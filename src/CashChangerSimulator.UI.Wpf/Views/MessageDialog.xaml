@@ -6,7 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d">
     <!-- Removed fixed MinWidth/MaxWidth to support liquid layout. Grid handles relative sizing based on children and margins -->
-    <Grid Margin="16" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}}">
+    <Grid Margin="16" MaxWidth="600">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
