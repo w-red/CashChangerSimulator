@@ -2,6 +2,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using System.Windows;
+using R3;
 
 namespace CashChangerSimulator.UI.Wpf.Views;
 
@@ -19,16 +20,15 @@ public partial class SettingsWindow : Window
             DIContainer.Resolve<MonitorsProvider>(),
             DIContainer.Resolve<CurrencyMetadataProvider>());
         DataContext = _viewModel;
-    }
 
-    /// <summary>Save ボタンクリック時に保存成功を確認してダイアログを閉じる。</summary>
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_viewModel.SaveSucceeded.Value)
-        {
-            DialogResult = true;
-            Close();
-        }
+        // 保存成功時にウィンドウを閉じる
+        _viewModel.SaveSucceeded
+            .Where(x => x)
+            .Subscribe(_ =>
+            {
+                DialogResult = true;
+                Close();
+            });
     }
 }
 

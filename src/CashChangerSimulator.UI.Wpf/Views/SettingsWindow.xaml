@@ -83,8 +83,7 @@
                 Content="{StaticResource CommitChanges}"
                 Command="{Binding SaveCommand}"
                 Style="{StaticResource PrimaryButtonStyle}"
-                Width="180"
-                Click="SaveButton_Click"/>
+                Width="180"/>
         </Grid>
     </Grid>
 </Window>
