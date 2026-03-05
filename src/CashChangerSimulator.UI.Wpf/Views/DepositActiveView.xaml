@@ -25,10 +25,42 @@
             </StackPanel>
         </Border>
         
+        <!-- Overflow & Reject Alerts -->
+        <StackPanel Margin="0,0,0,16">
+            <Border Background="Goldenrod" CornerRadius="4" Padding="8,4" Margin="0,0,0,4"
+                    Visibility="{Binding HasOverflow.Value, Converter={StaticResource VisibilityConv}}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Foreground="White" FontWeight="Bold" VerticalAlignment="Center">
+                        <Run Text="{StaticResource Overflow}"/>
+                        <Run Text=": "/>
+                        <Run Text="{Binding CurrencyPrefix.Value}"/>
+                        <Run Text="{Binding OverflowAmount.Value, StringFormat={}{0:N0}}"/>
+                        <Run Text="{Binding CurrencySuffix.Value}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Background="OrangeRed" CornerRadius="4" Padding="8,4"
+                    Visibility="{Binding HasReject.Value, Converter={StaticResource VisibilityConv}}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Cancel" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Foreground="White" FontWeight="Bold" VerticalAlignment="Center">
+                        <Run Text="{StaticResource Reject}"/>
+                        <Run Text=": "/>
+                        <Run Text="{Binding CurrencyPrefix.Value}"/>
+                        <Run Text="{Binding RejectAmount.Value, StringFormat={}{0:N0}}"/>
+                        <Run Text="{Binding CurrencySuffix.Value}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
         <!-- Main Actions (Not Fixed) -->
         <StackPanel Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -47,11 +79,17 @@
                         Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
                         Margin="4" Height="40" Foreground="Orange"
+                        ToolTip="Simulate Overlap Error"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource SimulateOverlap}" FontSize="12" FontWeight="Bold"/>
-                    </StackPanel>
+                    <materialDesign:PackIcon Kind="LayersTripleOutline" />
+                </Button>
+                <Button x:Name="SimulateRejectButton"
+                        Grid.Column="2" Style="{StaticResource SecondaryButtonStyle}" 
+                        Command="{Binding SimulateRejectCommand}"
+                        Margin="4" Height="40" Foreground="Goldenrod"
+                        ToolTip="Simulate Reject"
+                        AutomationProperties.AutomationId="SimulateRejectButton">
+                    <materialDesign:PackIcon Kind="CashRemove" />
                 </Button>
             </Grid>
 

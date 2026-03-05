@@ -14,6 +14,11 @@
     <system:String x:Key="Open">OPEN</system:String>
     <system:String x:Key="Close">CLOSE</system:String>
 
+    <system:String x:Key="Bills">BILLS</system:String>
+    <system:String x:Key="Coins">COINS</system:String>
+    <system:String x:Key="Overflow">OVERFLOW</system:String>
+    <system:String x:Key="Reject">REJECT</system:String>
+
     <system:String x:Key="CashBalance">CASH BALANCE</system:String>
     <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>
     <system:String x:Key="ValidationError">VAL ERROR</system:String>

@@ -39,6 +39,14 @@ public class DepositViewModel : IDisposable
     private readonly BindableReactiveProperty<bool> _isJammed;
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
+    /// <summary>オーバーフロー金額。</summary>
+    public BindableReactiveProperty<decimal> OverflowAmount { get; }
+    /// <summary>オーバーフローが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> HasOverflow { get; }
+    /// <summary>リジェクト金額。</summary>
+    public BindableReactiveProperty<decimal> RejectAmount { get; }
+    /// <summary>リジェクトが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> HasReject { get; }
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
     /// <summary>通貨記号。</summary>
@@ -66,6 +74,8 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<Unit> ResetErrorCommand { get; }
     /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateJamCommand { get; }
+    /// <summary>リジェクトをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateRejectCommand { get; }
 
     // Bulk Deposit
     /// <summary>一括投入画面を表示するコマンド（View側で購読）。</summary>
@@ -127,6 +137,24 @@ public class DepositViewModel : IDisposable
         IsDepositPaused = _depositController.Changed
             .Select(_ => _depositController.IsPaused)
             .ToBindableReactiveProperty(_depositController.IsPaused)
+            .AddTo(_disposables);
+
+        OverflowAmount = _depositController.Changed
+            .Select(_ => _depositController.OverflowAmount)
+            .ToBindableReactiveProperty(_depositController.OverflowAmount)
+            .AddTo(_disposables);
+
+        HasOverflow = OverflowAmount.Select(a => a > 0)
+            .ToReadOnlyReactiveProperty()
+            .AddTo(_disposables);
+
+        RejectAmount = _depositController.Changed
+            .Select(_ => _depositController.RejectAmount)
+            .ToBindableReactiveProperty(_depositController.RejectAmount)
+            .AddTo(_disposables);
+
+        HasReject = RejectAmount.Select(a => a > 0)
+            .ToReadOnlyReactiveProperty()
             .AddTo(_disposables);
 
         // DEBUG TRACE
@@ -248,6 +276,12 @@ public class DepositViewModel : IDisposable
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
+
+        SimulateRejectCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
+            .ToReactiveCommand<Unit>()
+            .AddTo(_disposables);
+        SimulateRejectCommand.Subscribe(_ => _depositController.SimulateReject(1000m));
     }
 
     private string GetModeName()
