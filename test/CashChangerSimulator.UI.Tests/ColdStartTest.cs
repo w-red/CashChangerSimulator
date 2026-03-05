@@ -100,8 +100,8 @@ public class ColdStartTest
         // Claim should fail if not open
         Should.Throw<PosControlException>(() => cashChanger.Claim(1000)).ErrorCode.ShouldBe(ErrorCode.Closed);
 
-        // Close should fail if already closed
-        Should.Throw<PosControlException>(() => cashChanger.Close()).ErrorCode.ShouldBe(ErrorCode.Closed);
+        // Close should NOT fail even if already closed (Idempotent)
+        Should.NotThrow(() => cashChanger.Close());
     }
 
     /// <summary>Open された後は操作が可能になることを検証する。</summary>
