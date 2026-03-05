@@ -145,8 +145,8 @@ public class DepositViewModel : IDisposable
         {
             if (_isDispenseBusy.Value)
             {
-                var msg = System.Windows.Application.Current?.Resources["WarnDepositDuringDispense"] as string ?? "Cannot begin deposit while dispense is in progress.";
-                var title = System.Windows.Application.Current?.Resources["Warn"] as string ?? "Warning";
+                var msg = ResourceHelper.GetAsString("WarnDepositDuringDispense", "Cannot begin deposit while dispense is in progress.");
+                var title = ResourceHelper.GetAsString("Warn", "Warning");
                 _notifyService.ShowWarning(msg, title);
                 return;
             }
@@ -161,12 +161,12 @@ public class DepositViewModel : IDisposable
             {
                 _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
                 _logger.ZLogError(pcEx, $"Failed to begin deposit.");
-                _notifyService.ShowWarning(pcEx.Message, (string)System.Windows.Application.Current.Resources["Error"]);
+                _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error"));
             }
             catch (Exception ex)
             {
                 _logger.ZLogError(ex, $"Failed to begin deposit.");
-                _notifyService.ShowWarning(ex.Message, (string)System.Windows.Application.Current.Resources["Error"]);
+                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error"));
             }
         });
 
@@ -218,8 +218,8 @@ public class DepositViewModel : IDisposable
             if (_isDispenseBusy.Value)
             {
                 _notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["WarnDepositDuringDispense"],
-                    (string)System.Windows.Application.Current.Resources["Warn"]);
+                    ResourceHelper.GetAsString("WarnDepositDuringDispense"),
+                    ResourceHelper.GetAsString("Warn"));
                 return;
             }
 
@@ -272,8 +272,8 @@ public class DepositViewModel : IDisposable
         if (_isJammed.Value || _isOverlapped.Value)
         {
             _notifyService.ShowWarning(
-                (string)System.Windows.Application.Current.Resources["ErrorCannotOpenTerminalInError"],
-                (string)System.Windows.Application.Current.Resources["Warn"]);
+                ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError"),
+                ResourceHelper.GetAsString("Warn"));
             return;
         }
 
@@ -321,13 +321,13 @@ public class DepositViewModel : IDisposable
         {
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
-            var title = System.Windows.Application.Current?.Resources["Error"] as string ?? "Error";
+            var title = ResourceHelper.GetAsString("Error", "Error");
             _notifyService.ShowWarning(pcEx.Message, title);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to execute quick deposit.");
-            var title = System.Windows.Application.Current?.Resources["Error"] as string ?? "Error";
+            var title = ResourceHelper.GetAsString("Error", "Error");
             _notifyService.ShowWarning(ex.Message, title);
         }
     }

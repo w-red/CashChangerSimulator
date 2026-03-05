@@ -16,6 +16,7 @@ public class PosTransactionViewModel : IDisposable
     private readonly DispenseViewModel _dispense;
     private readonly SimulatorCashChanger _cashChanger;
     private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly INotifyService _notifyService;
     private readonly ILogger<PosTransactionViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
     private CancellationTokenSource? _timeoutCts;
@@ -73,7 +74,7 @@ public class PosTransactionViewModel : IDisposable
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
     /// <summary>PosTransactionViewModel の新しいインスタンスを初期化します。</summary>
-    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController)
+    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController, INotifyService notifyService)
     {
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
@@ -81,6 +82,7 @@ public class PosTransactionViewModel : IDisposable
         _dispense = dispense;
         _cashChanger = cashChanger;
         _hardwareStatusManager = hardwareStatusManager;
+        _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<PosTransactionViewModel>();
 
         TargetAmountInput = new BindableReactiveProperty<string>("")
@@ -391,10 +393,12 @@ public class PosTransactionViewModel : IDisposable
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
         }
         catch (Exception ex)
         {
             LogOpos($"ERROR: {ex.Message}");
+            _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
         }
     }
 
