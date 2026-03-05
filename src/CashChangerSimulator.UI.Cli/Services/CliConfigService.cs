@@ -6,17 +6,12 @@ using CashChangerSimulator.Core.Configuration;
 
 namespace CashChangerSimulator.UI.Cli.Services;
 
-public class CliConfigService : CliServiceBase
+public class CliConfigService(
+    ConfigurationProvider configProvider,
+    IAnsiConsole console,
+    IStringLocalizer localizer) : CliServiceBase(console, localizer)
 {
-    private readonly ConfigurationProvider _configProvider;
-
-    public CliConfigService(
-        ConfigurationProvider configProvider,
-        IAnsiConsole console,
-        IStringLocalizer localizer) : base(console, localizer)
-    {
-        _configProvider = configProvider;
-    }
+    private readonly ConfigurationProvider _configProvider = configProvider;
 
     public void List()
     {

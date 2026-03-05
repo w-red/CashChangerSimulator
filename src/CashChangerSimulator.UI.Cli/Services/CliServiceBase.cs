@@ -7,16 +7,10 @@ namespace CashChangerSimulator.UI.Cli.Services;
 /// <summary>
 /// CLI の各サービスクラスの基底クラス。
 /// </summary>
-public abstract class CliServiceBase
+public abstract class CliServiceBase(IAnsiConsole console, IStringLocalizer localizer)
 {
-    protected readonly IAnsiConsole _console;
-    protected readonly IStringLocalizer _L;
-
-    protected CliServiceBase(IAnsiConsole console, IStringLocalizer localizer)
-    {
-        _console = console;
-        _L = localizer;
-    }
+    protected readonly IAnsiConsole _console = console;
+    protected readonly IStringLocalizer _L = localizer;
 
     public void HandleException(Exception ex)
     {

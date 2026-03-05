@@ -5,17 +5,12 @@ using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli.Services;
 
-public class CliDeviceService : CliServiceBase
+public class CliDeviceService(
+    SimulatorCashChanger changer,
+    IAnsiConsole console,
+    IStringLocalizer localizer) : CliServiceBase(console, localizer)
 {
-    private readonly SimulatorCashChanger _changer;
-
-    public CliDeviceService(
-        SimulatorCashChanger changer,
-        IAnsiConsole console,
-        IStringLocalizer localizer) : base(console, localizer)
-    {
-        _changer = changer;
-    }
+    private readonly SimulatorCashChanger _changer = changer;
 
     public void Open()
     {

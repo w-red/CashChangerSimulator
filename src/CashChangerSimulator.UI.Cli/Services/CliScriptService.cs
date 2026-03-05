@@ -4,17 +4,12 @@ using CashChangerSimulator.Device.Services;
 
 namespace CashChangerSimulator.UI.Cli.Services;
 
-public class CliScriptService : CliServiceBase
+public class CliScriptService(
+    IScriptExecutionService scriptExecutionService,
+    IAnsiConsole console,
+    IStringLocalizer localizer) : CliServiceBase(console, localizer)
 {
-    private readonly IScriptExecutionService _scriptExecutionService;
-
-    public CliScriptService(
-        IScriptExecutionService scriptExecutionService,
-        IAnsiConsole console,
-        IStringLocalizer localizer) : base(console, localizer)
-    {
-        _scriptExecutionService = scriptExecutionService;
-    }
+    private readonly IScriptExecutionService _scriptExecutionService = scriptExecutionService;
 
     public async Task RunScriptAsync(string path)
     {
