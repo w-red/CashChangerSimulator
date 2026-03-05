@@ -89,7 +89,7 @@ public class PosTransactionViewModel : IDisposable
             .EnableValidation(text =>
                 string.IsNullOrWhiteSpace(text) ? null :
                 !decimal.TryParse(text, out var val) ? new Exception("Invalid amount") :
-                val <= 0 ? new Exception("Amount must be positive") : 
+                val <= 0 ? new Exception("Amount must be positive") :
                 val > 100_000_000 ? new Exception("Amount is too large") : null)
             .AddTo(_disposables);
 
@@ -217,7 +217,7 @@ public class PosTransactionViewModel : IDisposable
     {
         _logger.LogInformation("Starting POS transaction for amount: {TargetAmount}", TargetAmountInput.Value);
         LogOpos("--- Sequence Start ---");
-        
+
         try
         {
             LogOpos("Open()");
@@ -293,7 +293,7 @@ public class PosTransactionViewModel : IDisposable
     {
         _logger.LogInformation("Canceling POS transaction.");
         StopTimeout();
-        
+
         try
         {
             LogOpos("FixDeposit()");
@@ -340,7 +340,7 @@ public class PosTransactionViewModel : IDisposable
             {
                 LogOpos($"DispenseChange({changeToDispense})");
                 _cashChanger.DispenseChange(changeToDispense);
-                
+
                 // Wait for dispense to complete
                 await Task.Delay(1000);
             }

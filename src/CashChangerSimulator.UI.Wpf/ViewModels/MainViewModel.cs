@@ -142,8 +142,8 @@ public class MainViewModel : IDisposable
                     : dispenseMode == "Busy"
                     ? "DISPENSING" : depositMode;
             })
-            .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value 
-                ? "IDLE" 
+            .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value
+                ? "IDLE"
                 : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 

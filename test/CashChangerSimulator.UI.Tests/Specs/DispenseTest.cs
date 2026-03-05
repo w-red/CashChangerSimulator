@@ -77,7 +77,7 @@ public class DispenseTest : IDisposable
         // 3. Verify Busy state appears on terminal
         var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")), UITestTimings.RetryShortTimeout);
         busyIndicator.ShouldNotBeNull();
-        
+
         // Wait for completion (Return to Idle)
         Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, UITestTimings.RetryLongTimeout);
     }

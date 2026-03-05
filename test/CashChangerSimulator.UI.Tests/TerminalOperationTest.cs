@@ -28,7 +28,7 @@ public class TerminalOperationTest
         _hardwareManager = new HardwareStatusManager();
         _mockInventory = new Mock<Inventory>();
         _mockInventory.Setup(i => i.Changed).Returns(Observable.Empty<DenominationKey>());
-        
+
         var mockHistory = new Mock<TransactionHistory>();
         mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
         _mockCashChangerManager = new Mock<CashChangerManager>(_mockInventory.Object, mockHistory.Object, new ChangeCalculator());
@@ -188,7 +188,7 @@ public class TerminalOperationTest
         // Assert: Re-enabled
         ((System.Windows.Input.ICommand)vm.BeginDepositCommand).CanExecute(null).ShouldBeTrue();
         ((System.Windows.Input.ICommand)vm.ShowBulkInsertCommand).CanExecute(null).ShouldBeTrue();
-        
+
         // Cleanup
         _mockDepositController.SetupGet(c => c.IsDepositInProgress).Returns(false);
         _mockDepositController.SetupGet(c => c.IsFixed).Returns(true);

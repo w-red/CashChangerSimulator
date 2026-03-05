@@ -20,16 +20,16 @@ public class BulkAmountInputViewModel(
 
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ICommand SimulateOverlapCommand { get; } = simulateOverlap;
-    
+
     /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
     public ICommand SimulateJamCommand { get; } = simulateJam;
-    
+
     /// <summary>エラー状態を解消するコマンド。</summary>
     public ICommand ResetErrorCommand { get; } = resetError;
 
     /// <summary>ジャムが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsJammed { get; } = isJammed;
-    
+
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; } = isOverlapped;
 }

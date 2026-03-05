@@ -15,7 +15,7 @@ public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFix
     {
         _fixture = fixture;
         _fixture.Initialize();
-        
+
         // Ensure Logging is initialized for the benchmark
         LogProvider.Initialize(new LoggingSettings
         {
@@ -35,7 +35,7 @@ public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFix
 
         const int iterations = 10000;
         var sw = Stopwatch.StartNew();
-        
+
         for (int i = 0; i < iterations; i++)
         {
             changer.BeginDeposit();
@@ -46,10 +46,10 @@ public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFix
         }
 
         sw.Stop();
-        
+
         var totalMs = sw.ElapsedMilliseconds;
         _ = (double)totalMs / iterations;
-        
+
         // Assert some reasonable performance (e.g., < 10s for 10k operations in-memory)
         totalMs.ShouldBeLessThan(10000, "10,000 transactions should be processed within 10 seconds in simulator.");
     }

@@ -55,7 +55,7 @@ public class DispenseViewModel : IDisposable
     public IEnumerable<DenominationViewModel> Denominations { get; }
     /// <summary>特定の金種を1枚出金するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> QuickDispenseCommand { get; }
-    
+
     // Phase 12: Error Reset
     /// <summary>エラー状態を解消するコマンド。</summary>
     public ReactiveCommand ResetErrorCommand { get; }

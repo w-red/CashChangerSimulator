@@ -97,7 +97,7 @@ HotStart = true
         // 実行直後に何度もメインウィンドウへのアクセスを試みることで、UIスレッドがロックされていないか確認する。
         bool UIThreadBlocked = false;
         long maxResponseTimeMs = 0;
-        
+
         // 5秒間、定期的にメインウィンドウのプロパティ（Title等）を読み取る
         var checkEnd = DateTime.Now.AddSeconds(5);
         while (DateTime.Now < checkEnd)
@@ -108,12 +108,12 @@ HotStart = true
                 // UIツリーへのアクセス（RPC呼び出し）を試みる
                 var title = window.Name;
                 checkSw.Stop();
-                
+
                 if (checkSw.ElapsedMilliseconds > maxResponseTimeMs)
                 {
                     maxResponseTimeMs = checkSw.ElapsedMilliseconds;
                 }
-                
+
                 // もしプロパティ取得に極端な遅延（例：500ms以上）があればフリーズと見なす
                 if (checkSw.ElapsedMilliseconds > 1000)
                 {
@@ -125,7 +125,7 @@ HotStart = true
                 // エラーはプロセス終了か応答なし扱い
                 UIThreadBlocked = true;
             }
-            
+
             Thread.Sleep(50);
         }
 

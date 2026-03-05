@@ -30,11 +30,11 @@ public class SettingsIntegrationTest
         // Arrange
         var configProvider = new ConfigurationProvider();
         configProvider.Config.System.CurrencyCode = "JPY"; // 明示的に初期化
-        // 開発環境の config.toml を汚さないように、一時的に保存先をモックするか、
-        // もしくは ConfigurationLoader.Save が使うパスを制御できるようにリファクタリングするべきですが、
-        // 現状は Loader が直接カレントディレクトリの config.toml を見るため、
-        // このテストは「ロジックの連動」のみを検証し、実際のファイル保存は Loader の単体テストに任せます。
-        
+                                                           // 開発環境の config.toml を汚さないように、一時的に保存先をモックするか、
+                                                           // もしくは ConfigurationLoader.Save が使うパスを制御できるようにリファクタリングするべきですが、
+                                                           // 現状は Loader が直接カレントディレクトリの config.toml を見るため、
+                                                           // このテストは「ロジックの連動」のみを検証し、実際のファイル保存は Loader の単体テストに任せます。
+
         var inventory = new Inventory();
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
@@ -56,7 +56,7 @@ public class SettingsIntegrationTest
         configProvider.Config.Thresholds.NearEmpty.ShouldBe(12);
         configProvider.Config.Thresholds.NearFull.ShouldBe(34);
         configProvider.Config.Thresholds.Full.ShouldBe(56);
-        
+
         // Assert: MonitorsProvider にも通知が届き、閾値が更新されていること
         // (MonitorsProvider は内部で各モニターの UpdateThresholds を呼ぶ)
         var monitor = monitorsProvider

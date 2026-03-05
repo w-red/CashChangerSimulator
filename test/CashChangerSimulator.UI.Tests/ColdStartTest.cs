@@ -68,7 +68,7 @@ public class ColdStartTest
 
         // Act & Assert
         cashChanger.State.ShouldBe(ControlState.Closed);
-        
+
         // This should fail (throw exception) when Cold Start is properly implemented
         Should.Throw<PosControlException>(() => cashChanger.BeginDeposit()).ErrorCode.ShouldBe(ErrorCode.Closed);
         Should.Throw<PosControlException>(() => cashChanger.DispenseChange(1000)).ErrorCode.ShouldBe(ErrorCode.Closed);
@@ -127,10 +127,10 @@ public class ColdStartTest
         // Act
         cashChanger.SkipStateVerification = true;
         cashChanger.Open();
-        
+
         // Assert
         cashChanger.State.ShouldNotBe(ControlState.Closed);
-        
+
         // These should not throw ErrorCode.Closed anymore, but will throw Illegal because not claimed
         Should.Throw<PosControlException>(() => cashChanger.BeginDeposit()).ErrorCode.ShouldBe(ErrorCode.Illegal);
     }
@@ -153,14 +153,14 @@ public class ColdStartTest
             null,
             null,
             _hardwareStatusManager);
-        
+
         cashChanger.SkipStateVerification = true;
         cashChanger.Open();
 
         // Act & Assert
         // Setting enabled when opened but NOT claimed should fail (ErrorCode.Illegal)
         Should.Throw<PosControlException>(() => cashChanger.DeviceEnabled = true).ErrorCode.ShouldBe(ErrorCode.Illegal);
-        
+
         // Claiming should then allow enabling
         cashChanger.Claim(0);
         Should.NotThrow(() => cashChanger.DeviceEnabled = true);

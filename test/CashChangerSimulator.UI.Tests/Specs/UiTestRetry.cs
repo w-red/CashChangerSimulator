@@ -48,8 +48,8 @@ public static class UiTestRetry
                 var topWindows = app.GetAllTopLevelWindows(automation);
                 foreach (var w in topWindows)
                 {
-                    if ((w.Title?.Contains(title) ?? false) || 
-                        (w.Name?.Contains(title) ?? false) || 
+                    if ((w.Title?.Contains(title) ?? false) ||
+                        (w.Name?.Contains(title) ?? false) ||
                         w.AutomationId == title)
                     {
                         result = w;

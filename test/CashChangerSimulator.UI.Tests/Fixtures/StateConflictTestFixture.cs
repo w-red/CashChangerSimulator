@@ -21,11 +21,11 @@ public class StateConflictTestFixture : IDisposable
     public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
     public MonitorsProvider MonitorsProvider { get; private set; } = null!;
     public OverallStatusAggregatorProvider AggregatorProvider { get; private set; } = null!;
-    
+
     public Mock<DispenseController> MockDispenseController { get; private set; } = null!;
     public Mock<InternalSimulatorCashChanger> MockCashChanger { get; } = new();
     public Mock<INotifyService> MockNotify { get; } = new();
-    
+
     public Subject<Unit> DispenseChanged { get; } = new();
 
     public void Initialize()
@@ -44,7 +44,7 @@ public class StateConflictTestFixture : IDisposable
         MockDispenseController = new Mock<DispenseController>(Manager, HardwareManager, new Mock<IDeviceSimulator>().Object);
         MockDispenseController.SetupGet(c => c.Changed).Returns(DispenseChanged);
         MockDispenseController.SetupGet(c => c.IsBusy).Returns(false);
-        
+
         MockCashChanger.SetupGet(c => c.CurrencyCode).Returns("JPY");
     }
 

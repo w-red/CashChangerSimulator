@@ -69,17 +69,17 @@ public class ColdStartUITest : IDisposable
         // Assert - Terminal buttons should become enabled
         var depositButton = FindElement(window, "LaunchDepositButton")?.AsButton();
         var dispenseButton = FindElement(window, "LaunchDispenseButton")?.AsButton();
-        
+
         depositButton.ShouldNotBeNull();
         dispenseButton.ShouldNotBeNull();
 
         Retry.WhileFalse(() => depositButton.IsEnabled, UITestTimings.RetryLongTimeout);
         Retry.WhileFalse(() => dispenseButton.IsEnabled, UITestTimings.RetryLongTimeout);
-        
+
         // Final re-fetch and check
         // Final re-fetch and check
         AutomationElement? finalDispenseButton = null;
-        Retry.WhileTrue(() => 
+        Retry.WhileTrue(() =>
         {
             try
             {
@@ -88,7 +88,7 @@ public class ColdStartUITest : IDisposable
             }
             catch { return true; } // Ignore COM exceptions during property retrieval
         }, UITestTimings.RetryLongTimeout);
-        
+
         finalDispenseButton.ShouldNotBeNull();
         finalDispenseButton.AsButton().IsEnabled.ShouldBeTrue();
 
@@ -97,7 +97,7 @@ public class ColdStartUITest : IDisposable
         (openBtnAfter == null || openBtnAfter.IsOffscreen).ShouldBeTrue();
 
         AutomationElement? closeButton = null;
-        Retry.WhileTrue(() => 
+        Retry.WhileTrue(() =>
         {
             try
             {
@@ -119,7 +119,7 @@ public class ColdStartUITest : IDisposable
         _app.Launch(hotStart: false);
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
-        
+
         // Open it first
         var openButton = FindElement(window, "DeviceOpenButton")?.AsButton();
         openButton?.Click();
@@ -134,7 +134,7 @@ public class ColdStartUITest : IDisposable
         // Assert - UI should be restricted again
         // Assert - UI should be restricted again
         AutomationElement? finalDepositButton = null;
-        Retry.WhileTrue(() => 
+        Retry.WhileTrue(() =>
         {
             try
             {

@@ -60,9 +60,9 @@ public class StateConflictTest : IAsyncLifetime
 
         // Assert
         exception.ShouldBeNull($"ディスペンスコマンド実行中に例外が発生しました: {exception?.Message}");
-        
+
         _fixture.MockNotify.Verify(
-            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()),
             Times.Once,
             "入金中のディスペンス試行時に警告ダイアログが表示されなかった");
     }
@@ -74,7 +74,7 @@ public class StateConflictTest : IAsyncLifetime
         // Arrange
         _fixture.MockDispenseController.SetupGet(c => c.Status).Returns(CashDispenseStatus.Busy);
         _fixture.DispenseChanged.OnNext(Unit.Default);
-        
+
         _mainViewModel.Dispense.IsBusy.Value.ShouldBeTrue();
 
         // Act
@@ -85,9 +85,9 @@ public class StateConflictTest : IAsyncLifetime
 
         // Assert
         exception.ShouldBeNull($"入金コマンド実行中に例外が発生しました: {exception?.Message}");
-        
+
         _fixture.MockNotify.Verify(
-            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()),
             Times.Once,
             "ディスペンス中の入金試行時に警告ダイアログが表示されなかった");
     }
@@ -107,13 +107,13 @@ public class StateConflictTest : IAsyncLifetime
                 _mainViewModel.Dispense.DispenseAmountInput.Value = "1000";
                 _mainViewModel.Dispense.DispenseCommand.Execute(Unit.Default);
             });
-            
+
             exception.ShouldBeNull($"ループ {i + 1} 回目でディスペンスコマンド実行中に例外が発生しました: {exception?.Message}");
         }
 
         // Assert: 3回警告が表示される
         _fixture.MockNotify.Verify(
-            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), 
+            n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()),
             Times.Exactly(3),
             "複数回の状態競合時に、各回ごとに警告が表示されなかった");
     }

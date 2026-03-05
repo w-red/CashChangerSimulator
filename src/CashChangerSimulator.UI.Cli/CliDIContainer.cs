@@ -22,7 +22,7 @@ public static class CliDIContainer
         var services = new ServiceCollection();
         ConfigureServices(services, args);
         _serviceProvider = services.BuildServiceProvider();
-        
+
         SimulatorServices.Provider = new CliResolverServiceProvider(_serviceProvider);
     }
 
@@ -44,7 +44,7 @@ public static class CliDIContainer
         services.AddSingleton<INotifyService, CliNotifyService>();
         services.AddSingleton<CliSessionOptions>();
         services.AddSingleton<IAnsiConsole>(AnsiConsole.Console);
-        
+
         // Localization
         services.AddSingleton<IStringLocalizerFactory, TomlStringLocalizerFactory>();
         services.AddTransient<IStringLocalizer>(sp => sp.GetRequiredService<IStringLocalizerFactory>().Create(typeof(CliCommands)));
@@ -76,7 +76,7 @@ public static class CliDIContainer
     public static void PostInitialize(IServiceProvider provider, string[] args)
     {
         _serviceProvider = provider;
-        
+
         // Override Configuration from args
         var configProvider = provider.GetRequiredService<ConfigurationProvider>();
         for (int i = 0; i < args.Length; i++)

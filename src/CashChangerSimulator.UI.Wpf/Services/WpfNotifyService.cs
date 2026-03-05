@@ -21,14 +21,14 @@ public class WpfNotifyService : INotifyService
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             var activeWindow = System.Windows.Application.Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(x => x.IsActive);
-            
+
             // Try to find a DialogHost in the active window.
             var dialogHost = FindVisualChild<DialogHost>(activeWindow);
 
             string dialogIdentifier = "RootDialog";
             if (dialogHost != null && !string.IsNullOrEmpty(dialogHost.Identifier as string))
             {
-               dialogIdentifier = (string)dialogHost.Identifier;
+                dialogIdentifier = (string)dialogHost.Identifier;
             }
 
             DialogHost.Show(dialog, dialogIdentifier);

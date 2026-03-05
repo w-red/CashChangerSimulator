@@ -33,10 +33,10 @@ public class CliViewService : CliServiceBase
         _console.Write(new Rule($"[cyan]{_L["StatusHeader"]}[/]").LeftJustified());
         _console.MarkupLine($"{_L["StateLabel"]}: [yellow]{_changer.State}[/]");
         _console.MarkupLine($"{_L["EnabledLabel"]}: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
-        
+
         _console.WriteLine();
         _console.Write(new Rule($"[cyan]{_L["InventoryHeader"]}[/]").LeftJustified());
-        
+
         var table = new Table().Border(TableBorder.Rounded);
         table.AddColumn(_L["DenominationLabel"]);
         table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
@@ -51,14 +51,14 @@ public class CliViewService : CliServiceBase
         var prefix = _metadata.SymbolPrefix.CurrentValue;
         var suffix = _metadata.SymbolSuffix.CurrentValue;
         table.Caption($"{_L["TotalCaption"]}: {prefix}{_inventory.CalculateTotal(currencyCode):N0}{suffix}");
-        
+
         _console.Write(table);
     }
 
     public void History(int count)
     {
         _console.Write(new Rule($"[cyan]{_L["TransactionHistoryHeader", count]}[/]").LeftJustified());
-        
+
         var table = new Table().Border(TableBorder.Rounded);
         table.AddColumn(_L["TimestampLabel"]);
         table.AddColumn(_L["TypeLabel"]);

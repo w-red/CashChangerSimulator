@@ -17,7 +17,7 @@ public class DocumentationScreenshotGenerator : IDisposable
     {
         _app = new CashChangerTestApp();
         _app.Launch();
-        
+
         // docs/images フォルダを特定
         // 実行ディレクトリ (test/bin/Debug/...) からリポジトリルートの docs/images へ
         _outputDir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../../docs/images"));
@@ -63,24 +63,24 @@ public class DocumentationScreenshotGenerator : IDisposable
                 ?? throw new Exception($"Button '{buttonId}' not found in MainWindow.");
         button.WaitUntilClickable();
         button.Click();
-        
+
         // ウィンドウが開くのを待機 (Desktop 直下 または MainWindow の子)
-        var window = Retry.WhileNull(() => 
+        var window = Retry.WhileNull(() =>
         {
             var desktop = _app.Automation.GetDesktop();
-            var win = 
+            var win =
                 desktop.FindFirstChild(
-                    cf => cf.ByAutomationId(windowId)) 
+                    cf => cf.ByAutomationId(windowId))
                 ?? _app.MainWindow
                     ?.FindFirstDescendant(
                         cf => cf.ByAutomationId(windowId));
-            
+
             if (win != null) return win.AsWindow();
 
             // 名前でのフォールバック
             win = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
                     .FirstOrDefault(w => w.Name != null && (w.Name.Contains("TERMINAL") || w.Name.Contains("Simulation") || w.Name.Contains("Controls")));
-            
+
             return win?.AsWindow();
         }, TimeSpan.FromSeconds(10)).Result
         ?? throw new Exception($"Window '{windowId}' not found after clicking '{buttonId}'.");
@@ -88,7 +88,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         window.SetForeground();
         Thread.Sleep(2000);
         CaptureElement(window, fileName);
-        
+
         window.Close();
         Thread.Sleep(1000);
     }
