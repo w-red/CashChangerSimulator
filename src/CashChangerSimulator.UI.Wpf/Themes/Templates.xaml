@@ -23,9 +23,9 @@
 
     <!-- Inventory Tile Template -->
     <DataTemplate x:Key="InventoryTileTemplate" DataType="{x:Type vm:DenominationViewModel}">
-        <Border MinWidth="170" MinHeight="185" Margin="0,0,16,16" Padding="4" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent">
+        <Border MinWidth="120" MinHeight="140" Margin="0,0,8,8" Padding="4" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="15" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
+                <DropShadowEffect BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
             </Border.Effect>
             <Border.RenderTransform>
                 <ScaleTransform ScaleX="1" ScaleY="1" />
@@ -64,18 +64,18 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Margin="16,16,16,0">
+                <StackPanel Grid.Row="0" Margin="12,12,12,0">
                     <Grid>
-                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
-                        <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="10" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="9" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top"/>
                     </Grid>
-                    <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="8" 
+                    <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="6" 
                                 Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" Background="#15FFFFFF" BorderThickness="0"
                                 materialDesign:TransitionAssist.DisableTransitions="False"/>
                 </StackPanel>
                 
-                <Viewbox Grid.Row="1" Stretch="Uniform" Margin="16" MaxHeight="80">
-                    <TextBlock Text="{Binding Count.Value}" FontSize="54" FontWeight="Bold" 
+                <Viewbox Grid.Row="1" Stretch="Uniform" Margin="12" MaxHeight="60">
+                    <TextBlock Text="{Binding Count.Value}" FontSize="48" FontWeight="Bold" 
                             Foreground="{StaticResource TextPrimaryBrush}"
                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Viewbox>
