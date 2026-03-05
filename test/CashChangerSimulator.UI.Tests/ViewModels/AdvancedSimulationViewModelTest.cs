@@ -35,7 +35,7 @@ public class AdvancedSimulationViewModelTest : IDisposable
         var monitors = new MonitorsProvider(inventory, configProvider, metadataProvider);
         var aggregator = new OverallStatusAggregatorProvider(monitors);
 
-        _mockDepositController = new Mock<DepositController>(inventory, hardware, manager);
+        _mockDepositController = new Mock<DepositController>(inventory, hardware, manager, configProvider);
         _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
 
         var dummyDispense = new DispenseController(manager, hardware, new Mock<IDeviceSimulator>().Object);
