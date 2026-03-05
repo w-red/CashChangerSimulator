@@ -55,7 +55,8 @@ public class DepositTest : IDisposable
         Console.WriteLine($"[DEBUG] After Bulk: FixBtn.IsEnabled={debugFixBtn?.IsEnabled}, StoreBtn.IsEnabled={debugStoreBtn?.IsEnabled}");
 
         // 6. Finish counting
-        var fixButton = UiTestRetry.Find(() => {
+        var fixButton = UiTestRetry.Find(() =>
+        {
             var btn = FindElement(depositWindow, "FixDepositButton", "");
             return (btn != null && btn.IsEnabled) ? btn : null;
         }, UITestTimings.RetryLongTimeout)?.AsButton();
@@ -64,7 +65,8 @@ public class DepositTest : IDisposable
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 7. Store
-        var storeButton = UiTestRetry.Find(() => {
+        var storeButton = UiTestRetry.Find(() =>
+        {
             var btn = FindElement(depositWindow, "StoreDepositButton", "");
             return (btn != null && btn.IsEnabled) ? btn : null;
         }, UITestTimings.RetryLongTimeout)?.AsButton();
@@ -73,11 +75,12 @@ public class DepositTest : IDisposable
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 8. Verify Global Total updated on Main Window
-        Retry.WhileTrue(() => {
+        Retry.WhileTrue(() =>
+        {
             var el = FindElement(window, "TotalAmountText", "");
             return el != null && ParseAmount(el.AsLabel().Text) == initialTotal;
         }, UITestTimings.RetryLongTimeout);
-        
+
         var finalEl = FindElement(window, "TotalAmountText", "");
         decimal finalTotal = finalEl != null ? ParseAmount(finalEl.AsLabel().Text) : initialTotal;
         finalTotal.ShouldBe(initialTotal + deposited);
@@ -89,7 +92,7 @@ public class DepositTest : IDisposable
     {
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
-        
+
         var depositWindow = OpenDepositTerminal(window);
 
         // Start Deposit
@@ -182,7 +185,7 @@ public class DepositTest : IDisposable
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "")?.AsButton();
         var quickDepositBox = FindElement(depositWindow, "QuickDepositBox", "")?.AsTextBox();
         var quickDepositButton = FindElement(depositWindow, "QuickDepositButton", "")?.AsButton();
-        
+
         beginButton.ShouldNotBeNull();
         quickDepositBox.ShouldNotBeNull();
         quickDepositButton.ShouldNotBeNull();

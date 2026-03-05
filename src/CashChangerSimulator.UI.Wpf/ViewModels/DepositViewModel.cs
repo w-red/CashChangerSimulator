@@ -58,7 +58,7 @@ public class DepositViewModel : IDisposable
     public ReactiveCommand<Unit> StoreDepositCommand { get; }
     /// <summary>入金をキャンセル（返却）するコマンド。</summary>
     public ReactiveCommand<Unit> CancelDepositCommand { get; }
-    
+
     // Phase 12: Error Reset
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
@@ -96,7 +96,7 @@ public class DepositViewModel : IDisposable
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DepositViewModel>();
-        
+
         _isJammed = _hardwareStatusManager.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
         IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
@@ -194,7 +194,7 @@ public class DepositViewModel : IDisposable
             _depositController.EndDeposit(CashDepositAction.Repay);
         });
 
-        ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, _isJammed, _isOverlapped, 
+        ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, _isJammed, _isOverlapped,
             (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
 

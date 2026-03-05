@@ -117,7 +117,7 @@ public class SettingsViewModel : IDisposable
 
         var canSave = Observable.CombineLatest(
             NearEmpty, NearFull, Full,
-            (_, _, _) => 
+            (_, _, _) =>
                 !NearEmpty.HasErrors &&
                 !NearFull.HasErrors &&
                 !Full.HasErrors);

@@ -32,9 +32,9 @@ public partial class DispenseWindow : Window
                 FindResource("BulkDispense").ToString()!,
                 FindResource("BulkDispenseSubtitle").ToString(),
                 FindResource("Dispense").ToString())
-            { 
+            {
                 Owner = this,
-                DataContext = bulkVm 
+                DataContext = bulkVm
             };
 
             if (dialog.ShowDialog() == true)

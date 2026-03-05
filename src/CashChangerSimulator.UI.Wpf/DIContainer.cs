@@ -60,7 +60,7 @@ public static class DIContainer
         // Initialize Inventory with State or Config
         var configProvider = _resolver.Resolve<ConfigurationProvider>();
         var inventory = _resolver.Resolve<Inventory>();
-        
+
         // Ensure the event history observer is instantiated and listening
         _resolver.Resolve<DeviceEventHistoryObserver>();
 

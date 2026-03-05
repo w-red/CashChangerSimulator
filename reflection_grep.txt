@@ -1,0 +1,3 @@
+src/CashChangerSimulator.Device/Strategies/GetVersionStrategy.cs:3:using System.Reflection;
+src/CashChangerSimulator.UI.Cli/Services/CliConfigService.cs:1:using System.Reflection;
+test/CashChangerSimulator.UI.Tests/CashChangerTestApp.cs:8:using System.Reflection;

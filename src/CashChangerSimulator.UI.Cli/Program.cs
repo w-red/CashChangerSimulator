@@ -11,10 +11,10 @@ public class Program
     public static void Main(string[] args)
     {
         var (globalArgs, commandArgs) = ExtractGlobalOptions(args);
-        
+
         var builder = CoconaApp.CreateBuilder(commandArgs);
         CliDIContainer.ConfigureServices(builder.Services, commandArgs);
-        
+
         var app = builder.Build();
         app.AddCommands<CliCommands>();
 
@@ -39,7 +39,7 @@ public class Program
     {
         var globals = new List<string>();
         var commands = new List<string>();
-        
+
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--async")
@@ -73,13 +73,16 @@ public class Program
                     {
                         var lang = globalArgs[++i];
                         options.Language = lang;
-                        try {
+                        try
+                        {
                             var culture = new CultureInfo(lang);
                             CultureInfo.DefaultThreadCurrentCulture = culture;
                             CultureInfo.DefaultThreadCurrentUICulture = culture;
                             Thread.CurrentThread.CurrentCulture = culture;
                             Thread.CurrentThread.CurrentUICulture = culture;
-                        } catch {
+                        }
+                        catch
+                        {
                         }
                     }
                     break;
@@ -241,17 +244,19 @@ public class Program
             // Wait briefly for async log messages to flush before showing prompt
             Thread.Sleep(100);
         }
-        
+
         // Final cleanup
-        try {
+        try
+        {
             changer.Close();
-        } catch { }
+        }
+        catch { }
     }
 
     private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console)
     {
         var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
-        
+
         if (isOpen)
         {
             console.MarkupLine("[yellow]Warning: Device is still open or processing.[/]");

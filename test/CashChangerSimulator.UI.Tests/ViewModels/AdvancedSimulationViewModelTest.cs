@@ -34,22 +34,22 @@ public class AdvancedSimulationViewModelTest : IDisposable
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitors = new MonitorsProvider(inventory, configProvider, metadataProvider);
         var aggregator = new OverallStatusAggregatorProvider(monitors);
-        
+
         _mockDepositController = new Mock<DepositController>(inventory, hardware, manager);
         _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
 
         var dummyDispense = new DispenseController(manager, hardware, new Mock<IDeviceSimulator>().Object);
 
         _mockCashChanger = new Mock<InternalSimulatorCashChanger>(
-            configProvider, 
-            inventory, 
-            history, 
-            manager, 
-            _mockDepositController.Object, 
-            dummyDispense, 
-            aggregator, 
+            configProvider,
+            inventory,
+            history,
+            manager,
+            _mockDepositController.Object,
+            dummyDispense,
+            aggregator,
             hardware);
-            
+
         _mockCashChanger.SetupProperty(x => x.RealTimeDataEnabled);
         _cashChanger = _mockCashChanger.Object;
         _mockScriptExecutionService = new Mock<IScriptExecutionService>();
@@ -63,7 +63,7 @@ public class AdvancedSimulationViewModelTest : IDisposable
     {
         // Arrange
         _cashChanger.RealTimeDataEnabled = false;
-        
+
         // Act
         _viewModel.IsRealTimeDataEnabled.Value = true;
 
@@ -109,7 +109,7 @@ public class AdvancedSimulationViewModelTest : IDisposable
         // Arrange
         var testScript = "[{ \"Op\": \"BeginDeposit\" }]";
         _viewModel.ScriptInput.Value = testScript;
-        
+
         // Setup mock to verify execution
         _mockScriptExecutionService
             .Setup(s => s.ExecuteScriptAsync(It.IsAny<string>()))

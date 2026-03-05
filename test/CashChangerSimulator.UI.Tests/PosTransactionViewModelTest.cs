@@ -37,12 +37,12 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
             _fixture.MetadataProvider);
 
         return new PosTransactionViewModel(
-            depVm, 
-            dispVm, 
-            _fixture.CashChanger, 
-            _fixture.Hardware, 
-            _fixture.MetadataProvider, 
-            () => [], 
+            depVm,
+            dispVm,
+            _fixture.CashChanger,
+            _fixture.Hardware,
+            _fixture.MetadataProvider,
+            () => [],
             _fixture.DepositController,
             notifyService);
     }

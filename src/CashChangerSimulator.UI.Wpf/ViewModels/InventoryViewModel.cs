@@ -165,7 +165,7 @@ public class InventoryViewModel : IDisposable
                 _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
             }
         });
-        
+
         CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
         CollectAllCommand.Subscribe(_ =>
         {

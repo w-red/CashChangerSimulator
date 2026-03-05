@@ -154,7 +154,7 @@ public class SettingsViewModelTests
         vm.NearEmpty.HasErrors.ShouldBeFalse();
         vm.NearFull.HasErrors.ShouldBeFalse();
         vm.Full.HasErrors.ShouldBeFalse();
-        
+
         // Ensure CanExecute is updated
         ((ICommand)vm.SaveCommand).CanExecute(null).ShouldBeTrue();
 

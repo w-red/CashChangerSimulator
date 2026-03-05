@@ -21,7 +21,7 @@ public class AdvancedSimulationViewModel : IDisposable
     public ReactiveCommand<Unit> ExecuteScriptCommand { get; }
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
-    
+
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
     public BindableReactiveProperty<bool> IsDepositInProgress { get; }
 
@@ -33,7 +33,7 @@ public class AdvancedSimulationViewModel : IDisposable
         _scriptExecutionService = scriptExecutionService;
 
         IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(_cashChanger.RealTimeDataEnabled);
-        
+
         CurrentDepositAmount = depositController.Changed
             .Select(_ => depositController.DepositAmount)
             .ToBindableReactiveProperty(depositController.DepositAmount)
@@ -43,7 +43,7 @@ public class AdvancedSimulationViewModel : IDisposable
             .Select(_ => depositController.IsDepositInProgress)
             .ToBindableReactiveProperty(depositController.IsDepositInProgress)
             .AddTo(_disposables);
-        
+
         IsRealTimeDataEnabled
             .Subscribe(enabled => _cashChanger.RealTimeDataEnabled = enabled)
             .AddTo(_disposables);
@@ -52,7 +52,7 @@ public class AdvancedSimulationViewModel : IDisposable
         ScriptError = new BindableReactiveProperty<string?>(null);
 
         // Enables command only if JSON is basically valid list
-        var canExecute = ScriptInput.Select(input => 
+        var canExecute = ScriptInput.Select(input =>
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
             try
@@ -79,7 +79,7 @@ public class AdvancedSimulationViewModel : IDisposable
                 ScriptError.Value = $"Execution Error: {ex.Message}";
             }
         });
-        
+
         // Also subscribe to input to show parsing errors immediately
         ScriptInput.Subscribe(input =>
         {

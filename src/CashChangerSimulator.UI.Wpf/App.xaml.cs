@@ -30,7 +30,7 @@ public partial class App : Application
             });
 
             DIContainer.Initialize();
-            
+
             // Apply language setting
             UpdateLanguage(config.System.CultureCode);
 
@@ -43,7 +43,7 @@ public partial class App : Application
             // Initializing LogProvider might have failed, but we try to log anyway
             var logger = LogProvider.CreateLogger<App>();
             logger.ZLogCritical(ex, $"Startup Crash");
-            
+
             // Still write to file as a last resort since logger might not be fully functional
             File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup_crash.txt"),
                 ex.ToString() + "\n\nInner: " + ex.InnerException?.ToString());
@@ -89,7 +89,7 @@ public partial class App : Application
             };
 
             var dictionaries = Current.Resources.MergedDictionaries;
-            
+
             // Find and replace existing Strings dictionary
             for (int i = 0; i < dictionaries.Count; i++)
             {

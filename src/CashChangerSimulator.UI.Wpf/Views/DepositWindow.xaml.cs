@@ -32,9 +32,9 @@ public partial class DepositWindow : Window
                 FindResource("BulkDeposit").ToString()!,
                 FindResource("BulkDepositSubtitle").ToString(),
                 FindResource("Deposit").ToString())
-            { 
+            {
                 Owner = this,
-                DataContext = bulkVm 
+                DataContext = bulkVm
             };
 
             if (dialog.ShowDialog() == true)

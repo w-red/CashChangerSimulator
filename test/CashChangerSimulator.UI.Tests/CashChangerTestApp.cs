@@ -125,7 +125,7 @@ HotStart = {hotStart.ToString().ToLower()}
                 {
                     Application.Close();
                 }
-                
+
                 // Force kill if it doesn't close within 2 seconds
                 try
                 {
