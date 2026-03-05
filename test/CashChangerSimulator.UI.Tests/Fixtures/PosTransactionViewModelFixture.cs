@@ -57,6 +57,7 @@ public class PosTransactionViewModelFixture : IDisposable
     public void Dispose()
     {
         // Add disposable cleanup if necessary
+        GC.SuppressFinalize(this);
     }
 }
 
