@@ -149,7 +149,7 @@ public partial class CliCommands
     [Command("log-level")]
     public void LogLevel(string level)
     {
-        if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out var logLevel))
+        if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out _))
         {
             LogProvider.SetLogLevel(level);
             _console.MarkupLine(_L["LogLevelUpdated", level]);
