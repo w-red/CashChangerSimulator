@@ -93,7 +93,10 @@ public class PerformanceTest(ITestOutputHelper output)
         var sw = Stopwatch.StartNew();
         for (int i = 0; i < iterations; i++)
         {
-            logger.LogInformation("Test log message with index {Index}", i);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Test log message with index {Index}", i);
+            }
         }
         sw.Stop();
         output.WriteLine($"{label}: {sw.ElapsedMilliseconds} ms");
