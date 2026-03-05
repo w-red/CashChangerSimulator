@@ -77,7 +77,8 @@ public class MainViewModel : IDisposable
             metadataProvider,
             hardwareStatusManager,
             depositController,
-            cashChanger)
+            cashChanger,
+            notifyService)
             .AddTo(_disposables);
 
         Deposit = new DepositViewModel(
@@ -103,7 +104,7 @@ public class MainViewModel : IDisposable
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
-        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, hardwareStatusManager, metadataProvider, () => Inventory.Denominations, depositController).AddTo(_disposables);
+        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, hardwareStatusManager, metadataProvider, () => Inventory.Denominations, depositController, notifyService).AddTo(_disposables);
         AdvancedSimulation = new AdvancedSimulationViewModel(cashChanger, scriptExecutionService, depositController, metadataProvider).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
@@ -127,6 +128,9 @@ public class MainViewModel : IDisposable
             catch (Exception ex)
             {
                 LogProvider.CreateLogger<MainViewModel>().LogError(ex, "Failed to auto-open device during Hot Start.");
+                var msg = ResourceHelper.GetAsString("ErrorDeviceConnection", "Failed to connect to the cash changer device.");
+                var title = ResourceHelper.GetAsString("Error", "Error");
+                notifyService.ShowWarning(msg, title);
             }
         }
 
@@ -134,13 +138,13 @@ public class MainViewModel : IDisposable
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
                 return !isConnected
-                    ? System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED"
+                    ? ResourceHelper.GetAsString("DeviceClosed", "CLOSED")
                     : dispenseMode == "Busy"
                     ? "DISPENSING" : depositMode;
             })
             .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value 
                 ? "IDLE" 
-                : (System.Windows.Application.Current?.Resources["DeviceClosed"] as string ?? "CLOSED"))
+                : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 
         OpenDepositCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
@@ -149,8 +153,8 @@ public class MainViewModel : IDisposable
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
             {
                 notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["ErrorCannotOpenTerminalInError"],
-                    (string)System.Windows.Application.Current.Resources["Warn"]);
+                    ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError", "Cannot open terminal while in error state."),
+                    ResourceHelper.GetAsString("Warn", "Warning"));
                 return;
             }
 
@@ -173,8 +177,8 @@ public class MainViewModel : IDisposable
             if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
             {
                 notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["ErrorCannotOpenTerminalInError"],
-                    (string)System.Windows.Application.Current.Resources["Warn"]);
+                    ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError", "Cannot open terminal while in error state."),
+                    ResourceHelper.GetAsString("Warn", "Warning"));
                 return;
             }
 

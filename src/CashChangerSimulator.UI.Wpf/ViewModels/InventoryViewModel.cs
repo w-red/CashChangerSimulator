@@ -22,6 +22,7 @@ public class InventoryViewModel : IDisposable
     private readonly MonitorsProvider _monitorsProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly INotifyService _notifyService;
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨記号のプレフィックス。</summary>
@@ -70,7 +71,8 @@ public class InventoryViewModel : IDisposable
         CurrencyMetadataProvider metadataProvider,
         HardwareStatusManager hardwareStatusManager,
         DepositController depositController,
-        SimulatorCashChanger cashChanger)
+        SimulatorCashChanger cashChanger,
+        INotifyService notifyService)
     {
         _inventory = inventory;
         _history = history;
@@ -79,6 +81,7 @@ public class InventoryViewModel : IDisposable
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
         _hardwareStatusManager = hardwareStatusManager;
+        _notifyService = notifyService;
         CurrencyPrefix = _metadataProvider.SymbolPrefix;
         CurrencySuffix = _metadataProvider.SymbolSuffix;
 
@@ -122,7 +125,7 @@ public class InventoryViewModel : IDisposable
         {
             var settingsWindow = new SettingsWindow()
             {
-                Owner = System.Windows.Application.Current.MainWindow
+                Owner = System.Windows.Application.Current?.MainWindow
             };
             settingsWindow.ShowDialog();
         });
@@ -142,9 +145,10 @@ public class InventoryViewModel : IDisposable
                     cashChanger.DeviceEnabled = true;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
             }
         });
 
@@ -155,9 +159,10 @@ public class InventoryViewModel : IDisposable
             {
                 cashChanger.Close();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
             }
         });
         

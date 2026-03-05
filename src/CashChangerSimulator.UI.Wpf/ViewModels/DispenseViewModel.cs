@@ -141,11 +141,11 @@ public class DispenseViewModel : IDisposable
                 string.IsNullOrWhiteSpace(text)
                     ? null
                     : !decimal.TryParse(text, out var val)
-                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorEnterValidNumber"] as string ?? "Enter a valid number")
+                    ? new Exception(ResourceHelper.GetAsString("ErrorEnterValidNumber", "Enter a valid number"))
                     : val <= 0
-                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorAmountPositive"] as string ?? "Amount must be positive")
+                    ? new Exception(ResourceHelper.GetAsString("ErrorAmountPositive", "Amount must be positive"))
                     : val > TotalAmount.Value
-                    ? new Exception(System.Windows.Application.Current?.Resources["ErrorInsufficientFunds"] as string ?? "Insufficient funds")
+                    ? new Exception(ResourceHelper.GetAsString("ErrorInsufficientFunds", "Insufficient funds"))
                     : null
             )
             .AddTo(_disposables);
@@ -160,8 +160,8 @@ public class DispenseViewModel : IDisposable
         {
             if (_isInDepositMode.Value)
             {
-                var msg = System.Windows.Application.Current?.Resources["WarnDispenseDuringDeposit"] as string ?? "Cannot dispense while deposit is in progress.";
-                var title = System.Windows.Application.Current?.Resources["Warn"] as string ?? "Warning";
+                var msg = ResourceHelper.GetAsString("WarnDispenseDuringDeposit", "Cannot dispense while deposit is in progress.");
+                var title = ResourceHelper.GetAsString("Warn", "Warning");
                 _notifyService.ShowWarning(msg, title);
                 return;
             }
@@ -194,8 +194,8 @@ public class DispenseViewModel : IDisposable
             if (_isInDepositMode.Value)
             {
                 _notifyService.ShowWarning(
-                    (string)System.Windows.Application.Current.Resources["WarnDispenseDuringDeposit"],
-                    (string)System.Windows.Application.Current.Resources["Warn"]);
+                    ResourceHelper.GetAsString("WarnDispenseDuringDeposit"),
+                    ResourceHelper.GetAsString("Warn"));
                 return;
             }
 
