@@ -67,7 +67,7 @@ public class TomlStringLocalizer : IStringLocalizer
         try
         {
             var tomlText = File.ReadAllText(path);
-            var table = Toml.ToModel<TomlTable>(tomlText);
+            var table = TomlSerializer.Deserialize<TomlTable>(tomlText) ?? new TomlTable();
             _cache[cacheKey] = table;
             return table;
         }
