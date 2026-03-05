@@ -50,4 +50,18 @@ if (!string.IsNullOrEmpty(automationId))
 }
 ```
 
-これらの教訓は、WPFアプリケーションをFlaUI等のUI Automationフレームワークで自動テストする際の安定性向上に不可欠です。
+## 4. Application.Current.Resources 参照時の CS8602 警告 (null 参照の可能性)
+
+WPFのリソース辞書から値を取得する際、`(string)Application.Current.Resources["Key"]` のように直接キャストすると、リソースが見つからない場合や `Application.Current` が null の場合に `CS8602` 警告および実行時の `NullReferenceException` の原因となります。
+
+### 解決策
+`as string` キャストと null 合体演算子 (`??`) を組み合わせることで、安全にデフォルト値を指定できます。
+```csharp
+// 悪い例 (CS8602 警告が出る可能性がある)
+var msg = (string)Application.Current.Resources["MyMessage"];
+
+// 良い例
+var msg = Application.Current?.Resources["MyMessage"] as string ?? "デフォルトメッセージ";
+```
+
+これらの教訓は、WPFアプリケーションをFlaUI等のUI Automationフレームワークで自動テストする際の安定性向上、およびコードの堅牢性維持に不可欠です。
