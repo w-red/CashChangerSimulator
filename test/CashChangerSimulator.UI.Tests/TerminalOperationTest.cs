@@ -63,7 +63,7 @@ public class TerminalOperationTest
         var vm = new DepositViewModel(
             _mockDepositController.Object,
             _hardwareManager,
-            () => Enumerable.Empty<DenominationViewModel>(),
+            () => [],
             _isBusyShared,
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
@@ -107,7 +107,7 @@ public class TerminalOperationTest
             _hardwareManager,
             configProvider,
             _isBusyShared,
-            () => Enumerable.Empty<DenominationViewModel>(),
+            () => [],
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
@@ -144,7 +144,7 @@ public class TerminalOperationTest
         var vm = new DepositViewModel(
             _mockDepositController.Object,
             _hardwareManager,
-            () => Enumerable.Empty<DenominationViewModel>(),
+            () => [],
             _isBusyShared,
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
@@ -209,7 +209,7 @@ public class TerminalOperationTest
             _hardwareManager,
             configProvider,
             _isBusyShared,
-            () => Enumerable.Empty<DenominationViewModel>(),
+            () => [],
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
