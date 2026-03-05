@@ -215,7 +215,7 @@ public class PosTransactionViewModel : IDisposable
 
     private void StartTransaction()
     {
-        _logger.LogInformation("Starting POS transaction for amount: {0}", TargetAmountInput.Value);
+        _logger.LogInformation("Starting POS transaction for amount: {TargetAmount}", TargetAmountInput.Value);
         LogOpos("--- Sequence Start ---");
         
         try
@@ -240,18 +240,18 @@ public class PosTransactionViewModel : IDisposable
         }
         catch (PosControlException pcEx)
         {
-            _logger.LogError(pcEx, "Failed to start OPOS sequence: {0}", pcEx.Message);
+            _logger.LogError(pcEx, "Failed to start OPOS sequence: {ErrorMessage}", pcEx.Message);
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _status.Value = PosTransactionStatus.Idle;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to start OPOS sequence: {0}", ex.Message);
+            _logger.LogError(ex, "Failed to start OPOS sequence: {ErrorMessage}", ex.Message);
             LogOpos($"ERROR: {ex.Message}");
             _status.Value = PosTransactionStatus.Idle;
         }
-        _logger.LogInformation("StartTransaction finished. Status: {0}", _status.Value);
+        _logger.LogInformation("StartTransaction finished. Status: {Status}", _status.Value);
     }
 
     private void ResetTimeout()
@@ -269,7 +269,7 @@ public class PosTransactionViewModel : IDisposable
         {
             if (t.IsCompletedSuccessfully && !token.IsCancellationRequested)
             {
-                _logger.LogWarning("Transaction timed out after {0} seconds.", timeoutSec);
+                _logger.LogWarning("Transaction timed out after {TimeoutSeconds} seconds.", timeoutSec);
                 LogOpos($"TIMEOUT: {timeoutSec}s exceeded.");
                 CancelTransaction();
             }
@@ -325,7 +325,7 @@ public class PosTransactionViewModel : IDisposable
         var targetValue = decimal.TryParse(TargetAmountInput.Value, out var v) ? v : 0m;
         var changeToDispense = (int)Math.Max(0, inserted - targetValue);
 
-        _logger.LogInformation("Amount met. Completing transaction. Inserted: {0}, Target: {1}, Change: {2}", inserted, targetValue, changeToDispense);
+        _logger.LogInformation("Amount met. Completing transaction. Inserted: {Inserted}, Target: {Target}, Change: {Change}", inserted, targetValue, changeToDispense);
         _status.Value = PosTransactionStatus.DispensingChange;
 
         try
@@ -358,13 +358,13 @@ public class PosTransactionViewModel : IDisposable
         }
         catch (PosControlException pcEx)
         {
-            _logger.LogError(pcEx, "Failed to complete OPOS sequence: {0}", pcEx.Message);
+            _logger.LogError(pcEx, "Failed to complete OPOS sequence: {ErrorMessage}", pcEx.Message);
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to complete OPOS sequence: {0}", ex.Message);
+            _logger.LogError(ex, "Failed to complete OPOS sequence: {ErrorMessage}", ex.Message);
             LogOpos($"ERROR: {ex.Message}");
         }
 
