@@ -30,8 +30,12 @@ public class InventoryViewModel : IDisposable
     /// <summary>通貨記号のサフィックス。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
-    /// <summary>金種ごとの ViewModel リスト。</summary>
-    public ObservableCollection<DenominationViewModel> Denominations { get; } = [];
+    /// <summary>紙幣金種ごとの ViewModel リスト（リサイクル可のみ）。</summary>
+    public ObservableCollection<DenominationViewModel> BillDenominations { get; } = [];
+    /// <summary>硬貨金種ごとの ViewModel リスト（リサイクル可のみ）。</summary>
+    public ObservableCollection<DenominationViewModel> CoinDenominations { get; } = [];
+    /// <summary>すべての金種 ViewModel リスト（読み取り専用）。</summary>
+    public IEnumerable<DenominationViewModel> Denominations => BillDenominations.Concat(CoinDenominations);
     /// <summary>デバイス全体の在庫ステータス（空・ニアエンプティ）。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
     /// <summary>デバイス全体の満杯ステータス。</summary>
@@ -97,7 +101,20 @@ public class InventoryViewModel : IDisposable
         foreach (var monitor in monitorsProvider.Monitors)
         {
             var key = monitor.Key;
-            Denominations.Add(new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider));
+            var isRecyclable = _configProvider.Config.GetDenominationSetting(key).IsRecyclable;
+            
+            if (isRecyclable)
+            {
+                var vm = new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider);
+                if (key.Type == CurrencyCashType.Bill)
+                {
+                    BillDenominations.Add(vm);
+                }
+                else
+                {
+                    CoinDenominations.Add(vm);
+                }
+            }
         }
 
         _history.Added
@@ -169,19 +186,19 @@ public class InventoryViewModel : IDisposable
         CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
         CollectAllCommand.Subscribe(_ =>
         {
-            foreach (var den in Denominations)
+            foreach (var monitor in _monitorsProvider.Monitors)
             {
-                _inventory.SetCount(den.Key, 0);
+                _inventory.SetCount(monitor.Key, 0);
             }
         });
 
         ReplenishAllCommand = new ReactiveCommand().AddTo(_disposables);
         ReplenishAllCommand.Subscribe(_ =>
         {
-            foreach (var den in Denominations)
+            foreach (var monitor in _monitorsProvider.Monitors)
             {
-                var setting = _configProvider.Config.GetDenominationSetting(den.Key);
-                _inventory.SetCount(den.Key, setting.InitialCount);
+                var setting = _configProvider.Config.GetDenominationSetting(monitor.Key);
+                _inventory.SetCount(monitor.Key, setting.InitialCount);
             }
         });
     }
