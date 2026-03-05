@@ -2,6 +2,7 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Tools;
 using System.IO;
+using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Documentation;
 
@@ -35,7 +36,7 @@ public class DocumentationScreenshotGenerator : IDisposable
     {
         // 1. メインダッシュボードのキャプチャ
         Thread.Sleep(3000);
-        Assert.NotNull(_app.MainWindow);
+        _app.MainWindow.ShouldNotBeNull();
         CaptureElement(_app.MainWindow, "main_dashboard.png");
 
         // 2. 入金画面のキャプチャ

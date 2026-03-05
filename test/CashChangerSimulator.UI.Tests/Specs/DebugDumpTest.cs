@@ -60,7 +60,7 @@ public class DebugDumpTest : IDisposable
 
         var outPath = Path.Combine(Path.GetTempPath(), "ui_dump_full.txt");
         File.WriteAllLines(outPath, lines);
-        Assert.True(File.Exists(outPath));
+        File.Exists(outPath).ShouldBeTrue();
     }
 
     /// <inheritdoc/>

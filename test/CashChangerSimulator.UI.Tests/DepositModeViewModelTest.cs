@@ -9,6 +9,7 @@ using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.PointOfService;
 using Moq;
 using R3;
+using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
@@ -79,19 +80,19 @@ public class DepositModeViewModelTest
         _depositController.BeginDeposit();
 
         // Assert: Running
-        Assert.True(denVm.IsAcceptingCash.CurrentValue);
+        denVm.IsAcceptingCash.CurrentValue.ShouldBeTrue();
 
         // Act: Pause
         _depositController.PauseDeposit(CashDepositPause.Pause);
 
         // Assert: Paused
-        Assert.False(denVm.IsAcceptingCash.CurrentValue);
+        denVm.IsAcceptingCash.CurrentValue.ShouldBeFalse();
 
         // Act: Resume
         _depositController.PauseDeposit(CashDepositPause.Restart);
 
         // Assert: Running again
-        Assert.True(denVm.IsAcceptingCash.CurrentValue);
+        denVm.IsAcceptingCash.CurrentValue.ShouldBeTrue();
     }
 
     /// <summary>MainViewModel の CurrentModeName が状態遷移を正しく反映することを検証します。</summary>
@@ -102,26 +103,26 @@ public class DepositModeViewModelTest
     public void MainViewModelCurrentModeNameShouldReflectTransitions()
     {
         // Initial
-        Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("IDLE");
 
         // Start
         _depositController.BeginDeposit();
-        Assert.Contains("COUNTING", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("COUNTING");
 
         // Pause
         _mainViewModel.Deposit.PauseDepositCommand.Execute(Unit.Default);
-        Assert.Contains("PAUSED", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("PAUSED");
 
         // Resume
         _mainViewModel.Deposit.ResumeDepositCommand.Execute(Unit.Default);
-        Assert.Contains("COUNTING", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("COUNTING");
 
         // Fix
         _mainViewModel.Deposit.FixDepositCommand.Execute(Unit.Default);
-        Assert.Contains("FIXED", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("FIXED");
 
         // End
         _mainViewModel.Deposit.StoreDepositCommand.Execute(Unit.Default);
-        Assert.Contains("IDLE", _mainViewModel.Deposit.CurrentModeName.CurrentValue);
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("IDLE");
     }
 }
