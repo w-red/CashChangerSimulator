@@ -75,11 +75,11 @@ public class QuickDepositAndPosModeTest
 
         _ = new List<DenominationViewModel>
         {
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
-            new DenominationViewModel(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
         };
 
         var depositVm = _mainViewModel.Deposit;
