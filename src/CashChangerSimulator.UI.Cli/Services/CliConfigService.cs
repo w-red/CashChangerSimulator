@@ -40,7 +40,7 @@ public class CliConfigService : CliServiceBase
             {
                 _console.MarkupLine($"{key} = [green]{value}[/]");
             }
-            else if (value is IDictionary dict)
+            else if (value is IDictionary)
             {
                 _console.MarkupLine($"{key} = [grey](Dictionary)[/]");
             }
@@ -103,7 +103,7 @@ public class CliConfigService : CliServiceBase
         }
     }
 
-    private (bool Success, object? Value) GetPropertyByPath(object obj, string path)
+    private static (bool Success, object? Value) GetPropertyByPath(object obj, string path)
     {
         var parts = path.Split('.');
         object? current = obj;
@@ -119,7 +119,7 @@ public class CliConfigService : CliServiceBase
         return (true, current);
     }
 
-    private bool SetPropertyByPath(object obj, string path, string value)
+    private static bool SetPropertyByPath(object obj, string path, string value)
     {
         var parts = path.Split('.');
         object? current = obj;

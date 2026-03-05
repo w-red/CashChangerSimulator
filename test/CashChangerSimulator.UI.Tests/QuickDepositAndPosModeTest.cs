@@ -73,7 +73,7 @@ public class QuickDepositAndPosModeTest
 
         var configProvider = _mainViewModel.ConfigProvider;
 
-        var denoms = new List<DenominationViewModel>
+        _ = new List<DenominationViewModel>
         {
             new DenominationViewModel(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
             new DenominationViewModel(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),

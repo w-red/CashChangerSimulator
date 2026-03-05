@@ -48,7 +48,7 @@ public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFix
         sw.Stop();
         
         var totalMs = sw.ElapsedMilliseconds;
-        var avgMs = (double)totalMs / iterations;
+        _ = (double)totalMs / iterations;
         
         // Assert some reasonable performance (e.g., < 10s for 10k operations in-memory)
         totalMs.ShouldBeLessThan(10000, "10,000 transactions should be processed within 10 seconds in simulator.");

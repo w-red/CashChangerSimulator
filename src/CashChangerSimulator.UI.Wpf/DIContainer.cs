@@ -46,7 +46,6 @@ public static class DIContainer
         resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
 
         // 4. Set state based on environment (for UI Tests)
-        var skipVerification = Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true";
 
         // 5. ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
