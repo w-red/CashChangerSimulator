@@ -51,5 +51,6 @@ public class StateConflictTestFixture : IDisposable
     public void Dispose()
     {
         DispenseChanged.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
