@@ -3,7 +3,6 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
-using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
