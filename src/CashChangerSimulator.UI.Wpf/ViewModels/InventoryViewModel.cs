@@ -9,6 +9,7 @@ using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -97,25 +98,26 @@ public class InventoryViewModel : IDisposable
         OverallStatus = _statusAggregator.DeviceStatus;
         FullStatus = _statusAggregator.FullStatus;
 
+        BillGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
+        CoinGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
+
         // Denominations initialization
-        foreach (var monitor in monitorsProvider.Monitors)
-        {
-            var key = monitor.Key;
-            var isRecyclable = _configProvider.Config.GetDenominationSetting(key).IsRecyclable;
-            
-            if (isRecyclable)
+        InitializeDenominations(depositController);
+
+        // モニターリスト更新時にUI（金種表示）も再取得する
+        _monitorsProvider.Changed
+            .Subscribe(_ =>
             {
-                var vm = new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider);
-                if (key.Type == CurrencyCashType.Bill)
+                if (System.Windows.Application.Current?.Dispatcher != null)
                 {
-                    BillDenominations.Add(vm);
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => InitializeDenominations(depositController));
                 }
                 else
                 {
-                    CoinDenominations.Add(vm);
+                    InitializeDenominations(depositController);
                 }
-            }
-        }
+            })
+            .AddTo(_disposables);
 
         _history.Added
             .Subscribe(entry =>
@@ -136,6 +138,8 @@ public class InventoryViewModel : IDisposable
                 }
             })
             .AddTo(_disposables);
+
+
 
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
@@ -202,6 +206,67 @@ public class InventoryViewModel : IDisposable
             }
         });
     }
+
+    private void InitializeDenominations(DepositController depositController)
+    {
+        BillDenominations.Clear();
+        CoinDenominations.Clear();
+
+        foreach (var monitor in _monitorsProvider.Monitors)
+        {
+            var key = monitor.Key;
+            var isRecyclable = _configProvider.Config.GetDenominationSetting(key).IsRecyclable;
+
+            if (isRecyclable)
+            {
+                var vm = new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider);
+                if (key.Type == CurrencyCashType.Bill)
+                {
+                    BillDenominations.Add(vm);
+                }
+                else
+                {
+                    CoinDenominations.Add(vm);
+                }
+            }
+        }
+
+        UpdateGridRatios();
+    }
+
+    private void UpdateGridRatios()
+    {
+        int billCount = BillDenominations.Count;
+        int coinCount = CoinDenominations.Count;
+
+        if (billCount == 0 && coinCount == 0)
+        {
+            BillGridWidth.Value = new GridLength(1, GridUnitType.Star);
+            CoinGridWidth.Value = new GridLength(1, GridUnitType.Star);
+        }
+        else if (billCount == 0)
+        {
+            BillGridWidth.Value = new GridLength(0);
+            CoinGridWidth.Value = new GridLength(1, GridUnitType.Star);
+        }
+        else if (coinCount == 0)
+        {
+            BillGridWidth.Value = new GridLength(1, GridUnitType.Star);
+            CoinGridWidth.Value = new GridLength(0);
+        }
+        else
+        {
+            // 金種数に応じた比率を設定
+            BillGridWidth.Value = new GridLength(billCount, GridUnitType.Star);
+            CoinGridWidth.Value = new GridLength(coinCount, GridUnitType.Star);
+        }
+    }
+
+    /// <summary>紙幣エリアの Grid 幅比率。</summary>
+    public BindableReactiveProperty<GridLength> BillGridWidth { get; }
+
+    /// <summary>硬貨エリアの Grid 幅比率。</summary>
+    public BindableReactiveProperty<GridLength> CoinGridWidth { get; }
 
     /// <inheritdoc/>
     public void Dispose()
