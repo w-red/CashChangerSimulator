@@ -129,12 +129,17 @@ public class DepositViewModel : IDisposable
             .ToBindableReactiveProperty(_depositController.IsPaused)
             .AddTo(_disposables);
 
+        // DEBUG TRACE
+        IsDepositFixed.Subscribe(fixed_ => Console.WriteLine($"[DEBUG-VM] IsDepositFixed changed to: {fixed_}")).AddTo(_disposables);
+        DepositStatus.Subscribe(status => Console.WriteLine($"[DEBUG-VM] DepositStatus changed to: {status}")).AddTo(_disposables);
+        IsInDepositMode.Subscribe(mode => Console.WriteLine($"[DEBUG-VM] IsInDepositMode changed to: {mode}")).AddTo(_disposables);
+
         CurrentModeName = _depositController.Changed
             .Select(_ => GetModeName())
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
-        BeginDepositCommand = IsJammed.CombineLatest(IsOverlapped, _isDispenseBusy, (jammed, overlapped, dispenseBusy) => !jammed && !overlapped && !dispenseBusy)
+        BeginDepositCommand = _hardwareStatusManager.IsConnected.CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusy) => connected && !jammed && !overlapped && !dispenseBusy)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ =>
         {
@@ -202,8 +207,8 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        CanOperate = _isJammed.CombineLatest(_isOverlapped, IsInDepositMode, _isDispenseBusy, (jammed, overlapped, mode, dispenseBusy) => !jammed && !overlapped && !mode && !dispenseBusy)
-            .ToBindableReactiveProperty(!_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
+        CanOperate = _hardwareStatusManager.IsConnected.CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusy) => connected && !jammed && !overlapped && !mode && !dispenseBusy)
+            .ToBindableReactiveProperty(_hardwareStatusManager.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
         QuickDepositCommand = CanOperate

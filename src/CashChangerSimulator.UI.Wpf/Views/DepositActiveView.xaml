@@ -50,7 +50,7 @@
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource JamError}" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Text="{StaticResource SimulateOverlap}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -103,7 +103,6 @@
                         Style="{StaticResource PrimaryButtonStyle}" 
                         Command="{Binding StoreDepositCommand}"
                         Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}"
-                        IsEnabled="{Binding CanOperate.Value}"
                         Margin="4" Height="44" AutomationProperties.AutomationId="StoreDepositButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Wallet" Margin="0,0,8,0" />

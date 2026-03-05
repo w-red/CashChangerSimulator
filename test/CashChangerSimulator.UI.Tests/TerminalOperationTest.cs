@@ -58,6 +58,7 @@ public class TerminalOperationTest
         _mockDepositController.SetupGet(c => c.IsDepositInProgress).Returns(false);
         var changedSubject = new Subject<Unit>();
         _mockDepositController.Setup(c => c.Changed).Returns(changedSubject);
+        _hardwareManager.SetConnected(true);
 
         var vm = new DepositViewModel(
             _mockDepositController.Object,
@@ -109,6 +110,7 @@ public class TerminalOperationTest
             () => Enumerable.Empty<DenominationViewModel>(),
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(configProvider));
+        _hardwareManager.SetConnected(true);
 
         // Assert: Initial
         vm.CanOperate.Value.ShouldBeTrue();
@@ -146,6 +148,7 @@ public class TerminalOperationTest
             _isBusyShared,
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
+        _hardwareManager.SetConnected(true);
 
         // --- Idle State (Not in Deposit Mode) ---
         // Assert: Begin and Quick are enabled, Bulk is disabled
@@ -209,6 +212,7 @@ public class TerminalOperationTest
             () => Enumerable.Empty<DenominationViewModel>(),
             new Mock<INotifyService>().Object,
             new CurrencyMetadataProvider(configProvider));
+        _hardwareManager.SetConnected(true);
 
         // Setup input to make DispenseCommand valid
         vm.DispenseAmountInput.Value = "100";

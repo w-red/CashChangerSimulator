@@ -22,11 +22,6 @@ public class IntToStringConverter : IValueConverter
             return 0;
         }
 
-        if (int.TryParse(str, out var result))
-        {
-            return result;
-        }
-
-        return 0;
+        return int.TryParse(str, out var result) ? result : 0;
     }
 }

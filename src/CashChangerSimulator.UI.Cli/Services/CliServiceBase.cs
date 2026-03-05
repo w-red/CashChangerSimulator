@@ -40,10 +40,6 @@ public abstract class CliServiceBase
     {
         var hintKey = $"ErrorHint_{errorCode}";
         var hint = _L[hintKey];
-        if (hint.ResourceNotFound)
-        {
-            return _L["ErrorHint_Generic"];
-        }
-        return hint;
+        return hint.ResourceNotFound ? (string)_L["ErrorHint_Generic"] : (string)hint;
     }
 }

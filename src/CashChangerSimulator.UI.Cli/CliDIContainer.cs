@@ -57,7 +57,8 @@ public static class CliDIContainer
         services.AddSingleton<HardwareStatusManager>();
 
         // Simulator / Devices
-        services.AddSingleton<SimulatorCashChanger>();
+        services.AddSingleton<SimulatorCashChanger, InternalSimulatorCashChanger>();
+        services.AddSingleton(sp => (InternalSimulatorCashChanger)sp.GetRequiredService<SimulatorCashChanger>());
         services.AddSingleton<IDeviceSimulator, CliHardwareSimulator>();
         services.AddSingleton<DepositController>();
         services.AddSingleton<DispenseController>();

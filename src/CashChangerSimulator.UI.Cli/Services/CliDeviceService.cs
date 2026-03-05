@@ -101,10 +101,7 @@ public class CliDeviceService : CliServiceBase
         var hint = _L[hintKey];
         if (hint.ResourceNotFound)
         {
-            if (errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled)
-                return _L["ErrorHint_NotEnabled"];
-            
-            return _L["ErrorHint_Generic"];
+            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["ErrorHint_NotEnabled"] : (string)_L["ErrorHint_Generic"];
         }
         return hint;
     }

@@ -45,7 +45,10 @@ public static class DIContainer
         resolver.Register<DeviceEventHistoryObserver, DeviceEventHistoryObserver>(Lifestyle.Singleton);
         resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
 
-        // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
+        // 4. Set state based on environment (for UI Tests)
+        var skipVerification = Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true";
+
+        // 5. ViewModels (Singleton - to ensure consistency between UI and Logic)
         resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
 
         // Compilation
@@ -61,6 +64,11 @@ public static class DIContainer
         
         // Ensure the event history observer is instantiated and listening
         _resolver.Resolve<DeviceEventHistoryObserver>();
+
+        if (Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true")
+        {
+            _resolver.Resolve<SimulatorCashChanger>().SkipStateVerification = true;
+        }
 
         // 1. 保存された状態があれば最優先
         var state = ConfigurationLoader.LoadInventoryState();

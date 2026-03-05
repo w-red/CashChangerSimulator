@@ -112,4 +112,57 @@ public static class UiTestRetry
 
         return result;
     }
+
+    /// <summary>
+    /// 要素が有効になるのを安全に待ち、クリック（または Invoke）を実行する。
+    /// COMException や ElementNotEnabledException などを補足しリトライする。
+    /// 無限の待機によるテストのタイムアウトを防ぐため、一定回数でフォールバックを行う。
+    /// </summary>
+    /// <param name="element">クリック対象のUI要素。</param>
+    /// <param name="timeoutMs">最大待機時間（ミリ秒） デフォルトは2000ms。</param>
+    public static void SmartClick(this AutomationElement? element, int timeoutMs = 2000)
+    {
+        if (element == null) return;
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        Exception? lastException = null;
+
+        while (sw.ElapsedMilliseconds < timeoutMs)
+        {
+            try
+            {
+                // IsEnabledの再取得はCOM例外を誘発しやすいためtry-catch内で判定
+                if (element.IsEnabled)
+                {
+                    try
+                    {
+                        var btn = element.AsButton();
+                        try
+                        {
+                            btn.Invoke(); // パターンがサポートされていれば優先
+                            return;
+                        }
+                        catch
+                        {
+                            btn.Click(); // フォールバック
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        lastException = ex;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+            }
+            Thread.Sleep(200);
+        }
+
+        // タイムアウトした場合は最後に記録された例外とともに強制クリックを試みる
+        Console.WriteLine($"SmartClick timeout ({timeoutMs}ms). Last exception: {lastException?.Message}");
+        element.Click();
+    }
 }
