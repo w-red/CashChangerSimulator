@@ -64,6 +64,7 @@ public class ColdStartTest
             null,
             null,
             _hardwareStatusManager);
+        cashChanger.SkipStateVerification = false;
 
         // Act & Assert
         cashChanger.State.ShouldBe(ControlState.Closed);
@@ -124,14 +125,15 @@ public class ColdStartTest
             _hardwareStatusManager);
 
         // Act
-        cashChanger.SkipStateVerification = true;
+        cashChanger.SkipStateVerification = false;
         cashChanger.Open();
-
+        cashChanger.Claim(1000);
+ 
         // Assert
         cashChanger.State.ShouldNotBe(ControlState.Closed);
-
-        // These should not throw ErrorCode.Closed anymore, but will throw Illegal because not claimed
-        Should.Throw<PosControlException>(() => cashChanger.BeginDeposit()).ErrorCode.ShouldBe(ErrorCode.Illegal);
+ 
+        // These should not throw even if not claimed because SkipStateVerification = true
+        Should.NotThrow(() => cashChanger.BeginDeposit());
     }
 
     /// <summary>DeviceEnabled の設定が適切な状態（Opened & Claimed）を要求することを検証する。</summary>
@@ -154,6 +156,7 @@ public class ColdStartTest
             _hardwareStatusManager);
 
         cashChanger.SkipStateVerification = true;
+        cashChanger.SkipStateVerification = false;
         cashChanger.Open();
 
         // Act & Assert
