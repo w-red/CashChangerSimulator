@@ -6,6 +6,7 @@ using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using MicroResolver;
 
@@ -28,6 +29,7 @@ public static class DIContainer
         resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
         resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
         resolver.Register<INotifyService, Services.WpfNotifyService>(Lifestyle.Singleton);
+        resolver.Register<SimulatorDependencies, SimulatorDependencies>(Lifestyle.Singleton);
 
         // 2. Core Services (Singleton)
         resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
