@@ -34,11 +34,11 @@ public class ColdStartTest
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
-            null,
-            null,
+            null!,
+            null!,
             new DepositController(_inventory, _hardwareStatusManager),
-            null,
-            null,
+            null!,
+            null!,
             _hardwareStatusManager);
 
         // Assert
@@ -58,11 +58,11 @@ public class ColdStartTest
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
-            null,
-            null,
+            null!,
+            null!,
             depositController,
-            null,
-            null,
+            null!,
+            null!,
             _hardwareStatusManager);
         cashChanger.SkipStateVerification = false;
 
@@ -88,11 +88,11 @@ public class ColdStartTest
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
-            null,
-            null,
+            null!,
+            null!,
             new DepositController(_inventory, _hardwareStatusManager),
-            null,
-            null,
+            null!,
+            null!,
             _hardwareStatusManager);
 
         // Act & Assert
@@ -117,11 +117,11 @@ public class ColdStartTest
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
-            null,
-            null,
+            null!,
+            null!,
             new DepositController(_inventory, _hardwareStatusManager),
-            null,
-            null,
+            null!,
+            null!,
             _hardwareStatusManager);
 
         // Act
@@ -148,11 +148,11 @@ public class ColdStartTest
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
             _inventory,
-            null,
-            null,
+            null!,
+            null!,
             new DepositController(_inventory, _hardwareStatusManager),
-            null,
-            null,
+            null!,
+            null!,
             _hardwareStatusManager);
 
         cashChanger.SkipStateVerification = true;
