@@ -8,70 +8,91 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using MicroResolver;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CashChangerSimulator.UI.Wpf;
 
 /// <summary>依存関係の注入（DI）を管理する静的コンテナクラス。</summary>
 public static class DIContainer
 {
-    private static ObjectResolver _resolver = null!;
+    private static IServiceProvider _serviceProvider = null!;
 
     /// <summary>コンテナを初期化し、各サービスの登録と解決を行います。</summary>
     public static void Initialize()
     {
-        var resolver = ObjectResolver.Create();
+        var services = new ServiceCollection();
 
         // 1. Providers (Singleton)
-        resolver.Register<ConfigurationProvider, ConfigurationProvider>(Lifestyle.Singleton);
-        resolver.Register<ICurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
-        resolver.Register<CurrencyMetadataProvider, CurrencyMetadataProvider>(Lifestyle.Singleton);
-        resolver.Register<MonitorsProvider, MonitorsProvider>(Lifestyle.Singleton);
-        resolver.Register<OverallStatusAggregatorProvider, OverallStatusAggregatorProvider>(Lifestyle.Singleton);
-        resolver.Register<INotifyService, Services.WpfNotifyService>(Lifestyle.Singleton);
-        resolver.Register<SimulatorDependencies, SimulatorDependencies>(Lifestyle.Singleton);
+        services.AddSingleton<ConfigurationProvider>();
+        services.AddSingleton<ICurrencyMetadataProvider, CurrencyMetadataProvider>();
+        services.AddSingleton<CurrencyMetadataProvider>();
+        services.AddSingleton<MonitorsProvider>();
+        services.AddSingleton<OverallStatusAggregatorProvider>();
+        services.AddSingleton<INotifyService, Services.WpfNotifyService>();
+        services.AddSingleton<SimulatorDependencies>();
 
         // 2. Core Services (Singleton)
-        resolver.Register<Inventory, Inventory>(Lifestyle.Singleton);
-        resolver.Register<TransactionHistory, TransactionHistory>(Lifestyle.Singleton);
-        resolver.Register<ChangeCalculator, ChangeCalculator>(Lifestyle.Singleton);
-        resolver.Register<CashChangerManager, CashChangerManager>(Lifestyle.Singleton);
-        resolver.Register<HardwareStatusManager, HardwareStatusManager>(Lifestyle.Singleton);
+        services.AddSingleton<Inventory>();
+        services.AddSingleton<TransactionHistory>();
+        services.AddSingleton<ChangeCalculator>();
+        services.AddSingleton<CashChangerManager>();
+        services.AddSingleton<HardwareStatusManager>();
+        services.AddSingleton<DiagnosticController>();
 
         // 3. Simulator / Devices (Singleton)
-        resolver.Register<CashChangerSimulator.Device.InternalSimulatorCashChanger, CashChangerSimulator.Device.InternalSimulatorCashChanger>(Lifestyle.Singleton);
-        resolver.Register<CashChangerSimulator.Device.SimulatorCashChanger, CashChangerSimulator.Device.InternalSimulatorCashChanger>(Lifestyle.Singleton);
-        resolver.Register<IDeviceSimulator, HardwareSimulator>(Lifestyle.Singleton);
-        resolver.Register<DepositController, DepositController>(Lifestyle.Singleton);
-        resolver.Register<DispenseController, DispenseController>(Lifestyle.Singleton);
-        resolver.Register<DeviceEventHistoryObserver, DeviceEventHistoryObserver>(Lifestyle.Singleton);
-        resolver.Register<IScriptExecutionService, ScriptExecutionService>(Lifestyle.Singleton);
+        // Manual instantiation via factory to handle complex dependencies if needed, 
+        // though MSI handles standard constructor injection much better than the previous DI container.
+        services.AddSingleton<InternalSimulatorCashChanger>(sp => {
+            var deps = sp.GetRequiredService<SimulatorDependencies>();
+            return new InternalSimulatorCashChanger(deps);
+        });
 
-        // 4. Set state based on environment (for UI Tests)
+        services.AddSingleton<SimulatorCashChanger>(sp => sp.GetRequiredService<InternalSimulatorCashChanger>());
+        services.AddSingleton<IDeviceSimulator, HardwareSimulator>();
+        services.AddSingleton<DepositController>();
+        services.AddSingleton<DispenseController>();
+        services.AddSingleton<DeviceEventHistoryObserver>();
+        services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
 
-        // 5. ViewModels (Singleton - to ensure consistency between UI and Logic)
-        resolver.Register<MainViewModel, MainViewModel>(Lifestyle.Singleton);
+        services.AddSingleton<IUposConfigurationManager>(sp => {
+            var so = sp.GetRequiredService<SimulatorCashChanger>();
+            var config = sp.GetRequiredService<ConfigurationProvider>();
+            var inventory = sp.GetRequiredService<Inventory>();
+            return new UposConfigurationManager(config, inventory, (IDeviceStateProvider)so);
+        });
 
-        // Compilation
-        resolver.Compile();
-        _resolver = resolver;
+        services.AddSingleton<IUposEventNotifier>(sp => {
+            var so = sp.GetRequiredService<SimulatorCashChanger>();
+            return new UposEventNotifier((IUposEventSink)so);
+        });
+
+        services.AddSingleton<IUposMediator>(sp => {
+            var so = sp.GetRequiredService<SimulatorCashChanger>();
+            return new UposMediator(so);
+        });
+
+        // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
+        services.AddSingleton<MainViewModel>();
+
+        // Build the ServiceProvider
+        _serviceProvider = services.BuildServiceProvider();
 
         // Register as SimulatorServices provider for cross-project service sharing
-        SimulatorServices.Provider = new ResolverServiceProvider(_resolver);
+        SimulatorServices.Provider = new MSIServiceProvider(_serviceProvider);
 
-        // Initialize Inventory with State or Config
-        var configProvider = _resolver.Resolve<ConfigurationProvider>();
-        var inventory = _resolver.Resolve<Inventory>();
+        // Initialization logic
+        var configProvider = _serviceProvider.GetRequiredService<ConfigurationProvider>();
+        var inventory = _serviceProvider.GetRequiredService<Inventory>();
 
         // Ensure the event history observer is instantiated and listening
-        _resolver.Resolve<DeviceEventHistoryObserver>();
+        _serviceProvider.GetRequiredService<DeviceEventHistoryObserver>();
 
         if (Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true")
         {
-            _resolver.Resolve<SimulatorCashChanger>().SkipStateVerification = true;
+            _serviceProvider.GetRequiredService<SimulatorCashChanger>().SkipStateVerification = true;
         }
 
-        // 1. 保存された状態があれば最優先
+        // Load Inventory State
         var state = ConfigurationLoader.LoadInventoryState();
         if (state?.Counts != null && state.Counts.Count > 0)
         {
@@ -79,8 +100,6 @@ public static class DIContainer
         }
         else
         {
-            // 2. 保存された状態がない場合は設定の初期値を使用
-            // 新しい金種別設定から読み込み（すべての通貨を対象に）
             foreach (var currencyEntry in configProvider.Config.Inventory)
             {
                 var currencyCode = currencyEntry.Key;
@@ -95,7 +114,7 @@ public static class DIContainer
         }
 
         // Initialize Transaction History
-        var history = _resolver.Resolve<TransactionHistory>();
+        var history = _serviceProvider.GetRequiredService<TransactionHistory>();
         var historyState = ConfigurationLoader.LoadHistoryState();
         if (historyState?.Entries != null && historyState.Entries.Count > 0)
         {
@@ -104,17 +123,16 @@ public static class DIContainer
     }
 
     /// <summary>指定された型のインスタンスをコンテナから解決します。</summary>
-    public static T Resolve<T>()
+    public static T Resolve<T>() where T : notnull
     {
-        return _resolver == null
+        return _serviceProvider == null
             ? throw new InvalidOperationException("DIContainer is not initialized yet. Call DIContainer.Initialize() first.")
-            : _resolver.Resolve<T>();
+            : _serviceProvider.GetRequiredService<T>();
     }
 }
 
-/// <summary>MicroResolver ベースの ISimulatorServiceProvider 実装。</summary>
-/// <param name="resolver">MicroResolver のリゾルバーインスタンス。</param>
-internal sealed class ResolverServiceProvider(ObjectResolver resolver) : ISimulatorServiceProvider
+/// <summary>Microsoft.Extensions.DependencyInjection ベースの ISimulatorServiceProvider 実装。</summary>
+internal sealed class MSIServiceProvider(IServiceProvider provider) : ISimulatorServiceProvider
 {
-    public T Resolve<T>() where T : class => resolver.Resolve<T>();
+    public T Resolve<T>() where T : class => provider.GetRequiredService<T>();
 }

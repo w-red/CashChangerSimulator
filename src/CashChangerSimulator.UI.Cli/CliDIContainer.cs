@@ -10,6 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using CashChangerSimulator.UI.Cli.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using Microsoft.Extensions.Localization;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.Device.Services;
+using Microsoft.PointOfService;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -55,10 +58,44 @@ public static class CliDIContainer
         services.AddSingleton<ChangeCalculator>();
         services.AddSingleton<CashChangerManager>();
         services.AddSingleton<HardwareStatusManager>();
+        services.AddSingleton<DiagnosticController>();
 
         // Simulator / Devices
-        services.AddSingleton<SimulatorCashChanger, InternalSimulatorCashChanger>();
+        services.AddSingleton<SimulatorCashChanger>(sp =>
+        {
+            var inventory = sp.GetRequiredService<Inventory>();
+            var history = sp.GetRequiredService<TransactionHistory>();
+            var hardwareStatusManager = sp.GetRequiredService<HardwareStatusManager>();
+            var configProvider = sp.GetRequiredService<ConfigurationProvider>();
+            var manager = sp.GetRequiredService<CashChangerManager>();
+            var depositController = sp.GetRequiredService<DepositController>();
+            var dispenseController = sp.GetRequiredService<DispenseController>();
+            var diagnosticController = sp.GetRequiredService<DiagnosticController>();
+
+            var deps = new SimulatorDependencies(
+                configProvider,
+                inventory,
+                history,
+                manager,
+                depositController,
+                dispenseController,
+                null, // AggregatorProvider will be resolved within SO if needed or passed
+                hardwareStatusManager,
+                diagnosticController
+            );
+            return new InternalSimulatorCashChanger(deps);
+        });
         services.AddSingleton(sp => (InternalSimulatorCashChanger)sp.GetRequiredService<SimulatorCashChanger>());
+        
+        services.AddSingleton<IUposConfigurationManager>(sp => {
+            var so = sp.GetRequiredService<SimulatorCashChanger>();
+            var config = sp.GetRequiredService<ConfigurationProvider>();
+            var inventory = sp.GetRequiredService<Inventory>();
+            return new UposConfigurationManager(config, inventory, so);
+        });
+        services.AddSingleton<IUposEventNotifier>(sp => new UposEventNotifier(sp.GetRequiredService<SimulatorCashChanger>()));
+        services.AddSingleton<IUposMediator>(sp => new UposMediator(sp.GetRequiredService<SimulatorCashChanger>()));
+
         services.AddSingleton<IDeviceSimulator, CliHardwareSimulator>();
         services.AddSingleton<DepositController>();
         services.AddSingleton<DispenseController>();
