@@ -2,6 +2,7 @@ using System.Globalization;
 using Cocona;
 using Spectre.Console;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli;
@@ -97,21 +98,23 @@ public class Program
     private static void RunInteractiveMode(IServiceProvider services)
     {
         var commands = services.GetRequiredService<CliCommands>();
+        var localizer = services.GetRequiredService<IStringLocalizer>();
         var changer = services.GetRequiredService<SimulatorCashChanger>();
         var console = services.GetRequiredService<IAnsiConsole>();
         var options = services.GetRequiredService<CliSessionOptions>();
+        var L = services.GetRequiredService<IStringLocalizer>();
 
         Console.CancelKeyPress += (_, e) =>
         {
             e.Cancel = true;
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[yellow]Use 'exit' to quit.[/]");
+            AnsiConsole.MarkupLine(L["messages.exit_hint"]);
         };
 
-        AnsiConsole.Write(new FigletText("Cash Changer").Color(Color.Cyan));
-        AnsiConsole.Write(new Rule("[cyan]Simulator CLI[/]").LeftJustified());
-        AnsiConsole.MarkupLine("Type [bold yellow]help[/] to see available commands.");
-        AnsiConsole.MarkupLine("Type [bold yellow]exit[/] to quit.");
+        AnsiConsole.Write(new FigletText(L["messages.welcome"]).Color(Color.Cyan));
+        AnsiConsole.Write(new Rule($"[cyan]{L["messages.simulator_cli"]}[/]").LeftJustified());
+        AnsiConsole.MarkupLine(L["messages.help_hint"]);
+        AnsiConsole.MarkupLine(L["messages.exit_hint"]);
         AnsiConsole.WriteLine();
 
         // Setup ReadLine
@@ -123,12 +126,14 @@ public class Program
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(historyFile)!);
-            if (File.Exists(historyFile))
-            {
-                ReadLine.AddHistory(File.ReadAllLines(historyFile));
-            }
         }
         catch { }
+
+        if (File.Exists(historyFile))
+        {
+            var historyLines = File.ReadAllLines(historyFile).Distinct().ToList();
+            ReadLine.AddHistory(historyLines.ToArray());
+        }
 
         while (true)
         {
@@ -141,12 +146,20 @@ public class Program
             var lower = trimmed.ToLowerInvariant();
             if (lower is "exit" or "quit")
             {
-                if (ConfirmExit(changer, console)) break;
+                if (ConfirmExit(changer, console, L)) break;
                 continue;
             }
 
-            // Persistence
-            try { File.AppendAllLines(historyFile, new[] { trimmed }); } catch { }
+            // Persistence with duplicate prevention
+            try
+            {
+                var history = File.Exists(historyFile) ? File.ReadAllLines(historyFile).ToList() : [];
+                if (history.Count == 0 || history[^1] != trimmed)
+                {
+                    File.AppendAllLines(historyFile, [trimmed]);
+                }
+            }
+            catch { }
 
             var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var command = parts[0].ToLowerInvariant();
@@ -190,13 +203,13 @@ public class Program
                         if (parts.Length > 1)
                             commands.AdjustCashCounts(parts[1]);
                         else
-                            AnsiConsole.MarkupLine("[red]Usage: adjust-counts <value:count,value:count>[/]");
+                            AnsiConsole.MarkupLine(localizer["messages.usage_adjust_counts"]);
                         break;
                     case "dispense":
                         if (parts.Length > 1 && int.TryParse(parts[1], out var dispAmt))
                             commands.Dispense(dispAmt);
                         else
-                            AnsiConsole.MarkupLine("[red]Usage: dispense <amount>[/]");
+                            AnsiConsole.MarkupLine(localizer["messages.usage_dispense"]);
                         break;
                     case "history":
                         var count = parts.Length > 1 && int.TryParse(parts[1], out var c) ? c : 10;
@@ -212,7 +225,7 @@ public class Program
                         if (parts.Length > 1)
                             commands.RunScript(parts[1]).GetAwaiter().GetResult();
                         else
-                            AnsiConsole.MarkupLine("[red]Usage: run-script <path>[/]");
+                            AnsiConsole.MarkupLine(localizer["messages.usage_run_script"]);
                         break;
                     case "config":
                         if (parts.Length > 1)
@@ -237,19 +250,19 @@ public class Program
                         if (parts.Length > 1)
                             commands.LogLevel(parts[1]);
                         else
-                            AnsiConsole.MarkupLine("[red]Usage: log-level <level>[/]");
+                            AnsiConsole.MarkupLine(localizer["messages.usage_log_level"]);
                         break;
                     case "help":
                         commands.Help();
                         break;
                     default:
-                        AnsiConsole.MarkupLine($"[red]Unknown command: {command}. Type 'help' for available commands.[/]");
+                        AnsiConsole.MarkupLine(L["messages.unknown_command", command]);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
+                AnsiConsole.MarkupLine(L["messages.error_prefix", ex.Message]);
             }
             Thread.Sleep(100);
         }
@@ -257,13 +270,13 @@ public class Program
         try { changer.Close(); } catch { }
     }
 
-    private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console)
+    private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console, IStringLocalizer L)
     {
         var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
         if (isOpen)
         {
-            console.MarkupLine("[yellow]Warning: Device is still open or processing.[/]");
-            if (!console.Confirm("Are you sure you want to exit? (Device will be closed automatically)"))
+            console.MarkupLine(L["messages.exit_warning"]);
+            if (!console.Confirm(L["messages.exit_confirm"]))
             {
                 return false;
             }
