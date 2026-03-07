@@ -13,7 +13,7 @@ namespace CashChangerSimulator.UI.Cli.Localization;
 /// </remarks>
 public class TomlStringLocalizer(string basePath) : IStringLocalizer
 {
-    private static readonly ConcurrentDictionary<string, TomlTable> _cache = new();
+    private readonly ConcurrentDictionary<string, TomlTable> _cache = new();
     private readonly string _basePath = basePath;
 
     /// <summary>指定された名前のローカライズされた文字列を取得します。</summary>
@@ -121,18 +121,4 @@ public class TomlStringLocalizer(string basePath) : IStringLocalizer
             return null;
         }
     }
-}
-
-public class TomlStringLocalizerFactory : IStringLocalizerFactory
-{
-    private readonly string _basePath;
-
-    public TomlStringLocalizerFactory()
-    {
-        _basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "i18n");
-    }
-
-    public IStringLocalizer Create(Type resourceSource) => new TomlStringLocalizer(_basePath);
-
-    public IStringLocalizer Create(string baseName, string location) => new TomlStringLocalizer(_basePath);
 }
