@@ -132,6 +132,11 @@ public partial class CliCommands(
     [Command("config reload")]
     public void ConfigReload() => _configService.Reload();
 
+    /// <summary>現在の在庫数を調整します。</summary>
+    /// <param name="counts">"1000:5,500:10" の形式で指定します。</param>
+    [Command("adjust-counts")]
+    public void AdjustCashCounts(string counts) => _cashService.AdjustCashCounts(counts);
+
     /// <summary>ログの詳細度を変更します。</summary>
     [Command("log-level")]
     public void LogLevel(string level)
