@@ -19,7 +19,7 @@ public class DepositModeViewModelTest
     private readonly Mock<Inventory> _mockInventory;
     private readonly Mock<TransactionHistory> _mockHistory;
     private readonly Mock<CashChangerManager> _mockManager;
-    private readonly DepositController _depositController;
+    private readonly DepositController DepositController;
     private readonly DispenseController _dispenseController;
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
@@ -41,7 +41,7 @@ public class DepositModeViewModelTest
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
         var hardwareManager = new HardwareStatusManager();
         hardwareManager.SetConnected(true);
-        _depositController = new DepositController(_mockInventory.Object, hardwareManager);
+        DepositController = new DepositController(_mockInventory.Object, hardwareManager);
         var mockSimulator = new Mock<IDeviceSimulator>();
         _dispenseController = new DispenseController(_mockManager.Object, hardwareManager, mockSimulator.Object);
 
@@ -58,9 +58,9 @@ public class DepositModeViewModelTest
             configProvider,
             _metadataProvider,
             hardwareManager,
-            _depositController,
+            DepositController,
             _dispenseController,
-            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
+            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, DepositController, _dispenseController, aggregatorProvider, hardwareManager),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
     }
@@ -76,20 +76,20 @@ public class DepositModeViewModelTest
         var config = new DenominationSettings();
         var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
         var configProvider = _mainViewModel.ConfigProvider;
-        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, _depositController, monitor, configProvider);
-        _depositController.BeginDeposit();
+        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, DepositController, monitor, configProvider);
+        DepositController.BeginDeposit();
 
         // Assert: Running
         denVm.IsAcceptingCash.CurrentValue.ShouldBeTrue();
 
         // Act: Pause
-        _depositController.PauseDeposit(CashDepositPause.Pause);
+        DepositController.PauseDeposit(CashDepositPause.Pause);
 
         // Assert: Paused
         denVm.IsAcceptingCash.CurrentValue.ShouldBeFalse();
 
         // Act: Resume
-        _depositController.PauseDeposit(CashDepositPause.Restart);
+        DepositController.PauseDeposit(CashDepositPause.Restart);
 
         // Assert: Running again
         denVm.IsAcceptingCash.CurrentValue.ShouldBeTrue();
@@ -106,7 +106,7 @@ public class DepositModeViewModelTest
         _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("IDLE");
 
         // Start
-        _depositController.BeginDeposit();
+        DepositController.BeginDeposit();
         _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("COUNTING");
 
         // Pause

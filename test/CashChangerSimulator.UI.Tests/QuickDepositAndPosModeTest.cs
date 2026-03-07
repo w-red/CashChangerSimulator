@@ -19,7 +19,7 @@ public class QuickDepositAndPosModeTest
     private readonly Mock<Inventory> _mockInventory;
     private readonly Mock<TransactionHistory> _mockHistory;
     private readonly Mock<CashChangerManager> _mockManager;
-    private readonly DepositController _depositController;
+    private readonly DepositController DepositController;
     private readonly DispenseController _dispenseController;
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
@@ -39,7 +39,7 @@ public class QuickDepositAndPosModeTest
 
         _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
         var hardwareManager = new HardwareStatusManager();
-        _depositController = new DepositController(_mockInventory.Object, hardwareManager);
+        DepositController = new DepositController(_mockInventory.Object, hardwareManager);
         var mockSimulator = new Mock<IDeviceSimulator>();
         _dispenseController = new DispenseController(_mockManager.Object, hardwareManager, mockSimulator.Object);
 
@@ -56,9 +56,9 @@ public class QuickDepositAndPosModeTest
             configProvider,
             _metadataProvider,
             hardwareManager,
-            _depositController,
+            DepositController,
             _dispenseController,
-            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, _depositController, _dispenseController, aggregatorProvider, hardwareManager),
+            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, DepositController, _dispenseController, aggregatorProvider, hardwareManager),
             new Mock<INotifyService>().Object,
             new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
         hardwareManager.SetConnected(true);
@@ -75,11 +75,11 @@ public class QuickDepositAndPosModeTest
 
         _ = new List<DenominationViewModel>
         {
-            new(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, _depositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, _depositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, DepositController, monitor, configProvider),
+            new(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, DepositController, monitor, configProvider),
         };
 
         var depositVm = _mainViewModel.Deposit;
