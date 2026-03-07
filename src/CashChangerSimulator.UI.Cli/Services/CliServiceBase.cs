@@ -17,23 +17,23 @@ public abstract class CliServiceBase(IAnsiConsole console, IStringLocalizer loca
         if (ex is PosControlException pex)
         {
             var hint = GetHint(pex.ErrorCode);
-            var errMsg = _L["ErrorFormat", "Error", (int)pex.ErrorCode, pex.ErrorCodeExtended, pex.Message];
+            var errMsg = _L["messages.error_format", "Error", (int)pex.ErrorCode, pex.ErrorCodeExtended, pex.Message];
             _console.MarkupLine(errMsg);
             if (!string.IsNullOrEmpty(hint))
             {
-                _console.MarkupLine(_L["HintFormat", hint]);
+                _console.MarkupLine(_L["messages.hint_format", hint]);
             }
         }
         else
         {
-            _console.MarkupLine($"[red]Error: {ex.Message}[/]");
+            _console.MarkupLine(_L["messages.error_prefix", ex.Message]);
         }
     }
 
     protected virtual string GetHint(ErrorCode errorCode)
     {
-        var hintKey = $"ErrorHint_{errorCode}";
+        var hintKey = $"messages.error_hint_{errorCode.ToString().ToLowerInvariant()}";
         var hint = _L[hintKey];
-        return hint.ResourceNotFound ? (string)_L["ErrorHint_Generic"] : (string)hint;
+        return hint.ResourceNotFound ? (string)_L["messages.error_hint_generic"] : (string)hint;
     }
 }

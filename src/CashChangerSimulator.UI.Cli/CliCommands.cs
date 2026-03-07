@@ -9,6 +9,14 @@ using CashChangerSimulator.Core;
 namespace CashChangerSimulator.UI.Cli;
 
 /// <summary>CLI からシミュレータを操作するためのコマンドを提供します。</summary>
+/// <param name="changer">シミュレータ本体のインスタンス。</param>
+/// <param name="deviceService">デバイスの基本操作（Open, Claim等）を提供するサービス。</param>
+/// <param name="cashService">現金操作（入出金）を提供するサービス。</param>
+/// <param name="configService">設定情報の管理を提供するサービス。</param>
+/// <param name="viewService">状態や履歴の表示を提供するサービス。</param>
+/// <param name="scriptService">自動実行スクリプトの実行機能を提供するサービス。</param>
+/// <param name="console">CLI への出力を行うためのコンソールインターフェース。</param>
+/// <param name="localizer">多言語対応メッセージを提供するローカライザー。</param>
 public partial class CliCommands(
     SimulatorCashChanger changer,
     CliDeviceService deviceService,
@@ -33,21 +41,21 @@ public partial class CliCommands(
     {
         _console.WriteLine();
         var hint = GetHint(e.ErrorCode);
-        var errMsg = _L["ErrorFormat", "Async Error", (int)e.ErrorCode, e.ErrorCodeExtended, "Async operation failed"];
+        var errMsg = _L["messages.error_format", "Async Error", (int)e.ErrorCode, e.ErrorCodeExtended, "Async operation failed"];
         _console.MarkupLine(errMsg);
         if (!string.IsNullOrEmpty(hint))
         {
-            _console.MarkupLine(_L["HintFormat", hint]);
+            _console.MarkupLine(_L["messages.hint_format", hint]);
         }
     }
 
     private string GetHint(ErrorCode errorCode)
     {
-        var hintKey = $"ErrorHint_{errorCode}";
+        var hintKey = $"messages.error_hint_{errorCode.ToString().ToLowerInvariant()}";
         var hint = _L[hintKey];
         if (hint.ResourceNotFound)
         {
-            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["ErrorHint_NotEnabled"] : (string)_L["ErrorHint_Generic"];
+            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["messages.error_hint_notenabled"] : (string)_L["messages.error_hint_generic"];
         }
         return hint;
     }
@@ -110,7 +118,7 @@ public partial class CliCommands(
 
     /// <summary>設定を一覧表示または変更します。</summary>
     [Command("config")]
-    public void Config() => _console.MarkupLine("[yellow]Usage: config <list|get|set|save>[/]");
+    public void Config() => _console.MarkupLine(_L["messages.usage_config"] ?? "[yellow]Usage: config <list|get|set|save>[/]");
 
     /// <summary>設定項目を一覧表示します。</summary>
     [Command("config list")]
@@ -144,11 +152,11 @@ public partial class CliCommands(
         if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out _))
         {
             LogProvider.SetLogLevel(level);
-            _console.MarkupLine(_L["LogLevelUpdated", level]);
+            _console.MarkupLine(_L["messages.log_level_updated", level]);
         }
         else
         {
-            _console.MarkupLine(_L["InvalidLogLevel", level]);
+            _console.MarkupLine(_L["messages.invalid_log_level", level]);
         }
     }
 
@@ -156,29 +164,30 @@ public partial class CliCommands(
     [Command("help")]
     public void Help()
     {
-        _console.Write(new Rule($"[cyan]{_L["AvailableCommands"]}[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["messages.available_commands"]}[/]").LeftJustified());
         var table = new Table().Border(TableBorder.None);
-        table.AddColumn(_L["CommandLabel"]);
-        table.AddColumn(_L["DescriptionLabel"]);
+        table.AddColumn(_L["messages.command_label"] ?? "Command");
+        table.AddColumn(_L["messages.description_label"] ?? "Description");
 
-        table.AddRow(Markup.Escape("open"), "Open device");
-        table.AddRow(Markup.Escape("claim"), "Claim device");
-        table.AddRow(Markup.Escape("enable"), "Enable device");
-        table.AddRow(Markup.Escape("status"), "Show status & inventory");
-        table.AddRow(Markup.Escape("read-counts"), "Read cash counts");
-        table.AddRow(Markup.Escape("deposit [amount]"), "Start deposit");
-        table.AddRow(Markup.Escape("fix-deposit"), "Fix current deposit");
-        table.AddRow(Markup.Escape("end-deposit"), "End deposit session");
-        table.AddRow(Markup.Escape("dispense <amount>"), "Dispense change");
-        table.AddRow(Markup.Escape("disable"), "Disable device");
-        table.AddRow(Markup.Escape("release"), "Release device");
-        table.AddRow(Markup.Escape("close"), "Close device");
-        table.AddRow(Markup.Escape("history"), "Show transaction history");
-        table.AddRow(Markup.Escape("config <list|get|set|save|reload>"), "Manage configuration");
-        table.AddRow(Markup.Escape("log-level <level>"), _L["LogLevelDescription"] ?? "Change log level");
-        table.AddRow(Markup.Escape("run-script <path>"), "Run JSON script");
-        table.AddRow(Markup.Escape("help"), Markup.Escape(_L["HelpDescription"] ?? ""));
-        table.AddRow(Markup.Escape("exit"), Markup.Escape(_L["ExitDescription"] ?? ""));
+        table.AddRow(Markup.Escape("open"), _L["commands.open"]);
+        table.AddRow(Markup.Escape("claim"), _L["commands.claim"]);
+        table.AddRow(Markup.Escape("enable"), _L["commands.enable"]);
+        table.AddRow(Markup.Escape("status"), _L["commands.status"]);
+        table.AddRow(Markup.Escape("read-counts"), _L["commands.read-counts"]);
+        table.AddRow(Markup.Escape("deposit [amount]"), _L["commands.deposit"]);
+        table.AddRow(Markup.Escape("fix-deposit"), _L["commands.fix-deposit"]);
+        table.AddRow(Markup.Escape("end-deposit"), _L["commands.end-deposit"]);
+        table.AddRow(Markup.Escape("dispense <amount>"), _L["commands.dispense"]);
+        table.AddRow(Markup.Escape("adjust-counts <v:c,v:c>"), _L["commands.adjust-counts"]);
+        table.AddRow(Markup.Escape("disable"), _L["commands.disable"]);
+        table.AddRow(Markup.Escape("release"), _L["commands.release"]);
+        table.AddRow(Markup.Escape("close"), _L["commands.close"]);
+        table.AddRow(Markup.Escape("history"), _L["commands.history"]);
+        table.AddRow(Markup.Escape("config <list|get|set|save|reload>"), _L["commands.config"]);
+        table.AddRow(Markup.Escape("log-level <level>"), _L["commands.log-level"]);
+        table.AddRow(Markup.Escape("run-script <path>"), _L["commands.run-script"]);
+        table.AddRow(Markup.Escape("help"), Markup.Escape(_L["commands.help"]));
+        table.AddRow(Markup.Escape("exit"), Markup.Escape(_L["commands.exit"]));
 
         _console.Write(table);
     }

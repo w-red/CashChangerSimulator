@@ -15,7 +15,7 @@ public class CliConfigService(
 
     public void List()
     {
-        _console.Write(new Rule($"[cyan]{_L["ConfigHeader"]}[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["messages.config_header"]}[/]").LeftJustified());
         PrintObject(_configProvider.Config, "");
     }
 
@@ -55,7 +55,7 @@ public class CliConfigService(
         }
         else
         {
-            _console.MarkupLine(_L["InvalidConfigKey", key]);
+            _console.MarkupLine(_L["messages.invalid_config_key", key]);
         }
     }
 
@@ -64,11 +64,11 @@ public class CliConfigService(
         var result = SetPropertyByPath(_configProvider.Config, key, value);
         if (result)
         {
-            _console.MarkupLine(_L["ConfigUpdated", key, value]);
+            _console.MarkupLine(_L["messages.config_updated", key, value]);
         }
         else
         {
-            _console.MarkupLine(_L["InvalidConfigKey", key]);
+            _console.MarkupLine(_L["messages.invalid_config_key", key]);
         }
     }
 
@@ -77,7 +77,7 @@ public class CliConfigService(
         try
         {
             ConfigurationLoader.Save(_configProvider.Config);
-            _console.MarkupLine(_L["ConfigSaved"]);
+            _console.MarkupLine(_L["messages.config_saved"]);
         }
         catch (Exception ex)
         {
@@ -90,7 +90,7 @@ public class CliConfigService(
         try
         {
             _configProvider.Reload();
-            _console.MarkupLine(_L["ConfigReloaded"]);
+            _console.MarkupLine(_L["messages.config_reloaded"]);
         }
         catch (Exception ex)
         {
