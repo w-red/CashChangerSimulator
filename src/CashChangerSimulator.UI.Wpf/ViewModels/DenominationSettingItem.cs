@@ -3,26 +3,38 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>金種ごとの詳細設定を保持・管理するデータ項目。</summary>
+/// <summary>設定画面において各金種の個別パラメータを管理するためのデータ項目モデル。</summary>
+/// <param name="key">金種を一意に識別する <see cref="DenominationKey"/>。</param>
+/// <param name="displayName">UI 表示用の名称。</param>
+/// <param name="displayNameJP">UI 表示用の日本語名称。</param>
+/// <param name="count">初期枚数。</param>
+/// <param name="nearEmpty">「少額（NearEmpty）」と判定するしきい値。</param>
+/// <param name="nearFull">「多額（NearFull）」と判定するしきい値。</param>
+/// <param name="full">「満杯（Full）」と判定するしきい値。</param>
+/// <param name="isRecyclable">還流（再利用）可能かどうか。</param>
+/// <remarks>
+/// UI 上での編集対象となるプロパティ（表示名、初期枚数、しきい値等）を ReactiveProperty として保持します。
+/// 画面上でのリアルタイムなバリデーションと、設定ファイルへの保存用データの仲介を行います。
+/// </remarks>
 public class DenominationSettingItem : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
 
-    /// <summary>対象の金種キー。</summary>
+    /// <summary>金種キー。</summary>
     public DenominationKey Key { get; }
-    /// <summary>英語の表示名。</summary>
+    /// <summary>表示名。</summary>
     public BindableReactiveProperty<string> DisplayName { get; }
-    /// <summary>日本語の表示名。</summary>
+    /// <summary>日本語表示名。</summary>
     public BindableReactiveProperty<string> DisplayNameJP { get; }
-    /// <summary>初期在庫枚数。</summary>
+    /// <summary>枚数。</summary>
     public BindableReactiveProperty<int> Count { get; }
-    /// <summary>NearEmpty しきい値。</summary>
+    /// <summary>少額しきい値。</summary>
     public BindableReactiveProperty<int> NearEmpty { get; }
-    /// <summary>NearFull しきい値。</summary>
+    /// <summary>多額しきい値。</summary>
     public BindableReactiveProperty<int> NearFull { get; }
-    /// <summary>Full しきい値。</summary>
+    /// <summary>満杯しきい値。</summary>
     public BindableReactiveProperty<int> Full { get; }
-    /// <summary>釣銭リサイクルに使用されるかどうか。</summary>
+    /// <summary>還流可能フラグ。</summary>
     public BindableReactiveProperty<bool> IsRecyclable { get; }
 
     public DenominationSettingItem(

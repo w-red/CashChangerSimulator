@@ -9,7 +9,11 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>設定画面の ViewModel。閾値と初期枚数の編集・保存・バリデーションを担当する。</summary>
+/// <summary>シミュレータの各種設定を編集・保存するための ViewModel。</summary>
+/// <remarks>
+/// 通貨コード、UI モード、各種センサーのしきい値、および金種ごとの個別設定の管理を担当します。
+/// 設定のバリデーション、ディスクへの保存、および実行時への変更反映（ホットリロード）のトリガーを提供します。
+/// </remarks>
 public class SettingsViewModel : IDisposable
 {
     private readonly ConfigurationProvider _configProvider;
@@ -61,7 +65,8 @@ public class SettingsViewModel : IDisposable
     /// <summary>直前の保存処理が成功したかどうか。</summary>
     public BindableReactiveProperty<bool> SaveSucceeded { get; }
 
-    /// <summary>各プロバイダーを注入してインスタンスを初期化する。</summary>
+    /// <summary>必要なコンポーネントを注入して SettingsViewModel を初期化します。</summary>
+    /// <remarks>現在の設定値のロードと、バリデーションロジックの構成を行います。</remarks>
     public SettingsViewModel(
         ConfigurationProvider configProvider,
         MonitorsProvider monitorsProvider,

@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Testing;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.ViewModels;
@@ -29,7 +30,7 @@ public static class DIContainer
         services.AddSingleton<MonitorsProvider>();
         services.AddSingleton<OverallStatusAggregatorProvider>();
         services.AddSingleton<INotifyService, Services.WpfNotifyService>();
-        services.AddSingleton<SimulatorDependencies>();
+        services.AddSingleton<INotifyService, Services.WpfNotifyService>();
 
         // 2. Core Services (Singleton)
         services.AddSingleton<Inventory>();
@@ -40,10 +41,19 @@ public static class DIContainer
         services.AddSingleton<DiagnosticController>();
 
         // 3. Simulator / Devices (Singleton)
-        // Manual instantiation via factory to handle complex dependencies if needed, 
-        // though MSI handles standard constructor injection much better than the previous DI container.
         services.AddSingleton<InternalSimulatorCashChanger>(sp => {
-            var deps = sp.GetRequiredService<SimulatorDependencies>();
+            // Break circular dependency: construct deps manually without the facades that depend on the changer itself
+            var deps = new SimulatorDependencies(
+                ConfigProvider: sp.GetRequiredService<ConfigurationProvider>(),
+                Inventory: sp.GetRequiredService<Inventory>(),
+                History: sp.GetRequiredService<TransactionHistory>(),
+                Manager: sp.GetRequiredService<CashChangerManager>(),
+                AggregatorProvider: sp.GetRequiredService<OverallStatusAggregatorProvider>(),
+                HardwareStatusManager: sp.GetRequiredService<HardwareStatusManager>(),
+                DiagnosticController: sp.GetRequiredService<DiagnosticController>()
+                // Facades (Mediator, etc.) will be resolved later if needed, 
+                // but InternalSimulatorCashChanger's constructor handles its own internal coordinator logic.
+            );
             return new InternalSimulatorCashChanger(deps);
         });
 
@@ -128,6 +138,12 @@ public static class DIContainer
         return _serviceProvider == null
             ? throw new InvalidOperationException("DIContainer is not initialized yet. Call DIContainer.Initialize() first.")
             : _serviceProvider.GetRequiredService<T>();
+    }
+
+    /// <summary>コンテナを破棄し、管理しているサービスのDisposeを呼び出します。</summary>
+    public static void Dispose()
+    {
+        (_serviceProvider as IDisposable)?.Dispose();
     }
 }
 

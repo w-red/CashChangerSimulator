@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Testing;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
@@ -13,7 +14,11 @@ using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>在庫表示とデバイスステータスを管理する ViewModel。</summary>
+/// <summary>現金在庫の可視化とデバイスの基本操作（接続・エラー解除）を担当する ViewModel。</summary>
+/// <remarks>
+/// 各金種の在庫数、デバイス全体のステータス（センサー状態）、取引履歴の表示を集約します。
+/// 設定の変更通知（MonitorsProvider等）を受けて、表示する金種リストを動的に更新します。
+/// </remarks>
 public class InventoryViewModel : IDisposable
 {
     private readonly Inventory _inventory;
@@ -66,7 +71,8 @@ public class InventoryViewModel : IDisposable
     /// <summary>すべての在庫を初期値に戻すコマンド。</summary>
     public ReactiveCommand ReplenishAllCommand { get; }
 
-    /// <summary>InventoryViewModel の新しいインスタンスを初期化します。</summary>
+    /// <summary>必要なサービスを注入して InventoryViewModel を初期化します。</summary>
+    /// <remarks>在庫データの監視、履歴の購読、および各コマンドのバインディング設定を行います。</remarks>
     public InventoryViewModel(
         Inventory inventory,
         TransactionHistory history,

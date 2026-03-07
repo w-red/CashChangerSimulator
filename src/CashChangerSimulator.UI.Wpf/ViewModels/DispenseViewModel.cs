@@ -12,7 +12,11 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>出金（払出）コンポーネントを制御する ViewModel。</summary>
+/// <summary>現金払い出し（出金）操作の UI 状態とロジックを管理する ViewModel。</summary>
+/// <remarks>
+/// `DispenseController` および `CashChangerManager` と連携し、指定金額や金種構成による払い出しを実行します。
+/// 在庫合計の監視や、払い出しコマンドのバリデーション（在庫不足チェック等）を担当します。
+/// </remarks>
 public class DispenseViewModel : IDisposable
 {
     private readonly Inventory _inventory;
@@ -70,7 +74,8 @@ public class DispenseViewModel : IDisposable
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
 
-    /// <summary>DispenseViewModel の新しいインスタンスを初期化します。</summary>
+    /// <summary>必要なサービスを注入して DispenseViewModel を初期化します。</summary>
+    /// <remarks>在庫監視の購読設定や、払い出しコマンドのバインディング構成を行います。</remarks>
     public DispenseViewModel(
         Inventory inventory,
         CashChangerManager manager,

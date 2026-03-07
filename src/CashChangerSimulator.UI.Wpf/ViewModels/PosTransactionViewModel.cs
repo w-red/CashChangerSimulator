@@ -9,7 +9,11 @@ using System.Collections.ObjectModel;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>POS取引（支払い、お釣り払い出し）フローを管理する ViewModel。</summary>
+/// <summary>POS取引（支払い・お釣り払い出し）の自動フローをシミュレートする ViewModel。</summary>
+/// <remarks>
+/// 実際の POS レジ業務（Open -> Claim -> Enable -> BeginDeposit -> Fix -> End -> Dispense -> Close）の一連の
+/// OPOS シーケンスを自動実行し、その過程をログとして表示します。
+/// </remarks>
 public class PosTransactionViewModel : IDisposable
 {
     private readonly DepositViewModel _deposit;
@@ -73,8 +77,10 @@ public class PosTransactionViewModel : IDisposable
 
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
-    /// <summary>PosTransactionViewModel の新しいインスタンスを初期化します。</summary>
-    public PosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController, INotifyService notifyService)
+    /// <summary>必要なコンポーネントを注入して PosTransactionViewModel を初期化します。</summary>
+    /// <remarks>内部で使用するコマンドや ReactiveProperty のバインディング構成を行います。</remarks>
+    public PosTransactionViewModel(
+DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController, INotifyService notifyService)
     {
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;

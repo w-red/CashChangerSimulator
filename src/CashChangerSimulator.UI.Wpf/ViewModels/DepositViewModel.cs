@@ -10,13 +10,21 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>入金コンポーネントを制御する ViewModel。</summary>
+/// <summary>現金投入（入金）操作の UI 状態とロジックを管理する ViewModel。</summary>
+/// <remarks>
+/// <see cref="DepositController"/> と連携し、入金の開始・確定・キャンセル、および各種エラー状態のシミュレーション制御を担当します。
+/// 金額のリアルタイム表示や、操作の有効・無効状態の制御も行います。
+/// </remarks>
 public class DepositViewModel : IDisposable
 {
+    private readonly ILogger<DepositViewModel> _logger = LogProvider.CreateLogger<DepositViewModel>();
+    private readonly CompositeDisposable _disposables = [];
     private readonly DepositController _depositController;
     private readonly HardwareStatusManager _hardwareStatusManager;
-    private readonly ILogger<DepositViewModel> _logger;
-    private readonly CompositeDisposable _disposables = [];
+    private readonly Func<IEnumerable<DenominationViewModel>> _getDenominations;
+    private readonly BindableReactiveProperty<bool> _isDispenseBusy;
+    private readonly INotifyService _notifyService;
+    private readonly CurrencyMetadataProvider _metadataProvider;
 
     // State Properties
     /// <summary>入金モード中かどうか。</summary>
@@ -51,6 +59,7 @@ public class DepositViewModel : IDisposable
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
     /// <summary>通貨記号。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    /// <summary>通貨単位。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     // Commands
@@ -87,10 +96,13 @@ public class DepositViewModel : IDisposable
     /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
     public BindableReactiveProperty<bool> CanOperate { get; }
 
-    private readonly BindableReactiveProperty<bool> _isDispenseBusy;
-    private readonly INotifyService _notifyService;
-
-    /// <summary>DepositViewModel の新しいインスタンスを初期化します。</summary>
+    /// <summary>必要なサービスを注入して DepositViewModel を初期化します。</summary>
+    /// <param name="depositController">入金処理を制御する <see cref="DepositController"/>。</param>
+    /// <param name="hardwareStatusManager">ハードウェアの状態（ジャム、エラー等）を管理する <see cref="HardwareStatusManager"/>。</param>
+    /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
+    /// <param name="isDispenseBusy">出金処理中かどうかを示す反応型プロパティ。</param>
+    /// <param name="notifyService">ユーザーへの通知（警告、エラー等）を行うサービス。</param>
+    /// <param name="metadataProvider">通貨の表示形式（記号など）を提供するプロバイダー。</param>
     public DepositViewModel(
         DepositController depositController,
         HardwareStatusManager hardwareStatusManager,
@@ -99,19 +111,21 @@ public class DepositViewModel : IDisposable
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
-        CurrencyPrefix = metadataProvider.SymbolPrefix;
-        CurrencySuffix = metadataProvider.SymbolSuffix;
         _depositController = depositController;
         _hardwareStatusManager = hardwareStatusManager;
+        _getDenominations = getDenominations;
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
-        _logger = LogProvider.CreateLogger<DepositViewModel>();
+        _metadataProvider = metadataProvider;
+
+        CurrencyPrefix = _metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        CurrencySuffix = _metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
         _isJammed = _hardwareStatusManager.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
         IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
         IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
-        IsDeviceError = _hardwareStatusManager.IsDeviceError;
+        IsDeviceError = _hardwareStatusManager.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         IsInDepositMode = _depositController.Changed
@@ -157,17 +171,12 @@ public class DepositViewModel : IDisposable
             .ToReadOnlyReactiveProperty()
             .AddTo(_disposables);
 
-        // DEBUG TRACE
-        IsDepositFixed.Subscribe(fixed_ => Console.WriteLine($"[DEBUG-VM] IsDepositFixed changed to: {fixed_}")).AddTo(_disposables);
-        DepositStatus.Subscribe(status => Console.WriteLine($"[DEBUG-VM] DepositStatus changed to: {status}")).AddTo(_disposables);
-        IsInDepositMode.Subscribe(mode => Console.WriteLine($"[DEBUG-VM] IsInDepositMode changed to: {mode}")).AddTo(_disposables);
-
         CurrentModeName = _depositController.Changed
             .Select(_ => GetModeName())
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
-        BeginDepositCommand = _hardwareStatusManager.IsConnected.CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusy) => connected && !jammed && !overlapped && !dispenseBusy)
+        BeginDepositCommand = _hardwareStatusManager.IsConnected.CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusyValue) => connected && !jammed && !overlapped && !dispenseBusyValue)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         BeginDepositCommand.Subscribe(_ =>
         {
@@ -235,7 +244,7 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        CanOperate = _hardwareStatusManager.IsConnected.CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusy) => connected && !jammed && !overlapped && !mode && !dispenseBusy)
+        CanOperate = _hardwareStatusManager.IsConnected.CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !mode && !dispenseBusyValue)
             .ToBindableReactiveProperty(_hardwareStatusManager.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
@@ -253,13 +262,11 @@ public class DepositViewModel : IDisposable
 
             if (IsInDepositMode.Value) return;
 
-            // Instead of evaluating in CanExecute, check validity here
             if (!decimal.TryParse(QuickDepositAmountInput.Value, out var a) || a <= 0) return;
 
-            await ExecuteQuickDepositAsync(getDenominations());
+            await ExecuteQuickDepositAsync(_getDenominations());
         });
 
-        // Phase 12: Error Reset
         SimulateOverlapCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => !overlapped)
             .ToReactiveCommand<Unit>()
@@ -315,16 +322,10 @@ public class DepositViewModel : IDisposable
 
         try
         {
-            // Start Deposit
             _depositController.BeginDeposit();
-
-            // Calculate greedy breakdown
             var breakdown = new Dictionary<DenominationKey, int>();
             var remaining = targetAmount;
-
-            // Sort denominations descending (e.g., 10000, 5000...)
-            var sortedDens = denominations
-                .OrderByDescending(d => d.Key.Value);
+            var sortedDens = denominations.OrderByDescending(d => d.Key.Value);
 
             foreach (var den in sortedDens)
             {
@@ -337,13 +338,11 @@ public class DepositViewModel : IDisposable
                 }
             }
 
-            // Insert
             if (breakdown.Count > 0)
             {
                 _depositController.TrackBulkDeposit(breakdown);
             }
 
-            // Auto Fix & Store
             await Task.Delay(100);
             _depositController.FixDeposit();
             await Task.Delay(100);
@@ -355,14 +354,12 @@ public class DepositViewModel : IDisposable
         {
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
-            var title = ResourceHelper.GetAsString("Error", "Error");
-            _notifyService.ShowWarning(pcEx.Message, title);
+            _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to execute quick deposit.");
-            var title = ResourceHelper.GetAsString("Error", "Error");
-            _notifyService.ShowWarning(ex.Message, title);
+            _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
         }
     }
 
