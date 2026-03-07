@@ -118,7 +118,14 @@ public class Program
         AnsiConsole.WriteLine();
 
         // Setup ReadLine
-        var commandList = new[] { "open", "claim", "enable", "disable", "status", "read-counts", "deposit", "fix-deposit", "end-deposit", "dispense", "adjust-counts", "history", "release", "close", "run-script", "config", "log-level", "help", "exit", "quit" };
+        var commandList = new[] { 
+            "open", "claim", "enable", "disable", "status", "read-counts", 
+            "deposit", "fix-deposit", "end-deposit", "dispense", "adjust-counts", 
+            "history", "release", "close", "run-script", 
+            "config", "config list", "config get", "config set", "config save", "config reload",
+            "log-level", "log-level Debug", "log-level Information", "log-level Warning", "log-level Error",
+            "help", "exit", "quit" 
+        };
         ReadLine.AutoCompletionHandler = new CliAutoCompleteHandler(commandList);
         ReadLine.HistoryEnabled = true;
 

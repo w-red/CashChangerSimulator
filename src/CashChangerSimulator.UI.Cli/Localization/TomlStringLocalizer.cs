@@ -103,7 +103,7 @@ public class TomlStringLocalizer(string basePath) : IStringLocalizer
             // Further fallback to en-US
             if (!File.Exists(path))
             {
-                path = Path.Combine(_basePath, "cli.en-US.toml");
+                path = Path.Combine(_basePath, "cli.en.toml");
             }
         }
 
