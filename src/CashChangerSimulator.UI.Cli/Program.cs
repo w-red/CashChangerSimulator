@@ -7,8 +7,11 @@ using CashChangerSimulator.Device;
 
 namespace CashChangerSimulator.UI.Cli;
 
+/// <summary>CLI アプリケーションのメインエントリポイントを提供します。</summary>
 public class Program
 {
+    /// <summary>アプリケーションを開始します。</summary>
+    /// <param name="args">コマンドライン引数。</param>
     public static void Main(string[] args)
     {
         var (globalArgs, commandArgs) = ExtractGlobalOptions(args);
@@ -36,6 +39,7 @@ public class Program
         }
     }
 
+    /// <summary>コマンドライン引数からグローバルオプションとコマンド引数を分離します。</summary>
     private static (string[] global, string[] command) ExtractGlobalOptions(string[] args)
     {
         var globals = new List<string>();
@@ -60,6 +64,7 @@ public class Program
         return (globals.ToArray(), commands.ToArray());
     }
 
+    /// <summary>抽出されたグローバルオプションをセッション設定に適用します。</summary>
     private static void ApplyGlobalOptions(string[] globalArgs, CliSessionOptions options)
     {
         for (int i = 0; i < globalArgs.Length; i++)
@@ -81,7 +86,6 @@ public class Program
                             CultureInfo.DefaultThreadCurrentUICulture = culture;
                             Thread.CurrentThread.CurrentCulture = culture;
                             Thread.CurrentThread.CurrentUICulture = culture;
-                            Thread.CurrentThread.CurrentUICulture = culture;
                         }
                         catch
                         {
@@ -95,6 +99,7 @@ public class Program
         }
     }
 
+    /// <summary>インタラクティブモード（REPL形式）を開始します。</summary>
     private static void RunInteractiveMode(IServiceProvider services)
     {
         var commands = services.GetRequiredService<CliCommands>();
@@ -277,6 +282,7 @@ public class Program
         try { changer.Close(); } catch { }
     }
 
+    /// <summary>終了確認を行います。デバイスがオープンの場合は警告を表示します。</summary>
     private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console, IStringLocalizer L)
     {
         var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
@@ -289,15 +295,5 @@ public class Program
             }
         }
         return true;
-    }
-}
-
-public class CliAutoCompleteHandler(string[] commands) : IAutoCompleteHandler
-{
-    private readonly string[] _commands = commands;
-    public char[] Separators { get; set; } = [' '];
-    public string[] GetSuggestions(string text, int index)
-    {
-        return string.IsNullOrWhiteSpace(text) ? _commands : [.. _commands.Where(c => c.StartsWith(text, StringComparison.OrdinalIgnoreCase))];
     }
 }
