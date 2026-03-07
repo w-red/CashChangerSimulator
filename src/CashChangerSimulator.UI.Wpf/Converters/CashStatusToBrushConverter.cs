@@ -5,9 +5,14 @@ using System.Windows.Media;
 
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
-/// <summary>在庫ステータスを対応する色（Brush）に変換するコンバーター。</summary>
+/// <summary>在庫ステータス（CashStatus）を表示用の色（Brush）に変換するコンバーター。</summary>
+/// <remarks>
+/// 在庫の「空」「ニアエンプティ」「正常」「満杯近し」「満杯」といった論理的状態を、
+/// UI 上で直感的に識別できるよう特定の色にマッピングします。
+/// </remarks>
 public class CashStatusToBrushConverter : IValueConverter
 {
+    /// <summary>在庫ステータスを対応する色（Brush）に変換します。</summary>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         return value is CashStatus status

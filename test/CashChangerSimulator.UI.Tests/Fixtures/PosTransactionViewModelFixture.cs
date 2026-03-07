@@ -4,6 +4,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Testing;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.ViewModels;
@@ -67,9 +68,9 @@ public class PosTransactionViewModelFixture : IDisposable
                 Hardware,
                 diagnosticController))
         {
-            SkipStateVerification = true,
             CurrencyCode = currencyCode
         };
+        CashChanger.SkipStateVerification = true;
     }
 
     /// <summary>検証用の ViewModel を生成します。</summary>

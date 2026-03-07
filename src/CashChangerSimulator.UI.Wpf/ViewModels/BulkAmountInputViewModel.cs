@@ -3,10 +3,11 @@ using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// 一括入力ダイアログ用の ViewModel。
-/// 項目リストと、親 ViewModel から引き継いだシミュレーションコマンドを保持します。
-/// </summary>
+/// <summary>一括入力ダイアログ（Bulk Input）を制御する ViewModel。</summary>
+/// <remarks>
+/// 各金種の入力項目リストを保持し、ダイアログからのシミュレーション操作（ジャム・重なり・エラー解除）を、
+/// 親 ViewModel から注入されたコマンドを通じて実行します。
+/// </remarks>
 public class BulkAmountInputViewModel(
     IEnumerable<BulkAmountInputItemViewModel> items,
     ICommand simulateOverlap,

@@ -3,12 +3,16 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using R3;
 using System.Text.Json;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Managers;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>
-/// 高度なシミュレーション機能（UPOS 準拠、スクリプト実行等）を管理する ViewModel。
-/// </summary>
+/// <summary>高度なシミュレーション機能（UPOS 準拠、スクリプト実行等）を管理する ViewModel。</summary>
+/// <remarks>
+/// OPOS の RealTimeDataEnabled プロパティの制御や、JSON スクリプトによる一連の操作の自動実行を担当します。
+/// 開発者向けのデバッグ機能や、特定のシーケンスを再現するためのツールとしての役割を持ちます。
+/// </remarks>
 public class AdvancedSimulationViewModel : IDisposable
 {
     private readonly SimulatorCashChanger _cashChanger;
@@ -25,14 +29,27 @@ public class AdvancedSimulationViewModel : IDisposable
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
     public BindableReactiveProperty<bool> IsDepositInProgress { get; }
 
-    public AdvancedSimulationViewModel(SimulatorCashChanger cashChanger, IScriptExecutionService scriptExecutionService, DepositController depositController, CurrencyMetadataProvider metadataProvider)
+    /// <summary>必要なコンポーネントを注入して AdvancedSimulationViewModel を初期化します。</summary>
+    /// <param name="cashChanger">対象の <see cref="SimulatorCashChanger"/>。</param>
+    /// <param name="scriptExecutionService">スクリプト実行サービス。</param>
+    /// <param name="depositController">入金制御コントローラー。</param>
+    /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
+    public AdvancedSimulationViewModel(
+        SimulatorCashChanger cashChanger,
+        IScriptExecutionService scriptExecutionService,
+        DepositController depositController,
+        CurrencyMetadataProvider metadataProvider)
     {
-        CurrencyPrefix = metadataProvider.SymbolPrefix;
-        CurrencySuffix = metadataProvider.SymbolSuffix;
         _cashChanger = cashChanger;
         _scriptExecutionService = scriptExecutionService;
 
-        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(_cashChanger.RealTimeDataEnabled);
+        CurrencyPrefix = metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        CurrencySuffix = metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
+
+        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(_cashChanger.RealTimeDataEnabled).AddTo(_disposables);
+        IsRealTimeDataEnabled
+            .Subscribe(enabled => _cashChanger.RealTimeDataEnabled = enabled)
+            .AddTo(_disposables);
 
         CurrentDepositAmount = depositController.Changed
             .Select(_ => depositController.DepositAmount)
@@ -44,12 +61,8 @@ public class AdvancedSimulationViewModel : IDisposable
             .ToBindableReactiveProperty(depositController.IsDepositInProgress)
             .AddTo(_disposables);
 
-        IsRealTimeDataEnabled
-            .Subscribe(enabled => _cashChanger.RealTimeDataEnabled = enabled)
-            .AddTo(_disposables);
-
-        ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]");
-        ScriptError = new BindableReactiveProperty<string?>(null);
+        ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
+        ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
 
         // Enables command only if JSON is basically valid list
         var canExecute = ScriptInput.Select(input =>

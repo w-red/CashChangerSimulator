@@ -1,6 +1,9 @@
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>POS取引モードの状態を表す列挙型。</summary>
+/// <summary>POS取引（チェックアウト）シミュレーションにおける現在の進行状態を表す列挙型。</summary>
+/// <remarks>
+/// 取引の開始から、対話的な現金投入、お釣りの払い出し、完了までのライフサイクルステータスを定義します。
+/// </remarks>
 public enum PosTransactionStatus
 {
     /// <summary>待機中。</summary>

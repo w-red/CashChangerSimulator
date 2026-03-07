@@ -84,8 +84,13 @@ HotStart = {hotStart.ToString().ToLower()}
             var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(5));
             if (win != null) return win;
 
-            // Fallback: Robust search on desktop if Application object fails
+            // Fallback: Robust search on desktop
             var desktop = Automation.GetDesktop();
+            // Try by AutomationId first (more reliable)
+            var mainWindowById = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
+            if (mainWindowById != null) return mainWindowById.AsWindow();
+
+            // Try by Title
             var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
             foreach (var w in windows)
             {
@@ -99,7 +104,7 @@ HotStart = {hotStart.ToString().ToLower()}
                 catch { }
             }
             return null;
-        }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(500)).Result ?? throw new Exception("Main window 'Cash Changer Simulator' not found after 30 seconds.");
+        }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(2000)).Result ?? throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found after 30 seconds.");
         MainWindow.WaitUntilClickable(TimeSpan.FromSeconds(10));
         MainWindow.SetForeground();
     }

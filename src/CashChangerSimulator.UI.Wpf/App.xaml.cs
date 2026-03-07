@@ -69,7 +69,10 @@ public partial class App : Application
         }
         catch (Exception)
         {
-            // Other failures safe on exit: ensure application can close even if history saving fails
+        }
+        finally
+        {
+            DIContainer.Dispose();
         }
         base.OnExit(e);
     }

@@ -8,7 +8,11 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>各金種の表示と操作を管理する ViewModel。</summary>
+/// <summary>個別の金種（1000円、100円等）の表示状態と操作を管理する ViewModel。</summary>
+/// <remarks>
+/// 特定の金種の名称、在庫枚数、およびステータス（センサー状態）を保持します。
+/// 在庫の変更を監視し、UI 上の表示枚数を最新の状態に保つ役割を担います。
+/// </remarks>
 public class DenominationViewModel
 {
     private readonly Inventory _inventory;
@@ -24,7 +28,8 @@ public class DenominationViewModel
     /// <summary>現在この金種を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
-    /// <summary>DenominationViewModel の新しいインスタンスを初期化します。</summary>
+    /// <summary>金種情報と監視オブジェクトを注入して DenominationViewModel を初期化します。</summary>
+    /// <remarks>言語設定に基づいた表示名の決定や、在庫変更の購読設定を行います。</remarks>
     public DenominationViewModel(Inventory inventory, DenominationKey key, CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, ConfigurationProvider configProvider)
     {
         _inventory = inventory;

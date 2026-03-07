@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Testing;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,11 @@ using R3;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
-/// <summary>アプリケーションのメイン画面を制御する ViewModel。</summary>
+/// <summary>シミュレータのメインウィンドウに対応する ViewModel。</summary>
+/// <remarks>
+/// アプリケーション全体のライフサイクル管理、サブ ViewModel（Deposit, Dispense, Inventory, PosTransaction 等）の保持、
+/// および設定に基づく初期動作（HotStart等）の制御を担当します。
+/// </remarks>
 public class MainViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
@@ -46,7 +51,8 @@ public class MainViewModel : IDisposable
     /// <summary>高度なシミュレーションウィンドウを表示するコマンド。</summary>
     public ReactiveCommand OpenAdvancedSimulationCommand { get; }
 
-    /// <summary>MainViewModel の新しいインスタンスを初期化します。</summary>
+    /// <summary>全依存関係を注入して MainViewModel を初期化し、サブ ViewModel を構築します。</summary>
+    /// <remarks>設定ファイルの値に基づき、デバイスの自動オープンなどの初期化処理も実行します。</remarks>
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,

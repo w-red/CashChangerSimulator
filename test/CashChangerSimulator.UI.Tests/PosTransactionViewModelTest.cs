@@ -8,7 +8,11 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests;
 
-/// <summary>POSトランザクションViewModelの動作を検証するテストクラス。</summary>
+/// <summary>POS取引モードの UI ライフサイクルと ViewModel の状態遷移を検証するテストクラス。</summary>
+/// <remarks>
+/// 金額入力のバリデーション、取引開始から完了までのステータス遷移、タイムアウト処理、
+/// および OPOS ログ出力の正確性を UI ロジックの観点から検証します。
+/// </remarks>
 public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>
 {
     private readonly PosTransactionViewModelFixture _fixture = fixture;
