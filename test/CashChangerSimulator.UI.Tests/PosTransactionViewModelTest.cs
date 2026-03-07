@@ -53,7 +53,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
     [Fact]
     public void ConstructorShouldInitializeCorrectly()
     {
-        var vm = CreateViewModel();
+        var vm = _fixture.CreateViewModel();
         PosTransactionStatus status = vm.TransactionStatus.Value;
         status.ShouldBe(PosTransactionStatus.Idle);
     }
@@ -66,7 +66,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
     [InlineData("0")]        // 0円
     public void StartTransactionWithInvalidAmount_ShouldBeDisabled(string invalidAmount)
     {
-        var vm = CreateViewModel();
+        var vm = _fixture.CreateViewModel();
         vm.TargetAmountInput.Value = invalidAmount;
 
         ((ICommand)vm.StartCommand).CanExecute(null).ShouldBeFalse();
@@ -76,7 +76,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
     [Fact]
     public void StartTransaction_ShouldTransitionToWaitingForCash()
     {
-        var vm = CreateViewModel();
+        var vm = _fixture.CreateViewModel();
         vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
 
         vm.StartCommand.Execute(Unit.Default);
@@ -89,7 +89,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
     [Fact]
     public void CancelTransaction_ShouldReturnToIdleAndCloseDevice()
     {
-        var vm = CreateViewModel();
+        var vm = _fixture.CreateViewModel();
         vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
         vm.StartCommand.Execute(Unit.Default);
 
@@ -104,7 +104,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
     [Fact]
     public async Task TransactionTimeout_ShouldTriggerCancel()
     {
-        var vm = CreateViewModel();
+        var vm = _fixture.CreateViewModel();
         vm.TargetAmountInput.Value = PosTransactionTestConstants.TargetAmount;
         vm.TransactionTimeoutSeconds.Value = 1; // 1秒でタイムアウト
 
