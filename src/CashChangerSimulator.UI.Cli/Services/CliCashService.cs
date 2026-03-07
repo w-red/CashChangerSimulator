@@ -33,12 +33,12 @@ public class CliCashService : CliServiceBase
         try
         {
             var counts = _changer.ReadCashCounts();
-            _console.MarkupLine(_L["CashCountsUpdated"]);
+            _console.MarkupLine(_L["messages.cash_counts_updated"]);
 
             var table = new Table().Border(TableBorder.Rounded);
-            table.AddColumn(_L["DenominationLabel"]);
-            table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
-            table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
+            table.AddColumn(_L["messages.denomination_label"]);
+            table.AddColumn(new TableColumn(_L["messages.count_label"]).RightAligned());
+            table.AddColumn(new TableColumn(_L["messages.amount_label"]).RightAligned());
 
             var currencyCode = _metadata.CurrencyCode;
             var prefix = _metadata.SymbolPrefix.CurrentValue;
@@ -56,7 +56,7 @@ public class CliCashService : CliServiceBase
                 );
             }
 
-            table.Caption($"{_L["TotalCaption"]}: {prefix}{_inventory.CalculateTotal(currencyCode):N0}{suffix}");
+            table.Caption($"{_L["messages.total_caption"]}: {prefix}{_inventory.CalculateTotal(currencyCode):N0}{suffix}");
             _console.Write(table);
         }
         catch (Exception ex)
@@ -71,17 +71,17 @@ public class CliCashService : CliServiceBase
         {
             if (_options.IsAsync)
             {
-                _console.MarkupLine(_L["DepositStarted", amount?.ToString() ?? "All", "True"]);
+                _console.MarkupLine(_L["messages.deposit_started", amount?.ToString() ?? "All", "True"]);
                 _changer.BeginDeposit();
-                _console.MarkupLine(_L["DepositAsyncWarning"]);
+                _console.MarkupLine(_L["messages.deposit_async_warning"]);
             }
             else
             {
-                _console.MarkupLine(_L["DepositStarted", amount?.ToString() ?? "All", "False"]);
+                _console.MarkupLine(_L["messages.deposit_started", amount?.ToString() ?? "All", "False"]);
                 _changer.BeginDeposit();
                 _changer.FixDeposit();
                 _changer.EndDeposit(CashDepositAction.Change);
-                _console.MarkupLine(_L["DepositCompleted"]);
+                _console.MarkupLine(_L["messages.deposit_completed"]);
             }
         }
         catch (Exception ex)
@@ -95,7 +95,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.FixDeposit();
-            _console.MarkupLine(_L["DepositFixed"]);
+            _console.MarkupLine(_L["messages.deposit_fixed"]);
         }
         catch (Exception ex)
         {
@@ -108,7 +108,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.EndDeposit(CashDepositAction.Change);
-            _console.MarkupLine(_L["EndDepositCompleted"]);
+            _console.MarkupLine(_L["messages.end_deposit_completed"]);
         }
         catch (Exception ex)
         {
@@ -130,11 +130,11 @@ public class CliCashService : CliServiceBase
             if (counts.Any())
             {
                 _changer.AdjustCashCounts(counts);
-                _console.MarkupLine(_L["AdjustCashCountsSuccess", input]);
+                _console.MarkupLine(_L["messages.adjust_cash_counts_success", input]);
             }
             else
             {
-                _console.MarkupLine("[red]Invalid format or no matching denominations found. Use 'value:count,value:count'[/]");
+                _console.MarkupLine(_L["messages.invalid_adjust_format"]);
             }
         }
         catch (Exception ex)
@@ -148,7 +148,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.DispenseChange(amount);
-            _console.MarkupLine(_L["DispensedSuccess", amount]);
+            _console.MarkupLine(_L["messages.dispensed_success", amount]);
         }
         catch (Exception ex)
         {

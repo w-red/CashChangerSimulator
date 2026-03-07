@@ -17,7 +17,7 @@ public class CliDeviceService(
         try
         {
             _changer.Open();
-            _console.MarkupLine(_L["DeviceOpened"]);
+            _console.MarkupLine(_L["messages.device_opened"]);
         }
         catch (Exception ex)
         {
@@ -30,7 +30,7 @@ public class CliDeviceService(
         try
         {
             _changer.Claim(timeout);
-            _console.MarkupLine(_L["DeviceClaimed"]);
+            _console.MarkupLine(_L["messages.device_claimed"]);
         }
         catch (Exception ex)
         {
@@ -43,7 +43,7 @@ public class CliDeviceService(
         try
         {
             _changer.DeviceEnabled = true;
-            _console.MarkupLine(_L["DeviceEnabled"]);
+            _console.MarkupLine(_L["messages.device_enabled"]);
         }
         catch (Exception ex)
         {
@@ -56,7 +56,7 @@ public class CliDeviceService(
         try
         {
             _changer.DeviceEnabled = false;
-            _console.MarkupLine(_L["DeviceDisabled"]);
+            _console.MarkupLine(_L["messages.device_disabled"]);
         }
         catch (Exception ex)
         {
@@ -69,7 +69,7 @@ public class CliDeviceService(
         try
         {
             _changer.Release();
-            _console.MarkupLine(_L["DeviceReleased"]);
+            _console.MarkupLine(_L["messages.device_released"]);
         }
         catch (Exception ex)
         {
@@ -82,7 +82,7 @@ public class CliDeviceService(
         try
         {
             _changer.Close();
-            _console.MarkupLine(_L["DeviceClosed"]);
+            _console.MarkupLine(_L["messages.device_closed"]);
         }
         catch (Exception ex)
         {
@@ -92,11 +92,11 @@ public class CliDeviceService(
 
     protected override string GetHint(ErrorCode errorCode)
     {
-        var hintKey = $"ErrorHint_{errorCode}";
+        var hintKey = $"messages.error_hint_{errorCode.ToString().ToLowerInvariant()}";
         var hint = _L[hintKey];
         if (hint.ResourceNotFound)
         {
-            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["ErrorHint_NotEnabled"] : (string)_L["ErrorHint_Generic"];
+            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["messages.error_hint_notenabled"] : (string)_L["messages.error_hint_generic"];
         }
         return hint;
     }

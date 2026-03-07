@@ -30,16 +30,16 @@ public class CliViewService : CliServiceBase
 
     public void Status()
     {
-        _console.Write(new Rule($"[cyan]{_L["StatusHeader"]}[/]").LeftJustified());
-        _console.MarkupLine($"{_L["StateLabel"]}: [yellow]{_changer.State}[/]");
-        _console.MarkupLine($"{_L["EnabledLabel"]}: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
+        _console.Write(new Rule($"[cyan]{_L["messages.status_header"]}[/]").LeftJustified());
+        _console.MarkupLine($"{_L["messages.state_label"]}: [yellow]{_changer.State}[/]");
+        _console.MarkupLine($"{_L["messages.enabled_label"]}: {(_changer.DeviceEnabled ? "[green]True[/]" : "[red]False[/]")}");
 
         _console.WriteLine();
-        _console.Write(new Rule($"[cyan]{_L["InventoryHeader"]}[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["messages.inventory_header"]}[/]").LeftJustified());
 
         var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn(_L["DenominationLabel"]);
-        table.AddColumn(new TableColumn(_L["CountLabel"]).RightAligned());
+        table.AddColumn(_L["messages.denomination_label"]);
+        table.AddColumn(new TableColumn(_L["messages.count_label"]).RightAligned());
 
         foreach (var key in _metadata.SupportedDenominations)
         {
@@ -50,20 +50,20 @@ public class CliViewService : CliServiceBase
         var currencyCode = _metadata.CurrencyCode;
         var prefix = _metadata.SymbolPrefix.CurrentValue;
         var suffix = _metadata.SymbolSuffix.CurrentValue;
-        table.Caption($"{_L["TotalCaption"]}: {prefix}{_inventory.CalculateTotal(currencyCode):N0}{suffix}");
+        table.Caption($"{_L["messages.total_caption"]}: {prefix}{_inventory.CalculateTotal(currencyCode):N0}{suffix}");
 
         _console.Write(table);
     }
 
     public void History(int count)
     {
-        _console.Write(new Rule($"[cyan]{_L["TransactionHistoryHeader", count]}[/]").LeftJustified());
+        _console.Write(new Rule($"[cyan]{_L["messages.transaction_history_header", count]}[/]").LeftJustified());
 
         var table = new Table().Border(TableBorder.Rounded);
-        table.AddColumn(_L["TimestampLabel"]);
-        table.AddColumn(_L["TypeLabel"]);
-        table.AddColumn(new TableColumn(_L["AmountLabel"]).RightAligned());
-        table.AddColumn(_L["CurrencyLabel"]);
+        table.AddColumn(_L["messages.timestamp_label"]);
+        table.AddColumn(_L["messages.type_label"]);
+        table.AddColumn(new TableColumn(_L["messages.amount_label"]).RightAligned());
+        table.AddColumn(_L["messages.currency_label"]);
 
         var entries = _history.Entries.TakeLast(count).Reverse();
         foreach (var entry in entries)
