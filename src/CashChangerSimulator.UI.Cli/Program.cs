@@ -80,6 +80,7 @@ public class Program
                             CultureInfo.DefaultThreadCurrentUICulture = culture;
                             Thread.CurrentThread.CurrentCulture = culture;
                             Thread.CurrentThread.CurrentUICulture = culture;
+                            Thread.CurrentThread.CurrentUICulture = culture;
                         }
                         catch
                         {
@@ -91,16 +92,6 @@ public class Program
                     break;
             }
         }
-    }
-
-    private static bool IsOnlyGlobalOptions(string[] args)
-    {
-        // Simple heuristic: if all args start with --, it's likely just options for interactive mode
-        foreach (var arg in args)
-        {
-            if (!arg.StartsWith("--")) return false;
-        }
-        return true;
     }
 
     private static void RunInteractiveMode(IServiceProvider services)
@@ -124,9 +115,20 @@ public class Program
         AnsiConsole.WriteLine();
 
         // Setup ReadLine
-        var commandList = new[] { "open", "claim", "enable", "disable", "status", "readcashcounts", "deposit", "dispense", "history", "release", "close", "run-script", "help", "exit", "quit" };
+        var commandList = new[] { "open", "claim", "enable", "disable", "status", "read-counts", "deposit", "fix-deposit", "end-deposit", "dispense", "adjust-counts", "history", "release", "close", "run-script", "config", "log-level", "help", "exit", "quit" };
         ReadLine.AutoCompletionHandler = new CliAutoCompleteHandler(commandList);
         ReadLine.HistoryEnabled = true;
+
+        var historyFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CashChangerSimulator", "cli_history.txt");
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(historyFile)!);
+            if (File.Exists(historyFile))
+            {
+                ReadLine.AddHistory(File.ReadAllLines(historyFile));
+            }
+        }
+        catch { }
 
         while (true)
         {
@@ -143,12 +145,8 @@ public class Program
                 continue;
             }
 
-            // Add to history if not empty and different from last
-            if (!string.IsNullOrWhiteSpace(trimmed))
-            {
-                // ReadLine handles history internally normally when Read is called, 
-                // but we can also manually manage it if needed.
-            }
+            // Persistence
+            try { File.AppendAllLines(historyFile, new[] { trimmed }); } catch { }
 
             var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var command = parts[0].ToLowerInvariant();
@@ -173,14 +171,26 @@ public class Program
                     case "status":
                         commands.Status();
                         break;
-                    case "readcashcounts":
+                    case "read-counts":
                         commands.ReadCashCounts();
                         break;
                     case "deposit":
                         if (parts.Length > 1 && int.TryParse(parts[1], out var amount))
                             commands.Deposit(amount);
                         else
-                            AnsiConsole.MarkupLine("[red]Usage: deposit <amount>[/]");
+                            commands.Deposit(null);
+                        break;
+                    case "fix-deposit":
+                        commands.FixDeposit();
+                        break;
+                    case "end-deposit":
+                        commands.EndDeposit();
+                        break;
+                    case "adjust-counts":
+                        if (parts.Length > 1)
+                            commands.AdjustCashCounts(parts[1]);
+                        else
+                            AnsiConsole.MarkupLine("[red]Usage: adjust-counts <value:count,value:count>[/]");
                         break;
                     case "dispense":
                         if (parts.Length > 1 && int.TryParse(parts[1], out var dispAmt))
@@ -241,26 +251,18 @@ public class Program
             {
                 AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
             }
-            // Wait briefly for async log messages to flush before showing prompt
             Thread.Sleep(100);
         }
 
-        // Final cleanup
-        try
-        {
-            changer.Close();
-        }
-        catch { }
+        try { changer.Close(); } catch { }
     }
 
     private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console)
     {
         var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
-
         if (isOpen)
         {
             console.MarkupLine("[yellow]Warning: Device is still open or processing.[/]");
-            // Note: ReadLine doesn't support Confirm directly, but we can still use Spectre.Console for confirming exit
             if (!console.Confirm("Are you sure you want to exit? (Device will be closed automatically)"))
             {
                 return false;
@@ -270,22 +272,12 @@ public class Program
     }
 }
 
-/// <summary>CLI コマンドの自動補完ハンドラ。</summary>
-public class CliAutoCompleteHandler(string[] commands)
-    : IAutoCompleteHandler
+public class CliAutoCompleteHandler(string[] commands) : IAutoCompleteHandler
 {
     private readonly string[] _commands = commands;
-
     public char[] Separators { get; set; } = [' '];
-
     public string[] GetSuggestions(string text, int index)
     {
-        return string.IsNullOrWhiteSpace(text)
-            ? _commands
-            : [.. _commands.Where(
-                c => c
-                    .StartsWith(
-                        text,
-                        StringComparison.OrdinalIgnoreCase))];
+        return string.IsNullOrWhiteSpace(text) ? _commands : [.. _commands.Where(c => c.StartsWith(text, StringComparison.OrdinalIgnoreCase))];
     }
 }

@@ -116,6 +116,33 @@ public class CliCashService : CliServiceBase
         }
     }
 
+    public void AdjustCashCounts(string input)
+    {
+        try
+        {
+            var currencyCode = _options.CurrencyCode;
+            var factor = UposCurrencyHelper.GetCurrencyFactor(currencyCode);
+            var availableKeys = _metadata.SupportedDenominations
+                .Select(d => new DenominationKey(d.Value, d.Type, currencyCode));
+
+            var counts = CashCountAdapter.ParseCashCounts(input, currencyCode, factor, availableKeys);
+
+            if (counts.Any())
+            {
+                _changer.AdjustCashCounts(counts);
+                _console.MarkupLine(_L["AdjustCashCountsSuccess", input]);
+            }
+            else
+            {
+                _console.MarkupLine("[red]Invalid format or no matching denominations found. Use 'value:count,value:count'[/]");
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
+        }
+    }
+
     public void Dispense(int amount)
     {
         try
