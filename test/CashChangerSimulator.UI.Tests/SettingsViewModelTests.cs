@@ -14,15 +14,15 @@ public class SettingsViewModelTests
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly Inventory _inventory;
+    private readonly Inventory Inventory;
 
     public SettingsViewModelTests()
     {
-        _inventory = new Inventory();
+        Inventory = new Inventory();
         _configProvider = new ConfigurationProvider();
         _configProvider.Config.System.CurrencyCode = "JPY"; // 明示的に初期化
         _metadataProvider = new CurrencyMetadataProvider(_configProvider);
-        _monitorsProvider = new MonitorsProvider(_inventory, _configProvider, _metadataProvider);
+        _monitorsProvider = new MonitorsProvider(Inventory, _configProvider, _metadataProvider);
     }
 
     /// <summary>初期値が正しくロードされることを検証します。</summary>

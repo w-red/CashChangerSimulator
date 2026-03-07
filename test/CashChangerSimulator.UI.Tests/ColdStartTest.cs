@@ -11,14 +11,14 @@ namespace CashChangerSimulator.UI.Tests;
 /// <summary>デバイスの初回起動状態（Cold Start）に関連する動作を検証するテストクラス。</summary>
 public class ColdStartTest
 {
-    private readonly Inventory _inventory;
-    private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly Inventory Inventory;
+    private readonly HardwareStatusManager HardwareStatusManager;
     private readonly ConfigurationProvider _configProvider;
 
     public ColdStartTest()
     {
-        _inventory = new Inventory();
-        _hardwareStatusManager = new HardwareStatusManager();
+        Inventory = new Inventory();
+        HardwareStatusManager = new HardwareStatusManager();
         _configProvider = new ConfigurationProvider();
     }
 
@@ -34,13 +34,13 @@ public class ColdStartTest
         // Act
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
-            _inventory,
+            Inventory,
             null!,
             null!,
-            new DepositController(_inventory, _hardwareStatusManager),
+            new DepositController(Inventory, HardwareStatusManager),
             null!,
             null!,
-            _hardwareStatusManager);
+            HardwareStatusManager);
 
         // Assert
         cashChanger.State.ShouldBe(ControlState.Closed);
@@ -55,16 +55,16 @@ public class ColdStartTest
         config.Simulation.HotStart = false;
         _configProvider.Update(config);
 
-        var depositController = new DepositController(_inventory, _hardwareStatusManager);
+        var depositController = new DepositController(Inventory, HardwareStatusManager);
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
-            _inventory,
+            Inventory,
             null!,
             null!,
             depositController,
             null!,
             null!,
-            _hardwareStatusManager);
+            HardwareStatusManager);
         cashChanger.SkipStateVerification = false;
 
         // Act & Assert
@@ -88,13 +88,13 @@ public class ColdStartTest
 
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
-            _inventory,
+            Inventory,
             null!,
             null!,
-            new DepositController(_inventory, _hardwareStatusManager),
+            new DepositController(Inventory, HardwareStatusManager),
             null!,
             null!,
-            _hardwareStatusManager);
+            HardwareStatusManager);
 
         // Act & Assert
         cashChanger.State.ShouldBe(ControlState.Closed);
@@ -117,13 +117,13 @@ public class ColdStartTest
 
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
-            _inventory,
+            Inventory,
             null!,
             null!,
-            new DepositController(_inventory, _hardwareStatusManager),
+            new DepositController(Inventory, HardwareStatusManager),
             null!,
             null!,
-            _hardwareStatusManager);
+            HardwareStatusManager);
 
         // Act
         cashChanger.SkipStateVerification = false;
@@ -148,13 +148,13 @@ public class ColdStartTest
 
         var cashChanger = new InternalSimulatorCashChanger(
             _configProvider,
-            _inventory,
+            Inventory,
             null!,
             null!,
-            new DepositController(_inventory, _hardwareStatusManager),
+            new DepositController(Inventory, HardwareStatusManager),
             null!,
             null!,
-            _hardwareStatusManager);
+            HardwareStatusManager);
 
         cashChanger.SkipStateVerification = true;
         cashChanger.SkipStateVerification = false;
