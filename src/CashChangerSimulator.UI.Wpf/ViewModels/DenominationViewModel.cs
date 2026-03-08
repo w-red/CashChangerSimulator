@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
 using R3;
+using System.Linq;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -27,6 +28,13 @@ public class DenominationViewModel
     public BindableReactiveProperty<CashStatus> Status { get; }
     /// <summary>現在この金種を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
+
+    /// <summary>還流庫（通常庫）の枚数。</summary>
+    public BindableReactiveProperty<int> RecyclableCount { get; }
+    /// <summary>回収庫（オーバーフロー）の枚数。</summary>
+    public BindableReactiveProperty<int> CollectionCount { get; }
+    /// <summary>リジェクト庫（汚損・不明）の枚数。</summary>
+    public BindableReactiveProperty<int> RejectCount { get; }
 
     /// <summary>リサイクル可能（還流）かどうか。</summary>
     public bool IsRecyclable { get; }
@@ -63,19 +71,38 @@ public class DenominationViewModel
         Status = monitor.Status.ToBindableReactiveProperty();
         _count = new BindableReactiveProperty<int>(_inventory.GetTotalCount(key));
         Count = _count;
+
+        RecyclableCount = new BindableReactiveProperty<int>(_inventory.GetCount(key));
+        CollectionCount = new BindableReactiveProperty<int>(((IReadOnlyInventory)_inventory).CollectionCounts.FirstOrDefault(x => x.Key == key).Value);
+        RejectCount = new BindableReactiveProperty<int>(((IReadOnlyInventory)_inventory).RejectCounts.FirstOrDefault(x => x.Key == key).Value);
+
         _inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)
             .Subscribe(_ =>
             {
-                var newCount = _inventory.GetTotalCount(key);
-                System.Diagnostics.Debug.WriteLine($"[DenominationViewModel] Updated {key}: {newCount}");
+                var newTotal = _inventory.GetTotalCount(key);
+                var newRecyclable = _inventory.GetCount(key);
+                var newCollection = ((IReadOnlyInventory)_inventory).CollectionCounts.FirstOrDefault(x => x.Key == key).Value;
+                var newReject = ((IReadOnlyInventory)_inventory).RejectCounts.FirstOrDefault(x => x.Key == key).Value;
+
+                System.Diagnostics.Debug.WriteLine($"[DenominationViewModel] Updated {key}: {newTotal} (Rec:{newRecyclable}, Col:{newCollection}, Rej:{newReject})");
+                
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => _count.Value = newCount);
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _count.Value = newTotal;
+                        RecyclableCount.Value = newRecyclable;
+                        CollectionCount.Value = newCollection;
+                        RejectCount.Value = newReject;
+                    });
                 }
                 else
                 {
-                    _count.Value = newCount;
+                    _count.Value = newTotal;
+                    RecyclableCount.Value = newRecyclable;
+                    CollectionCount.Value = newCollection;
+                    RejectCount.Value = newReject;
                 }
             });
 
