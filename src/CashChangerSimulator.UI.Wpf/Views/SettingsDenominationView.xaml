@@ -113,6 +113,10 @@
                         Header="{StaticResource HeaderRecycle}"
                         Binding="{Binding IsRecyclable.Value}"
                         Width="80"/>
+                    <DataGridCheckBoxColumn
+                        Header="{StaticResource HeaderDeposit}"
+                        Binding="{Binding IsDepositable.Value}"
+                        Width="80"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

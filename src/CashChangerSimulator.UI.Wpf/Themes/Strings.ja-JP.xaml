@@ -18,6 +18,7 @@
     <system:String x:Key="Coins">硬貨</system:String>
     <system:String x:Key="Overflow">オーバーフロー</system:String>
     <system:String x:Key="Reject">リジェクト</system:String>
+    <system:String x:Key="BadgeCollection">回収のみ</system:String>
 
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
@@ -91,6 +92,7 @@
     <system:String x:Key="HeaderNameEn">名称 (英)</system:String>
     <system:String x:Key="HeaderNameJp">名称 (日)</system:String>
     <system:String x:Key="HeaderRecycle">リサイクル</system:String>
+    <system:String x:Key="HeaderDeposit">入金</system:String>
 
     <!-- Bulk Input Dialog -->
     <system:String x:Key="BulkInput">一括投入</system:String>
