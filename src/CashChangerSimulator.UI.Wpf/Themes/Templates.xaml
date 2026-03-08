@@ -28,6 +28,7 @@
                 Style="{StaticResource MaterialDesignFlatButton}"
                 Padding="0" Background="Transparent" BorderBrush="Transparent"
                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                AutomationProperties.AutomationId="InventoryTile"
                 Margin="0,0,8,8" Width="180" Height="140">
             <Border ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent" CornerRadius="8">
                 <Border.Effect>

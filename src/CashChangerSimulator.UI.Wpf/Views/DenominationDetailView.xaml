@@ -8,7 +8,8 @@
              mc:Ignorable="d" 
              MinWidth="400" d:DesignHeight="350"
              d:DataContext="{d:DesignInstance Type=vm:DenominationViewModel}">
-    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="#33FFFFFF">
+    <Border AutomationProperties.AutomationId="DenominationDetailDialogContent"
+            Background="{StaticResource SurfaceBrush}" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="#33FFFFFF">
         <StackPanel>
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal">
