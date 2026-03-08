@@ -23,70 +23,77 @@
 
     <!-- Inventory Tile Template -->
     <DataTemplate x:Key="InventoryTileTemplate" DataType="{x:Type vm:DenominationViewModel}">
-        <Border MinWidth="120" MinHeight="140" Margin="0,0,8,8" Padding="4" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
-            </Border.Effect>
-            <Border.RenderTransform>
-                <ScaleTransform ScaleX="1" ScaleY="1" />
-            </Border.RenderTransform>
-            <Border.Style>
-                <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsAcceptingCash.Value}" Value="True">
-                            <DataTrigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                        To="{StaticResource PrimaryColor}" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
-                                                        To="0.6" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.EnterActions>
-                            <DataTrigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                        To="Transparent" Duration="0:0:0.2" />
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
-                                                        To="0" Duration="0:0:0.2" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.ExitActions>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+        <Button Command="{Binding DataContext.ShowDenominationDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                CommandParameter="{Binding}"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                Padding="0" Background="Transparent" BorderBrush="Transparent"
+                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                Margin="0,0,8,8" Width="180" Height="140">
+            <Border ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent" CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
+                </Border.Effect>
+                <Border.RenderTransform>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsAcceptingCash.Value}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                            To="{StaticResource PrimaryColor}" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                            To="0.6" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                            To="Transparent" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                            To="0" Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Margin="12,12,12,0">
-                    <Grid>
-                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Grid Grid.Row="0" Margin="8,8,8,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" FontWeight="Bold" 
+                                   TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Margin="0,0,0,2"/>
+                        <WrapPanel Grid.Row="1" HorizontalAlignment="Right">
                             <Border Background="{StaticResource SecondaryBrush}" CornerRadius="2" Padding="4,1" Margin="0,0,4,0"
-                                    Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedBooleanToVisibilityConv}}">
-                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="Black" FontSize="8" FontWeight="Black"/>
+                                    Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedVisibilityConv}}">
+                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="Black" FontSize="10" FontWeight="Black"/>
                             </Border>
-                            <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="9" FontWeight="Black"/>
-                        </StackPanel>
+                            <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="11" FontWeight="Black"/>
+                        </WrapPanel>
                     </Grid>
-                    <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="6" 
-                                Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" Background="#15FFFFFF" BorderThickness="0"
-                                materialDesign:TransitionAssist.DisableTransitions="False"/>
-                </StackPanel>
-                
-                <Viewbox Grid.Row="1" Stretch="Uniform" Margin="12" MaxHeight="60">
-                    <TextBlock Text="{Binding Count.Value}" FontSize="48" FontWeight="Bold" 
-                            Foreground="{StaticResource TextPrimaryBrush}"
-                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Viewbox>
-            </Grid>
-        </Border>
+                    
+                    <Viewbox Grid.Row="1" Stretch="Uniform" Margin="4" MaxHeight="60">
+                        <TextBlock Text="{Binding Count.Value}" FontSize="42" FontWeight="Bold" 
+                                Foreground="{StaticResource TextPrimaryBrush}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Viewbox>
+                </Grid>
+            </Border>
+        </Button>
     </DataTemplate>
 
     <!-- Cash Insertion Template -->
