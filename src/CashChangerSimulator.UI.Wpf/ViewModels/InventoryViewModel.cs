@@ -70,6 +70,8 @@ public class InventoryViewModel : IDisposable
     public ReactiveCommand CollectAllCommand { get; }
     /// <summary>すべての在庫を初期値に戻すコマンド。</summary>
     public ReactiveCommand ReplenishAllCommand { get; }
+    /// <summary>金種の詳細ダイアログを表示するコマンド。</summary>
+    public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
 
     /// <summary>必要なサービスを注入して InventoryViewModel を初期化します。</summary>
     /// <remarks>在庫データの監視、履歴の購読、および各コマンドのバインディング設定を行います。</remarks>
@@ -209,6 +211,16 @@ public class InventoryViewModel : IDisposable
             {
                 var setting = _configProvider.Config.GetDenominationSetting(monitor.Key);
                 _inventory.SetCount(monitor.Key, setting.InitialCount);
+            }
+        });
+
+        ShowDenominationDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
+        ShowDenominationDetailCommand.Subscribe(vm =>
+        {
+            if (vm != null)
+            {
+                var view = new DenominationDetailView { DataContext = vm };
+                MaterialDesignThemes.Wpf.DialogHost.Show(view, "RootDialog");
             }
         });
     }

@@ -16,9 +16,12 @@
 
     <system:String x:Key="Bills">BILLS</system:String>
     <system:String x:Key="Coins">COINS</system:String>
+    <system:String x:Key="Recyclable">RECYCLABLE</system:String>
+    <system:String x:Key="Collection">COLLECTION</system:String>
     <system:String x:Key="Overflow">OVERFLOW</system:String>
     <system:String x:Key="Reject">REJECT</system:String>
     <system:String x:Key="BadgeCollection">COLL. ONLY</system:String>
+    <system:String x:Key="InventoryDetail">INVENTORY DETAIL</system:String>
 
     <system:String x:Key="CashBalance">CASH BALANCE</system:String>
     <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>

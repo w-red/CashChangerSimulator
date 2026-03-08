@@ -16,9 +16,12 @@
     
     <system:String x:Key="Bills">紙幣</system:String>
     <system:String x:Key="Coins">硬貨</system:String>
+    <system:String x:Key="Recyclable">還流庫</system:String>
+    <system:String x:Key="Collection">回収庫</system:String>
     <system:String x:Key="Overflow">オーバーフロー</system:String>
     <system:String x:Key="Reject">リジェクト</system:String>
     <system:String x:Key="BadgeCollection">回収のみ</system:String>
+    <system:String x:Key="InventoryDetail">在庫内訳</system:String>
 
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
