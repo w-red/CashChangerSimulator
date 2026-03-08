@@ -67,7 +67,13 @@
                 <StackPanel Grid.Row="0" Margin="12,12,12,0">
                     <Grid>
                         <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,4"/>
-                        <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="9" FontWeight="Black" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <Border Background="{StaticResource SecondaryBrush}" CornerRadius="2" Padding="4,1" Margin="0,0,4,0"
+                                    Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedBooleanToVisibilityConv}}">
+                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="Black" FontSize="8" FontWeight="Black"/>
+                            </Border>
+                            <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="9" FontWeight="Black"/>
+                        </StackPanel>
                     </Grid>
                     <ProgressBar Value="{Binding Count.Value}" Minimum="0" Maximum="200" Height="6" 
                                 Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" Background="#15FFFFFF" BorderThickness="0"
