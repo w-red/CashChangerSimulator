@@ -36,6 +36,8 @@ public class DenominationSettingItem : IDisposable
     public BindableReactiveProperty<int> Full { get; }
     /// <summary>還流可能フラグ。</summary>
     public BindableReactiveProperty<bool> IsRecyclable { get; }
+    /// <summary>入金可能フラグ。</summary>
+    public BindableReactiveProperty<bool> IsDepositable { get; }
 
     public DenominationSettingItem(
         DenominationKey key,
@@ -45,7 +47,8 @@ public class DenominationSettingItem : IDisposable
         int nearEmpty,
         int nearFull,
         int full,
-        bool isRecyclable)
+        bool isRecyclable,
+        bool isDepositable)
     {
         Key = key;
         DisplayName = new BindableReactiveProperty<string>(displayName).AddTo(_disposables);
@@ -55,6 +58,7 @@ public class DenominationSettingItem : IDisposable
         NearFull = new BindableReactiveProperty<int>(nearFull).AddTo(_disposables);
         Full = new BindableReactiveProperty<int>(full).AddTo(_disposables);
         IsRecyclable = new BindableReactiveProperty<bool>(isRecyclable).AddTo(_disposables);
+        IsDepositable = new BindableReactiveProperty<bool>(isDepositable).AddTo(_disposables);
     }
 
     /// <inheritdoc/>

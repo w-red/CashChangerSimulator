@@ -169,7 +169,8 @@ public class SettingsViewModel : IDisposable
                     setting.NearEmpty,
                     setting.NearFull,
                     setting.Full,
-                    setting.IsRecyclable));
+                    setting.IsRecyclable,
+                    setting.IsDepositable));
             }
             else
             {
@@ -181,6 +182,7 @@ public class SettingsViewModel : IDisposable
                     NearEmpty.Value,
                     NearFull.Value,
                     Full.Value,
+                    true,
                     true));
             }
         }
@@ -217,7 +219,8 @@ public class SettingsViewModel : IDisposable
                 NearEmpty = item.NearEmpty.Value,
                 NearFull = item.NearFull.Value,
                 Full = item.Full.Value,
-                IsRecyclable = item.IsRecyclable.Value
+                IsRecyclable = item.IsRecyclable.Value,
+                IsDepositable = item.IsDepositable.Value
             };
         }
 
