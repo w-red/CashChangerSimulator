@@ -221,9 +221,9 @@ public class InventoryViewModel : IDisposable
         foreach (var monitor in _monitorsProvider.Monitors)
         {
             var key = monitor.Key;
-            var isRecyclable = _configProvider.Config.GetDenominationSetting(key).IsRecyclable;
+            var setting = _configProvider.Config.GetDenominationSetting(key);
 
-            if (isRecyclable)
+            if (setting.IsRecyclable || setting.IsDepositable)
             {
                 var vm = new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider);
                 if (key.Type == CurrencyCashType.Bill)
