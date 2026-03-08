@@ -28,6 +28,11 @@ public class DenominationViewModel
     /// <summary>現在この金種を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
+    /// <summary>リサイクル可能（還流）かどうか。</summary>
+    public bool IsRecyclable { get; }
+    /// <summary>入金可能かどうか。</summary>
+    public bool IsDepositable { get; }
+
     /// <summary>金種情報と監視オブジェクトを注入して DenominationViewModel を初期化します。</summary>
     /// <remarks>言語設定に基づいた表示名の決定や、在庫変更の購読設定を行います。</remarks>
     public DenominationViewModel(Inventory inventory, DenominationKey key, CurrencyMetadataProvider metadataProvider, DepositController depositController, CashStatusMonitor monitor, ConfigurationProvider configProvider)
@@ -44,17 +49,25 @@ public class DenominationViewModel
             inventorySettings.Denominations.TryGetValue(keyStr, out var setting))
         {
             name = isJapanese ? (setting.DisplayNameJP ?? setting.DisplayName) : setting.DisplayName;
+            IsRecyclable = setting.IsRecyclable;
+            IsDepositable = setting.IsDepositable;
+        }
+        else
+        {
+            var globalSetting = configProvider.Config.GetDenominationSetting(key);
+            IsRecyclable = globalSetting.IsRecyclable;
+            IsDepositable = globalSetting.IsDepositable;
         }
 
         Name = !string.IsNullOrEmpty(name) ? name : metadataProvider.GetDenominationName(key);
         Status = monitor.Status.ToBindableReactiveProperty();
-        _count = new BindableReactiveProperty<int>(_inventory.GetCount(key));
+        _count = new BindableReactiveProperty<int>(_inventory.GetTotalCount(key));
         Count = _count;
         _inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)
             .Subscribe(_ =>
             {
-                var newCount = _inventory.GetCount(key);
+                var newCount = _inventory.GetTotalCount(key);
                 System.Diagnostics.Debug.WriteLine($"[DenominationViewModel] Updated {key}: {newCount}");
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
