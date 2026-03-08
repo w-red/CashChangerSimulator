@@ -47,6 +47,31 @@ public class DocumentationScreenshotGenerator : IDisposable
 
         // 4. 高度なシミュレーション画面のキャプチャ
         CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", "advanced_simulation.png");
+
+        // 5. 金種詳細ダイアログのキャプチャ
+        CaptureDenominationDetail("InventoryTile", "DenominationDetailDialog", "inventory_detail.png");
+    }
+
+    private void CaptureDenominationDetail(string tileId, string dialogId, string fileName)
+    {
+        var tile = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(tileId))?.AsButton()
+                   ?? throw new Exception("Inventory tile not found.");
+        tile.Click();
+
+        var dialog = Retry.WhileNull(() =>
+        {
+            var desktop = _app.Automation.GetDesktop();
+            return desktop.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogContent"));
+        }, TimeSpan.FromSeconds(10)).Result
+        ?? throw new Exception("Denomination detail dialog not found.");
+
+        Thread.Sleep(1000);
+        CaptureElement(dialog, fileName);
+
+        // ダイアログを閉じる (ESCキー または 外側クリック、ここではCloseボタンを探す)
+        var closeButton = dialog.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button))?.AsButton();
+        closeButton?.Click();
+        Thread.Sleep(1000);
     }
 
     private void CaptureSubWindow(string buttonId, string windowId, string fileName)
