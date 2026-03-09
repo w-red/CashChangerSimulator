@@ -12,7 +12,10 @@ using CashChangerSimulator.Core.Services;
 using R3;
 
 using CashChangerSimulator.Core.Transactions;
+using MaterialDesignThemes.Wpf;
+using MaterialDesignColors;
 using CashChangerSimulator.Core.Monitoring;
+using Microsoft.Extensions.DependencyInjection;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Views;
@@ -49,7 +52,15 @@ public class UISmokeTests
                 var resources = app.Resources.MergedDictionaries;
                 resources.Clear();
                 
-                // Essential styles and colors
+                // BundledTheme handles multiple necessary dictionaries for MaterialDesign
+                resources.Add(new BundledTheme
+                {
+                    BaseTheme = BaseTheme.Dark,
+                    PrimaryColor = PrimaryColor.DeepPurple,
+                    SecondaryColor = SecondaryColor.Lime
+                });
+
+                resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Strings.en-US.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml") });
@@ -59,7 +70,18 @@ public class UISmokeTests
                 app.Resources["StatusBrushConv"] = new CashStatusToBrushConverter();
                 app.Resources["TypeSymbolConv"] = new TransactionTypeToSymbolConverter();
                 app.Resources["InvertedVisibilityConv"] = new InvertedBooleanToVisibilityConverter();
+                app.Resources["InverseBoolConverter"] = new InverseBooleanConverter();
+                app.Resources["DepositModeBackgroundConv"] = new DepositModeBackgroundConverter();
                 app.Resources["VisibilityConv"] = new BooleanToVisibilityConverter();
+                app.Resources["UIModeVisibilityConv"] = new UIModeToVisibilityConverter();
+                app.Resources["BoolToVis"] = new BooleanToVisibilityConverter();
+                app.Resources["StringNullOrEmptyToVisibilityConv"] = new StringNullOrEmptyToVisibilityConverter();
+                app.Resources["IntToStrConv"] = new IntToStringConverter();
+                
+                // Static strings and brushes if needed
+                app.Resources["ValidationError"] = "VAL ERROR";
+                app.Resources["SuccessBrush"] = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4C, 0xAF, 0x50));
+                app.Resources["SurfaceBrush"] = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x1E));
 
                 // Instantiate Dependencies
                 var mockInv = new Mock<Inventory>();
@@ -102,13 +124,19 @@ public class UISmokeTests
                 var inventoryControl = new InventoryControl { DataContext = invVM };
                 inventoryControl.ShouldNotBeNull();
 
-                // Test MainWindow
                 var mainVM = new Mock<MainViewModel>(
                     mockInv.Object, mockHistory.Object, new Mock<CashChangerManager>(mockInv.Object, mockHistory.Object, new ChangeCalculator()).Object,
                     monitors, new OverallStatusAggregatorProvider(monitors), config, metadata, hardware, depositController, dispenseController,
                     mockChanger.Object, mockNotify.Object, new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object
                 );
-                var mainWindow = new MainWindow { DataContext = mainVM.Object };
+
+                // Initialize DIContainer with our mock provider
+                var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+                services.AddSingleton<MainViewModel>(mainVM.Object);
+                DIContainer.SetProvider(services.BuildServiceProvider());
+
+                var mainWindow = new MainWindow();
+                mainWindow.DataContext = mainVM.Object;
                 mainWindow.ShouldNotBeNull();
                 
                 // Explicitly close window
@@ -120,8 +148,8 @@ public class UISmokeTests
             }
             finally
             {
-                // Note: Shutting down the Application instance can break subsequent tests in the same process.
-                // We'll let the test runner handle lifecycle if it's shared.
+                // We avoid Application.Current.Shutdown() because it can affect the host process in certain environments.
+                // Instead, we rely on mainWindow.Close() inside the try block.
             }
         });
 
