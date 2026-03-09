@@ -113,7 +113,27 @@ HotStart = {hotStart.ToString().ToLower()}
     {
         try
         {
-            // Close window explicitly if possible
+            // Close all windows explicitly
+            if (Application != null && Automation != null)
+            {
+                var desktop = Automation.GetDesktop();
+                var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                var appProcessId = Application.ProcessId;
+
+                foreach (var window in allWindows)
+                {
+                    try
+                    {
+                        // ONLY close windows belonging to OUR test application process
+                        if (window.Properties.ProcessId.Value == appProcessId)
+                        {
+                            var win = window.AsWindow();
+                            win.Close();
+                        }
+                    }
+                    catch { }
+                }
+            }
             MainWindow?.Close();
         }
         catch { }
@@ -131,24 +151,19 @@ HotStart = {hotStart.ToString().ToLower()}
                     Application.Close();
                 }
 
-                // Force kill if it doesn't close within 2 seconds
+                // Force kill if it doesn't close within 3 seconds
                 try
                 {
                     using var process = System.Diagnostics.Process.GetProcessById(processId);
-                    if (!process.HasExited && !process.WaitForExit(2000))
+                    if (!process.HasExited && !process.WaitForExit(3000))
                     {
-                        process.Kill();
+                        process.Kill(true); // Kill entire process tree
                         process.WaitForExit(1000);
                     }
                 }
-                catch (ArgumentException)
-                {
-                    // Process already exited
-                }
-                catch (InvalidOperationException)
-                {
-                    // Process already exited
-                }
+                catch (ArgumentException) { }
+                catch (InvalidOperationException) { }
+                
                 Application.Dispose();
             }
         }
