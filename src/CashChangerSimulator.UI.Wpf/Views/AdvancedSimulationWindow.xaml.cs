@@ -13,4 +13,13 @@ public partial class AdvancedSimulationWindow : Window
         InitializeComponent();
         DataContext = viewModel;
     }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        if (DataContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
 }

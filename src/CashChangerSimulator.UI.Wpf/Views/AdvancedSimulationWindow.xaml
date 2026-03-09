@@ -65,6 +65,72 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Error Status Indicators -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16" HorizontalAlignment="Left">
+                        <Border x:Name="JamIndicator" Background="#F44336" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
+                                Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
+                                AutomationProperties.AutomationId="JamIndicator">
+                            <TextBlock Text="JAM" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="JamIndicatorText"/>
+                        </Border>
+                        <Border x:Name="OverlapIndicator" Background="#FF9800" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
+                                Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
+                                AutomationProperties.AutomationId="OverlapIndicator">
+                            <TextBlock Text="OVERLAP" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                        </Border>
+                        <Border x:Name="ErrorIndicator" Background="#9C27B0" CornerRadius="4" Padding="8,4"
+                                Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
+                                AutomationProperties.AutomationId="ErrorIndicator">
+                            <TextBlock Text="DEVICE ERROR" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="ErrorIndicatorText"/>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Simulation Presets -->
+                    <Border Style="{StaticResource CardStyle}"
+                            Background="#05FFFFFF" Margin="0,0,0,16" Padding="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="SimulateJamButton"
+                                        Content="Jam"
+                                        Command="{Binding SimulateJamCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Margin="0,0,4,0"
+                                        Padding="10,4"
+                                        Height="32"
+                                        FontSize="12"
+                                        AutomationProperties.AutomationId="SimulateJamButton"/>
+                                <Button x:Name="SimulateOverlapButton"
+                                        Content="Overlap"
+                                        Command="{Binding SimulateOverlapCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Margin="0,0,4,0"
+                                        Padding="10,4"
+                                        Height="32"
+                                        FontSize="12"
+                                        AutomationProperties.AutomationId="SimulateOverlapButton"/>
+                                <Button x:Name="SimulateDeviceErrorButton"
+                                        Content="Error"
+                                        Command="{Binding SimulateDeviceErrorCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Margin="0,0,0,0"
+                                        Padding="10,4"
+                                        Height="32"
+                                        FontSize="12"
+                                        AutomationProperties.AutomationId="SimulateDeviceErrorButton" />
+                            </StackPanel>
+                            <Button x:Name="ResetErrorButton" Grid.Column="1"
+                                    Content="Reset All" 
+                                    Command="{Binding ResetErrorCommand}" 
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="16,4"
+                                    Height="36"
+                                    AutomationProperties.AutomationId="ResetErrorButton"/>
+                        </Grid>
+                    </Border>
+
                     <!-- Scripts Section -->
                     <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Padding="12">
                         <StackPanel>
