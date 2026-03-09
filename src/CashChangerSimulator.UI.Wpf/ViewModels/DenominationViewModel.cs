@@ -15,20 +15,38 @@ public class DenominationViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
 
+    /// <summary>金種のキー情報。</summary>
     public DenominationKey Key { get; }
+    /// <summary>表示名称。</summary>
     public string Name { get; }
+    /// <summary>合計枚数（リサイクル＋回収）。</summary>
     public BindableReactiveProperty<int> Count { get; }
+    /// <summary>金種の状態（ニアフル、フル等）。</summary>
     public BindableReactiveProperty<CashStatus> Status { get; }
+    /// <summary>現在入金を受け入れ可能かどうか。</summary>
     public BindableReactiveProperty<bool> IsAcceptingCash { get; }
 
+    /// <summary>リサイクル庫の枚数。</summary>
     public BindableReactiveProperty<int> RecyclableCount { get; }
+    /// <summary>回収庫の枚数。</summary>
     public BindableReactiveProperty<int> CollectionCount { get; }
+    /// <summary>リジェクト庫の枚数。</summary>
     public BindableReactiveProperty<int> RejectCount { get; }
 
+    /// <summary>リサイクル（払い出し）可能かどうか。</summary>
     public bool IsRecyclable { get; }
+    /// <summary>入金可能かどうか。</summary>
     public bool IsDepositable { get; }
+    /// <summary>詳細情報を表示するコマンド。</summary>
     public ReactiveCommand<Unit> ShowDetailCommand { get; }
 
+    /// <summary>依存関係を注入して DenominationViewModel を初期化します。</summary>
+    /// <param name="inventory">在庫データ管理用インスタンス。</param>
+    /// <param name="key">対象となる金種のキー情報。</param>
+    /// <param name="metadataProvider">通貨や名称のメタデータプロバイダー。</param>
+    /// <param name="depositController">入金処理のコントロール状態。</param>
+    /// <param name="monitor">個別の金種状態監視モニター。</param>
+    /// <param name="configProvider">アプリケーション設定プロバイダー。</param>
     public DenominationViewModel(
         Inventory inventory,
         DenominationKey key,
@@ -77,9 +95,10 @@ public class DenominationViewModel : IDisposable
             }))
             .AddTo(_disposables);
 
+        var isAccepting = depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused;
         IsAcceptingCash = depositController.Changed
             .Select(_ => depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused)
-            .ToBindableReactiveProperty(depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused);
+            .ToBindableReactiveProperty(isAccepting);
 
         ShowDetailCommand = new ReactiveCommand().AddTo(_disposables);
     }
@@ -97,5 +116,10 @@ public class DenominationViewModel : IDisposable
         }
     }
 
-    public void Dispose() => _disposables.Dispose();
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _disposables.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

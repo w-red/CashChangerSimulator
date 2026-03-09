@@ -2,14 +2,15 @@ using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Testing;
-using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.Extensions.Logging;
 using R3;
+using CashChangerSimulator.Device.Services;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -37,8 +38,9 @@ public class MainViewModel : IDisposable
     /// <summary>高度なシミュレーション設定 ViewModel。</summary>
     public AdvancedSimulationViewModel AdvancedSimulation { get; }
 
-    /// <summary>通貨記号。</summary>
+    /// <summary>通貨記号の接頭辞。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    /// <summary>通貨記号の接尾辞。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     /// <summary>現在の UI 動作モード。</summary>
@@ -51,8 +53,23 @@ public class MainViewModel : IDisposable
     /// <summary>高度なシミュレーションウィンドウを表示するコマンド。</summary>
     public ReactiveCommand OpenAdvancedSimulationCommand { get; }
 
+    /// <summary>全体的な動作状態の表示名。</summary>
+    public BindableReactiveProperty<string> GlobalModeName { get; }
+
     /// <summary>全依存関係を注入して MainViewModel を初期化し、サブ ViewModel を構築します。</summary>
-    /// <remarks>設定ファイルの値に基づき、デバイスの自動オープンなどの初期化処理も実行します。</remarks>
+    /// <param name="inventory">在庫管理インスタンス。</param>
+    /// <param name="history">取引履歴サービス。</param>
+    /// <param name="manager">マネージャーインスタンス。</param>
+    /// <param name="monitorsProvider">監視モニタープロバイダー。</param>
+    /// <param name="aggregatorProvider">集約ステータスプロバイダー。</param>
+    /// <param name="configProvider">設定プロバイダー。</param>
+    /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
+    /// <param name="hardwareStatusManager">ハードウェア状態マネージャー。</param>
+    /// <param name="depositController">入金コントローラー。</param>
+    /// <param name="dispenseController">出金コントローラー。</param>
+    /// <param name="cashChanger">デバイス本体インスタンス。</param>
+    /// <param name="notifyService">通知サービス。</param>
+    /// <param name="scriptExecutionService">スクリプト実行サービス。</param>
     public MainViewModel(
         Inventory inventory,
         TransactionHistory history,
@@ -202,9 +219,6 @@ public class MainViewModel : IDisposable
         });
     }
 
-    /// <summary>全体的な動作状態の表示名。</summary>
-    public BindableReactiveProperty<string> GlobalModeName { get; }
-
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -212,4 +226,3 @@ public class MainViewModel : IDisposable
         GC.SuppressFinalize(this);
     }
 }
-
