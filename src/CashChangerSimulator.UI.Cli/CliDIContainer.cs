@@ -55,6 +55,7 @@ public static class CliDIContainer
         // Core Services
         services.AddSingleton<Inventory>();
         services.AddSingleton<TransactionHistory>();
+        services.AddSingleton<HistoryPersistenceService>();
         services.AddSingleton<ChangeCalculator>();
         services.AddSingleton<CashChangerManager>();
         services.AddSingleton<HardwareStatusManager>();
@@ -149,11 +150,16 @@ public static class CliDIContainer
 
         // Initialize History
         var history = provider.GetRequiredService<TransactionHistory>();
-        var historyState = ConfigurationLoader.LoadHistoryState();
-        if (historyState?.Entries != null && historyState.Entries.Count > 0)
+        var persistence = provider.GetRequiredService<HistoryPersistenceService>();
+        
+        var historyState = persistence.Load();
+        if (historyState.Entries.Count > 0)
         {
             history.FromState(historyState);
         }
+
+        // Start Auto-Save
+        persistence.StartAutoSave();
 
         // Initialize Observers
         provider.GetRequiredService<DeviceEventHistoryObserver>();

@@ -55,13 +55,7 @@ public partial class App : Application
     {
         try
         {
-            // Only attempt to save if DIContainer was successfully initialized
-            var history = DIContainer.Resolve<TransactionHistory>();
-            if (history != null)
-            {
-                var state = history.ToState();
-                ConfigurationLoader.SaveHistoryState(state);
-            }
+            // DIContainer cleanup
         }
         catch (InvalidOperationException)
         {
