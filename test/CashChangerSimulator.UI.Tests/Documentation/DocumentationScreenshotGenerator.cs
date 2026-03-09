@@ -54,7 +54,10 @@ public class DocumentationScreenshotGenerator : IDisposable
 
     private void CaptureDenominationDetail(string tileId, string dialogId, string fileName)
     {
-        var tile = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(tileId))?.AsButton()
+        var mainWindow = _app?.MainWindow;
+        if (mainWindow == null) throw new Exception("MainWindow is not available.");
+
+        var tile = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId(tileId))?.AsButton()
                    ?? throw new Exception("Inventory tile not found.");
         // タイトルをクリックする前に、状態を確認
         tile.WaitUntilEnabled(TimeSpan.FromSeconds(5));
@@ -81,12 +84,15 @@ public class DocumentationScreenshotGenerator : IDisposable
         // ダイアログが表示されるのを待機
         var dialog = Retry.WhileNull(() =>
         {
+            if (_app == null) return null;
             // A. MainWindow の子孫
             var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
             if (found != null) return found;
 
             // B. Desktop 直下の全要素から再帰的に検索
-            var desktop = _app.Automation.GetDesktop();
+            var automation = _app.Automation;
+            if (automation == null) return null;
+            var desktop = automation.GetDesktop();
             foreach (var child in desktop.FindAllChildren())
             {
                 var inChild = child.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
@@ -113,7 +119,10 @@ public class DocumentationScreenshotGenerator : IDisposable
         }
         else
         {
-            _app.MainWindow?.Focus();
+            if (mainWindow != null) mainWindow.Focus();
+            FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
+            // After RETURN, wait a bit and escape
+            Thread.Sleep(500);
             FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ESCAPE);
         }
         Thread.Sleep(1000);

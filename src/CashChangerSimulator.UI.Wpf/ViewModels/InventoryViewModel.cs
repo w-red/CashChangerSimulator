@@ -136,7 +136,10 @@ public class InventoryViewModel : IDisposable
                 {
                     RecentTransactions.Insert(0, entry);
                     if (RecentTransactions.Count > 50) RecentTransactions.RemoveAt(50);
-                    IsEmpty.Value = RecentTransactions.Count == 0;
+                    if (IsEmpty != null)
+                    {
+                        IsEmpty.Value = RecentTransactions.Count == 0;
+                    }
                 }
 
                 if (System.Windows.Application.Current?.Dispatcher != null)
@@ -155,9 +158,10 @@ public class InventoryViewModel : IDisposable
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
         {
+            var mainWindow = System.Windows.Application.Current?.MainWindow;
             var settingsWindow = new SettingsWindow()
             {
-                Owner = System.Windows.Application.Current?.MainWindow
+                Owner = mainWindow
             };
             settingsWindow.ShowDialog();
         });
