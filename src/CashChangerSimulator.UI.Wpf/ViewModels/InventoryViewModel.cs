@@ -10,6 +10,7 @@ using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -56,6 +57,7 @@ public class InventoryViewModel : IDisposable
     public BindableReactiveProperty<int?> CurrentErrorCode { get; }
     /// <summary>デバイスが接続（Open）されているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsConnected { get; }
+    public BindableReactiveProperty<bool> IsEmpty { get; }
     /// <summary>デバイスを物理的にオープンするコマンド。</summary>
     public ReactiveCommand OpenCommand { get; }
     /// <summary>デバイスを物理的にクローズするコマンド。</summary>
@@ -134,6 +136,7 @@ public class InventoryViewModel : IDisposable
                 {
                     RecentTransactions.Insert(0, entry);
                     if (RecentTransactions.Count > 50) RecentTransactions.RemoveAt(50);
+                    IsEmpty.Value = RecentTransactions.Count == 0;
                 }
 
                 if (System.Windows.Application.Current?.Dispatcher != null)
@@ -161,6 +164,8 @@ public class InventoryViewModel : IDisposable
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+
+        IsEmpty = new BindableReactiveProperty<bool>(RecentTransactions.Count == 0).AddTo(_disposables);
 
         OpenCommand = new ReactiveCommand().AddTo(_disposables);
         OpenCommand.Subscribe(_ =>

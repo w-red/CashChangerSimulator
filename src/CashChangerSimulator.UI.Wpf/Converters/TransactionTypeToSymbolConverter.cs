@@ -19,6 +19,10 @@ public class TransactionTypeToSymbolConverter : IValueConverter
                 TransactionType.Collection => PackIconKind.TrayArrowUp,
                 TransactionType.Adjustment => PackIconKind.Tools,
                 TransactionType.DataEvent => PackIconKind.BellAlertOutline,
+                TransactionType.Open => PackIconKind.Power,
+                TransactionType.Close => PackIconKind.PowerOff,
+                TransactionType.Claim => PackIconKind.Lock,
+                TransactionType.Release => PackIconKind.LockOpen,
                 _ => PackIconKind.HelpCircleOutline
             }
             : PackIconKind.HelpCircleOutline;
