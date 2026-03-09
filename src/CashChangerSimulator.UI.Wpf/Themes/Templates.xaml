@@ -23,14 +23,15 @@
 
     <!-- Inventory Tile Template -->
     <DataTemplate x:Key="InventoryTileTemplate" DataType="{x:Type vm:DenominationViewModel}">
-        <Button Command="{Binding DataContext.ShowDenominationDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        <Button Command="{Binding ShowDetailCommand}"
                 CommandParameter="{Binding}"
                 Style="{StaticResource MaterialDesignFlatButton}"
                 Padding="0" Background="Transparent" BorderBrush="Transparent"
                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                 AutomationProperties.AutomationId="InventoryTile"
+                Cursor="Hand"
                 Margin="0,0,8,8" Width="180" Height="140">
-            <Border ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent" CornerRadius="8">
+            <Border x:Name="TileBorder" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent" CornerRadius="8">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
                 </Border.Effect>
@@ -62,6 +63,38 @@
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
                             </DataTrigger>
+                            
+                            <!-- Hover Effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1.05" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1.05" Duration="0:0:0.2">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
