@@ -58,9 +58,11 @@ After startup, enter the following commands to interact with the device.
 | `config set <k> <v>` | Temporarily updates a configuration value.                      |
 | `config save`        | Saves current configurations to `config.toml`.                  |
 | `log-level <level>`  | Changes the log level (debug, info, warning, error) at runtime. |
-| `run-script <path>`  | Executes a series of operations from a JSON file.               |
+| `run-script <path>`  | Executes operations automatically from a JSON file.             |
 
-## 4. Scripting (run-script)
+For details on command behavior, initial inventory, and threshold settings, please refer to the [Configuration Guide](ConfigurationGuide.md).
+
+## 4. Script Execution (run-script)
 
 You can automate complex scenarios using JSON script files.
 

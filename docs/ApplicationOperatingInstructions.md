@@ -57,9 +57,11 @@ This window allows testing scenarios that are difficult to reproduce via basic G
 - **Script Execution**: Execute JSON files defining complex cash transaction sequences.
 - **Error Injection**: Force specific sensor errors (NearFull, Full, etc.) to verify top-level app behavior.
 
-## 6. Configuration File (config.toml)
+## 6. Configuration (config.toml)
 
-You can customize initial inventory and thresholds by editing `config.toml` in the application directory.
+Application settings are stored in `config.toml`. Key parameters can be modified via the "System Settings" window in the UI.
+
+For detailed information on all available settings (Currency, Language, Thresholds, etc.), please refer to the [Configuration Guide](ConfigurationGuide.md).
 
 ### `[System]` — General Settings
 - `CurrencyCode`: Active currency (default "JPY").
