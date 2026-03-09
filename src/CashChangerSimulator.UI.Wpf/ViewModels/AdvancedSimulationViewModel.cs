@@ -19,45 +19,60 @@ public class AdvancedSimulationViewModel : IDisposable
     private readonly IScriptExecutionService _scriptExecutionService;
     private readonly CompositeDisposable _disposables = [];
 
+    // --- State Properties ---
+
     /// <summary>RealTimeDataEnabled プロパティの現在値。</summary>
     public BindableReactiveProperty<bool> IsRealTimeDataEnabled { get; }
+
     /// <summary>実行する JSON スクリプトの入力値。</summary>
     public BindableReactiveProperty<string> ScriptInput { get; }
+
     /// <summary>スクリプトの解析・実行エラーメッセージ。</summary>
     public BindableReactiveProperty<string?> ScriptError { get; }
-    /// <summary>スクリプトを実行するコマンド。</summary>
-    public ReactiveCommand<Unit> ExecuteScriptCommand { get; }
+
     /// <summary>通貨記号の接頭辞。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+
     /// <summary>通貨記号の接尾辞。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
     /// <summary>現在の入金合計金額。</summary>
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
+
     /// <summary>現在入金中かどうか。</summary>
     public BindableReactiveProperty<bool> IsDepositInProgress { get; }
 
     /// <summary>ジャムが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsJammed { get; }
+
     /// <summary>重なりが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsOverlapped { get; }
+
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
 
+    // --- Commands ---
+
+    /// <summary>スクリプトを実行するコマンド。</summary>
+    public ReactiveCommand<Unit> ExecuteScriptCommand { get; }
+
     /// <summary>エラー状態をリセットするコマンド。</summary>
     public ReactiveCommand<Unit> ResetErrorCommand { get; }
+
     /// <summary>ジャム状態をシミュレーションするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateJamCommand { get; }
+
     /// <summary>重なり状態をシミュレーションするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
+
     /// <summary>デバイスエラーをシミュレーションするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateDeviceErrorCommand { get; }
 
-    /// <summary>依存関係を注入して AdvancedSimulationViewModel を初期化します。</summary>
-    /// <param name="cashChanger">シミュレータ本体インスタンス。</param>
-    /// <param name="scriptExecutionService">スクリプト実行サービス。</param>
-    /// <param name="depositController">入金コントローラー。</param>
-    /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
+    /// <summary>依存関係を注入して <see cref="AdvancedSimulationViewModel"/> を初期化します。</summary>
+    /// <param name="cashChanger">シミュレータ本体インスタンス <see cref="SimulatorCashChanger"/>。</param>
+    /// <param name="scriptExecutionService">スクリプト実行を担う <see cref="IScriptExecutionService"/>。</param>
+    /// <param name="depositController">入金状態を管理する <see cref="DepositController"/>。</param>
+    /// <param name="metadataProvider">通貨情報を表す <see cref="CurrencyMetadataProvider"/>。</param>
     public AdvancedSimulationViewModel(
         SimulatorCashChanger cashChanger,
         IScriptExecutionService scriptExecutionService,
@@ -70,7 +85,7 @@ public class AdvancedSimulationViewModel : IDisposable
         IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(cashChanger.RealTimeDataEnabled).AddTo(_disposables);
         ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
         ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
-        
+
         CurrencyPrefix = metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
         CurrencySuffix = metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
