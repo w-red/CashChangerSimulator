@@ -75,7 +75,8 @@ public class UISmokeTests
                 var depositController = new DepositController(mockInv.Object, hardware);
                 var mockSimulator = new Mock<IDeviceSimulator>();
                 var dispenseController = new DispenseController(new Mock<CashChangerManager>(mockInv.Object, mockHistory.Object, new ChangeCalculator()).Object, hardware, mockSimulator.Object);
-                var mockChanger = new Mock<SimulatorCashChanger>();
+                var deps = new SimulatorDependencies { Inventory = mockInv.Object, History = mockHistory.Object };
+                var mockChanger = new Mock<SimulatorCashChanger>(deps);
                 var mockNotify = new Mock<INotifyService>();
 
                 var invVM = new InventoryViewModel(
@@ -106,6 +107,9 @@ public class UISmokeTests
                 );
                 var mainWindow = new MainWindow { DataContext = mainVM.Object };
                 mainWindow.ShouldNotBeNull();
+                
+                // Explicitly close window
+                mainWindow.Close();
             }
             catch (Exception ex)
             {
@@ -113,12 +117,18 @@ public class UISmokeTests
             }
             finally
             {
-                Application.Current?.Shutdown();
+                // Note: Shutting down the Application instance can break subsequent tests in the same process.
+                // We'll let the test runner handle lifecycle if it's shared.
             }
         });
 
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
-        thread.Join();
+        // Wait for a reasonable timeout
+        if (!thread.Join(TimeSpan.FromSeconds(30)))
+        {
+            thread.Interrupt();
+            Assert.Fail("UISmokeTest timed out (possible deadlock or long XAML load).");
+        }
     }
 }
