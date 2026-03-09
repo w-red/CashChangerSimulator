@@ -40,6 +40,8 @@ public class DenominationViewModel
     public bool IsRecyclable { get; }
     /// <summary>入金可能かどうか。</summary>
     public bool IsDepositable { get; }
+    /// <summary>詳細ダイアログを表示するコマンド。</summary>
+    public ReactiveCommand<Unit> ShowDetailCommand { get; }
 
     /// <summary>金種情報と監視オブジェクトを注入して DenominationViewModel を初期化します。</summary>
     /// <remarks>言語設定に基づいた表示名の決定や、在庫変更の購読設定を行います。</remarks>
@@ -109,6 +111,11 @@ public class DenominationViewModel
         IsAcceptingCash = depositController.Changed
             .Select(_ => depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused)
             .ToBindableReactiveProperty(depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused);
+
+        ShowDetailCommand = new ReactiveCommand().AddTo(_disposables);
     }
+
+    private readonly CompositeDisposable _disposables = [];
+    public void Dispose() => _disposables.Dispose();
 }
 

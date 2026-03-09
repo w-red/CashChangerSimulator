@@ -238,6 +238,7 @@ public class InventoryViewModel : IDisposable
             if (setting.IsRecyclable || setting.IsDepositable)
             {
                 var vm = new DenominationViewModel(_inventory, key, _metadataProvider, depositController, monitor, _configProvider);
+                vm.ShowDetailCommand.Subscribe(_ => ShowDenominationDetailCommand.Execute(vm)).AddTo(_disposables);
                 if (key.Type == CurrencyCashType.Bill)
                 {
                     BillDenominations.Add(vm);
