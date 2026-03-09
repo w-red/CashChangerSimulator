@@ -27,35 +27,69 @@ public class InventoryViewModel : IDisposable
     private readonly INotifyService _notifyService;
     private readonly CompositeDisposable _disposables = [];
 
+    /// <summary>通貨の接頭辞（例: ￥）。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    /// <summary>通貨の接尾辞。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
+    /// <summary>紙幣金種のリスト。</summary>
     public ObservableCollection<DenominationViewModel> BillDenominations { get; } = [];
+    /// <summary>硬貨金種のリスト。</summary>
     public ObservableCollection<DenominationViewModel> CoinDenominations { get; } = [];
+    /// <summary>全金種の列挙。</summary>
     public IEnumerable<DenominationViewModel> Denominations => BillDenominations.Concat(CoinDenominations);
 
+    /// <summary>デバイス全体の在庫ステータス。</summary>
     public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
+    /// <summary>フル状態のステータス。</summary>
     public ReadOnlyReactiveProperty<CashStatus> FullStatus { get; }
+    /// <summary>ジャムが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsJammed { get; }
+    /// <summary>重なりが発生しているかどうか。</summary>
     public ReactiveProperty<bool> IsOverlapped { get; }
+    /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
+    /// <summary>現在のエラーコード。</summary>
     public BindableReactiveProperty<int?> CurrentErrorCode { get; }
+    /// <summary>デバイスと接続されているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsConnected { get; }
 
+    /// <summary>取引履歴が空かどうか。</summary>
     public BindableReactiveProperty<bool> IsEmpty { get; }
+    /// <summary>UI上の紙幣エリアの幅割合。</summary>
     public BindableReactiveProperty<GridLength> BillGridWidth { get; }
+    /// <summary>UI上の硬貨エリアの幅割合。</summary>
     public BindableReactiveProperty<GridLength> CoinGridWidth { get; }
 
+    /// <summary>デバイスをオープンするコマンド。</summary>
     public ReactiveCommand OpenCommand { get; }
+    /// <summary>デバイスをクローズするコマンド。</summary>
     public ReactiveCommand CloseCommand { get; }
+    /// <summary>設定画面を表示するコマンド。</summary>
     public ReactiveCommand OpenSettingsCommand { get; }
+    /// <summary>エラーをリセットするコマンド。</summary>
     public ReactiveCommand ResetErrorCommand { get; }
+    /// <summary>全在庫を回収するコマンド。</summary>
     public ReactiveCommand CollectAllCommand { get; }
+    /// <summary>全在庫を補充するコマンド。</summary>
     public ReactiveCommand ReplenishAllCommand { get; }
+    /// <summary>金種詳細を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
 
+    /// <summary>最近の取引履歴。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
 
+    /// <summary>依存関係を注入して InventoryViewModel を初期化します。</summary>
+    /// <param name="inventory">在庫管理インスタンス。</param>
+    /// <param name="history">取引履歴サービス。</param>
+    /// <param name="aggregator">ステータス集約プロバイダー。</param>
+    /// <param name="configProvider">設定プロバイダー。</param>
+    /// <param name="monitorsProvider">監視モニタープロバイダー。</param>
+    /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
+    /// <param name="hardwareStatusManager">ハードウェア状態マネージャー。</param>
+    /// <param name="depositController">入金コントローラー。</param>
+    /// <param name="cashChanger">デバイス本体インスタンス。</param>
+    /// <param name="notifyService">通知サービス。</param>
     public InventoryViewModel(
         Inventory inventory,
         TransactionHistory history,
@@ -246,6 +280,7 @@ public class InventoryViewModel : IDisposable
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _disposables.Dispose();
