@@ -6,7 +6,9 @@
              xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             MinWidth="400" d:DesignHeight="350"
+             MinWidth="400"
+             AutomationProperties.AutomationId="DenominationDetailDialogView"
+             d:DesignHeight="350"
              d:DataContext="{d:DesignInstance Type=vm:DenominationViewModel}">
     <Border AutomationProperties.AutomationId="DenominationDetailDialogContent"
             Background="{StaticResource SurfaceBrush}" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="#33FFFFFF">

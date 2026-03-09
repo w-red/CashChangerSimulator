@@ -29,7 +29,8 @@
         <sys:Boolean x:Key="False">False</sys:Boolean>
     </Window.Resources>
 
-    <materialDesign:DialogHost x:Name="RootDialogHost" Identifier="RootDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+    <materialDesign:DialogHost x:Name="RootDialogHost" Identifier="RootDialog" Style="{StaticResource MaterialDesignEmbeddedDialogHost}"
+                               AutomationProperties.AutomationId="MainDialogHost">
         <Grid>
             <Grid Margin="24">
                 <Grid.ColumnDefinitions>
