@@ -22,6 +22,8 @@ public class SettingsViewModel : IDisposable
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
 
+    // --- State Properties ---
+
     /// <summary>選択されている通貨コード。</summary>
     public BindableReactiveProperty<string> CurrencyCode { get; }
 
@@ -52,9 +54,13 @@ public class SettingsViewModel : IDisposable
     /// <summary>起動時に自動オープンするかどうか (Hot Start)。</summary>
     public BindableReactiveProperty<bool> HotStart { get; }
 
-
     /// <summary>各金種の詳細設定リスト。</summary>
     public ObservableCollection<DenominationSettingItem> DenominationSettings { get; } = [];
+
+    /// <summary>直前の保存処理が成功したかどうか。</summary>
+    public BindableReactiveProperty<bool> SaveSucceeded { get; }
+
+    // --- Commands ---
 
     /// <summary>設定を保存するコマンド。</summary>
     public ReactiveCommand SaveCommand { get; }
@@ -62,11 +68,10 @@ public class SettingsViewModel : IDisposable
     /// <summary>設定をデフォルト値にリセットするコマンド。</summary>
     public ReactiveCommand ResetToDefaultCommand { get; }
 
-    /// <summary>直前の保存処理が成功したかどうか。</summary>
-    public BindableReactiveProperty<bool> SaveSucceeded { get; }
-
-    /// <summary>必要なコンポーネントを注入して SettingsViewModel を初期化します。</summary>
-    /// <remarks>現在の設定値のロードと、バリデーションロジックの構成を行います。</remarks>
+    /// <summary>必要なサービスを注入して <see cref="SettingsViewModel"/> を初期化します。</summary>
+    /// <param name="configProvider">アプリケーション設定を提供・管理する <see cref="ConfigurationProvider"/>。</param>
+    /// <param name="monitorsProvider">各種センサー（枚数監視等）を管理する <see cref="MonitorsProvider"/>。</param>
+    /// <param name="metadataProvider">通貨情報を管理する <see cref="CurrencyMetadataProvider"/>。</param>
     public SettingsViewModel(
         ConfigurationProvider configProvider,
         MonitorsProvider monitorsProvider,
@@ -77,46 +82,35 @@ public class SettingsViewModel : IDisposable
         _metadataProvider = metadataProvider;
         _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
-        CurrencyCode =
-            new BindableReactiveProperty<string>("JPY")
-            .AddTo(_disposables);
-        ActiveUIMode =
-            new BindableReactiveProperty<UIMode>(UIMode.Standard)
-            .AddTo(_disposables);
-        CultureCode =
-            new BindableReactiveProperty<string>("en-US")
-            .AddTo(_disposables);
+        CurrencyCode = new BindableReactiveProperty<string>("JPY").AddTo(_disposables);
+        ActiveUIMode = new BindableReactiveProperty<UIMode>(UIMode.Standard).AddTo(_disposables);
+        CultureCode = new BindableReactiveProperty<string>("en-US").AddTo(_disposables);
 
         CultureCode.Subscribe(App.UpdateLanguage).AddTo(_disposables);
 
         NearEmpty = new BindableReactiveProperty<int>(0)
             .EnableValidation(val =>
                 val <= 0
-                ? new Exception("NearEmpty は 1 以上にしてください。")
+                ? new Exception(ResourceHelper.GetAsString("ErrorNearEmptyPositive", "NearEmpty must be at least 1."))
                 : null)
             .AddTo(_disposables);
 
         NearFull = new BindableReactiveProperty<int>(0)
             .EnableValidation(val =>
                 val <= NearEmpty.Value
-                ? new Exception("NearFull は NearEmpty より大きくしてください。")
+                ? new Exception(ResourceHelper.GetAsString("ErrorNearFullGreater", "NearFull must be greater than NearEmpty."))
                 : null)
             .AddTo(_disposables);
 
         Full = new BindableReactiveProperty<int>(0)
             .EnableValidation(val =>
                 val <= NearFull.Value
-                ? new Exception("Full は NearFull より大きくしてください。")
+                ? new Exception(ResourceHelper.GetAsString("ErrorFullGreater", "Full must be greater than NearFull."))
                 : null)
             .AddTo(_disposables);
 
-        HotStart = new BindableReactiveProperty<bool>(false)
-            .AddTo(_disposables);
-
-
-        SaveSucceeded =
-            new BindableReactiveProperty<bool>(false)
-            .AddTo(_disposables);
+        HotStart = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
+        SaveSucceeded = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
 
         LoadFromConfig(configProvider.Config);
 
@@ -127,20 +121,15 @@ public class SettingsViewModel : IDisposable
                 !NearFull.HasErrors &&
                 !Full.HasErrors);
 
-        SaveCommand = canSave
-            .ToReactiveCommand()
-            .AddTo(_disposables);
-        SaveCommand
-            .Subscribe(_ => Save());
+        SaveCommand = canSave.ToReactiveCommand().AddTo(_disposables);
+        SaveCommand.Subscribe(_ => Save());
 
-        ResetToDefaultCommand =
-            new ReactiveCommand()
-            .AddTo(_disposables);
-        ResetToDefaultCommand
-            .Subscribe(_ => ResetToDefault());
+        ResetToDefaultCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetToDefaultCommand.Subscribe(_ => ResetToDefault());
     }
 
     /// <summary>設定オブジェクトから ViewModel の各プロパティへ値を読み込む。</summary>
+    /// <param name="config">読み込み元の設定オブジェクト。</param>
     private void LoadFromConfig(SimulatorConfiguration config)
     {
         CurrencyCode.Value = config.System.CurrencyCode;
