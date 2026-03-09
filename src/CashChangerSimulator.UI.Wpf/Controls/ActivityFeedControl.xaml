@@ -13,19 +13,39 @@
                 <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="Black"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="Margin" Value="0,0,0,12"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Border Style="{StaticResource CardStyle}">
-        <DockPanel>
-            <TextBlock DockPanel.Dock="Top" Text="{StaticResource ActivityFeed}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
-            
-            <ListBox ItemsSource="{Binding RecentTransactions}" 
-                     Background="Transparent" BorderThickness="0"
-                     ItemContainerStyle="{StaticResource TransactionListStyle}"
-                     ItemTemplate="{StaticResource TransactionItemTemplate}"
-                     AutomationProperties.AutomationId="HistoryListBox">
-            </ListBox>
-        </DockPanel>
+        <Grid>
+            <StackPanel>
+                <TextBlock x:Name="FeedTitle" Text="RECENT TRANSACTIONS" Style="{StaticResource SectionHeaderStyle}" AutomationProperties.AutomationId="ActivityFeedTitle" />
+                
+                <Grid MinHeight="100">
+                    <!-- Empty State Message -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20"
+                                Visibility="{Binding IsEmpty.Value, Converter={StaticResource VisibilityConv}}">
+                        <materialDesign:PackIcon Kind="History" Width="32" Height="32" Opacity="0.2" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text="最近の取引はありません" FontSize="12" Opacity="0.4" Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </StackPanel>
+
+                    <!-- Transactions List -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Visibility="{Binding IsEmpty.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                        <ItemsControl ItemsSource="{Binding RecentTransactions}"
+                                      ItemTemplate="{StaticResource TransactionItemTemplate}"
+                                      Background="Transparent">
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
