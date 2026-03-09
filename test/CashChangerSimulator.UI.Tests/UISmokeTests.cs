@@ -51,6 +51,7 @@ public class UISmokeTests
                 
                 // Essential styles and colors
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml") });
+                resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Strings.en-US.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml") });
 
