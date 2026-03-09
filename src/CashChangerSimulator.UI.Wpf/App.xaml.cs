@@ -2,6 +2,7 @@ using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.UI.Wpf.Views;
+using CashChangerSimulator.Device;
 using R3;
 using System.IO;
 using System.Windows;
@@ -55,14 +56,32 @@ public partial class App : Application
     {
         try
         {
-            // DIContainer cleanup
-        }
-        catch (InvalidOperationException)
-        {
-            // DIContainer not initialized, ignore
+            // [FIX] Explicitly close all windows (except the main one which might already be closing)
+            // to ensure ViewModels associated with those windows can start their cleanup.
+            var windows = Windows.Cast<Window>().ToList();
+            foreach (var window in windows)
+            {
+                if (window != MainWindow)
+                {
+                    try { window.Close(); } catch { }
+                }
+            }
+
+            // [FIX] Explicitly close the CashChanger device if it's still open.
+            // This helps the POS SDK state transitions happen before the container starts tearing down dependencies.
+            try
+            {
+                var cashChanger = DIContainer.Resolve<SimulatorCashChanger>();
+                if (cashChanger.State != Microsoft.PointOfService.ControlState.Closed)
+                {
+                    cashChanger.Close();
+                }
+            }
+            catch { /* Ignore if device was not initialized or failure during close */ }
         }
         catch (Exception)
         {
+            // Ignore exit-time cleanup errors to ensure the process actually terminates
         }
         finally
         {
