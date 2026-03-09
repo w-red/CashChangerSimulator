@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -24,72 +25,112 @@ public class PosTransactionViewModel : IDisposable
     private readonly ILogger<PosTransactionViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
     private CancellationTokenSource? _timeoutCts;
+    private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
 
-    // Properties
+    // --- State Properties ---
+
     /// <summary>目標金額の入力値。</summary>
     public BindableReactiveProperty<string> TargetAmountInput { get; }
+
     /// <summary>目標金額（数値型）。</summary>
     public ReadOnlyReactiveProperty<decimal> TargetAmount { get; }
+
     /// <summary>現在の取引ステータス。</summary>
     public BindableReactiveProperty<PosTransactionStatus> TransactionStatus { get; }
+
     /// <summary>投入済みの合計金額。</summary>
     public BindableReactiveProperty<decimal> InsertedAmount { get; }
+
     /// <summary>不足している残り金額。</summary>
     public BindableReactiveProperty<decimal> RemainingAmount { get; }
+
     /// <summary>お釣りの合計金額。</summary>
     public BindableReactiveProperty<decimal> ChangeAmount { get; }
+
     /// <summary>取引のタイムアウト時間（秒）。0以下の場合はタイムアウトなし。</summary>
     public BindableReactiveProperty<int> TransactionTimeoutSeconds { get; }
+
     /// <summary>OPOSアクションのログ。</summary>
     public ObservableCollection<string> OposLog { get; } = [];
+
     /// <summary>通貨記号。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+
+    /// <summary>通貨単位。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
-    // Missing Binding Properties for UI
+    /// <summary>表示用のステータステキスト。</summary>
     public ReadOnlyReactiveProperty<string> StatusText { get; }
+
+    /// <summary>ユーザーへのメッセージテキスト。</summary>
     public ReadOnlyReactiveProperty<string> Message { get; }
+
+    /// <summary>ターゲット金額の合計。</summary>
     public ReadOnlyReactiveProperty<decimal> TotalTargetAmount { get; }
+
+    /// <summary>現在の合計金額。</summary>
     public ReadOnlyReactiveProperty<decimal> CurrentAmount { get; }
+
+    /// <summary>進捗率（0-100）。</summary>
     public ReadOnlyReactiveProperty<double> Progress { get; }
 
-    // Commands
+    // --- Commands ---
+
     /// <summary>取引を開始するコマンド。</summary>
     public ReactiveCommand<Unit> StartCommand { get; }
+
     /// <summary>取引をキャンセルするコマンド。</summary>
     public ReactiveCommand<Unit> CancelCommand { get; }
+
     /// <summary>取引完了後にリセットするコマンド。</summary>
     public ReactiveCommand<Unit> ResetCommand { get; }
 
     /// <summary>現金投入用の金種ボタンリスト。</summary>
     public ObservableCollection<DenominationViewModel> AvailableDenominations { get; }
+
     /// <summary>金種を投入するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> InsertCashCommand { get; }
 
     /// <summary>手動：Open/Claim/Enable コマンド。</summary>
     public ReactiveCommand<Unit> ManualOpenCommand { get; }
+
     /// <summary>手動：BeginDeposit コマンド。</summary>
     public ReactiveCommand<Unit> ManualDepositCommand { get; }
+
     /// <summary>手動：DispenseChange コマンド。</summary>
     public ReactiveCommand<Unit> ManualDispenseCommand { get; }
+
     /// <summary>手動：Close コマンド。</summary>
     public ReactiveCommand<Unit> ManualCloseCommand { get; }
 
-    private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
-
-    /// <summary>必要なコンポーネントを注入して PosTransactionViewModel を初期化します。</summary>
-    /// <remarks>内部で使用するコマンドや ReactiveProperty のバインディング構成を行います。</remarks>
+    /// <summary>必要なコンポーネントを注入して <see cref="PosTransactionViewModel"/> を初期化します。</summary>
+    /// <param name="deposit">入金処理を管理する <see cref="DepositViewModel"/>。</param>
+    /// <param name="dispense">出金処理を管理する <see cref="DispenseViewModel"/>。</param>
+    /// <param name="cashChanger">シミュレーターのメインデバイスクラス <see cref="SimulatorCashChanger"/>。</param>
+    /// <param name="hardwareStatusManager">ハードウェア状態を管理する <see cref="HardwareStatusManager"/>。</param>
+    /// <param name="metadataProvider">通貨情報を表す <see cref="CurrencyMetadataProvider"/>。</param>
+    /// <param name="getDenominations">利用可能な金種を取得する関数。</param>
+    /// <param name="depositController">入金ロジックを制御する <see cref="DepositController"/>。</param>
+    /// <param name="notifyService">通知サービス。</param>
     public PosTransactionViewModel(
-DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashChanger, HardwareStatusManager hardwareStatusManager, CurrencyMetadataProvider metadataProvider, Func<IEnumerable<DenominationViewModel>> getDenominations, DepositController depositController, INotifyService notifyService)
+        DepositViewModel deposit,
+        DispenseViewModel dispense,
+        SimulatorCashChanger cashChanger,
+        HardwareStatusManager hardwareStatusManager,
+        CurrencyMetadataProvider metadataProvider,
+        Func<IEnumerable<DenominationViewModel>> getDenominations,
+        DepositController depositController,
+        INotifyService notifyService)
     {
-        CurrencyPrefix = metadataProvider.SymbolPrefix;
-        CurrencySuffix = metadataProvider.SymbolSuffix;
         _deposit = deposit;
         _dispense = dispense;
         _cashChanger = cashChanger;
         _hardwareStatusManager = hardwareStatusManager;
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<PosTransactionViewModel>();
+
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
 
         TargetAmountInput = new BindableReactiveProperty<string>("")
             .EnableValidation(text =>
@@ -99,35 +140,34 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
                 val > 100_000_000 ? new Exception("Amount is too large") : null)
             .AddTo(_disposables);
 
-        TargetAmount = TargetAmountInput.Select(text =>
-        {
-            return decimal.TryParse(text, out var val) ? val : 0m;
-        }).ToReadOnlyReactiveProperty(0m).AddTo(_disposables);
+        TargetAmount = TargetAmountInput
+            .Select(text => decimal.TryParse(text, out var val) ? val : 0m)
+            .ToReadOnlyReactiveProperty(0m)
+            .AddTo(_disposables);
 
         TransactionStatus = _status.ToBindableReactiveProperty().AddTo(_disposables);
-
         InsertedAmount = _deposit.CurrentDepositAmount;
 
-        RemainingAmount = InsertedAmount.CombineLatest(TargetAmountInput, (inserted, targetStr) =>
-        {
-            return decimal.TryParse(targetStr, out var target) ? Math.Max(0, target - inserted) : 0m;
-        }).ToBindableReactiveProperty(0m).AddTo(_disposables);
+        RemainingAmount = InsertedAmount
+            .CombineLatest(TargetAmountInput, (inserted, targetStr) => decimal.TryParse(targetStr, out var target) ? Math.Max(0, target - inserted) : 0m)
+            .ToBindableReactiveProperty(0m)
+            .AddTo(_disposables);
 
-        ChangeAmount = InsertedAmount.CombineLatest(TargetAmountInput, (inserted, targetStr) =>
-        {
-            return decimal.TryParse(targetStr, out var target) ? Math.Max(0, inserted - target) : 0m;
-        }).ToBindableReactiveProperty(0m).AddTo(_disposables);
+        ChangeAmount = InsertedAmount
+            .CombineLatest(TargetAmountInput, (inserted, targetStr) => decimal.TryParse(targetStr, out var target) ? Math.Max(0, inserted - target) : 0m)
+            .ToBindableReactiveProperty(0m)
+            .AddTo(_disposables);
 
         TransactionTimeoutSeconds = new BindableReactiveProperty<int>(60).AddTo(_disposables);
 
-        // Map existing properties to the missing ones expected by XAML
+        // Map existing properties for UI binding
         TotalTargetAmount = TargetAmount;
         CurrentAmount = InsertedAmount.ToReadOnlyReactiveProperty(0m).AddTo(_disposables);
 
-        Progress = TargetAmount.CombineLatest(CurrentAmount, (target, current) =>
-        {
-            return target <= 0 ? 0.0 : Math.Min(100.0, (double)(current / target) * 100.0);
-        }).ToReadOnlyReactiveProperty(0.0).AddTo(_disposables);
+        Progress = TargetAmount
+            .CombineLatest(CurrentAmount, (target, current) => target <= 0 ? 0.0 : Math.Min(100.0, (double)(current / target) * 100.0))
+            .ToReadOnlyReactiveProperty(0.0)
+            .AddTo(_disposables);
 
         StatusText = _status.Select(s => s switch
         {
@@ -147,19 +187,19 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
             _ => ""
         }).ToReadOnlyReactiveProperty("").AddTo(_disposables);
 
+        // --- Commands Implementation ---
+
         StartCommand = TargetAmountInput
             .Select(text => !TargetAmountInput.HasErrors && !string.IsNullOrWhiteSpace(text))
             .CombineLatest(_status, (canInput, s) => canInput && s == PosTransactionStatus.Idle)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-
         StartCommand.Subscribe(_ => StartTransaction());
 
         CancelCommand = _status
             .Select(s => s == PosTransactionStatus.WaitingForCash)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-
         CancelCommand.Subscribe(_ => CancelTransaction());
 
         ManualOpenCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
@@ -186,8 +226,7 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
         });
 
         // Available denominations for cash insertion
-        AvailableDenominations = new ObservableCollection<DenominationViewModel>(
-            getDenominations());
+        AvailableDenominations = new ObservableCollection<DenominationViewModel>(getDenominations());
 
         InsertCashCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         InsertCashCommand.Subscribe(den =>
@@ -199,7 +238,8 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
             }
         });
 
-        // Process Transaction Logic
+        // --- Automatic Transaction Flow Logic ---
+
         Observable.CombineLatest(InsertedAmount, _status, (inserted, status) => (inserted, status))
             .Subscribe(async x =>
             {
@@ -209,19 +249,16 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
                 // Reset timeout on cash insertion
                 ResetTimeout();
 
-                if (decimal.TryParse(TargetAmountInput.Value, out var target))
+                if (decimal.TryParse(TargetAmountInput.Value, out var target) && inserted >= target)
                 {
-                    if (inserted >= target)
-                    {
-                        await CompleteTransactionAsync();
-                    }
+                    await CompleteTransactionAsync();
                 }
             }).AddTo(_disposables);
     }
 
     private void StartTransaction()
     {
-        _logger.LogInformation("Starting POS transaction for amount: {TargetAmount}", TargetAmountInput.Value);
+        _logger.ZLogInformation($"Starting POS transaction for amount: {TargetAmountInput.Value}");
         LogOpos("--- Sequence Start ---");
 
         try
@@ -246,18 +283,18 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
         }
         catch (PosControlException pcEx)
         {
-            _logger.LogError(pcEx, "Failed to start OPOS sequence: {ErrorMessage}", pcEx.Message);
+            _logger.ZLogError(pcEx, $"Failed to start OPOS sequence: {pcEx.Message}");
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _status.Value = PosTransactionStatus.Idle;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to start OPOS sequence: {ErrorMessage}", ex.Message);
+            _logger.ZLogError(ex, $"Failed to start OPOS sequence: {ex.Message}");
             LogOpos($"ERROR: {ex.Message}");
             _status.Value = PosTransactionStatus.Idle;
         }
-        _logger.LogInformation("StartTransaction finished. Status: {Status}", _status.Value);
+        _logger.ZLogInformation($"StartTransaction finished. Status: {_status.Value}");
     }
 
     private void ResetTimeout()
@@ -275,7 +312,7 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
         {
             if (t.IsCompletedSuccessfully && !token.IsCancellationRequested)
             {
-                _logger.LogWarning("Transaction timed out after {TimeoutSeconds} seconds.", timeoutSec);
+                _logger.ZLogWarning($"Transaction timed out after {timeoutSec} seconds.");
                 LogOpos($"TIMEOUT: {timeoutSec}s exceeded.");
                 CancelTransaction();
             }
@@ -297,7 +334,7 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
 
     private void CancelTransaction()
     {
-        _logger.LogInformation("Canceling POS transaction.");
+        _logger.ZLogInformation($"Canceling POS transaction.");
         StopTimeout();
 
         try
@@ -331,7 +368,7 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
         var targetValue = decimal.TryParse(TargetAmountInput.Value, out var v) ? v : 0m;
         var changeToDispense = (int)Math.Max(0, inserted - targetValue);
 
-        _logger.LogInformation("Amount met. Completing transaction. Inserted: {Inserted}, Target: {Target}, Change: {Change}", inserted, targetValue, changeToDispense);
+        _logger.ZLogInformation($"Amount met. Completing transaction. Inserted: {inserted}, Target: {targetValue}, Change: {changeToDispense}");
         _status.Value = PosTransactionStatus.DispensingChange;
 
         try
@@ -364,13 +401,13 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
         }
         catch (PosControlException pcEx)
         {
-            _logger.LogError(pcEx, "Failed to complete OPOS sequence: {ErrorMessage}", pcEx.Message);
+            _logger.ZLogError(pcEx, $"Failed to complete OPOS sequence: {pcEx.Message}");
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to complete OPOS sequence: {ErrorMessage}", ex.Message);
+            _logger.ZLogError(ex, $"Failed to complete OPOS sequence: {ex.Message}");
             LogOpos($"ERROR: {ex.Message}");
         }
 
@@ -487,6 +524,7 @@ DepositViewModel deposit, DispenseViewModel dispense, SimulatorCashChanger cashC
     public void Dispose()
     {
         _disposables.Dispose();
+        _timeoutCts?.Dispose();
         GC.SuppressFinalize(this);
     }
 }
