@@ -18,6 +18,13 @@ public static class DIContainer
 {
     private static IServiceProvider _serviceProvider = null!;
 
+    /// <summary>内部テスト用にサービスプロバイダーを直接設定します。</summary>
+    internal static void SetProvider(IServiceProvider provider)
+    {
+        _serviceProvider = provider;
+        SimulatorServices.Provider = new MSIServiceProvider(_serviceProvider);
+    }
+
     /// <summary>コンテナを初期化し、各サービスの登録と解決を行います。</summary>
     public static void Initialize()
     {
