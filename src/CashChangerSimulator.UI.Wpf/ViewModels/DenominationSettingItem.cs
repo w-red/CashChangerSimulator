@@ -12,6 +12,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// <param name="nearFull">「多額（NearFull）」と判定するしきい値。</param>
 /// <param name="full">「満杯（Full）」と判定するしきい値。</param>
 /// <param name="isRecyclable">還流（再利用）可能かどうか。</param>
+/// <param name="isDepositable">投入（入金）可能かどうか。</param>
 /// <remarks>
 /// UI 上での編集対象となるプロパティ（表示名、初期枚数、しきい値等）を ReactiveProperty として保持します。
 /// 画面上でのリアルタイムなバリデーションと、設定ファイルへの保存用データの仲介を行います。
@@ -22,23 +23,32 @@ public class DenominationSettingItem : IDisposable
 
     /// <summary>金種キー。</summary>
     public DenominationKey Key { get; }
+
     /// <summary>表示名。</summary>
     public BindableReactiveProperty<string> DisplayName { get; }
+
     /// <summary>日本語表示名。</summary>
     public BindableReactiveProperty<string> DisplayNameJP { get; }
+
     /// <summary>枚数。</summary>
     public BindableReactiveProperty<int> Count { get; }
+
     /// <summary>少額しきい値。</summary>
     public BindableReactiveProperty<int> NearEmpty { get; }
+
     /// <summary>多額しきい値。</summary>
     public BindableReactiveProperty<int> NearFull { get; }
+
     /// <summary>満杯しきい値。</summary>
     public BindableReactiveProperty<int> Full { get; }
+
     /// <summary>還流可能フラグ。</summary>
     public BindableReactiveProperty<bool> IsRecyclable { get; }
+
     /// <summary>入金可能フラグ。</summary>
     public BindableReactiveProperty<bool> IsDepositable { get; }
 
+    /// <summary><see cref="DenominationSettingItem"/> クラスの新しいインスタンスを初期化します。</summary>
     public DenominationSettingItem(
         DenominationKey key,
         string displayName,
