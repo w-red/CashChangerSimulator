@@ -35,6 +35,7 @@ public static class DIContainer
         // 2. Core Services (Singleton)
         services.AddSingleton<Inventory>();
         services.AddSingleton<TransactionHistory>();
+        services.AddSingleton<HistoryPersistenceService>();
         services.AddSingleton<ChangeCalculator>();
         services.AddSingleton<CashChangerManager>();
         services.AddSingleton<HardwareStatusManager>();
@@ -125,11 +126,16 @@ public static class DIContainer
 
         // Initialize Transaction History
         var history = _serviceProvider.GetRequiredService<TransactionHistory>();
-        var historyState = ConfigurationLoader.LoadHistoryState();
-        if (historyState?.Entries != null && historyState.Entries.Count > 0)
+        var persistence = _serviceProvider.GetRequiredService<HistoryPersistenceService>();
+        
+        var historyState = persistence.Load();
+        if (historyState.Entries.Count > 0)
         {
             history.FromState(historyState);
         }
+
+        // Start Auto-Save
+        persistence.StartAutoSave();
     }
 
     /// <summary>指定された型のインスタンスをコンテナから解決します。</summary>
