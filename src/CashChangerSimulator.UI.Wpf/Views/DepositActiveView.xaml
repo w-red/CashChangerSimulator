@@ -81,7 +81,12 @@
                         Margin="4" Height="40" Foreground="Orange"
                         ToolTip="Simulate Overlap Error"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
-                    <materialDesign:PackIcon Kind="LayersTripleOutline" />
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="LayersTripleOutline"
+                                                 Margin="0,0,8,0" />
+                        <TextBlock Text="{StaticResource Overlap}"
+                                   FontSize="12" FontWeight="Bold"/>
+                    </StackPanel>
                 </Button>
                 <Button x:Name="SimulateRejectButton"
                         Grid.Column="2" Style="{StaticResource SecondaryButtonStyle}" 
@@ -89,7 +94,12 @@
                         Margin="4" Height="40" Foreground="Goldenrod"
                         ToolTip="Simulate Reject"
                         AutomationProperties.AutomationId="SimulateRejectButton">
-                    <materialDesign:PackIcon Kind="CashRemove" />
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CashRemove"
+                                                 Margin="0,0,8,0" />
+                        <TextBlock Text="{StaticResource Reject}"
+                                   FontSize="12" FontWeight="Bold"/>
+                    </StackPanel>
                 </Button>
             </Grid>
 

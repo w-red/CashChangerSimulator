@@ -75,6 +75,7 @@
     <system:String x:Key="QuickDeposit">クイック入金</system:String>
     <system:String x:Key="AutoCalcDenoms">枚数を自動計算して投入します</system:String>
     <system:String x:Key="Bulk">一括</system:String>
+    <system:String x:Key="Overlap">重なり</system:String>
     <system:String x:Key="FinishCounting">計数終了</system:String>
     <system:String x:Key="Pause">一時停止</system:String>
     <system:String x:Key="Resume">再開</system:String>
