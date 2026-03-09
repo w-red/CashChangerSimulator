@@ -189,16 +189,8 @@ public class MainViewModel : IDisposable
             }
 
             var mainWindow = System.Windows.Application.Current?.MainWindow;
-            if (mainWindow != null)
-            {
-                var window = new DispenseWindow(Dispense, () => Inventory.Denominations) { Owner = mainWindow };
-                window.Show();
-            }
-            else
-            {
-                var window = new DispenseWindow(Dispense, () => Inventory.Denominations);
-                window.Show();
-            }
+            var window = new DispenseWindow(Dispense, () => Inventory.Denominations) { Owner = mainWindow };
+            window.Show();
         });
 
         OpenAdvancedSimulationCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);

@@ -29,6 +29,15 @@ public class AdvancedSimulationViewModel : IDisposable
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
     public BindableReactiveProperty<bool> IsDepositInProgress { get; }
 
+    public BindableReactiveProperty<bool> IsJammed { get; }
+    public BindableReactiveProperty<bool> IsOverlapped { get; }
+    public BindableReactiveProperty<bool> IsDeviceError { get; }
+
+    public ReactiveCommand<Unit> ResetErrorCommand { get; }
+    public ReactiveCommand<Unit> SimulateJamCommand { get; }
+    public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
+    public ReactiveCommand<Unit> SimulateDeviceErrorCommand { get; }
+
     /// <summary>必要なコンポーネントを注入して AdvancedSimulationViewModel を初期化します。</summary>
     /// <param name="cashChanger">対象の <see cref="SimulatorCashChanger"/>。</param>
     /// <param name="scriptExecutionService">スクリプト実行サービス。</param>
@@ -60,6 +69,22 @@ public class AdvancedSimulationViewModel : IDisposable
             .Select(_ => depositController.IsDepositInProgress)
             .ToBindableReactiveProperty(depositController.IsDepositInProgress)
             .AddTo(_disposables);
+
+        IsJammed = _cashChanger.HardwareStatus.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
+        IsOverlapped = _cashChanger.HardwareStatus.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
+        IsDeviceError = _cashChanger.HardwareStatus.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+
+        ResetErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        ResetErrorCommand.Subscribe(_ => _cashChanger.HardwareStatus.ResetError());
+
+        SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateJamCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetJammed(true));
+
+        SimulateOverlapCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateOverlapCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetOverlapped(true));
+
+        SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateDeviceErrorCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetDeviceError(999, 0));
 
         ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
         ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
@@ -115,6 +140,8 @@ public class AdvancedSimulationViewModel : IDisposable
 
     public void Dispose()
     {
+        // Explicitly disable event generation before disposal to prevent SDK exceptions
+        _cashChanger.RealTimeDataEnabled = false;
         _disposables.Dispose();
         GC.SuppressFinalize(this);
     }
