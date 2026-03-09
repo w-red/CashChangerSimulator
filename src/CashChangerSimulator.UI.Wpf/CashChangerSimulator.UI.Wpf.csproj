@@ -51,5 +51,9 @@
     </None>
   </ItemGroup>
 
+  <Target Name="CheckXaml" BeforeTargets="BeforeBuild">
+    <Exec Command="python &quot;$(ProjectDir)..\..\scripts\check_xaml.py&quot;" />
+  </Target>
+
 </Project>
 
