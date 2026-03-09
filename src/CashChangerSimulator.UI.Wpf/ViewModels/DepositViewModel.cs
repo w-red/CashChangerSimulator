@@ -26,77 +26,103 @@ public class DepositViewModel : IDisposable
     private readonly INotifyService _notifyService;
     private readonly CurrencyMetadataProvider _metadataProvider;
 
-    // State Properties
+    // --- State Properties ---
+
     /// <summary>入金モード中かどうか。</summary>
     public BindableReactiveProperty<bool> IsInDepositMode { get; }
+
     /// <summary>現在の入金合計額。</summary>
     public BindableReactiveProperty<decimal> CurrentDepositAmount { get; }
+
     /// <summary>入金が確定されたかどうか。</summary>
     public BindableReactiveProperty<bool> IsDepositFixed { get; }
+
     /// <summary>入金ステータス。</summary>
     public BindableReactiveProperty<CashDepositStatus> DepositStatus { get; }
+
     /// <summary>入金が一時停止中かどうか。</summary>
     public BindableReactiveProperty<bool> IsDepositPaused { get; }
+
     /// <summary>現在の動作モードの表示名。</summary>
     public BindableReactiveProperty<string> CurrentModeName { get; }
+
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
     private readonly BindableReactiveProperty<bool> _isOverlapped;
+
     /// <summary>ジャムが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsJammed { get; }
     private readonly BindableReactiveProperty<bool> _isJammed;
+
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
+
     /// <summary>オーバーフロー金額。</summary>
     public BindableReactiveProperty<decimal> OverflowAmount { get; }
+
     /// <summary>オーバーフローが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> HasOverflow { get; }
+
     /// <summary>リジェクト金額。</summary>
     public BindableReactiveProperty<decimal> RejectAmount { get; }
+
     /// <summary>リジェクトが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> HasReject { get; }
+
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
+
     /// <summary>通貨記号。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+
     /// <summary>通貨単位。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
-    // Commands
+    // --- Commands ---
+
     /// <summary>入金を開始するコマンド。</summary>
     public ReactiveCommand<Unit> BeginDepositCommand { get; }
+
     /// <summary>入金を一時停止するコマンド。</summary>
     public ReactiveCommand<Unit> PauseDepositCommand { get; }
+
     /// <summary>入金を再開するコマンド。</summary>
     public ReactiveCommand<Unit> ResumeDepositCommand { get; }
+
     /// <summary>入金を確定するコマンド。</summary>
     public ReactiveCommand<Unit> FixDepositCommand { get; }
+
     /// <summary>確定した入金を収納するコマンド。</summary>
     public ReactiveCommand<Unit> StoreDepositCommand { get; }
+
     /// <summary>入金をキャンセル（返却）するコマンド。</summary>
     public ReactiveCommand<Unit> CancelDepositCommand { get; }
 
-    // Phase 12: Error Reset
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
+
     /// <summary>エラー状態を解消するコマンド。</summary>
     public ReactiveCommand<Unit> ResetErrorCommand { get; }
+
     /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateJamCommand { get; }
+
     /// <summary>リジェクトをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateRejectCommand { get; }
 
-    // Bulk Deposit
     /// <summary>一括投入画面を表示するコマンド（View側で購読）。</summary>
     public ReactiveCommand<Unit> ShowBulkInsertCommand { get; }
+
     /// <summary>一括投入を実行するコマンド。</summary>
     public ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>> InsertBulkCommand { get; }
+
     /// <summary>クイック入金を実行するコマンド。</summary>
     public ReactiveCommand<Unit> QuickDepositCommand { get; }
+
     /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
     public BindableReactiveProperty<bool> CanOperate { get; }
 
-    /// <summary>必要なサービスを注入して DepositViewModel を初期化します。</summary>
+    /// <summary>必要なサービスを注入して <see cref="DepositViewModel"/> を初期化します。</summary>
     /// <param name="depositController">入金処理を制御する <see cref="DepositController"/>。</param>
     /// <param name="hardwareStatusManager">ハードウェアの状態（ジャム、エラー等）を管理する <see cref="HardwareStatusManager"/>。</param>
     /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
@@ -118,9 +144,11 @@ public class DepositViewModel : IDisposable
         _notifyService = notifyService;
         _metadataProvider = metadataProvider;
 
+        // UI Metadata
         CurrencyPrefix = _metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
         CurrencySuffix = _metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
+        // Hardware State
         _isJammed = _hardwareStatusManager.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
         IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
@@ -128,6 +156,7 @@ public class DepositViewModel : IDisposable
         IsDeviceError = _hardwareStatusManager.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
+        // Deposit State Observables
         IsInDepositMode = _depositController.Changed
             .Select(_ => _depositController.IsDepositInProgress)
             .ToBindableReactiveProperty(_depositController.IsDepositInProgress)
@@ -176,8 +205,12 @@ public class DepositViewModel : IDisposable
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
-        BeginDepositCommand = _hardwareStatusManager.IsConnected.CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusyValue) => connected && !jammed && !overlapped && !dispenseBusyValue)
+        // Commands Logic
+
+        BeginDepositCommand = _hardwareStatusManager.IsConnected
+            .CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusyValue) => connected && !jammed && !overlapped && !dispenseBusyValue)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
+
         BeginDepositCommand.Subscribe(_ =>
         {
             if (_isDispenseBusy.Value)
@@ -207,18 +240,21 @@ public class DepositViewModel : IDisposable
             }
         });
 
-        PauseDepositCommand = IsInDepositMode.CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
+        PauseDepositCommand = IsInDepositMode
+            .CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         PauseDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Pause));
 
         ResumeDepositCommand = IsDepositPaused.ToReactiveCommand<Unit>().AddTo(_disposables);
         ResumeDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Restart));
 
-        FixDepositCommand = IsInDepositMode.CombineLatest(IsDepositFixed, IsJammed, IsOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
+        FixDepositCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, IsJammed, IsOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         FixDepositCommand.Subscribe(_ => _depositController.FixDeposit());
 
-        StoreDepositCommand = IsDepositFixed.CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
+        StoreDepositCommand = IsDepositFixed
+            .CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
 
@@ -231,25 +267,25 @@ public class DepositViewModel : IDisposable
             _depositController.EndDeposit(CashDepositAction.Repay);
         });
 
-        ShowBulkInsertCommand = IsInDepositMode.CombineLatest(IsDepositFixed, _isJammed, _isOverlapped,
-            (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
+        ShowBulkInsertCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, _isJammed, _isOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
 
         InsertBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
         InsertBulkCommand.Subscribe(counts =>
         {
-            if (counts != null && counts.Count > 0)
+            if (counts is { Count: > 0 })
             {
                 _depositController.TrackBulkDeposit(counts);
             }
         });
 
-        CanOperate = _hardwareStatusManager.IsConnected.CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !mode && !dispenseBusyValue)
+        CanOperate = _hardwareStatusManager.IsConnected
+            .CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !mode && !dispenseBusyValue)
             .ToBindableReactiveProperty(_hardwareStatusManager.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
-        QuickDepositCommand = CanOperate
-            .ToReactiveCommand<Unit>().AddTo(_disposables);
+        QuickDepositCommand = CanOperate.ToReactiveCommand<Unit>().AddTo(_disposables);
         QuickDepositCommand.Subscribe(async _ =>
         {
             if (_isDispenseBusy.Value)
@@ -273,7 +309,8 @@ public class DepositViewModel : IDisposable
             .AddTo(_disposables);
         SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
 
-        ResetErrorCommand = IsOverlapped.CombineLatest(_hardwareStatusManager.IsJammed, (overlapped, jammed) => overlapped || jammed)
+        ResetErrorCommand = IsOverlapped
+            .CombineLatest(_hardwareStatusManager.IsJammed, (overlapped, jammed) => overlapped || jammed)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
@@ -308,6 +345,11 @@ public class DepositViewModel : IDisposable
                     };
     }
 
+    /// <summary>
+    /// クイック入金（金額直接入力によるシミュレーション）を非同期的に実行します。
+    /// </summary>
+    /// <param name="denominations">投入可能な金種の ViewModel リスト。</param>
+    /// <returns>非同期タスク。</returns>
     internal async Task ExecuteQuickDepositAsync(IEnumerable<DenominationViewModel> denominations)
     {
         if (_isJammed.Value || _isOverlapped.Value)
