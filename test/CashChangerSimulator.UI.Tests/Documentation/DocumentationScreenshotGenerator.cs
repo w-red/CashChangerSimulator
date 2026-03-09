@@ -49,28 +49,73 @@ public class DocumentationScreenshotGenerator : IDisposable
         CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", "advanced_simulation.png");
 
         // 5. 金種詳細ダイアログのキャプチャ
-        CaptureDenominationDetail("InventoryTile", "DenominationDetailDialog", "inventory_detail.png");
+        CaptureDenominationDetail("InventoryTile", "DenominationDetailDialogView", "inventory_detail.png");
     }
 
     private void CaptureDenominationDetail(string tileId, string dialogId, string fileName)
     {
         var tile = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(tileId))?.AsButton()
                    ?? throw new Exception("Inventory tile not found.");
-        tile.Click();
+        // タイトルをクリックする前に、状態を確認
+        tile.WaitUntilEnabled(TimeSpan.FromSeconds(5));
+        tile.WaitUntilClickable(TimeSpan.FromSeconds(5));
+        
+        Console.WriteLine($"Aggressive clicking tile: {tile.Name}, AutomationId: {tile.AutomationId}");
 
+        // 1. フォーカスを当てる
+        tile.Focus();
+        Thread.Sleep(500);
+
+        // 2. Invoke パターンを試行
+        if (tile.Patterns.Invoke.IsSupported)
+        {
+            try { tile.Patterns.Invoke.Pattern.Invoke(); } catch { }
+        }
+        
+        // 3. マウスクリックを試行
+        try { tile.Click(false); } catch { }
+        
+        // 4. キーボード Enter を試行
+        try { FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN); } catch { }
+
+        // ダイアログが表示されるのを待機
         var dialog = Retry.WhileNull(() =>
         {
-            var desktop = _app.Automation.GetDesktop();
-            return desktop.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogContent"));
-        }, TimeSpan.FromSeconds(10)).Result
-        ?? throw new Exception("Denomination detail dialog not found.");
+            // A. MainWindow の子孫
+            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+            if (found != null) return found;
 
-        Thread.Sleep(1000);
+            // B. Desktop 直下の全要素から再帰的に検索
+            var desktop = _app.Automation.GetDesktop();
+            foreach (var child in desktop.FindAllChildren())
+            {
+                var inChild = child.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                if (inChild != null) return inChild;
+            }
+
+            return null;
+        }, TimeSpan.FromSeconds(25)).Result;
+
+        if (dialog == null)
+        {
+            throw new Exception($"Denomination detail dialog not found (ID: {dialogId}).");
+        }
+
+        Thread.Sleep(2000); // 描画・アニメーション待ち
         CaptureElement(dialog, fileName);
 
-        // ダイアログを閉じる (ESCキー または 外側クリック、ここではCloseボタンを探す)
-        var closeButton = dialog.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button))?.AsButton();
-        closeButton?.Click();
+        // ダイアログを閉じる
+        var closeButton = dialog.FindFirstDescendant(cf => cf.ByName("Close").Or(cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)))?.AsButton();
+        if (closeButton != null)
+        {
+            if (closeButton.Patterns.Invoke.IsSupported) closeButton.Patterns.Invoke.Pattern.Invoke();
+            else closeButton.Click();
+        }
+        else
+        {
+            _app.MainWindow?.Focus();
+            FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ESCAPE);
+        }
         Thread.Sleep(1000);
     }
 
@@ -87,28 +132,40 @@ public class DocumentationScreenshotGenerator : IDisposable
                         .ByName(buttonId.Replace("Launch", "")))
                 ?.AsButton())
                 ?? throw new Exception($"Button '{buttonId}' not found in MainWindow.");
-        button.WaitUntilClickable();
-        button.Click();
+        
+        button.WaitUntilEnabled(TimeSpan.FromSeconds(5));
+        button.WaitUntilClickable(TimeSpan.FromSeconds(5));
 
-        // ウィンドウが開くのを待機 (Desktop 直下 または MainWindow の子)
+        if (button.Patterns.Invoke.IsSupported)
+        {
+            button.Patterns.Invoke.Pattern.Invoke();
+        }
+        else
+        {
+            button.Click();
+        }
+
+        // ウィンドウが開くのを待機
         var window = Retry.WhileNull(() =>
         {
+            // Windows は Desktop 直下であることが多いため、まず Desktop を確認
             var desktop = _app.Automation.GetDesktop();
-            var win =
-                desktop.FindFirstChild(
-                    cf => cf.ByAutomationId(windowId))
-                ?? _app.MainWindow
-                    ?.FindFirstDescendant(
-                        cf => cf.ByAutomationId(windowId));
-
+            var win = desktop.FindFirstChild(cf => cf.ByAutomationId(windowId));
             if (win != null) return win.AsWindow();
+
+            // 見つからない場合は MainWindow の子孫（埋め込みウィンドウなど）を確認
+            if (_app.MainWindow != null)
+            {
+                win = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(windowId));
+                if (win != null) return win.AsWindow();
+            }
 
             // 名前でのフォールバック
             win = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
                     .FirstOrDefault(w => w.Name != null && (w.Name.Contains("TERMINAL") || w.Name.Contains("Simulation") || w.Name.Contains("Controls")));
 
             return win?.AsWindow();
-        }, TimeSpan.FromSeconds(10)).Result
+        }, TimeSpan.FromSeconds(20)).Result
         ?? throw new Exception($"Window '{windowId}' not found after clicking '{buttonId}'.");
 
         window.SetForeground();
