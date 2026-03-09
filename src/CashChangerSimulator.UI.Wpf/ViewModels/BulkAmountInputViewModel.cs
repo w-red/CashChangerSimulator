@@ -8,6 +8,12 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// 各金種の入力項目リストを保持し、ダイアログからのシミュレーション操作（ジャム・重なり・エラー解除）を、
 /// 親 ViewModel から注入されたコマンドを通じて実行します。
 /// </remarks>
+/// <param name="items">金種ごとの入力項目リスト。</param>
+/// <param name="simulateOverlap">重なりエラーをシミュレートするコマンド。</param>
+/// <param name="simulateJam">ジャムエラーをシミュレートするコマンド。</param>
+/// <param name="resetError">エラーをリセットするコマンド。</param>
+/// <param name="isJammed">ジャムが発生しているかどうかを監視するリアクティブプロパティ。</param>
+/// <param name="isOverlapped">重なりが発生しているかどうかを監視するリアクティブプロパティ。</param>
 public class BulkAmountInputViewModel(
     IEnumerable<BulkAmountInputItemViewModel> items,
     ICommand simulateOverlap,
