@@ -116,7 +116,7 @@ public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture)
         vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.WaitingForCash);
 
         // タイムアウトを待機 (1s + 余裕)
-        await Task.Delay(1500);
+        await Task.Delay(1500, TestContext.Current.CancellationToken);
 
         vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.Idle);
         vm.OposLog.ShouldContain(s => s.Contains("TIMEOUT"));

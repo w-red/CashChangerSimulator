@@ -44,7 +44,9 @@ public class UISmokeTests
                 }
 
                 // Load Global Resources manually to avoid App.xaml x:Class issues
-                var resources = Application.Current.Resources.MergedDictionaries;
+                var app = Application.Current;
+                if (app == null) throw new Exception("Application.Current is null.");
+                var resources = app.Resources.MergedDictionaries;
                 resources.Clear();
                 
                 // Essential styles and colors
@@ -53,10 +55,10 @@ public class UISmokeTests
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml") });
 
                 // Register standard converters used in XAML
-                Application.Current.Resources["StatusBrushConv"] = new CashStatusToBrushConverter();
-                Application.Current.Resources["TypeSymbolConv"] = new TransactionTypeToSymbolConverter();
-                Application.Current.Resources["InvertedVisibilityConv"] = new InvertedBooleanToVisibilityConverter();
-                Application.Current.Resources["VisibilityConv"] = new BooleanToVisibilityConverter();
+                app.Resources["StatusBrushConv"] = new CashStatusToBrushConverter();
+                app.Resources["TypeSymbolConv"] = new TransactionTypeToSymbolConverter();
+                app.Resources["InvertedVisibilityConv"] = new InvertedBooleanToVisibilityConverter();
+                app.Resources["VisibilityConv"] = new BooleanToVisibilityConverter();
 
                 // Instantiate Dependencies
                 var mockInv = new Mock<Inventory>();
