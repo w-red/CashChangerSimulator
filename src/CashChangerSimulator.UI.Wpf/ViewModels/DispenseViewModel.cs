@@ -29,53 +29,80 @@ public class DispenseViewModel : IDisposable
     private readonly BindableReactiveProperty<bool> _isInDepositMode;
     private readonly CompositeDisposable _disposables = [];
 
-    // Properties
+    // --- State Properties ---
+
     /// <summary>現在の在庫合計金額。</summary>
     public BindableReactiveProperty<decimal> TotalAmount { get; }
+
     /// <summary>出金金額の入力値。</summary>
     public BindableReactiveProperty<string> DispenseAmountInput { get; }
-    /// <summary>出金を実行するコマンド。</summary>
-    public ReactiveCommand DispenseCommand { get; }
+
     /// <summary>通貨記号。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+
+    /// <summary>通貨単位。</summary>
     public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
 
-    // Bulk Dispense
-    /// <summary>一括出金画面を表示するコマンド（View側で購読）。</summary>
-    public ReactiveCommand ShowBulkDispenseCommand { get; }
-    /// <summary>一括出金を実行するコマンド。</summary>
-    public ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>> DispenseBulkCommand { get; }
-
-    // Phase 18: State Properties
     /// <summary>出金ステータス。</summary>
     public BindableReactiveProperty<CashDispenseStatus> Status { get; }
+
     /// <summary>出金ステータスの表示名。</summary>
     public BindableReactiveProperty<string> StatusName { get; }
+
     /// <summary>出金処理中かどうか。</summary>
     public BindableReactiveProperty<bool> IsBusy { get; }
+
     /// <summary>現在出金中の合計金額。</summary>
     public BindableReactiveProperty<decimal> DispensingAmount { get; }
+
     /// <summary>利用可能な金種リスト。</summary>
     public IEnumerable<DenominationViewModel> Denominations { get; }
-    /// <summary>特定の金種を1枚出金するコマンド。</summary>
-    public ReactiveCommand<DenominationViewModel> QuickDispenseCommand { get; }
 
-    // Phase 12: Error Reset
-    /// <summary>エラー状態を解消するコマンド。</summary>
-    public ReactiveCommand ResetErrorCommand { get; }
-    /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
-    public ReactiveCommand SimulateJamCommand { get; }
     /// <summary>ジャムが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsJammed { get; }
+
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
+
     /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
     public BindableReactiveProperty<bool> CanOperate { get; }
+
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
 
-    /// <summary>必要なサービスを注入して DispenseViewModel を初期化します。</summary>
-    /// <remarks>在庫監視の購読設定や、払い出しコマンドのバインディング構成を行います。</remarks>
+    // --- Commands ---
+
+    /// <summary>出金を実行するコマンド。</summary>
+    public ReactiveCommand DispenseCommand { get; }
+
+    /// <summary>一括出金画面を表示するコマンド（View側で購読）。</summary>
+    public ReactiveCommand ShowBulkDispenseCommand { get; }
+
+    /// <summary>一括出金を実行するコマンド。</summary>
+    public ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>> DispenseBulkCommand { get; }
+
+    /// <summary>特定の金種を1枚出金するコマンド。</summary>
+    public ReactiveCommand<DenominationViewModel> QuickDispenseCommand { get; }
+
+    /// <summary>エラー状態を解消するコマンド。</summary>
+    public ReactiveCommand ResetErrorCommand { get; }
+
+    /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand SimulateJamCommand { get; }
+
+    /// <summary>重なりエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand SimulateOverlapCommand { get; }
+
+    /// <summary>必要なサービスを注入して <see cref="DispenseViewModel"/> を初期化します。</summary>
+    /// <param name="inventory">現金在庫を管理する <see cref="Inventory"/>。</param>
+    /// <param name="manager">デバイスを管理する <see cref="CashChangerManager"/>。</param>
+    /// <param name="controller">出金処理を制御する <see cref="DispenseController"/>。</param>
+    /// <param name="hardwareStatusManager">ハードウェア状態（エラー等）を管理する <see cref="HardwareStatusManager"/>。</param>
+    /// <param name="configProvider">アプリケーション設定を提供する <see cref="ConfigurationProvider"/>。</param>
+    /// <param name="isInDepositMode">現在入金モード中かどうかを示す反応型プロパティ。</param>
+    /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
+    /// <param name="notifyService">ユーザーへの通知を行うサービス。</param>
+    /// <param name="metadataProvider">通貨の表示形式（記号など）を提供するプロバイダー。</param>
     public DispenseViewModel(
         Inventory inventory,
         CashChangerManager manager,
@@ -87,8 +114,6 @@ public class DispenseViewModel : IDisposable
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
-        CurrencyPrefix = metadataProvider.SymbolPrefix;
-        CurrencySuffix = metadataProvider.SymbolSuffix;
         _inventory = inventory;
         _manager = manager;
         _controller = controller;
@@ -98,9 +123,12 @@ public class DispenseViewModel : IDisposable
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<DispenseViewModel>();
 
+        CurrencyPrefix = metadataProvider.SymbolPrefix;
+        CurrencySuffix = metadataProvider.SymbolSuffix;
         IsDeviceError = _hardwareStatusManager.IsDeviceError;
 
-        // State Mapping
+        // --- State Mapping ---
+
         Status = _controller.Changed
             .Select(_ => _controller.Status)
             .ToBindableReactiveProperty(_controller.Status)
@@ -119,7 +147,8 @@ public class DispenseViewModel : IDisposable
         IsJammed = _hardwareStatusManager.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
         IsOverlapped = _hardwareStatusManager.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
-        CanOperate = IsBusy.CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
+        CanOperate = IsBusy
+            .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
             .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.CurrentValue && !IsOverlapped.CurrentValue && !_isInDepositMode.Value)
             .AddTo(_disposables);
 
@@ -155,13 +184,15 @@ public class DispenseViewModel : IDisposable
             )
             .AddTo(_disposables);
 
+        // --- Commands Logic ---
+
         DispenseCommand = DispenseAmountInput
             .Select(_ => !DispenseAmountInput.HasErrors && !string.IsNullOrWhiteSpace(DispenseAmountInput.Value))
             .CombineLatest(IsBusy, IsJammed, IsOverlapped, _isInDepositMode, (can, busy, jammed, overlapped, deposit) => can && !busy && !jammed && !overlapped && !deposit)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
-        DispenseCommand.Subscribe(x =>
+        DispenseCommand.Subscribe(_ =>
         {
             if (_isInDepositMode.Value)
             {
@@ -180,7 +211,6 @@ public class DispenseViewModel : IDisposable
 
         var canDispense = IsBusy.Select(busy => !busy);
 
-        // ShowBulkDispenseCommand should be disabled during hardware errors or deposit
         ShowBulkDispenseCommand = canDispense
             .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (can, jammed, overlapped, deposit) => can && !jammed && !overlapped && !deposit)
             .ToReactiveCommand()
@@ -210,13 +240,12 @@ public class DispenseViewModel : IDisposable
         DispenseBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
         DispenseBulkCommand.Subscribe(counts =>
         {
-            if (counts != null && counts.Count > 0)
+            if (counts is { Count: > 0 })
             {
                 ExecuteBulkDispense(counts);
             }
         });
 
-        // Phase 12: Error Reset
         ResetErrorCommand = Status
             .Select(s => s == CashDispenseStatus.Error)
             .CombineLatest(_hardwareStatusManager.IsJammed, _hardwareStatusManager.IsOverlapped, (err, jammed, overlapped) => err || jammed || overlapped)
@@ -225,19 +254,18 @@ public class DispenseViewModel : IDisposable
 
         ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
 
-        SimulateJamCommand = IsJammed.Select(jammed => !jammed)
+        SimulateJamCommand = IsJammed
+            .Select(jammed => !jammed)
             .ToReactiveCommand()
             .AddTo(_disposables);
         SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
 
-        SimulateOverlapCommand = IsOverlapped.Select(o => !o)
+        SimulateOverlapCommand = IsOverlapped
+            .Select(o => !o)
             .ToReactiveCommand()
             .AddTo(_disposables);
         SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
     }
-
-    /// <summary>重なりエラーをシミュレートするコマンド。</summary>
-    public ReactiveCommand SimulateOverlapCommand { get; }
 
     private void DispenseCash(decimal amount)
     {
