@@ -75,6 +75,7 @@
     <system:String x:Key="QuickDeposit">QUICK DEPOSIT</system:String>
     <system:String x:Key="AutoCalcDenoms">Calculates denominations automatically</system:String>
     <system:String x:Key="Bulk">BULK</system:String>
+    <system:String x:Key="Overlap">OVERLAP</system:String>
     <system:String x:Key="FinishCounting">FINISH COUNTING</system:String>
     <system:String x:Key="Pause">PAUSE</system:String>
     <system:String x:Key="Resume">RESUME</system:String>
