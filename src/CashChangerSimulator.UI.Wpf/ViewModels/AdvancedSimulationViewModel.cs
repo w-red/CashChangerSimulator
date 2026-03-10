@@ -79,6 +79,11 @@ public class AdvancedSimulationViewModel : IDisposable
         DepositController depositController,
         CurrencyMetadataProvider metadataProvider)
     {
+        ArgumentNullException.ThrowIfNull(cashChanger);
+        ArgumentNullException.ThrowIfNull(scriptExecutionService);
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+
         _cashChanger = cashChanger;
         _scriptExecutionService = scriptExecutionService;
 

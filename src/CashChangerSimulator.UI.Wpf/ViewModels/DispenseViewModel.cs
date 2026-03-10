@@ -114,6 +114,16 @@ public class DispenseViewModel : IDisposable
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(manager);
+        ArgumentNullException.ThrowIfNull(controller);
+        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(configProvider);
+        ArgumentNullException.ThrowIfNull(isInDepositMode);
+        ArgumentNullException.ThrowIfNull(getDenominations);
+        ArgumentNullException.ThrowIfNull(notifyService);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+
         _inventory = inventory;
         _manager = manager;
         _controller = controller;

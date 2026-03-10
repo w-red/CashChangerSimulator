@@ -102,6 +102,17 @@ public class InventoryViewModel : IDisposable
         SimulatorCashChanger cashChanger,
         INotifyService notifyService)
     {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(history);
+        ArgumentNullException.ThrowIfNull(aggregator);
+        ArgumentNullException.ThrowIfNull(configProvider);
+        ArgumentNullException.ThrowIfNull(monitorsProvider);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(cashChanger);
+        ArgumentNullException.ThrowIfNull(notifyService);
+
         _inventory = inventory;
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;

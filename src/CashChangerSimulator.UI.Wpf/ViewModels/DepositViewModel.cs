@@ -137,6 +137,13 @@ public class DepositViewModel : IDisposable
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(getDenominations);
+        ArgumentNullException.ThrowIfNull(isDispenseBusy);
+        ArgumentNullException.ThrowIfNull(notifyService);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+
         _depositController = depositController;
         _hardwareStatusManager = hardwareStatusManager;
         _getDenominations = getDenominations;

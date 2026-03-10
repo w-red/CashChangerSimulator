@@ -22,21 +22,27 @@ public class BulkAmountInputViewModel(
     ReadOnlyReactiveProperty<bool> isJammed,
     ReadOnlyReactiveProperty<bool> isOverlapped)
 {
+    private static T EnsureNotNull<T>(T value) where T : class
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return value;
+    }
+
     /// <summary>入力項目のリスト。</summary>
-    public IEnumerable<BulkAmountInputItemViewModel> Items { get; } = items;
+    public IEnumerable<BulkAmountInputItemViewModel> Items { get; } = EnsureNotNull(items);
 
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
-    public ICommand SimulateOverlapCommand { get; } = simulateOverlap;
+    public ICommand SimulateOverlapCommand { get; } = EnsureNotNull(simulateOverlap);
 
     /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
-    public ICommand SimulateJamCommand { get; } = simulateJam;
+    public ICommand SimulateJamCommand { get; } = EnsureNotNull(simulateJam);
 
     /// <summary>エラー状態を解消するコマンド。</summary>
-    public ICommand ResetErrorCommand { get; } = resetError;
+    public ICommand ResetErrorCommand { get; } = EnsureNotNull(resetError);
 
     /// <summary>ジャムが発生しているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsJammed { get; } = isJammed;
+    public ReadOnlyReactiveProperty<bool> IsJammed { get; } = EnsureNotNull(isJammed);
 
     /// <summary>重なりエラーが発生しているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsOverlapped { get; } = isOverlapped;
+    public ReadOnlyReactiveProperty<bool> IsOverlapped { get; } = EnsureNotNull(isOverlapped);
 }

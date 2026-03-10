@@ -55,6 +55,13 @@ public class DenominationViewModel : IDisposable
         CashStatusMonitor monitor,
         ConfigurationProvider configProvider)
     {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(monitor);
+        ArgumentNullException.ThrowIfNull(configProvider);
+
         Key = key;
 
         var cultureCode = configProvider.Config.System.CultureCode ?? "en-US";
