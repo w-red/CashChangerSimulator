@@ -26,27 +26,31 @@
 
     <Border Style="{StaticResource CardStyle}">
         <Grid>
-            <StackPanel>
-                <TextBlock x:Name="FeedTitle" Text="RECENT TRANSACTIONS" Style="{StaticResource SectionHeaderStyle}" AutomationProperties.AutomationId="ActivityFeedTitle" />
-                
-                <Grid MinHeight="100">
-                    <!-- Empty State Message -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20"
-                                Visibility="{Binding IsEmpty.Value, Converter={StaticResource VisibilityConv}}">
-                        <materialDesign:PackIcon Kind="History" Width="32" Height="32" Opacity="0.2" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Text="最近の取引はありません" FontSize="12" Opacity="0.4" Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </StackPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" x:Name="FeedTitle" Text="RECENT TRANSACTIONS" Style="{StaticResource SectionHeaderStyle}" AutomationProperties.AutomationId="ActivityFeedTitle" />
+            
+            <Grid Grid.Row="1" MinHeight="100">
+                <!-- Empty State Message -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20"
+                            Visibility="{Binding IsEmpty.Value, Converter={StaticResource VisibilityConv}}">
+                    <materialDesign:PackIcon Kind="History" Width="32" Height="32" Opacity="0.2" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="最近の取引はありません" FontSize="12" Opacity="0.4" Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                </StackPanel>
 
-                    <!-- Transactions List -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                                  Visibility="{Binding IsEmpty.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                        <ItemsControl ItemsSource="{Binding RecentTransactions}"
-                                      ItemTemplate="{StaticResource TransactionItemTemplate}"
-                                      Background="Transparent">
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </StackPanel>
+                <!-- Transactions List -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                AutomationProperties.AutomationId="ActivityFeedScrollViewer"
+                                Visibility="{Binding IsEmpty.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                    <ItemsControl ItemsSource="{Binding RecentTransactions}"
+                                    ItemTemplate="{StaticResource TransactionItemTemplate}"
+                                    Background="Transparent">
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
         </Grid>
     </Border>
 </UserControl>
