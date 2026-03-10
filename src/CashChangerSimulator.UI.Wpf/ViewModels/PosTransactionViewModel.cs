@@ -240,7 +240,7 @@ public class PosTransactionViewModel : IDisposable
         InsertCashCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         InsertCashCommand.Subscribe(den =>
         {
-            if (_status.Value == PosTransactionStatus.WaitingForCash)
+            if (den != null && _status.Value == PosTransactionStatus.WaitingForCash)
             {
                 depositController.TrackDeposit(den.Key);
                 LogOpos($"Cash inserted: {den.Name}");

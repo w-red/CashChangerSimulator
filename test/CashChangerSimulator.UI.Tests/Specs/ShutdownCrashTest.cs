@@ -1,5 +1,4 @@
 using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Tools;
 using Shouldly;
 using System.Diagnostics;
 
