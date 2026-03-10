@@ -5,7 +5,7 @@ namespace CashChangerSimulator.UI.Wpf.Views;
 /// <summary>
 /// DialogHost で表示するための汎用メッセージダイアログ。
 /// </summary>
-public partial class MessageDialog : UserControl
+internal partial class MessageDialog : UserControl
 {
     public MessageDialog()
     {

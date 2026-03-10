@@ -6,7 +6,7 @@ using System.Windows;
 namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>メインウィンドウの表示と操作を制御する UI 要素。</summary>
-public partial class MainWindow : Window
+internal partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
 

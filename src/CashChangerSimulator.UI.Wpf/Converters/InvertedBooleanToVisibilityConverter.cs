@@ -9,7 +9,7 @@ namespace CashChangerSimulator.UI.Wpf.Converters;
 /// `true` を `Collapsed` に、`false` を `Visible` に変換します。
 /// 特定のフラグが「立っていない」時にのみ要素を表示させたい場合に使用します。
 /// </remarks>
-public class InvertedBooleanToVisibilityConverter : IValueConverter
+internal class InvertedBooleanToVisibilityConverter : IValueConverter
 {
     /// <summary>論理値を反転して Visibility に変換します。</summary>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

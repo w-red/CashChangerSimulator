@@ -5,7 +5,7 @@ using System.Windows;
 namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>出金操作を行うための独立ウィンドウ。</summary>
-public partial class DispenseWindow : Window
+internal partial class DispenseWindow : Window
 {
     private readonly CompositeDisposable _disposables = [];
 

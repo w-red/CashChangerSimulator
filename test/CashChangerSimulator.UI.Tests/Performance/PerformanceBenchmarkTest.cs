@@ -7,15 +7,13 @@ using CashChangerSimulator.Core;
 
 namespace CashChangerSimulator.UI.Tests.Performance;
 
-public class PerformanceBenchmarkTest : IClassFixture<PosTransactionViewModelFixture>
+/// <summary>POS取引フローのパフォーマンスを計測するベンチマークテスト。</summary>
+public class PerformanceBenchmarkTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly PosTransactionViewModelFixture _fixture = fixture;
 
-    public PerformanceBenchmarkTest(PosTransactionViewModelFixture fixture)
+    static PerformanceBenchmarkTest()
     {
-        _fixture = fixture;
-        _fixture.Initialize();
-
         // Ensure Logging is initialized for the benchmark
         LogProvider.Initialize(new LoggingSettings
         {

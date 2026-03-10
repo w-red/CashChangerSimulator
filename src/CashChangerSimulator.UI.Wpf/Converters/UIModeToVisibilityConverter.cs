@@ -6,7 +6,7 @@ using System.Windows.Data;
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
 /// <summary>現在の UIMode が、パラメータで指定された UIMode と一致するか判定するコンバーター。</summary>
-public class UIModeToVisibilityConverter : IValueConverter
+internal class UIModeToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

@@ -3,7 +3,7 @@ using System.Windows;
 namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>金種指定入出金用のダイアログウィンドウ。</summary>
-public partial class BulkAmountInputWindow : Window
+internal partial class BulkAmountInputWindow : Window
 {
     public BulkAmountInputWindow(string title, string? subtitle = null, string? buttonText = null)
     {
