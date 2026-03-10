@@ -5,7 +5,6 @@ using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
 using R3;
-using System.Linq;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -38,7 +37,7 @@ public class DenominationViewModel : IDisposable
     /// <summary>入金可能かどうか。</summary>
     public bool IsDepositable { get; }
     /// <summary>詳細情報を表示するコマンド。</summary>
-    public ReactiveCommand<Unit> ShowDetailCommand { get; }
+    public ReactiveCommand<DenominationViewModel> ShowDetailCommand { get; }
 
     /// <summary>依存関係を注入して DenominationViewModel を初期化します。</summary>
     /// <param name="inventory">在庫データ管理用インスタンス。</param>
@@ -107,7 +106,7 @@ public class DenominationViewModel : IDisposable
             .Select(_ => depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused)
             .ToBindableReactiveProperty(isAccepting);
 
-        ShowDetailCommand = new ReactiveCommand().AddTo(_disposables);
+        ShowDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
     }
 
     private void SafeInvoke(Action action)
