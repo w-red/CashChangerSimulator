@@ -13,7 +13,9 @@
         <materialDesign:PackIcon Kind="AlertCircle" Width="64" Height="64" Foreground="Red" HorizontalAlignment="Center" Margin="0,0,0,12"/>
         <TextBlock Text="{StaticResource DispenseError}" FontSize="24" FontWeight="Bold" Foreground="Red" HorizontalAlignment="Center"/>
         <TextBlock Text="{StaticResource HardwareCheckRequired}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,12"/>
-        <Button Command="{Binding ResetErrorCommand}" Style="{StaticResource ModernFlatButtonStyle}" Foreground="Red" Margin="0,16" Height="44">
+        <Button Command="{Binding ResetErrorCommand}" 
+                AutomationProperties.AutomationId="DispenseErrorResetButton"
+                Style="{StaticResource ErrorResetButtonStyle}" Margin="0,16" Height="44">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" />
                 <TextBlock Text="{StaticResource ClearError}" FontSize="14"/>

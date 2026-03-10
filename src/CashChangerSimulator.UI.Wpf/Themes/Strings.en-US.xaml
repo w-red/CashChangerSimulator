@@ -118,6 +118,7 @@
 
     <system:String x:Key="SimulateOverlap">SIM OVERLAP</system:String>
     <system:String x:Key="SimulateJam">SIM JAM</system:String>
+    <system:String x:Key="SimulateDeviceError">SIM ERROR</system:String>
     <system:String x:Key="LabelInput">Input: </system:String>
     <system:String x:Key="LabelTarget">Target: </system:String>
     <system:String x:Key="BulkOperations">BULK OPERATIONS</system:String>

@@ -48,6 +48,17 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
     </Style>
 
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="Background" Value="#FF5252"/>
+        <Setter Property="BorderBrush" Value="#FF5252"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FF8686"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
         <Setter Property="Background" Value="#25FFFFFF"/>
         <Setter Property="Foreground" Value="{StaticResource OnSurfaceBrush}"/>
@@ -58,6 +69,28 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#40FFFFFF"/>
                 <Setter Property="BorderBrush" Value="#D7B1FF"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{StaticResource WarningBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#15FFB74D"/>
+                <Setter Property="BorderBrush" Value="#FFE0B2"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ErrorResetButtonStyle" TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,4"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FF8686"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -82,15 +115,17 @@
         <Setter Property="Height" Value="40"/>
     </Style>
 
-    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-        <Setter Property="Background" Value="#FF5252"/>
-        <Setter Property="BorderBrush" Value="#FF5252"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FF8686"/>
-            </Trigger>
-        </Style.Triggers>
+    <Style x:Key="HeaderIconButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="HeaderIconToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Padding" Value="0"/>
     </Style>
 
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">

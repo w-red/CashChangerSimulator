@@ -33,7 +33,7 @@
                     FontSize="10" Padding="8,2"
                     Margin="0,0,8,0" Cursor="Hand">
                 <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+                    <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
@@ -49,13 +49,13 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button Style="{StaticResource SecondaryButtonStyle}" 
+            <Button Style="{StaticResource SimulationErrorButtonStyle}" 
                     Command="{Binding SimulateOverlapCommand}"
                     Content="{StaticResource SimulateOverlap}"
                     AutomationProperties.AutomationId="SimulateOverlapButton"
                     FontSize="10" Padding="8,2"
                     Margin="0,0,8,0"/>
-            <Button Style="{StaticResource SecondaryButtonStyle}" 
+            <Button Style="{StaticResource SimulationErrorButtonStyle}" 
                     Command="{Binding SimulateJamCommand}"
                     FontSize="10" Padding="8,2"
                     AutomationProperties.AutomationId="SimulateJamButton"

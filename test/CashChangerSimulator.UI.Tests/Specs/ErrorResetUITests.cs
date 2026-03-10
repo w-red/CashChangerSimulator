@@ -1,0 +1,190 @@
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Tools;
+using FlaUI.Core.Definitions;
+using Shouldly;
+
+namespace CashChangerSimulator.UI.Tests.Specs;
+
+/// <summary>エラー状態の解消（リセット）機能が、各 UI 要素から正しく動作することを検証する FlaUI テスト。</summary>
+public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
+{
+    private readonly CashChangerTestApp _app;
+
+    public ErrorResetUITests(CashChangerTestApp app)
+    {
+        _app = app;
+    }
+
+    [Fact]
+    public void SidebarResetButtonShouldClearErrorState()
+    {
+        // Arrange
+        _app.Launch(hotStart: true);
+        var window = _app.MainWindow ?? throw new Exception("MainWindow is null");
+
+        // デバイスが接続されていない場合は接続する (Open)
+        var openBtn = window.FindFirstDescendant("DeviceOpenButton");
+        if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
+        {
+            openBtn.AsButton().Click();
+        }
+
+        // ステータスが IDLE になるまで待機 (HotStart時も含む)
+        Retry.WhileFalse(() => {
+            var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel();
+            return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
+
+        // 念のため画面が表示されるのを待つ
+        var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsButton();
+        sidebarJamBtn.ShouldNotBeNull("Sidebar SimulateJamButton not found");
+
+        // Act: Sidebar の Jam ボタン（またはヘッダーのシミュレーションボタン）を押してエラー状態にする
+        sidebarJamBtn.Click();
+
+        // ヘッダーの Reset ボタンが表示されるのを待つ
+        var resetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
+        resetBtn.ShouldNotBeNull("GlobalResetErrorButton should be visible when jammed");
+
+        // Assert: Jam インジケータ（ステータスタブなど）を確認
+        var jamIndicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator"));
+        jamIndicator.ShouldNotBeNull("JamErrorIndicator should be visible in status header");
+
+        // Act: Reset ボタンをクリック
+        resetBtn.Click();
+
+        // Assert: エラー状態が解消されたことを確認
+        Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
+             .Success.ShouldBeTrue("JamErrorIndicator should disappear after reset");
+    }
+
+    [Fact]
+    public void GlobalResetButtonShouldClearErrorState()
+    {
+        // Arrange
+        _app.Launch(hotStart: true);
+        var window = _app.MainWindow ?? throw new Exception("MainWindow is null");
+
+        // デバイスが接続されていない場合は接続する (Open)
+        var openBtn = window.FindFirstDescendant("DeviceOpenButton");
+        if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
+        {
+            openBtn.AsButton().Click();
+        }
+
+        // ステータスが IDLE になるまで待機
+        Retry.WhileFalse(() => {
+            var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel();
+            return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
+
+        var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsButton();
+        sidebarJamBtn.ShouldNotBeNull();
+
+        // Act: Simulate Jam
+        sidebarJamBtn.Click();
+
+        // Global Reset ボタン（ヘッダー部分）を探す
+        var globalResetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
+        globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+
+        // Act: Click Global Reset
+        globalResetBtn.Click();
+
+        // Assert
+        Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
+             .Success.ShouldBeTrue("JamErrorIndicator should disappear after global reset");
+    }
+
+    [Fact]
+    public void DispenseErrorOverlayResetButtonShouldClearErrorState()
+    {
+        // Arrange: 金額 1 で出金遅延を設定してエラーを誘発するか、
+        // または DispenseWindow を開き、オーバーレイが表示される状態でテストする。
+        _app.Launch(hotStart: true);
+        var window = _app.MainWindow ?? throw new Exception("MainWindow is null");
+
+        // デバイスが接続されていない場合は接続する (Open)
+        var openBtn = window.FindFirstDescendant("DeviceOpenButton");
+        if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
+        {
+            openBtn.AsButton().Click();
+        }
+
+        // ステータスが IDLE になるまで待機
+        Retry.WhileFalse(() => {
+            var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel();
+            return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
+
+        // 出金ウィンドウを開く
+        var launchDispenseBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton();
+        launchDispenseBtn.ShouldNotBeNull("LaunchDispenseButton not found");
+        
+        // 有効になるまで待機
+        Retry.WhileFalse(() => launchDispenseBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("LaunchDispenseButton was not enabled");
+        
+        if (launchDispenseBtn.Patterns.Invoke.IsSupported) launchDispenseBtn.Patterns.Invoke.Pattern.Invoke();
+        else launchDispenseBtn.Click();
+
+        // 出金ウィンドウを待機 (デスクトップおよびメインウィンドウの直系から検索)
+        var desktop = _app.Automation.GetDesktop();
+        var dispenseWindow = Retry.WhileNull(() => 
+        {
+            // デスクトップから検索
+            var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+            var found = windows.FirstOrDefault(w => 
+            {
+                var aid = w.Properties.AutomationId.ValueOrDefault;
+                var name = w.Properties.Name.ValueOrDefault;
+                return aid == "DispenseWindow" || (name != null && name.Contains("DISPENSE"));
+            });
+            if (found != null) return found.AsWindow();
+
+            // メインウィンドウの子から検索 (念のため)
+            found = window.FindAllChildren(cf => cf.ByControlType(ControlType.Window)).FirstOrDefault(w => 
+            {
+                var aid = w.Properties.AutomationId.ValueOrDefault;
+                var name = w.Properties.Name.ValueOrDefault;
+                return aid == "DispenseWindow" || (name != null && name.Contains("DISPENSE"));
+            });
+            return found?.AsWindow();
+        }, TimeSpan.FromSeconds(15)).Result;
+
+        if (dispenseWindow == null)
+        {
+            var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+            var names = string.Join(", ", allWindows.Select(w => 
+            {
+                var n = w.Properties.Name.ValueOrDefault ?? "Unknown";
+                var aid = w.Properties.AutomationId.ValueOrDefault ?? "Unknown";
+                var pid = w.Properties.ProcessId.ValueOrDefault;
+                return $"'{n}' ({aid}) [PID={pid}]";
+            }));
+            throw new Exception($"DispenseWindow not found. Found windows: {names}");
+        }
+
+        // Act: 出金ウィンドウ内の Jam シミュレーションボタンをクリック
+        var sidebarJamBtn = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
+        sidebarJamBtn.ShouldNotBeNull("SimulateJamButton not found in dispense window");
+        
+        if (sidebarJamBtn.Patterns.Invoke.IsSupported) sidebarJamBtn.Patterns.Invoke.Pattern.Invoke();
+        else sidebarJamBtn.Click();
+
+        // エラー解消ボタンを探す (オーバーレイまたは通常ビュー内のリセットボタン)
+        var overlayResetBtn = Retry.WhileNull(() => 
+            dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")) ??
+            dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton")), 
+            TimeSpan.FromSeconds(15)).Result?.AsButton();
+        overlayResetBtn.ShouldNotBeNull("Dispense reset button not found (DispenseErrorResetButton or ResetErrorButton)");
+
+        // Act: Overlay の Reset をクリック
+        overlayResetBtn.Click();
+
+        // Assert: エラー表示が消えたことを確認（オーバーレイが消えるはず）
+        Retry.WhileFalse(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")) == null, TimeSpan.FromSeconds(5))
+             .Success.ShouldBeTrue("DispenseErrorResetButton should disappear after reset");
+
+        dispenseWindow.Close();
+    }
+}

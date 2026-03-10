@@ -35,7 +35,7 @@
             </StackPanel>
 
             <!-- Content -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Cursor="">
                 <StackPanel>
                     <!-- Settings Section -->
                     <Border Style="{StaticResource CardStyle}" Background="#05FFFFFF" Margin="0,0,0,16" Padding="12">
@@ -95,27 +95,27 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="SimulateJamButton"
-                                        Content="Jam"
+                                        Content="{StaticResource SimulateJam}"
                                         Command="{Binding SimulateJamCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Style="{StaticResource SimulationErrorButtonStyle}"
                                         Margin="0,0,4,0"
                                         Padding="10,4"
                                         Height="36"
                                         FontSize="12"
                                         AutomationProperties.AutomationId="SimulateJamButton"/>
                                 <Button x:Name="SimulateOverlapButton"
-                                        Content="Overlap"
+                                        Content="{StaticResource SimulateOverlap}"
                                         Command="{Binding SimulateOverlapCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Style="{StaticResource SimulationErrorButtonStyle}"
                                         Margin="0,0,4,0"
                                         Padding="10,4"
                                         Height="36"
                                         FontSize="12"
                                         AutomationProperties.AutomationId="SimulateOverlapButton"/>
                                 <Button x:Name="SimulateDeviceErrorButton"
-                                        Content="Error"
+                                        Content="{StaticResource SimulateDeviceError}"
                                         Command="{Binding SimulateDeviceErrorCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Style="{StaticResource SimulationErrorButtonStyle}"
                                         Margin="0,0,0,0"
                                         Padding="10,4"
                                         Height="36"
@@ -123,9 +123,10 @@
                                         AutomationProperties.AutomationId="SimulateDeviceErrorButton" />
                             </StackPanel>
                             <Button x:Name="ResetErrorButton" Grid.Column="1"
-                                    Content="Reset All" 
+                                    Content="{StaticResource Reset}" 
                                     Command="{Binding ResetErrorCommand}" 
-                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Style="{StaticResource ErrorResetButtonStyle}"
+                                    Visibility="{Binding IsAnyError.Value, Converter={StaticResource BoolToVis}}"
                                     Padding="16,4"
                                     Height="36"
                                     AutomationProperties.AutomationId="ResetErrorButton"/>
