@@ -77,9 +77,9 @@
                     </StackPanel>
                 </Button>
                 <Button x:Name="SimulateOverlapButton"
-                        Grid.Column="1" Style="{StaticResource SecondaryButtonStyle}" 
+                        Grid.Column="1" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
-                        Margin="4" Height="40" Foreground="Orange"
+                        Margin="4" Height="40"
                         ToolTip="Simulate Overlap Error"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
@@ -90,9 +90,9 @@
                     </StackPanel>
                 </Button>
                 <Button x:Name="SimulateRejectButton"
-                        Grid.Column="2" Style="{StaticResource SecondaryButtonStyle}" 
+                        Grid.Column="2" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateRejectCommand}"
-                        Margin="4" Height="40" Foreground="Goldenrod"
+                        Margin="4" Height="40"
                         ToolTip="Simulate Reject"
                         AutomationProperties.AutomationId="SimulateRejectButton">
                     <StackPanel Orientation="Horizontal">
@@ -177,7 +177,7 @@
                         Margin="4" Height="40"
                         AutomationProperties.AutomationId="ActiveResetErrorButton">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
+                        <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
                             <Setter Property="Visibility" Value="Collapsed" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">

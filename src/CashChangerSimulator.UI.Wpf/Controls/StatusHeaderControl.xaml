@@ -49,13 +49,19 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <!-- Reset Error Button -->
             <Button Command="{Binding ResetErrorCommand}"
-                    Background="#FF5252" BorderBrush="#FF5252" Foreground="White"
-                    Width="32" Height="32" Margin="0,0,8,0"
+                    AutomationProperties.AutomationId="GlobalResetErrorButton"
+                    Margin="0,0,8,0"
                     ToolTip="Reset Hardware Error">
                 <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource ModernActionButtonStyle}">
+                    <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
+                        <Setter Property="Background" Value="#FF5252"/>
+                        <Setter Property="BorderBrush" Value="#FF5252"/>
+                        <Setter Property="Foreground" Value="White"/>
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF8686"/>
+                            </Trigger>
                             <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
@@ -71,17 +77,27 @@
                 <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
             </Button>
 
-            <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
-                          IsChecked="{Binding IsJammed.Value}"
+            <ToggleButton IsChecked="{Binding IsJammed.Value}"
+                          AutomationProperties.AutomationId="SimulateJamButton"
                           ToolTip="Simulate Mechanical Jam"
                           Margin="0,0,8,0">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource HeaderIconToggleButtonStyle}">
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{StaticResource WarningBrush}" />
+                                <Setter Property="Foreground" Value="Black" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
                 <materialDesign:PackIcon Kind="CarBrakeAlert" />
                 <materialDesign:ToggleButtonAssist.OnContent>
-                    <materialDesign:PackIcon Kind="CarBrakeAlert" />
+                    <materialDesign:PackIcon Kind="Alert" />
                 </materialDesign:ToggleButtonAssist.OnContent>
             </ToggleButton>
 
-            <Button Style="{StaticResource ModernActionButtonStyle}"
+            <Button Style="{StaticResource HeaderIconButtonStyle}"
                     Command="{Binding OpenSettingsCommand}"
                     ToolTip="System Settings"
                     Background="{StaticResource SurfaceBrush}"

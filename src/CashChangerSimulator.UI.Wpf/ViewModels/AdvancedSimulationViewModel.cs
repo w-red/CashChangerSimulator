@@ -49,6 +49,9 @@ public class AdvancedSimulationViewModel : IDisposable
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
 
+    /// <summary>何らかのエラーが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsAnyError { get; }
+
     // --- Commands ---
 
     /// <summary>スクリプトを実行するコマンド。</summary>
@@ -108,6 +111,10 @@ public class AdvancedSimulationViewModel : IDisposable
         IsJammed = cashChanger.HardwareStatus.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
         IsOverlapped = cashChanger.HardwareStatus.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
         IsDeviceError = cashChanger.HardwareStatus.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+
+        IsAnyError = Observable.CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (j, o, e) => j || o || e)
+                .ToReadOnlyReactiveProperty()
+                .AddTo(_disposables);
 
         ResetErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
