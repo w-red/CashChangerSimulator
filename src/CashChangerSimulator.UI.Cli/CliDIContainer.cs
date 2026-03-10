@@ -12,7 +12,6 @@ using CashChangerSimulator.UI.Cli.Services;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.Device.Services;
-using Microsoft.PointOfService;
 
 namespace CashChangerSimulator.UI.Cli;
 

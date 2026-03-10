@@ -5,12 +5,10 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Testing;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -249,7 +247,7 @@ public class InventoryViewModel : IDisposable
             if (setting.IsRecyclable || setting.IsDepositable)
             {
                 var vm = new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, monitor, _configProvider);
-                vm.ShowDetailCommand.Subscribe(_ => ShowDenominationDetailCommand.Execute(vm)).AddTo(_disposables);
+                vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
                 if (key.Type == CurrencyCashType.Bill)
                 {
                     BillDenominations.Add(vm);

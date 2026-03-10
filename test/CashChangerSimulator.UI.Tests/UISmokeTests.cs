@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Windows;
 using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.Controls;

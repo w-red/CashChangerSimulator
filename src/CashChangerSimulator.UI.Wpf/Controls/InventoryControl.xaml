@@ -81,6 +81,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
                                       IsChecked="{Binding IsJammed.Value}"
+                                      AutomationProperties.AutomationId="SimulateJamButton"
                                       ToolTip="Simulate Mechanical Jam"
                                       Margin="0,0,8,0">
                             <materialDesign:PackIcon Kind="CarBrakeAlert" />
