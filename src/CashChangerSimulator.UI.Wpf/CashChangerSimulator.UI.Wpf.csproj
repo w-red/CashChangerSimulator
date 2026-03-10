@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="CashChangerSimulator.UI.Tests" />
+    <InternalsVisibleTo Include="CashChangerSimulator.Tests" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\config.toml" Link="config.toml">

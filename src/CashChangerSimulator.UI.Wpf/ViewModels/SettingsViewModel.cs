@@ -77,6 +77,10 @@ public class SettingsViewModel : IDisposable
         MonitorsProvider monitorsProvider,
         CurrencyMetadataProvider metadataProvider)
     {
+        ArgumentNullException.ThrowIfNull(configProvider);
+        ArgumentNullException.ThrowIfNull(monitorsProvider);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;

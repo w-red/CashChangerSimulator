@@ -122,6 +122,15 @@ public class PosTransactionViewModel : IDisposable
         DepositController depositController,
         INotifyService notifyService)
     {
+        ArgumentNullException.ThrowIfNull(deposit);
+        ArgumentNullException.ThrowIfNull(dispense);
+        ArgumentNullException.ThrowIfNull(cashChanger);
+        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+        ArgumentNullException.ThrowIfNull(getDenominations);
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(notifyService);
+
         _deposit = deposit;
         _dispense = dispense;
         _cashChanger = cashChanger;

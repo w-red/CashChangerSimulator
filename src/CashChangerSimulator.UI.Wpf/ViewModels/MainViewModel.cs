@@ -85,6 +85,20 @@ public class MainViewModel : IDisposable
         INotifyService notifyService,
         IScriptExecutionService scriptExecutionService)
     {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(history);
+        ArgumentNullException.ThrowIfNull(manager);
+        ArgumentNullException.ThrowIfNull(monitorsProvider);
+        ArgumentNullException.ThrowIfNull(aggregatorProvider);
+        ArgumentNullException.ThrowIfNull(configProvider);
+        ArgumentNullException.ThrowIfNull(metadataProvider);
+        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(depositController);
+        ArgumentNullException.ThrowIfNull(dispenseController);
+        ArgumentNullException.ThrowIfNull(cashChanger);
+        ArgumentNullException.ThrowIfNull(notifyService);
+        ArgumentNullException.ThrowIfNull(scriptExecutionService);
+
         _configProvider = configProvider;
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
