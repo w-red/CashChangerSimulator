@@ -3,8 +3,6 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using R3;
 using System.Text.Json;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Managers;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
