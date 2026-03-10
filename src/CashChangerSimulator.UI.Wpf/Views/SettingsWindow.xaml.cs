@@ -7,7 +7,7 @@ using R3;
 namespace CashChangerSimulator.UI.Wpf.Views;
 
 /// <summary>設定画面の表示と操作を制御する UI 要素。</summary>
-public partial class SettingsWindow : Window
+internal partial class SettingsWindow : Window
 {
     private readonly SettingsViewModel _viewModel;
 

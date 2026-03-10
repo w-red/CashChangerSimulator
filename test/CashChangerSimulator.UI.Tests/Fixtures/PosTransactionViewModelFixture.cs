@@ -74,7 +74,7 @@ public class PosTransactionViewModelFixture : IDisposable
     }
 
     /// <summary>検証用の ViewModel を生成します。</summary>
-    public PosTransactionViewModel CreateViewModel()
+    internal PosTransactionViewModel CreateViewModel()
     {
         var isDispenseBusy = new BindableReactiveProperty<bool>(false);
         var isInDepositMode = new BindableReactiveProperty<bool>(false);

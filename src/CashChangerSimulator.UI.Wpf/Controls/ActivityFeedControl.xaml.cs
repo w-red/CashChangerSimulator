@@ -2,7 +2,7 @@ using System.Windows.Controls;
 
 namespace CashChangerSimulator.UI.Wpf.Controls;
 
-public partial class ActivityFeedControl : UserControl
+internal partial class ActivityFeedControl : UserControl
 {
     public ActivityFeedControl()
     {

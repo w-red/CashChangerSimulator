@@ -8,7 +8,7 @@ namespace CashChangerSimulator.UI.Wpf.Converters;
 /// `true` を `false` に、`false` を `true` に変換します。
 /// UI 要素の有効/無効状態や可視性を、条件の否定に基づいて制御する場合に使用します。
 /// </remarks>
-public class InverseBooleanConverter : IValueConverter
+internal class InverseBooleanConverter : IValueConverter
 {
     /// <summary>論理値を反転します。</summary>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

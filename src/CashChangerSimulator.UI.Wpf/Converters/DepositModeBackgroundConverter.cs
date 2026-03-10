@@ -5,7 +5,7 @@ using System.Windows.Media;
 namespace CashChangerSimulator.UI.Wpf.Converters;
 
 /// <summary>入金モードかどうかに応じて背景色を切り替えるコンバーター。</summary>
-public class DepositModeBackgroundConverter : IValueConverter
+internal class DepositModeBackgroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

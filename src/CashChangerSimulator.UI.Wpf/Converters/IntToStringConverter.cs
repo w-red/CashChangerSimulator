@@ -7,7 +7,7 @@ namespace CashChangerSimulator.UI.Wpf.Converters;
 /// TextBox の空文字と数値型の相互変換をサポートするコンバーター。
 /// 空文字の場合は 0 を返し、バインドエラーを防ぎます。
 /// </summary>
-public class IntToStringConverter : IValueConverter
+internal class IntToStringConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

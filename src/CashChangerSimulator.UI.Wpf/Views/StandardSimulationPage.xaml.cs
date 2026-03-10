@@ -6,7 +6,7 @@ namespace CashChangerSimulator.UI.Wpf.Views;
 /// <summary>
 /// Interaction logic for StandardSimulationPage.xaml
 /// </summary>
-public partial class StandardSimulationPage : Page
+internal partial class StandardSimulationPage : Page
 {
     /// <summary>StandardSimulationPage の新しいインスタンスを初期化する。</summary>
     public StandardSimulationPage()
