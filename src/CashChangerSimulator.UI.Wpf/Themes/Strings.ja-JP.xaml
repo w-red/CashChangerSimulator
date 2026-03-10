@@ -22,6 +22,8 @@
     <system:String x:Key="Reject">リジェクト</system:String>
     <system:String x:Key="BadgeCollection">回収のみ</system:String>
     <system:String x:Key="InventoryDetail">在庫内訳</system:String>
+    <system:String x:Key="TotalCountLabel">総枚数</system:String>
+    <system:String x:Key="CountSuffix">枚</system:String>
 
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>

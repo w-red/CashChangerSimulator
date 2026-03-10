@@ -67,10 +67,10 @@
             <Border Margin="0,20,0,0" Padding="16,8" Background="{StaticResource PrimaryBrush}" CornerRadius="8" Opacity="0.1" />
             
             <Grid Margin="16,-38,16,0">
-                <TextBlock Text="TOTAL" FontSize="12" FontWeight="Black" VerticalAlignment="Center" Opacity="0.6"/>
+                <TextBlock Text="{StaticResource TotalCountLabel}" FontSize="12" FontWeight="Black" VerticalAlignment="Center" Opacity="0.6"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding Count.Value}" FontSize="32" FontWeight="Black" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
-                    <TextBlock Text="枚" FontSize="14" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Bottom" Margin="4,0,0,6"/>
+                    <TextBlock Text="{StaticResource CountSuffix}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Bottom" Margin="4,0,0,6"/>
                 </StackPanel>
             </Grid>
         </StackPanel>

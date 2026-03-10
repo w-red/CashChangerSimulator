@@ -22,6 +22,8 @@
     <system:String x:Key="Reject">REJECT</system:String>
     <system:String x:Key="BadgeCollection">COLL. ONLY</system:String>
     <system:String x:Key="InventoryDetail">INVENTORY DETAIL</system:String>
+    <system:String x:Key="TotalCountLabel">TOTAL COUNT</system:String>
+    <system:String x:Key="CountSuffix"></system:String>
 
     <system:String x:Key="CashBalance">CASH BALANCE</system:String>
     <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>
