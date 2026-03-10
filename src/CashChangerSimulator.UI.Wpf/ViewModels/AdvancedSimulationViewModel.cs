@@ -66,6 +66,9 @@ public class AdvancedSimulationViewModel : IDisposable
     /// <summary>デバイスエラーをシミュレーションするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateDeviceErrorCommand { get; }
 
+    /// <summary>スクリプト入力をクリアするコマンド。</summary>
+    public ReactiveCommand<Unit> ClearScriptInputCommand { get; }
+
     /// <summary>依存関係を注入して <see cref="AdvancedSimulationViewModel"/> を初期化します。</summary>
     /// <param name="cashChanger">シミュレータ本体インスタンス <see cref="SimulatorCashChanger"/>。</param>
     /// <param name="scriptExecutionService">スクリプト実行を担う <see cref="IScriptExecutionService"/>。</param>
@@ -110,6 +113,7 @@ public class AdvancedSimulationViewModel : IDisposable
         SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateOverlapCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        ClearScriptInputCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
 
         IsRealTimeDataEnabled
             .Subscribe(enabled => _cashChanger.RealTimeDataEnabled = enabled)
@@ -119,6 +123,7 @@ public class AdvancedSimulationViewModel : IDisposable
         SimulateJamCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetJammed(true));
         SimulateOverlapCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetOverlapped(true));
         SimulateDeviceErrorCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetDeviceError(999, 0));
+        ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
 
         // Enables command only if JSON is basically valid list
         var canExecute = ScriptInput.Select(input =>
