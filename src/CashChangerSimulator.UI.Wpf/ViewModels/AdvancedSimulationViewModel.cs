@@ -116,7 +116,7 @@ public class AdvancedSimulationViewModel : IDisposable
                 .ToReadOnlyReactiveProperty()
                 .AddTo(_disposables);
 
-        ResetErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        ResetErrorCommand = IsAnyError.ToReactiveCommand().AddTo(_disposables);
         SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateOverlapCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);

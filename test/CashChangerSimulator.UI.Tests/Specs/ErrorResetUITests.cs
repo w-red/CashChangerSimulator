@@ -42,9 +42,10 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Sidebar の Jam ボタン（またはヘッダーのシミュレーションボタン）を押してエラー状態にする
         sidebarJamBtn.Click();
 
-        // ヘッダーの Reset ボタンが表示されるのを待つ
-        var resetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
-        resetBtn.ShouldNotBeNull("GlobalResetErrorButton should be visible when jammed");
+        // ヘッダーの Reset ボタンは常にUIツリーに存在するが、エラー発生時にのみ Enabled になる
+        var resetBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton"))?.AsButton();
+        resetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+        Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Assert: Jam インジケータ（ステータスタブなど）を確認
         var jamIndicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator"));
@@ -84,9 +85,10 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Simulate Jam
         sidebarJamBtn.Click();
 
-        // Global Reset ボタン（ヘッダー部分）を探す
-        var globalResetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
+        // Global Reset ボタン（ヘッダー部分）を探す。常に存在するが Enabled を待つ
+        var globalResetBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton"))?.AsButton();
         globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+        Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Act: Click Global Reset
         globalResetBtn.Click();
@@ -181,9 +183,9 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Overlay の Reset をクリック
         overlayResetBtn.Click();
 
-        // Assert: エラー表示が消えたことを確認（オーバーレイが消えるはず）
-        Retry.WhileFalse(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")) == null, TimeSpan.FromSeconds(5))
-             .Success.ShouldBeTrue("DispenseErrorResetButton should disappear after reset");
+        // Assert: エラー表示が消えたことを確認（オーバーレイのボタンがDisabledになる）
+        Retry.WhileFalse(() => !overlayResetBtn.IsEnabled, TimeSpan.FromSeconds(5))
+             .Success.ShouldBeTrue("DispenseErrorResetButton should be disabled after reset");
 
         dispenseWindow.Close();
     }

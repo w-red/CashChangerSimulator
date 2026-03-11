@@ -126,7 +126,6 @@
                                     Content="{StaticResource Reset}" 
                                     Command="{Binding ResetErrorCommand}" 
                                     Style="{StaticResource ErrorResetButtonStyle}"
-                                    Visibility="{Binding IsAnyError.Value, Converter={StaticResource BoolToVis}}"
                                     Padding="16,4"
                                     Height="36"
                                     AutomationProperties.AutomationId="ResetErrorButton"/>

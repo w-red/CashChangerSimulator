@@ -98,10 +98,8 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
 
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
 
-        var resetBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
         var simulateJamBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
 
-        resetBtn.ShouldNotBeNull("ResetErrorButton not found");
         simulateJamBtn.ShouldNotBeNull("SimulateJamButton not found");
 
         // Act: Simulate Jam
@@ -112,6 +110,12 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         var jamIndicator = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("JamIndicatorText")), TimeSpan.FromSeconds(10)).Result;
         jamIndicator.ShouldNotBeNull("JamIndicator should be visible after simulation");
         jamIndicator.IsOffscreen.ShouldBeFalse();
+
+        // ResetErrorButton は常にツリーに配置されているが、エラー発生後にのみ Enabled となる
+        var resetBtn = advWindow.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton"))?.AsButton();
+        resetBtn.ShouldNotBeNull("ResetErrorButton not found");
+        
+        Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("ResetErrorButton should enable after jam");
 
         // Act: Reset
         if (resetBtn.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
