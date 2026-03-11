@@ -37,7 +37,7 @@ public class CashChangerTestApp : IDisposable
         _executablePath = potentialPath;
     }
 
-    public void Launch(string? customConfigToml = null, bool hotStart = true)
+    public void Launch(string? customConfigToml = null, bool hotStart = true, Dictionary<string, string>? envVars = null)
     {
         string fullPath = Path.GetFullPath(_executablePath);
         string? appDir = Path.GetDirectoryName(fullPath);
@@ -76,6 +76,13 @@ HotStart = {hotStart.ToString().ToLower()}
         Automation = new UIA3Automation();
         var startInfo = new System.Diagnostics.ProcessStartInfo(_executablePath);
         startInfo.EnvironmentVariables["SKIP_STATE_VERIFICATION"] = "true";
+        if (envVars != null)
+        {
+            foreach (var kvp in envVars)
+            {
+                startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
+            }
+        }
         Application = Application.Launch(startInfo);
 
         // Use a more robust wait for the window

@@ -17,7 +17,8 @@ public class DocumentationScreenshotGenerator : IDisposable
     public DocumentationScreenshotGenerator()
     {
         _app = new CashChangerTestApp();
-        _app.Launch();
+        var triggerPath = Path.GetFullPath("open_dialog.trigger");
+        _app.Launch(envVars: new Dictionary<string, string> { { "TEST_AUTO_OPEN_INVENTORY_DIALOG_FILE", triggerPath } });
 
         // docs/images フォルダを特定
         // 実行ディレクトリ (test/bin/Debug/...) からリポジトリルートの docs/images へ
@@ -57,54 +58,46 @@ public class DocumentationScreenshotGenerator : IDisposable
         var mainWindow = _app?.MainWindow;
         if (mainWindow == null) throw new Exception("MainWindow is not available.");
 
-        var tile = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId(tileId))?.AsButton()
-                   ?? throw new Exception("Inventory tile not found.");
-        // タイトルをクリックする前に、状態を確認
-        tile.WaitUntilEnabled(TimeSpan.FromSeconds(5));
-        tile.WaitUntilClickable(TimeSpan.FromSeconds(5));
-        
-        Console.WriteLine($"Aggressive clicking tile: {tile.Name}, AutomationId: {tile.AutomationId}");
+        // The View Model will auto-open this dialog when the trigger file is detected.
+        Console.WriteLine("Writing open_dialog.trigger to trigger ViewModel hook...");
+        System.IO.File.WriteAllText(Path.GetFullPath("open_dialog.trigger"), "open");
 
-        // 1. フォーカスを当てる
-        tile.Focus();
-        Thread.Sleep(500);
+        AutomationElement? dialog = null;
 
-        // 2. Invoke パターンを試行
-        if (tile.Patterns.Invoke.IsSupported)
-        {
-            try { tile.Patterns.Invoke.Pattern.Invoke(); } catch { }
-        }
-        
-        // 3. マウスクリックを試行
-        try { tile.Click(false); } catch { }
-        
-        // 4. キーボード Enter を試行
-        try { FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN); } catch { }
-
-        // ダイアログが表示されるのを待機
-        var dialog = Retry.WhileNull(() =>
-        {
-            if (_app == null) return null;
-            // A. MainWindow の子孫
-            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
-            if (found != null) return found;
-
-            // B. Desktop 直下の全要素から再帰的に検索
-            var automation = _app.Automation;
-            if (automation == null) return null;
-            var desktop = automation.GetDesktop();
-            foreach (var child in desktop.FindAllChildren())
+            // ダイアログが表示されるのを待機
+            dialog = Retry.WhileNull(() =>
             {
-                var inChild = child.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
-                if (inChild != null) return inChild;
-            }
+                if (_app == null) return null;
+                // A. MainWindow の子孫 (DialogHost は MainWindow 上にオーバーレイされる)
+                var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                if (found != null && !found.IsOffscreen) return found;
 
-            return null;
-        }, TimeSpan.FromSeconds(25)).Result;
+                // C. 名前、あるいはクラス名でフォールバック検索（MaterialDesignThemes DialogHost への対策）
+                found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByClassName("Popup").Or(cf.ByClassName("DialogHost")).Or(cf.ByName("Denomination Detail")));
+                if (found != null && !found.IsOffscreen)
+                {
+                   // 中に目的のダイアログがあるか確認
+                   var inner = found.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                   if (inner != null && !inner.IsOffscreen) return inner;
+                   return found; // 見つからなくてもオーバーレイ自体を返す
+                }
+
+                // B. Desktop 直下の全要素から再帰的に検索
+                var automation = _app.Automation;
+                if (automation == null) return null;
+                var desktop = automation.GetDesktop();
+                foreach (var child in desktop.FindAllChildren())
+                {
+                    var inChild = child.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                    if (inChild != null && !inChild.IsOffscreen) return inChild;
+                }
+
+                return null;
+            }, TimeSpan.FromSeconds(10)).Result;
 
         if (dialog == null)
         {
-            throw new Exception($"Denomination detail dialog not found (ID: {dialogId}).");
+            throw new Exception($"Denomination detail dialog not found (ID: {dialogId}) after 3 attempts.");
         }
 
         Thread.Sleep(2000); // 描画・アニメーション待ち
