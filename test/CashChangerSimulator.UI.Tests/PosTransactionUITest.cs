@@ -1,6 +1,10 @@
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.UI.Tests.Fixtures;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.UI.Tests.Fixtures;
+using CashChangerSimulator.Device.Coordination;
 using Moq;
 using R3;
 using Shouldly;
@@ -19,38 +23,43 @@ public class PosTransactionUITest : IDisposable
 
     private PosTransactionViewModel CreateViewModel()
     {
+        var facade = new DeviceFacade(
+            _fixture.Inventory,
+            _fixture.Manager,
+            _fixture.DepositController,
+            _fixture.DispenseController,
+            _fixture.Hardware,
+            _fixture.CashChanger,
+            _fixture.History,
+            new OverallStatusAggregatorProvider(new MonitorsProvider(_fixture.Inventory, _fixture.ConfigProvider, _fixture.MetadataProvider)),
+            new MonitorsProvider(_fixture.Inventory, _fixture.ConfigProvider, _fixture.MetadataProvider),
+            new Mock<INotifyService>().Object);
+
         var isDispenseBusy = new BindableReactiveProperty<bool>(false);
         var isInDepositMode = new BindableReactiveProperty<bool>(false);
-        var notifyService = new Mock<INotifyService>().Object;
 
         var depVm = new DepositViewModel(
-            _fixture.DepositController,
-            _fixture.Hardware,
+            facade,
             () => [],
             isDispenseBusy,
-            notifyService,
+            facade.Notify,
             _fixture.MetadataProvider);
 
         var dispVm = new DispenseViewModel(
-            _fixture.Inventory,
-            _fixture.Manager,
-            _fixture.DispenseController,
-            _fixture.Hardware,
+            facade,
             _fixture.ConfigProvider,
             isInDepositMode,
             () => [],
-            notifyService,
+            facade.Notify,
             _fixture.MetadataProvider);
 
         return new PosTransactionViewModel(
+            facade,
             depVm,
             dispVm,
-            _fixture.CashChanger,
-            _fixture.Hardware,
             _fixture.MetadataProvider,
             () => [],
-            _fixture.DepositController,
-            notifyService);
+            facade.Notify);
     }
 
     [Fact]

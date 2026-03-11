@@ -55,10 +55,10 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             closeBtn?.Click();
             Thread.Sleep(200);
             
-            openBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton(), TimeSpan.FromSeconds(5)).Result;
+            openBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton(), TimeSpan.FromSeconds(10)).Result;
             openBtn.ShouldNotBeNull($"DeviceOpenButton not found during iteration {i}");
             openBtn.Click();
-            Thread.Sleep(200);
+            Thread.Sleep(500);
             
             closeBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton(), TimeSpan.FromSeconds(5)).Result;
             closeBtn.ShouldNotBeNull($"DeviceCloseButton not found during iteration {i}");

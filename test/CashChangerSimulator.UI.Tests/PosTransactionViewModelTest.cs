@@ -1,5 +1,5 @@
 using System.Windows.Input;
-using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using Moq;
@@ -16,42 +16,6 @@ namespace CashChangerSimulator.UI.Tests;
 public class PosTransactionViewModelTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>
 {
     private readonly PosTransactionViewModelFixture _fixture = fixture;
-
-    private PosTransactionViewModel CreateViewModel()
-    {
-        var isDispenseBusy = new BindableReactiveProperty<bool>(false);
-        var isInDepositMode = new BindableReactiveProperty<bool>(false);
-        var notifyService = new Mock<INotifyService>().Object;
-
-        var depVm = new DepositViewModel(
-            _fixture.DepositController,
-            _fixture.Hardware,
-            () => [],
-            isDispenseBusy,
-            notifyService,
-            _fixture.MetadataProvider);
-
-        var dispVm = new DispenseViewModel(
-            inventory: _fixture.Inventory,
-            manager: _fixture.Manager,
-            controller: _fixture.DispenseController,
-            hardwareStatusManager: _fixture.Hardware,
-            configProvider: _fixture.ConfigProvider,
-            isInDepositMode: isInDepositMode,
-            getDenominations: () => [],
-            notifyService: notifyService,
-            metadataProvider: _fixture.MetadataProvider);
-
-        return new PosTransactionViewModel(
-            depVm,
-            dispVm,
-            _fixture.CashChanger,
-            _fixture.Hardware,
-            _fixture.MetadataProvider,
-            () => [],
-            _fixture.DepositController,
-            notifyService);
-    }
 
     /// <summary>初期化時にトランザクションステータスが Idle になることを検証します。</summary>
     [Fact]
