@@ -107,6 +107,9 @@ public static class CliDIContainer
         services.AddSingleton<CliViewService>();
         services.AddSingleton<CliScriptService>();
 
+        services.AddSingleton<ILineReader, ReadLineReader>();
+        services.AddSingleton<ICliCommandDispatcher, CliCommandDispatcher>();
+        services.AddSingleton<CliInteractiveShell>();
         services.AddTransient<CliCommands>();
     }
 

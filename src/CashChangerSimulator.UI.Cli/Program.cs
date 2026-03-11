@@ -4,6 +4,7 @@ using Spectre.Console;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Cli.Services;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -29,7 +30,8 @@ public class Program
         if (commandArgs.Length == 0)
         {
             CliDIContainer.PostInitialize(app.Services, commandArgs);
-            RunInteractiveMode(app.Services);
+            var shell = app.Services.GetRequiredService<CliInteractiveShell>();
+            shell.RunAsync().GetAwaiter().GetResult();
         }
         else
         {
@@ -97,203 +99,5 @@ public class Program
                     break;
             }
         }
-    }
-
-    /// <summary>インタラクティブモード（REPL形式）を開始します。</summary>
-    private static void RunInteractiveMode(IServiceProvider services)
-    {
-        var commands = services.GetRequiredService<CliCommands>();
-        var localizer = services.GetRequiredService<IStringLocalizer>();
-        var changer = services.GetRequiredService<SimulatorCashChanger>();
-        var console = services.GetRequiredService<IAnsiConsole>();
-        var options = services.GetRequiredService<CliSessionOptions>();
-        var L = services.GetRequiredService<IStringLocalizer>();
-
-        Console.CancelKeyPress += (_, e) =>
-        {
-            e.Cancel = true;
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine(L["messages.exit_hint"]);
-        };
-
-        AnsiConsole.Write(new FigletText(L["messages.welcome"]).Color(Color.Cyan));
-        AnsiConsole.Write(new Rule($"[cyan]{L["messages.simulator_cli"]}[/]").LeftJustified());
-        AnsiConsole.MarkupLine(L["messages.help_hint"]);
-        AnsiConsole.MarkupLine(L["messages.exit_hint"]);
-        AnsiConsole.WriteLine();
-
-        // Setup ReadLine
-        var commandList = new[] { 
-            "open", "claim", "enable", "disable", "status", "read-counts", 
-            "deposit", "fix-deposit", "end-deposit", "dispense", "adjust-counts", 
-            "history", "release", "close", "run-script", 
-            "config", "config list", "config get", "config set", "config save", "config reload",
-            "log-level", "log-level Debug", "log-level Information", "log-level Warning", "log-level Error",
-            "help", "exit", "quit" 
-        };
-        ReadLine.AutoCompletionHandler = new CliAutoCompleteHandler(commandList);
-        ReadLine.HistoryEnabled = true;
-
-        var historyFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CashChangerSimulator", "cli_history.txt");
-        try
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(historyFile)!);
-        }
-        catch { }
-
-        if (File.Exists(historyFile))
-        {
-            var historyLines = File.ReadAllLines(historyFile).Distinct().ToList();
-            ReadLine.AddHistory(historyLines.ToArray());
-        }
-
-        while (true)
-        {
-            var prompt = options.IsAsync ? "async > " : "> ";
-            var line = ReadLine.Read(prompt);
-
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
-            var trimmed = line.Trim();
-            var lower = trimmed.ToLowerInvariant();
-            if (lower is "exit" or "quit")
-            {
-                if (ConfirmExit(changer, console, L)) break;
-                continue;
-            }
-
-            // Persistence with duplicate prevention
-            try
-            {
-                var history = File.Exists(historyFile) ? File.ReadAllLines(historyFile).ToList() : [];
-                if (history.Count == 0 || history[^1] != trimmed)
-                {
-                    File.AppendAllLines(historyFile, [trimmed]);
-                }
-            }
-            catch { }
-
-            var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var command = parts[0].ToLowerInvariant();
-
-            try
-            {
-                switch (command)
-                {
-                    case "open":
-                        commands.Open();
-                        break;
-                    case "claim":
-                        var timeout = parts.Length > 1 && int.TryParse(parts[1], out var t) ? t : 1000;
-                        commands.Claim(timeout);
-                        break;
-                    case "enable":
-                        commands.Enable();
-                        break;
-                    case "disable":
-                        commands.Disable();
-                        break;
-                    case "status":
-                        commands.Status();
-                        break;
-                    case "read-counts":
-                        commands.ReadCashCounts();
-                        break;
-                    case "deposit":
-                        if (parts.Length > 1 && int.TryParse(parts[1], out var amount))
-                            commands.Deposit(amount);
-                        else
-                            commands.Deposit(null);
-                        break;
-                    case "fix-deposit":
-                        commands.FixDeposit();
-                        break;
-                    case "end-deposit":
-                        commands.EndDeposit();
-                        break;
-                    case "adjust-counts":
-                        if (parts.Length > 1)
-                            commands.AdjustCashCounts(parts[1]);
-                        else
-                            AnsiConsole.MarkupLine(localizer["messages.usage_adjust_counts"]);
-                        break;
-                    case "dispense":
-                        if (parts.Length > 1 && int.TryParse(parts[1], out var dispAmt))
-                            commands.Dispense(dispAmt);
-                        else
-                            AnsiConsole.MarkupLine(localizer["messages.usage_dispense"]);
-                        break;
-                    case "history":
-                        var count = parts.Length > 1 && int.TryParse(parts[1], out var c) ? c : 10;
-                        commands.History(count);
-                        break;
-                    case "release":
-                        commands.Release();
-                        break;
-                    case "close":
-                        commands.Close();
-                        break;
-                    case "run-script":
-                        if (parts.Length > 1)
-                            commands.RunScript(parts[1]).GetAwaiter().GetResult();
-                        else
-                            AnsiConsole.MarkupLine(localizer["messages.usage_run_script"]);
-                        break;
-                    case "config":
-                        if (parts.Length > 1)
-                        {
-                            var sub = parts[1].ToLowerInvariant();
-                            switch (sub)
-                            {
-                                case "list": commands.ConfigList(); break;
-                                case "get": if (parts.Length > 2) commands.ConfigGet(parts[2]); break;
-                                case "set": if (parts.Length > 3) commands.ConfigSet(parts[2], parts[3]); break;
-                                case "save": commands.ConfigSave(); break;
-                                case "reload": commands.ConfigReload(); break;
-                                default: commands.Config(); break;
-                            }
-                        }
-                        else
-                        {
-                            commands.Config();
-                        }
-                        break;
-                    case "log-level":
-                        if (parts.Length > 1)
-                            commands.LogLevel(parts[1]);
-                        else
-                            AnsiConsole.MarkupLine(localizer["messages.usage_log_level"]);
-                        break;
-                    case "help":
-                        commands.Help();
-                        break;
-                    default:
-                        AnsiConsole.MarkupLine(L["messages.unknown_command", command]);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine(L["messages.error_prefix", ex.Message]);
-            }
-            Thread.Sleep(100);
-        }
-
-        try { changer.Close(); } catch { }
-    }
-
-    /// <summary>終了確認を行います。デバイスがオープンの場合は警告を表示します。</summary>
-    private static bool ConfirmExit(SimulatorCashChanger changer, IAnsiConsole console, IStringLocalizer L)
-    {
-        var isOpen = changer.State != Microsoft.PointOfService.ControlState.Closed;
-        if (isOpen)
-        {
-            console.MarkupLine(L["messages.exit_warning"]);
-            if (!console.Confirm(L["messages.exit_confirm"]))
-            {
-                return false;
-            }
-        }
-        return true;
     }
 }
