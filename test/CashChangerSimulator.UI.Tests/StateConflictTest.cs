@@ -1,6 +1,16 @@
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Managers;
+using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
+using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Transactions;
+using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Tests.Fixtures;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
 using Shouldly;
@@ -17,20 +27,41 @@ public class StateConflictTest : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _fixture.Initialize();
-        _mainViewModel = new MainViewModel(
+
+        var facade = new DeviceFacade(
             _fixture.Inventory,
-            _fixture.History,
             _fixture.Manager,
-            _fixture.MonitorsProvider,
-            _fixture.AggregatorProvider,
-            _fixture.ConfigProvider,
-            _fixture.MetadataProvider,
-            _fixture.HardwareManager,
             _fixture.DepositController,
             _fixture.MockDispenseController.Object,
+            _fixture.HardwareManager,
             _fixture.MockCashChanger.Object,
-            _fixture.MockNotify.Object,
-            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+            _fixture.History,
+            _fixture.AggregatorProvider,
+            _fixture.MonitorsProvider,
+            _fixture.MockNotify.Object);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(facade);
+        services.AddSingleton(_fixture.ConfigProvider);
+        services.AddSingleton(_fixture.MetadataProvider);
+        services.AddSingleton<IDeviceFacade>(facade);
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
+        services.AddSingleton(facade.Notify);
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<IViewModelFactory>();
+
+        _mainViewModel = new MainViewModel(
+            factory,
+            facade,
+            _fixture.ConfigProvider,
+            _fixture.MetadataProvider,
+            facade.Notify,
+            provider.GetRequiredService<IScriptExecutionService>());
+        
         await ValueTask.CompletedTask;
     }
 

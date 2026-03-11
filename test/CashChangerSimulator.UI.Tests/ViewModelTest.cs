@@ -4,7 +4,11 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
 using Shouldly;
@@ -40,20 +44,45 @@ public class ViewModelTest
         var mockSimulator = new Mock<IDeviceSimulator>();
         var dispenseController = new DispenseController(mockManager.Object, realHardware, mockSimulator.Object);
 
-        var vm = new MainViewModel(
+        var changer = new InternalSimulatorCashChanger(new SimulatorDependencies(
+            realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, 
+            depositController, dispenseController, realAggregator, realHardware));
+
+        var facade = new DeviceFacade(
             mockInventory.Object,
-            mockHistory.Object,
             mockManager.Object,
-            realMonitors,
-            realAggregator,
-            realConfig,
-            realMetadata,
-            realHardware,
             depositController,
             dispenseController,
-            new InternalSimulatorCashChanger(realConfig, mockInventory.Object, mockHistory.Object, mockManager.Object, depositController, dispenseController, realAggregator, realHardware),
-            new Mock<INotifyService>().Object,
-            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+            realHardware,
+            changer,
+            mockHistory.Object,
+            realAggregator,
+            realMonitors,
+            new Mock<INotifyService>().Object);
+
+        var services = new ServiceCollection();
+        // ViewModels are usually singletons in standard registration, but for testing we can just register them or let ActivatorUtilities handle them.
+        services.AddSingleton(facade);
+        services.AddSingleton(realConfig);
+        services.AddSingleton(realMetadata);
+        services.AddSingleton<IDeviceFacade>(facade);
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        // Add other necessary services
+        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
+        services.AddSingleton(facade.Notify);
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
+
+        var provider = services.BuildServiceProvider();
+        var factory = new ViewModelFactory(provider);
+
+        var vm = new MainViewModel(
+            factory,
+            facade,
+            realConfig,
+            realMetadata,
+            facade.Notify,
+            provider.GetRequiredService<IScriptExecutionService>());
 
         // Verify: ViewModel is properly initialized
         vm.Deposit.ShouldNotBeNull();

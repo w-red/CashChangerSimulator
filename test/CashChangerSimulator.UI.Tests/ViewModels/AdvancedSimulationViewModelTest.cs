@@ -4,7 +4,9 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
@@ -54,7 +56,19 @@ public class AdvancedSimulationViewModelTest : IDisposable
         _cashChanger = _mockCashChanger.Object;
         _mockScriptExecutionService = new Mock<IScriptExecutionService>();
 
-        _viewModel = new AdvancedSimulationViewModel(_cashChanger, _mockScriptExecutionService.Object, _mockDepositController.Object, metadataProvider);
+        var facade = new DeviceFacade(
+            inventory,
+            manager,
+            _mockDepositController.Object,
+            dummyDispense,
+            hardware,
+            _cashChanger,
+            history,
+            aggregator,
+            monitors,
+            new Mock<INotifyService>().Object);
+
+        _viewModel = new AdvancedSimulationViewModel(facade, _mockScriptExecutionService.Object, metadataProvider);
     }
 
     /// <summary>IsRealTimeDataEnabledを切り替えた際に、対象となるデバイスへ設定が反映されることを検証します。</summary>

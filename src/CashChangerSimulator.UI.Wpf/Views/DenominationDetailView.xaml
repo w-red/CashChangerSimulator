@@ -8,6 +8,7 @@
              mc:Ignorable="d" 
              MinWidth="400"
              AutomationProperties.IsOffscreenBehavior="Onscreen"
+             AutomationProperties.AutomationId="DenominationDetailDialogView"
              d:DesignHeight="350"
              d:DataContext="{d:DesignInstance Type=vm:DenominationViewModel}">
     <Border Background="#1E1E1E" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="#33FFFFFF">

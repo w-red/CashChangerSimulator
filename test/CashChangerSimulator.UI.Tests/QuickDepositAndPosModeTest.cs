@@ -5,7 +5,11 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
 using Shouldly;
@@ -23,6 +27,7 @@ public class QuickDepositAndPosModeTest
     private readonly DispenseController _dispenseController;
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
+    private readonly IDeviceFacade _facade;
 
     /// <summary>QuickDepositAndPosModeTest の新しいインスタンスを初期化します。</summary>
     public QuickDepositAndPosModeTest()
@@ -47,20 +52,42 @@ public class QuickDepositAndPosModeTest
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
 
-        _mainViewModel = new MainViewModel(
+        var changer = new InternalSimulatorCashChanger(new SimulatorDependencies(
+            configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, 
+            DepositController, _dispenseController, aggregatorProvider, hardwareManager));
+
+        _facade = new DeviceFacade(
             _mockInventory.Object,
-            _mockHistory.Object,
             _mockManager.Object,
-            monitorsProvider,
-            aggregatorProvider,
-            configProvider,
-            _metadataProvider,
-            hardwareManager,
             DepositController,
             _dispenseController,
-            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, DepositController, _dispenseController, aggregatorProvider, hardwareManager),
-            new Mock<INotifyService>().Object,
-            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+            hardwareManager,
+            changer,
+            _mockHistory.Object,
+            aggregatorProvider,
+            monitorsProvider,
+            new Mock<INotifyService>().Object);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(configProvider);
+        services.AddSingleton(_metadataProvider);
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
+        services.AddSingleton(_facade.Notify);
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<IViewModelFactory>();
+
+        _mainViewModel = new MainViewModel(
+            factory,
+            _facade,
+            configProvider,
+            _metadataProvider,
+            _facade.Notify,
+            provider.GetRequiredService<IScriptExecutionService>());
         hardwareManager.SetConnected(true);
     }
 
@@ -75,11 +102,11 @@ public class QuickDepositAndPosModeTest
 
         _ = new List<DenominationViewModel>
         {
-            new(_mockInventory.Object, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, DepositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, DepositController, monitor, configProvider),
-            new(_mockInventory.Object, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, DepositController, monitor, configProvider),
+            new(_facade, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
+            new(_facade, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
+            new(_facade, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
+            new(_facade, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, monitor, configProvider),
+            new(_facade, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, monitor, configProvider),
         };
 
         var depositVm = _mainViewModel.Deposit;

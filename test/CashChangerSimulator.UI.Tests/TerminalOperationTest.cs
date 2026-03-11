@@ -5,6 +5,8 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.PointOfService;
 using Moq;
@@ -22,6 +24,7 @@ public class TerminalOperationTest
     private readonly Mock<DepositController> _mockDepositController;
     private readonly Mock<DispenseController> _mockDispenseController;
     private readonly BindableReactiveProperty<bool> _isBusyShared = new(false);
+    private readonly IDeviceFacade _facade;
 
     public TerminalOperationTest()
     {
@@ -51,6 +54,25 @@ public class TerminalOperationTest
         _mockDepositController.SetupGet(c => c.IsFixed).Returns(false);
         _mockDepositController.SetupGet(c => c.DepositStatus).Returns(CashDepositStatus.None);
         _mockDepositController.SetupGet(c => c.IsPaused).Returns(false);
+
+        var configProvider = new ConfigurationProvider();
+        var metadataProvider = new CurrencyMetadataProvider(configProvider);
+        var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, metadataProvider);
+        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
+        
+        _facade = new DeviceFacade(
+            _mockInventory.Object,
+            _mockCashChangerManager.Object,
+            _mockDepositController.Object,
+            _mockDispenseController.Object,
+            _hardwareManager,
+            new Mock<InternalSimulatorCashChanger>(new SimulatorDependencies(
+                configProvider, _mockInventory.Object, new TransactionHistory(), _mockCashChangerManager.Object,
+                _mockDepositController.Object, _mockDispenseController.Object, aggregatorProvider, _hardwareManager)).Object,
+            new TransactionHistory(),
+            aggregatorProvider,
+            monitorsProvider,
+            new Mock<INotifyService>().Object);
     }
 
     /// <summary>入金 ViewModel の操作可能状態がハードウェアエラーとビジー状態を正しく反映することを検証します。</summary>
@@ -65,11 +87,10 @@ public class TerminalOperationTest
         _hardwareManager.SetConnected(true);
 
         var vm = new DepositViewModel(
-            _mockDepositController.Object,
-            _hardwareManager,
+            _facade,
             () => [],
             _isBusyShared,
-            new Mock<INotifyService>().Object,
+            _facade.Notify,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
 
         // Assert: Initial (Normal)
@@ -105,14 +126,11 @@ public class TerminalOperationTest
         // Arrange
         var configProvider = new ConfigurationProvider();
         var vm = new DispenseViewModel(
-            _mockInventory.Object,
-            _mockCashChangerManager.Object,
-            _mockDispenseController.Object,
-            _hardwareManager,
+            _facade,
             configProvider,
             _isBusyShared,
             () => [],
-            new Mock<INotifyService>().Object,
+            _facade.Notify,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
 
@@ -146,11 +164,10 @@ public class TerminalOperationTest
         _mockDepositController.Setup(c => c.Changed).Returns(changedSubject);
 
         var vm = new DepositViewModel(
-            _mockDepositController.Object,
-            _hardwareManager,
+            _facade,
             () => [],
             _isBusyShared,
-            new Mock<INotifyService>().Object,
+            _facade.Notify,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
         _hardwareManager.SetConnected(true);
 
@@ -207,14 +224,11 @@ public class TerminalOperationTest
         _mockInventory.Setup(i => i.CalculateTotal(It.IsAny<string>())).Returns(1000m); // Ensure sufficient funds
         var configProvider = new ConfigurationProvider();
         var vm = new DispenseViewModel(
-            _mockInventory.Object,
-            _mockCashChangerManager.Object,
-            _mockDispenseController.Object,
-            _hardwareManager,
+            _facade,
             configProvider,
             _isBusyShared,
             () => [],
-            new Mock<INotifyService>().Object,
+            _facade.Notify,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
 

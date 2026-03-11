@@ -5,7 +5,11 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PointOfService;
 using Moq;
 using R3;
@@ -24,6 +28,7 @@ public class DepositModeViewModelTest
     private readonly MainViewModel _mainViewModel;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly DenominationKey _testKey = new(1000, CurrencyCashType.Bill);
+    private readonly IDeviceFacade _facade;
 
     /// <summary>DepositModeViewModelTest の新しいインスタンスを初期化します。</summary>
     public DepositModeViewModelTest()
@@ -49,20 +54,42 @@ public class DepositModeViewModelTest
         var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
 
-        _mainViewModel = new MainViewModel(
+        var changer = new InternalSimulatorCashChanger(new SimulatorDependencies(
+            configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, 
+            DepositController, _dispenseController, aggregatorProvider, hardwareManager));
+
+        _facade = new DeviceFacade(
             _mockInventory.Object,
-            _mockHistory.Object,
             _mockManager.Object,
-            monitorsProvider,
-            aggregatorProvider,
-            configProvider,
-            _metadataProvider,
-            hardwareManager,
             DepositController,
             _dispenseController,
-            new InternalSimulatorCashChanger(configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, DepositController, _dispenseController, aggregatorProvider, hardwareManager),
-            new Mock<INotifyService>().Object,
-            new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+            hardwareManager,
+            changer,
+            _mockHistory.Object,
+            aggregatorProvider,
+            monitorsProvider,
+            new Mock<INotifyService>().Object);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(configProvider);
+        services.AddSingleton(_metadataProvider);
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
+        services.AddSingleton(_facade.Notify);
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
+
+        var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<IViewModelFactory>();
+
+        _mainViewModel = new MainViewModel(
+            factory,
+            _facade,
+            configProvider,
+            _metadataProvider,
+            _facade.Notify,
+            provider.GetRequiredService<IScriptExecutionService>());
     }
 
     /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証します。</summary>
@@ -76,7 +103,7 @@ public class DepositModeViewModelTest
         var config = new DenominationSettings();
         var monitor = new CashStatusMonitor(_mockInventory.Object, _testKey, config.NearEmpty, config.NearFull, config.Full);
         var configProvider = _mainViewModel.ConfigProvider;
-        var denVm = new DenominationViewModel(_mockInventory.Object, _testKey, _metadataProvider, DepositController, monitor, configProvider);
+        var denVm = new DenominationViewModel(_facade, _testKey, _metadataProvider, monitor, configProvider);
         DepositController.BeginDeposit();
 
         // Assert: Running

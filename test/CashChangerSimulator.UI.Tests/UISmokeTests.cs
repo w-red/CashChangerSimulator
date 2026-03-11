@@ -17,6 +17,7 @@ using CashChangerSimulator.Core.Monitoring;
 using Microsoft.Extensions.DependencyInjection;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.UI.Wpf.Converters;
 using System.IO.Packaging;
@@ -103,16 +104,22 @@ public class UISmokeTests
                 var mockChanger = new Mock<SimulatorCashChanger>(deps);
                 var mockNotify = new Mock<INotifyService>();
 
+                var facade = new DeviceFacade(
+                    mockInv.Object,
+                    new Mock<CashChangerManager>(mockInv.Object, mockHistory.Object, new ChangeCalculator()).Object,
+                    depositController,
+                    dispenseController,
+                    hardware,
+                    mockChanger.Object,
+                    mockHistory.Object,
+                    new OverallStatusAggregatorProvider(monitors),
+                    monitors,
+                    mockNotify.Object);
+
                 var invVM = new InventoryViewModel(
-                    mockInv.Object, 
-                    mockHistory.Object, 
-                    aggregator, 
-                    config, 
-                    monitors, 
-                    metadata, 
-                    hardware, 
-                    depositController, 
-                    mockChanger.Object, 
+                    facade,
+                    config,
+                    metadata,
                     mockNotify.Object);
 
                 // Test ActivityFeedControl
@@ -123,16 +130,30 @@ public class UISmokeTests
                 var inventoryControl = new InventoryControl { DataContext = invVM };
                 inventoryControl.ShouldNotBeNull();
 
+                var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+                services.AddSingleton<IDeviceFacade>(facade);
+                services.AddSingleton(config);
+                services.AddSingleton(metadata);
+                services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+                services.AddSingleton(new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
+                services.AddSingleton(facade.Notify);
+                services.AddSingleton<InventoryViewModel>();
+                services.AddSingleton<AdvancedSimulationViewModel>();
+                services.AddSingleton<MainViewModel>();
+                var provider = services.BuildServiceProvider();
+                var factory = provider.GetRequiredService<IViewModelFactory>();
+
                 var mainVM = new Mock<MainViewModel>(
-                    mockInv.Object, mockHistory.Object, new Mock<CashChangerManager>(mockInv.Object, mockHistory.Object, new ChangeCalculator()).Object,
-                    monitors, new OverallStatusAggregatorProvider(monitors), config, metadata, hardware, depositController, dispenseController,
-                    mockChanger.Object, mockNotify.Object, new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object
+                    factory,
+                    facade,
+                    config,
+                    metadata,
+                    mockNotify.Object,
+                    provider.GetRequiredService<CashChangerSimulator.Device.Services.IScriptExecutionService>()
                 );
 
                 // Initialize DIContainer with our mock provider
-                var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-                services.AddSingleton<MainViewModel>(mainVM.Object);
-                DIContainer.SetProvider(services.BuildServiceProvider());
+                DIContainer.SetProvider(provider);
 
                 var mainWindow = new MainWindow();
                 mainWindow.DataContext = mainVM.Object;
