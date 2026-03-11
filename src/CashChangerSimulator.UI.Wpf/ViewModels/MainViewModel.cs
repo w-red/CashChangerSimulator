@@ -5,10 +5,11 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.Extensions.Logging;
 using R3;
-using CashChangerSimulator.Device.Services;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -21,6 +22,8 @@ public class MainViewModel : IDisposable
 {
     private readonly CompositeDisposable _disposables = [];
     private readonly ConfigurationProvider _configProvider;
+    private readonly IViewModelFactory _viewModelFactory;
+    private readonly IDeviceFacade _facade;
 
     /// <summary>設定プロバイダー。</summary>
     public ConfigurationProvider ConfigProvider => _configProvider;
@@ -55,92 +58,56 @@ public class MainViewModel : IDisposable
     public BindableReactiveProperty<string> GlobalModeName { get; }
 
     /// <summary>全依存関係を注入して MainViewModel を初期化し、サブ ViewModel を構築します。</summary>
-    /// <param name="inventory">在庫管理インスタンス。</param>
-    /// <param name="history">取引履歴サービス。</param>
-    /// <param name="manager">マネージャーインスタンス。</param>
-    /// <param name="monitorsProvider">監視モニタープロバイダー。</param>
-    /// <param name="aggregatorProvider">集約ステータスプロバイダー。</param>
+    /// <param name="viewModelFactory">ViewModel 生成ファクトリ。</param>
+    /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="configProvider">設定プロバイダー。</param>
     /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
-    /// <param name="hardwareStatusManager">ハードウェア状態マネージャー。</param>
-    /// <param name="depositController">入金コントローラー。</param>
-    /// <param name="dispenseController">出金コントローラー。</param>
-    /// <param name="cashChanger">デバイス本体インスタンス。</param>
     /// <param name="notifyService">通知サービス。</param>
     /// <param name="scriptExecutionService">スクリプト実行サービス。</param>
     public MainViewModel(
-        Inventory inventory,
-        TransactionHistory history,
-        CashChangerManager manager,
-        MonitorsProvider monitorsProvider,
-        OverallStatusAggregatorProvider aggregatorProvider,
+        IViewModelFactory viewModelFactory,
+        IDeviceFacade facade,
         ConfigurationProvider configProvider,
         CurrencyMetadataProvider metadataProvider,
-        HardwareStatusManager hardwareStatusManager,
-        DepositController depositController,
-        DispenseController dispenseController,
-        SimulatorCashChanger cashChanger,
         INotifyService notifyService,
         IScriptExecutionService scriptExecutionService)
     {
-        ArgumentNullException.ThrowIfNull(inventory);
-        ArgumentNullException.ThrowIfNull(history);
-        ArgumentNullException.ThrowIfNull(manager);
-        ArgumentNullException.ThrowIfNull(monitorsProvider);
-        ArgumentNullException.ThrowIfNull(aggregatorProvider);
+        ArgumentNullException.ThrowIfNull(viewModelFactory);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(metadataProvider);
-        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
-        ArgumentNullException.ThrowIfNull(depositController);
-        ArgumentNullException.ThrowIfNull(dispenseController);
-        ArgumentNullException.ThrowIfNull(cashChanger);
         ArgumentNullException.ThrowIfNull(notifyService);
         ArgumentNullException.ThrowIfNull(scriptExecutionService);
 
+        _viewModelFactory = viewModelFactory;
+        _facade = facade;
         _configProvider = configProvider;
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
         var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
 
         // Sub-ViewModels
-        Inventory = new InventoryViewModel(
-            inventory,
-            history,
-            aggregatorProvider.Aggregator,
-            configProvider,
-            monitorsProvider,
-            metadataProvider,
-            hardwareStatusManager,
-            depositController,
-            cashChanger,
-            notifyService)
-            .AddTo(_disposables);
+        Inventory = _viewModelFactory.CreateInventoryViewModel().AddTo(_disposables);
 
-        Deposit = new DepositViewModel(
-            depositController,
-            hardwareStatusManager,
+        Deposit = _viewModelFactory.CreateDepositViewModel(
             () => Inventory.Denominations,
-            isDispenseBusy,
-            notifyService,
-            metadataProvider)
+            isDispenseBusy)
             .AddTo(_disposables);
 
-        Dispense = new DispenseViewModel(
-            inventory,
-            manager,
-            dispenseController,
-            hardwareStatusManager,
-            configProvider,
+        Dispense = _viewModelFactory.CreateDispenseViewModel(
             Deposit.IsInDepositMode,
-            () => Inventory.Denominations,
-            notifyService,
-            metadataProvider)
+            () => Inventory.Denominations)
             .AddTo(_disposables);
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
-        PosTransaction = new PosTransactionViewModel(Deposit, Dispense, cashChanger, hardwareStatusManager, metadataProvider, () => Inventory.Denominations, depositController, notifyService).AddTo(_disposables);
-        AdvancedSimulation = new AdvancedSimulationViewModel(cashChanger, scriptExecutionService, depositController, metadataProvider).AddTo(_disposables);
+        PosTransaction = _viewModelFactory.CreatePosTransactionViewModel(
+            Deposit,
+            Dispense,
+            () => Inventory.Denominations)
+            .AddTo(_disposables);
+
+        AdvancedSimulation = _viewModelFactory.CreateAdvancedSimulationViewModel().AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
 
@@ -153,11 +120,11 @@ public class MainViewModel : IDisposable
         {
             try
             {
-                cashChanger.Open();
-                if (cashChanger.SkipStateVerification)
+                _facade.Changer.Open();
+                if (_facade.Changer.SkipStateVerification)
                 {
-                    cashChanger.Claim(0);
-                    cashChanger.DeviceEnabled = true;
+                    _facade.Changer.Claim(0);
+                    _facade.Changer.DeviceEnabled = true;
                 }
             }
             catch (Exception ex)
@@ -165,11 +132,11 @@ public class MainViewModel : IDisposable
                 LogProvider.CreateLogger<MainViewModel>().LogError(ex, "Failed to auto-open device during Hot Start.");
                 var msg = ResourceHelper.GetAsString("ErrorDeviceConnection", "Failed to connect to the cash changer device.");
                 var title = ResourceHelper.GetAsString("Error", "Error");
-                notifyService.ShowWarning(msg, title);
+                _facade.Notify.ShowWarning(msg, title);
             }
         }
 
-        GlobalModeName = hardwareStatusManager.IsConnected
+        GlobalModeName = _facade.Status.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
                 return !isConnected
@@ -177,17 +144,17 @@ public class MainViewModel : IDisposable
                     : dispenseMode == "Busy"
                     ? "DISPENSING" : depositMode;
             })
-            .ToBindableReactiveProperty(hardwareStatusManager.IsConnected.Value
+            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value
                 ? "IDLE"
                 : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 
-        OpenDepositCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenDepositCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenDepositCommand.Subscribe(_ =>
         {
-            if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
+            if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
             {
-                notifyService.ShowWarning(
+                _facade.Notify.ShowWarning(
                     ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError", "Cannot open terminal while in error state."),
                     ResourceHelper.GetAsString("Warn", "Warning"));
                 return;
@@ -206,12 +173,12 @@ public class MainViewModel : IDisposable
             }
         });
 
-        OpenDispenseCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenDispenseCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenDispenseCommand.Subscribe(_ =>
         {
-            if (hardwareStatusManager.IsJammed.Value || hardwareStatusManager.IsOverlapped.Value)
+            if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
             {
-                notifyService.ShowWarning(
+                _facade.Notify.ShowWarning(
                     ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError", "Cannot open terminal while in error state."),
                     ResourceHelper.GetAsString("Warn", "Warning"));
                 return;
@@ -222,7 +189,7 @@ public class MainViewModel : IDisposable
             window.Show();
         });
 
-        OpenAdvancedSimulationCommand = hardwareStatusManager.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
             var mainWindow = System.Windows.Application.Current?.MainWindow;

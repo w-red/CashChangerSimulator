@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
@@ -16,12 +17,9 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// <summary>現金在庫の可視化とデバイスの基本操作（接続・エラー解除）を担当する ViewModel。</summary>
 public class InventoryViewModel : IDisposable
 {
-    private readonly Inventory _inventory;
+    private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
-    private readonly MonitorsProvider _monitorsProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly HardwareStatusManager _hardwareStatusManager;
-    private readonly DepositController _depositController;
     private readonly INotifyService _notifyService;
     private readonly CompositeDisposable _disposables = [];
 
@@ -81,56 +79,35 @@ public class InventoryViewModel : IDisposable
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
 
     /// <summary>依存関係を注入して InventoryViewModel を初期化します。</summary>
-    /// <param name="inventory">在庫管理インスタンス。</param>
-    /// <param name="history">取引履歴サービス。</param>
-    /// <param name="aggregator">ステータス集約プロバイダー。</param>
+    /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="configProvider">設定プロバイダー。</param>
-    /// <param name="monitorsProvider">監視モニタープロバイダー。</param>
     /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
-    /// <param name="hardwareStatusManager">ハードウェア状態マネージャー。</param>
-    /// <param name="depositController">入金コントローラー。</param>
-    /// <param name="cashChanger">デバイス本体インスタンス。</param>
     /// <param name="notifyService">通知サービス。</param>
     public InventoryViewModel(
-        Inventory inventory,
-        TransactionHistory history,
-        OverallStatusAggregator aggregator,
+        IDeviceFacade facade,
         ConfigurationProvider configProvider,
-        MonitorsProvider monitorsProvider,
         CurrencyMetadataProvider metadataProvider,
-        HardwareStatusManager hardwareStatusManager,
-        DepositController depositController,
-        SimulatorCashChanger cashChanger,
         INotifyService notifyService)
     {
-        ArgumentNullException.ThrowIfNull(inventory);
-        ArgumentNullException.ThrowIfNull(history);
-        ArgumentNullException.ThrowIfNull(aggregator);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
-        ArgumentNullException.ThrowIfNull(monitorsProvider);
         ArgumentNullException.ThrowIfNull(metadataProvider);
-        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
-        ArgumentNullException.ThrowIfNull(depositController);
-        ArgumentNullException.ThrowIfNull(cashChanger);
         ArgumentNullException.ThrowIfNull(notifyService);
 
-        _inventory = inventory;
+        _facade = facade;
         _configProvider = configProvider;
-        _monitorsProvider = monitorsProvider;
         _metadataProvider = metadataProvider;
-        _hardwareStatusManager = hardwareStatusManager;
-        _depositController = depositController;
         _notifyService = notifyService;
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix;
         CurrencySuffix = _metadataProvider.SymbolSuffix;
-        OverallStatus = aggregator.DeviceStatus;
-        FullStatus = aggregator.FullStatus;
-        IsJammed = _hardwareStatusManager.IsJammed;
-        IsOverlapped = _hardwareStatusManager.IsOverlapped;
-        IsDeviceError = _hardwareStatusManager.IsDeviceError;
-        CurrentErrorCode = _hardwareStatusManager.CurrentErrorCode;
-        IsConnected = _hardwareStatusManager.IsConnected;
+        OverallStatus = _facade.AggregatorProvider.Aggregator.DeviceStatus;
+        FullStatus = _facade.AggregatorProvider.Aggregator.FullStatus;
+        IsJammed = _facade.Status.IsJammed;
+        IsOverlapped = _facade.Status.IsOverlapped;
+        IsDeviceError = _facade.Status.IsDeviceError;
+        CurrentErrorCode = _facade.Status.CurrentErrorCode;
+        IsConnected = _facade.Status.IsConnected;
 
         BillGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
         CoinGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
@@ -138,11 +115,11 @@ public class InventoryViewModel : IDisposable
 
         InitializeDenominations();
 
-        _monitorsProvider.Changed
+        _facade.Monitors.Changed
             .Subscribe(_ => SafeInvoke(InitializeDenominations))
             .AddTo(_disposables);
 
-        history.Added
+        _facade.History.Added
             .Subscribe(entry => SafeInvoke(() =>
             {
                 RecentTransactions.Insert(0, entry);
@@ -159,23 +136,23 @@ public class InventoryViewModel : IDisposable
         });
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
 
         OpenCommand = new ReactiveCommand().AddTo(_disposables);
         OpenCommand.Subscribe(_ =>
         {
             try
             {
-                cashChanger.Open();
-                if (cashChanger.SkipStateVerification)
+                _facade.Changer.Open();
+                if (_facade.Changer.SkipStateVerification)
                 {
-                    cashChanger.Claim(0);
-                    cashChanger.DeviceEnabled = true;
+                    _facade.Changer.Claim(0);
+                    _facade.Changer.DeviceEnabled = true;
                 }
             }
             catch (Exception ex)
             {
-                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+                _facade.Status.SetDeviceError((int)ErrorCode.Failure);
                 _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
             }
         });
@@ -185,11 +162,11 @@ public class InventoryViewModel : IDisposable
         {
             try
             {
-                cashChanger.Close();
+                _facade.Changer.Close();
             }
             catch (Exception ex)
             {
-                _hardwareStatusManager.SetDeviceError((int)ErrorCode.Failure);
+                _facade.Status.SetDeviceError((int)ErrorCode.Failure);
                 _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
             }
         });
@@ -197,19 +174,19 @@ public class InventoryViewModel : IDisposable
         CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
         CollectAllCommand.Subscribe(_ =>
         {
-            foreach (var monitor in _monitorsProvider.Monitors)
+            foreach (var monitor in _facade.Monitors.Monitors)
             {
-                _inventory.SetCount(monitor.Key, 0);
+                _facade.Inventory.SetCount(monitor.Key, 0);
             }
         });
 
         ReplenishAllCommand = new ReactiveCommand().AddTo(_disposables);
         ReplenishAllCommand.Subscribe(_ =>
         {
-            foreach (var monitor in _monitorsProvider.Monitors)
+            foreach (var monitor in _facade.Monitors.Monitors)
             {
                 var setting = _configProvider.Config.GetDenominationSetting(monitor.Key);
-                _inventory.SetCount(monitor.Key, setting.InitialCount);
+                _facade.Inventory.SetCount(monitor.Key, setting.InitialCount);
             }
         });
 
@@ -296,14 +273,14 @@ public class InventoryViewModel : IDisposable
         BillDenominations.Clear();
         CoinDenominations.Clear();
 
-        foreach (var monitor in _monitorsProvider.Monitors)
+        foreach (var monitor in _facade.Monitors.Monitors)
         {
             var key = monitor.Key;
             var setting = _configProvider.Config.GetDenominationSetting(key);
 
             if (setting.IsRecyclable || setting.IsDepositable)
             {
-                var vm = new DenominationViewModel(_inventory, key, _metadataProvider, _depositController, monitor, _configProvider);
+                var vm = new DenominationViewModel(_facade, key, _metadataProvider, monitor, _configProvider);
                 vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
                 if (key.Type == CurrencyCashType.Bill)
                 {
