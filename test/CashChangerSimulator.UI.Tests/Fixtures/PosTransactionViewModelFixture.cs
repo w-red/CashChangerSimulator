@@ -6,6 +6,7 @@ using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
 using R3;
@@ -75,36 +76,45 @@ public class PosTransactionViewModelFixture : IDisposable
     /// <summary>検証用の ViewModel を生成します。</summary>
     internal PosTransactionViewModel CreateViewModel()
     {
+        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
+        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
+        
+        var facade = new DeviceFacade(
+            Inventory,
+            Manager,
+            DepositController,
+            DispenseController,
+            Hardware,
+            CashChanger,
+            History,
+            aggregatorProvider,
+            monitorsProvider,
+            NotifyServiceMock.Object);
+
         var isDispenseBusy = new BindableReactiveProperty<bool>(false);
         var isInDepositMode = new BindableReactiveProperty<bool>(false);
 
         var depVm = new DepositViewModel(
-            DepositController,
-            Hardware,
+            facade,
             () => [],
             isDispenseBusy,
             NotifyServiceMock.Object,
             MetadataProvider);
 
         var dispVm = new DispenseViewModel(
-            inventory: Inventory,
-            manager: Manager,
-            controller: DispenseController,
-            hardwareStatusManager: Hardware,
-            configProvider: ConfigProvider,
-            isInDepositMode: isInDepositMode,
-            getDenominations: () => [],
-            notifyService: NotifyServiceMock.Object,
-            metadataProvider: MetadataProvider);
+            facade,
+            ConfigProvider,
+            isInDepositMode,
+            () => [],
+            NotifyServiceMock.Object,
+            MetadataProvider);
 
         return new PosTransactionViewModel(
+            facade,
             depVm,
             dispVm,
-            CashChanger,
-            Hardware,
             MetadataProvider,
             () => [],
-            DepositController,
             NotifyServiceMock.Object);
     }
 
