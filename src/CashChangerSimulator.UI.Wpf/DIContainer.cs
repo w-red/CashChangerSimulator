@@ -7,6 +7,7 @@ using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +37,6 @@ public static class DIContainer
         services.AddSingleton<MonitorsProvider>();
         services.AddSingleton<OverallStatusAggregatorProvider>();
         services.AddSingleton<INotifyService, Services.WpfNotifyService>();
-        services.AddSingleton<INotifyService, Services.WpfNotifyService>();
 
         // 2. Core Services (Singleton)
         services.AddSingleton<Inventory>();
@@ -48,26 +48,26 @@ public static class DIContainer
         services.AddSingleton<DiagnosticController>();
 
         // 3. Simulator / Devices (Singleton)
+        services.AddSingleton<IDeviceSimulator, HardwareSimulator>();
+        services.AddSingleton<DepositController>();
+        services.AddSingleton<DispenseController>();
+
         services.AddSingleton<InternalSimulatorCashChanger>(sp => {
-            // Break circular dependency: construct deps manually without the facades that depend on the changer itself
             var deps = new SimulatorDependencies(
                 ConfigProvider: sp.GetRequiredService<ConfigurationProvider>(),
                 Inventory: sp.GetRequiredService<Inventory>(),
                 History: sp.GetRequiredService<TransactionHistory>(),
                 Manager: sp.GetRequiredService<CashChangerManager>(),
+                DepositController: sp.GetRequiredService<DepositController>(),
+                DispenseController: sp.GetRequiredService<DispenseController>(),
                 AggregatorProvider: sp.GetRequiredService<OverallStatusAggregatorProvider>(),
                 HardwareStatusManager: sp.GetRequiredService<HardwareStatusManager>(),
                 DiagnosticController: sp.GetRequiredService<DiagnosticController>()
-                // Facades (Mediator, etc.) will be resolved later if needed, 
-                // but InternalSimulatorCashChanger's constructor handles its own internal coordinator logic.
             );
             return new InternalSimulatorCashChanger(deps);
         });
 
         services.AddSingleton<SimulatorCashChanger>(sp => sp.GetRequiredService<InternalSimulatorCashChanger>());
-        services.AddSingleton<IDeviceSimulator, HardwareSimulator>();
-        services.AddSingleton<DepositController>();
-        services.AddSingleton<DispenseController>();
         services.AddSingleton<DeviceEventHistoryObserver>();
         services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
 
@@ -89,7 +89,11 @@ public static class DIContainer
         });
 
         // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        services.AddSingleton<IDeviceFacade, DeviceFacade>();
         services.AddSingleton<MainViewModel>();
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
 
         // Build the ServiceProvider
         _serviceProvider = services.BuildServiceProvider();
