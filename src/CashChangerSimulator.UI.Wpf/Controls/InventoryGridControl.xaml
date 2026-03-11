@@ -17,7 +17,17 @@
         </ResourceDictionary>
     </UserControl.Resources>
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <!-- テスト専用ボタン: 金種詳細ダイアログを確実に開くためのエントリポイント。本番 UI には表示されない。-->
+        <Button AutomationProperties.AutomationId="ShowFirstDenominationDetailTestButton"
+                Width="100" Height="100" Opacity="0.01" Background="Transparent"
+                Command="{Binding OpenFirstBillDenominationDetailCommand}"
+                Focusable="False"
+                IsTabStop="False"
+                Panel.ZIndex="999"
+                HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding BillGridWidth.Value}" />
@@ -41,5 +51,6 @@
                 </ItemsControl>
             </StackPanel>
         </Grid>
-    </ScrollViewer>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
