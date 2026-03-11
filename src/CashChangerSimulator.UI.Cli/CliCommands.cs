@@ -62,92 +62,92 @@ public partial class CliCommands(
 
     /// <summary>指定された JSON スクリプトファイルを実行します。</summary>
     [Command("run-script")]
-    public Task RunScript(string path) => _scriptService.RunScriptAsync(path);
+    public virtual Task RunScript(string path) => _scriptService.RunScriptAsync(path);
 
     /// <summary>デバイスの状態と現在の在高を表示します。</summary>
     [Command("status")]
-    public void Status() => _viewService.Status();
+    public virtual void Status() => _viewService.Status();
 
     /// <summary>取引履歴を表示します。</summary>
     [Command("history")]
-    public void History([Option('c', Description = "表示件数")] int count = 10) => _viewService.History(count);
+    public virtual void History([Option('c', Description = "表示件数")] int count = 10) => _viewService.History(count);
 
     /// <summary>デバイスをオープンします。</summary>
     [Command("open")]
-    public void Open() => _deviceService.Open();
+    public virtual void Open() => _deviceService.Open();
 
     /// <summary>デバイスを占有します。</summary>
     [Command("claim")]
-    public void Claim([Option('t', Description = "タイムアウト(ms)")] int timeout = 5000) => _deviceService.Claim(timeout);
+    public virtual void Claim([Option('t', Description = "タイムアウト(ms)")] int timeout = 5000) => _deviceService.Claim(timeout);
 
     /// <summary>デバイスを有効化します。</summary>
     [Command("enable")]
-    public void Enable() => _deviceService.Enable();
+    public virtual void Enable() => _deviceService.Enable();
 
     /// <summary>現在の在高を読み取ります。</summary>
     [Command("read-counts")]
-    public void ReadCashCounts() => _cashService.ReadCashCounts();
+    public virtual void ReadCashCounts() => _cashService.ReadCashCounts();
 
     /// <summary>入金を開始します。</summary>
     [Command("deposit")]
-    public void Deposit(int? amount = null) => _cashService.Deposit(amount);
+    public virtual void Deposit(int? amount = null) => _cashService.Deposit(amount);
 
     /// <summary>入金を確定します。</summary>
     [Command("fix-deposit")]
-    public void FixDeposit() => _cashService.FixDeposit();
+    public virtual void FixDeposit() => _cashService.FixDeposit();
 
     /// <summary>入金を終了します。</summary>
     [Command("end-deposit")]
-    public void EndDeposit() => _cashService.EndDeposit();
+    public virtual void EndDeposit() => _cashService.EndDeposit();
 
     /// <summary>出金を実行します。</summary>
     [Command("dispense")]
-    public void Dispense(int amount) => _cashService.Dispense(amount);
+    public virtual void Dispense(int amount) => _cashService.Dispense(amount);
 
     /// <summary>デバイスを無効化します。</summary>
     [Command("disable")]
-    public void Disable() => _deviceService.Disable();
+    public virtual void Disable() => _deviceService.Disable();
 
     /// <summary>デバイスの占有を解除します。</summary>
     [Command("release")]
-    public void Release() => _deviceService.Release();
+    public virtual void Release() => _deviceService.Release();
 
     /// <summary>デバイスをクローズします。</summary>
     [Command("close")]
-    public void Close() => _deviceService.Close();
+    public virtual void Close() => _deviceService.Close();
 
     /// <summary>設定を一覧表示または変更します。</summary>
     [Command("config")]
-    public void Config() => _console.MarkupLine(_L["messages.usage_config"] ?? "[yellow]Usage: config <list|get|set|save>[/]");
+    public virtual void Config() => _console.MarkupLine(_L["messages.usage_config"] ?? "[yellow]Usage: config <list|get|set|save>[/]");
 
     /// <summary>設定項目を一覧表示します。</summary>
     [Command("config list")]
-    public void ConfigList() => _configService.List();
+    public virtual void ConfigList() => _configService.List();
 
     /// <summary>特定の設定値を取得します。</summary>
     [Command("config get")]
-    public void ConfigGet(string key) => _configService.Get(key);
+    public virtual void ConfigGet(string key) => _configService.Get(key);
 
     /// <summary>設定値を一時的に更新します。</summary>
     [Command("config set")]
-    public void ConfigSet(string key, string value) => _configService.Set(key, value);
+    public virtual void ConfigSet(string key, string value) => _configService.Set(key, value);
 
     /// <summary>更新した設定を TOML ファイルに保存します。</summary>
     [Command("config save")]
-    public void ConfigSave() => _configService.Save();
+    public virtual void ConfigSave() => _configService.Save();
 
     /// <summary>設定をファイルから再読み込みします。</summary>
     [Command("config reload")]
-    public void ConfigReload() => _configService.Reload();
+    public virtual void ConfigReload() => _configService.Reload();
 
     /// <summary>現在の在庫数を調整します。</summary>
     /// <param name="counts">"1000:5,500:10" の形式で指定します。</param>
     [Command("adjust-counts")]
-    public void AdjustCashCounts(string counts) => _cashService.AdjustCashCounts(counts);
+    public virtual void AdjustCashCounts(string counts) => _cashService.AdjustCashCounts(counts);
 
     /// <summary>ログの詳細度を変更します。</summary>
     [Command("log-level")]
-    public void LogLevel(string level)
+    public virtual void LogLevel(string level)
     {
         if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out _))
         {
@@ -162,7 +162,7 @@ public partial class CliCommands(
 
     /// <summary>利用可能なコマンドの一覧を表示します。</summary>
     [Command("help")]
-    public void Help()
+    public virtual void Help()
     {
         _console.Write(new Rule($"[cyan]{_L["messages.available_commands"]}[/]").LeftJustified());
         var table = new Table().Border(TableBorder.None);
