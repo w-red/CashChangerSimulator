@@ -3,6 +3,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.PointOfService;
 using R3;
 using System.Windows;
@@ -48,24 +49,21 @@ public class DenominationViewModel : IDisposable
     public string SuffixCount { get; }
 
     /// <summary>依存関係を注入して DenominationViewModel を初期化します。</summary>
-    /// <param name="inventory">在庫データ管理用インスタンス。</param>
+    /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="key">対象となる金種のキー情報。</param>
     /// <param name="metadataProvider">通貨や名称のメタデータプロバイダー。</param>
-    /// <param name="depositController">入金処理のコントロール状態。</param>
     /// <param name="monitor">個別の金種状態監視モニター。</param>
     /// <param name="configProvider">アプリケーション設定プロバイダー。</param>
     public DenominationViewModel(
-        Inventory inventory,
+        IDeviceFacade facade,
         DenominationKey key,
         CurrencyMetadataProvider metadataProvider,
-        DepositController depositController,
         CashStatusMonitor monitor,
         ConfigurationProvider configProvider)
     {
-        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(metadataProvider);
-        ArgumentNullException.ThrowIfNull(depositController);
         ArgumentNullException.ThrowIfNull(monitor);
         ArgumentNullException.ThrowIfNull(configProvider);
 
@@ -92,11 +90,11 @@ public class DenominationViewModel : IDisposable
 
         Name = !string.IsNullOrEmpty(name) ? name : metadataProvider.GetDenominationName(key);
         Status = monitor.Status.ToBindableReactiveProperty();
-        Count = new BindableReactiveProperty<int>(inventory.GetTotalCount(key));
+        Count = new BindableReactiveProperty<int>(facade.Inventory.GetTotalCount(key));
 
-        RecyclableCount = new BindableReactiveProperty<int>(inventory.GetCount(key));
-        CollectionCount = new BindableReactiveProperty<int>(inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value);
-        RejectCount = new BindableReactiveProperty<int>(inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value);
+        RecyclableCount = new BindableReactiveProperty<int>(facade.Inventory.GetCount(key));
+        CollectionCount = new BindableReactiveProperty<int>(facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value);
+        RejectCount = new BindableReactiveProperty<int>(facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value);
 
         // ローカライズ文字列の初期化
         LabelInventoryDetail = isJapanese ? "在庫内訳" : "INVENTORY DETAIL";
@@ -106,20 +104,20 @@ public class DenominationViewModel : IDisposable
         LabelTotalCount = isJapanese ? "総枚数" : "TOTAL COUNT";
         SuffixCount = isJapanese ? "枚" : "";
 
-        inventory.Changed
+        facade.Inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)
             .Subscribe(_ => SafeInvoke(() =>
             {
-                Count.Value = inventory.GetTotalCount(key);
-                RecyclableCount.Value = inventory.GetCount(key);
-                CollectionCount.Value = inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value;
-                RejectCount.Value = inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value;
+                Count.Value = facade.Inventory.GetTotalCount(key);
+                RecyclableCount.Value = facade.Inventory.GetCount(key);
+                CollectionCount.Value = facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value;
+                RejectCount.Value = facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value;
             }))
             .AddTo(_disposables);
 
-        var isAccepting = depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused;
-        IsAcceptingCash = depositController.Changed
-            .Select(_ => depositController.DepositStatus == CashDepositStatus.Count && !depositController.IsFixed && !depositController.IsPaused)
+        var isAccepting = facade.Deposit.DepositStatus == CashDepositStatus.Count && !facade.Deposit.IsFixed && !facade.Deposit.IsPaused;
+        IsAcceptingCash = facade.Deposit.Changed
+            .Select(_ => facade.Deposit.DepositStatus == CashDepositStatus.Count && !facade.Deposit.IsFixed && !facade.Deposit.IsPaused)
             .ToBindableReactiveProperty(isAccepting);
 
         ShowDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);

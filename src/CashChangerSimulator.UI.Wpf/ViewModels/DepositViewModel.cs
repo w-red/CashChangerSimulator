@@ -3,6 +3,7 @@ using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
@@ -19,8 +20,7 @@ public class DepositViewModel : IDisposable
 {
     private readonly ILogger<DepositViewModel> _logger = LogProvider.CreateLogger<DepositViewModel>();
     private readonly CompositeDisposable _disposables = [];
-    private readonly DepositController _depositController;
-    private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly IDeviceFacade _facade;
     private readonly Func<IEnumerable<DenominationViewModel>> _getDenominations;
     private readonly BindableReactiveProperty<bool> _isDispenseBusy;
     private readonly INotifyService _notifyService;
@@ -123,29 +123,25 @@ public class DepositViewModel : IDisposable
     public BindableReactiveProperty<bool> CanOperate { get; }
 
     /// <summary>必要なサービスを注入して <see cref="DepositViewModel"/> を初期化します。</summary>
-    /// <param name="depositController">入金処理を制御する <see cref="DepositController"/>。</param>
-    /// <param name="hardwareStatusManager">ハードウェアの状態（ジャム、エラー等）を管理する <see cref="HardwareStatusManager"/>。</param>
+    /// <param name="facade">デバイスとコア機能の Facade である <see cref="IDeviceFacade"/>。</param>
     /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
     /// <param name="isDispenseBusy">出金処理中かどうかを示す反応型プロパティ。</param>
     /// <param name="notifyService">ユーザーへの通知（警告、エラー等）を行うサービス。</param>
     /// <param name="metadataProvider">通貨の表示形式（記号など）を提供するプロバイダー。</param>
     public DepositViewModel(
-        DepositController depositController,
-        HardwareStatusManager hardwareStatusManager,
+        IDeviceFacade facade,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         BindableReactiveProperty<bool> isDispenseBusy,
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
-        ArgumentNullException.ThrowIfNull(depositController);
-        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(getDenominations);
         ArgumentNullException.ThrowIfNull(isDispenseBusy);
         ArgumentNullException.ThrowIfNull(notifyService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
-        _depositController = depositController;
-        _hardwareStatusManager = hardwareStatusManager;
+        _facade = facade;
         _getDenominations = getDenominations;
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
@@ -156,65 +152,65 @@ public class DepositViewModel : IDisposable
         CurrencySuffix = _metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
         // Hardware State
-        _isJammed = _hardwareStatusManager.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
+        _isJammed = _facade.Status.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
         IsJammed = _isJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
-        _isOverlapped = _hardwareStatusManager.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
+        _isOverlapped = _facade.Status.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
         IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
-        IsDeviceError = _hardwareStatusManager.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+        IsDeviceError = _facade.Status.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         // Deposit State Observables
-        IsInDepositMode = _depositController.Changed
-            .Select(_ => _depositController.IsDepositInProgress)
-            .ToBindableReactiveProperty(_depositController.IsDepositInProgress)
+        IsInDepositMode = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.IsDepositInProgress)
+            .ToBindableReactiveProperty(_facade.Deposit.IsDepositInProgress)
             .AddTo(_disposables);
 
-        CurrentDepositAmount = _depositController.Changed
-            .Select(_ => _depositController.DepositAmount)
-            .ToBindableReactiveProperty(_depositController.DepositAmount)
+        CurrentDepositAmount = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.DepositAmount)
+            .ToBindableReactiveProperty(_facade.Deposit.DepositAmount)
             .AddTo(_disposables);
 
-        IsDepositFixed = _depositController.Changed
-            .Select(_ => _depositController.IsFixed)
-            .ToBindableReactiveProperty(_depositController.IsFixed)
+        IsDepositFixed = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.IsFixed)
+            .ToBindableReactiveProperty(_facade.Deposit.IsFixed)
             .AddTo(_disposables);
 
-        DepositStatus = _depositController.Changed
-            .Select(_ => _depositController.DepositStatus)
-            .ToBindableReactiveProperty(_depositController.DepositStatus)
+        DepositStatus = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.DepositStatus)
+            .ToBindableReactiveProperty(_facade.Deposit.DepositStatus)
             .AddTo(_disposables);
 
-        IsDepositPaused = _depositController.Changed
-            .Select(_ => _depositController.IsPaused)
-            .ToBindableReactiveProperty(_depositController.IsPaused)
+        IsDepositPaused = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.IsPaused)
+            .ToBindableReactiveProperty(_facade.Deposit.IsPaused)
             .AddTo(_disposables);
 
-        OverflowAmount = _depositController.Changed
-            .Select(_ => _depositController.OverflowAmount)
-            .ToBindableReactiveProperty(_depositController.OverflowAmount)
+        OverflowAmount = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.OverflowAmount)
+            .ToBindableReactiveProperty(_facade.Deposit.OverflowAmount)
             .AddTo(_disposables);
 
         HasOverflow = OverflowAmount.Select(a => a > 0)
             .ToReadOnlyReactiveProperty()
             .AddTo(_disposables);
 
-        RejectAmount = _depositController.Changed
-            .Select(_ => _depositController.RejectAmount)
-            .ToBindableReactiveProperty(_depositController.RejectAmount)
+        RejectAmount = _facade.Deposit.Changed
+            .Select(_ => _facade.Deposit.RejectAmount)
+            .ToBindableReactiveProperty(_facade.Deposit.RejectAmount)
             .AddTo(_disposables);
 
         HasReject = RejectAmount.Select(a => a > 0)
             .ToReadOnlyReactiveProperty()
             .AddTo(_disposables);
 
-        CurrentModeName = _depositController.Changed
+        CurrentModeName = _facade.Deposit.Changed
             .Select(_ => GetModeName())
             .ToBindableReactiveProperty(GetModeName())
             .AddTo(_disposables);
 
         // Commands Logic
 
-        BeginDepositCommand = _hardwareStatusManager.IsConnected
+        BeginDepositCommand = _facade.Status.IsConnected
             .CombineLatest(IsJammed, IsOverlapped, _isDispenseBusy, (connected, jammed, overlapped, dispenseBusyValue) => connected && !jammed && !overlapped && !dispenseBusyValue)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
 
@@ -232,11 +228,11 @@ public class DepositViewModel : IDisposable
 
             try
             {
-                _depositController.BeginDeposit();
+                _facade.Deposit.BeginDeposit();
             }
             catch (PosControlException pcEx)
             {
-                _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+                _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
                 _logger.ZLogError(pcEx, $"Failed to begin deposit.");
                 _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error"));
             }
@@ -250,28 +246,28 @@ public class DepositViewModel : IDisposable
         PauseDepositCommand = IsInDepositMode
             .CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        PauseDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Pause));
+        PauseDepositCommand.Subscribe(_ => _facade.Deposit.PauseDeposit(CashDepositPause.Pause));
 
         ResumeDepositCommand = IsDepositPaused.ToReactiveCommand<Unit>().AddTo(_disposables);
-        ResumeDepositCommand.Subscribe(_ => _depositController.PauseDeposit(CashDepositPause.Restart));
+        ResumeDepositCommand.Subscribe(_ => _facade.Deposit.PauseDeposit(CashDepositPause.Restart));
 
         FixDepositCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsJammed, IsOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        FixDepositCommand.Subscribe(_ => _depositController.FixDeposit());
+        FixDepositCommand.Subscribe(_ => _facade.Deposit.FixDeposit());
 
         StoreDepositCommand = IsDepositFixed
             .CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        StoreDepositCommand.Subscribe(_ => _depositController.EndDeposit(CashDepositAction.NoChange));
+        StoreDepositCommand.Subscribe(_ => _facade.Deposit.EndDeposit(CashDepositAction.NoChange));
 
         CancelDepositCommand = IsInDepositMode
             .CombineLatest(IsJammed, IsOverlapped, (mode, jammed, overlapped) => mode && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         CancelDepositCommand.Subscribe(_ =>
         {
-            if (!_depositController.IsFixed) _depositController.FixDeposit();
-            _depositController.EndDeposit(CashDepositAction.Repay);
+            if (!_facade.Deposit.IsFixed) _facade.Deposit.FixDeposit();
+            _facade.Deposit.EndDeposit(CashDepositAction.Repay);
         });
 
         ShowBulkInsertCommand = IsInDepositMode
@@ -283,13 +279,13 @@ public class DepositViewModel : IDisposable
         {
             if (counts is { Count: > 0 })
             {
-                _depositController.TrackBulkDeposit(counts);
+                _facade.Deposit.TrackBulkDeposit(counts);
             }
         });
 
-        CanOperate = _hardwareStatusManager.IsConnected
+        CanOperate = _facade.Status.IsConnected
             .CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !mode && !dispenseBusyValue)
-            .ToBindableReactiveProperty(_hardwareStatusManager.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
+            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
         QuickDepositCommand = CanOperate.ToReactiveCommand<Unit>().AddTo(_disposables);
@@ -314,36 +310,36 @@ public class DepositViewModel : IDisposable
             .CombineLatest(IsDepositFixed, IsOverlapped, (mode, fixed_, overlapped) => !overlapped)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-        SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
+        SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
 
         ResetErrorCommand = IsOverlapped
-            .CombineLatest(_hardwareStatusManager.IsJammed, (overlapped, jammed) => overlapped || jammed)
+            .CombineLatest(_facade.Status.IsJammed, (overlapped, jammed) => overlapped || jammed)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
 
         SimulateJamCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsJammed, (mode, fixed_, jammed) => !jammed)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-        SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
+        SimulateJamCommand.Subscribe(_ => _facade.Status.SetJammed(true));
 
         SimulateRejectCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-        SimulateRejectCommand.Subscribe(_ => _depositController.SimulateReject(1000m));
+        SimulateRejectCommand.Subscribe(_ => _facade.Deposit.SimulateReject(1000m));
     }
 
     private string GetModeName()
     {
-        return !_depositController.IsDepositInProgress && _depositController.DepositStatus != CashDepositStatus.End
+        return !_facade.Deposit.IsDepositInProgress && _facade.Deposit.DepositStatus != CashDepositStatus.End
             ? "IDLE"
-            : _depositController.IsPaused
+            : _facade.Deposit.IsPaused
                 ? "PAUSED"
-                : _depositController.IsFixed
+                : _facade.Deposit.IsFixed
                     ? "FIXED"
-                    : _depositController.DepositStatus switch
+                    : _facade.Deposit.DepositStatus switch
                     {
                         CashDepositStatus.Start => "STARTING",
                         CashDepositStatus.Count => "COUNTING",
@@ -371,7 +367,7 @@ public class DepositViewModel : IDisposable
 
         try
         {
-            _depositController.BeginDeposit();
+            _facade.Deposit.BeginDeposit();
             var breakdown = new Dictionary<DenominationKey, int>();
             var remaining = targetAmount;
             var sortedDens = denominations.OrderByDescending(d => d.Key.Value);
@@ -389,19 +385,19 @@ public class DepositViewModel : IDisposable
 
             if (breakdown.Count > 0)
             {
-                _depositController.TrackBulkDeposit(breakdown);
+                _facade.Deposit.TrackBulkDeposit(breakdown);
             }
 
             await Task.Delay(100);
-            _depositController.FixDeposit();
+            _facade.Deposit.FixDeposit();
             await Task.Delay(100);
-            _depositController.EndDeposit(CashDepositAction.NoChange);
+            _facade.Deposit.EndDeposit(CashDepositAction.NoChange);
 
             QuickDepositAmountInput.Value = "";
         }
         catch (PosControlException pcEx)
         {
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
             _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
         }

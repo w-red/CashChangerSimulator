@@ -5,6 +5,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
@@ -19,10 +20,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// </remarks>
 public class DispenseViewModel : IDisposable
 {
-    private readonly Inventory _inventory;
-    private readonly CashChangerManager _manager;
-    private readonly DispenseController _controller;
-    private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
     private readonly ILogger<DispenseViewModel> _logger;
     private readonly INotifyService _notifyService;
@@ -94,40 +92,28 @@ public class DispenseViewModel : IDisposable
     public ReactiveCommand SimulateOverlapCommand { get; }
 
     /// <summary>必要なサービスを注入して <see cref="DispenseViewModel"/> を初期化します。</summary>
-    /// <param name="inventory">現金在庫を管理する <see cref="Inventory"/>。</param>
-    /// <param name="manager">デバイスを管理する <see cref="CashChangerManager"/>。</param>
-    /// <param name="controller">出金処理を制御する <see cref="DispenseController"/>。</param>
-    /// <param name="hardwareStatusManager">ハードウェア状態（エラー等）を管理する <see cref="HardwareStatusManager"/>。</param>
+    /// <param name="facade">デバイスとコア機能の Facade である <see cref="IDeviceFacade"/>。</param>
     /// <param name="configProvider">アプリケーション設定を提供する <see cref="ConfigurationProvider"/>。</param>
     /// <param name="isInDepositMode">現在入金モード中かどうかを示す反応型プロパティ。</param>
     /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
     /// <param name="notifyService">ユーザーへの通知を行うサービス。</param>
     /// <param name="metadataProvider">通貨の表示形式（記号など）を提供するプロバイダー。</param>
     public DispenseViewModel(
-        Inventory inventory,
-        CashChangerManager manager,
-        DispenseController controller,
-        HardwareStatusManager hardwareStatusManager,
+        IDeviceFacade facade,
         ConfigurationProvider configProvider,
         BindableReactiveProperty<bool> isInDepositMode,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         INotifyService notifyService,
         CurrencyMetadataProvider metadataProvider)
     {
-        ArgumentNullException.ThrowIfNull(inventory);
-        ArgumentNullException.ThrowIfNull(manager);
-        ArgumentNullException.ThrowIfNull(controller);
-        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(isInDepositMode);
         ArgumentNullException.ThrowIfNull(getDenominations);
         ArgumentNullException.ThrowIfNull(notifyService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
-        _inventory = inventory;
-        _manager = manager;
-        _controller = controller;
-        _hardwareStatusManager = hardwareStatusManager;
+        _facade = facade;
         _configProvider = configProvider;
         _isInDepositMode = isInDepositMode;
         _notifyService = notifyService;
@@ -135,13 +121,13 @@ public class DispenseViewModel : IDisposable
 
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
-        IsDeviceError = _hardwareStatusManager.IsDeviceError;
+        IsDeviceError = _facade.Status.IsDeviceError;
 
         // --- State Mapping ---
 
-        Status = _controller.Changed
-            .Select(_ => _controller.Status)
-            .ToBindableReactiveProperty(_controller.Status)
+        Status = _facade.Dispense.Changed
+            .Select(_ => _facade.Dispense.Status)
+            .ToBindableReactiveProperty(_facade.Dispense.Status)
             .AddTo(_disposables);
 
         IsBusy = Status
@@ -154,8 +140,8 @@ public class DispenseViewModel : IDisposable
             .ToBindableReactiveProperty("Idle")
             .AddTo(_disposables);
 
-        IsJammed = _hardwareStatusManager.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
-        IsOverlapped = _hardwareStatusManager.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        IsJammed = _facade.Status.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        IsOverlapped = _facade.Status.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
         CanOperate = IsBusy
             .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
@@ -164,11 +150,11 @@ public class DispenseViewModel : IDisposable
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
 
-        TotalAmount = new BindableReactiveProperty<decimal>(_inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode)).AddTo(_disposables);
-        _inventory.Changed
+        TotalAmount = new BindableReactiveProperty<decimal>(_facade.Inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode)).AddTo(_disposables);
+        _facade.Inventory.Changed
             .Subscribe(_ =>
             {
-                var total = _inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode);
+                var total = _facade.Inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode);
                 if (System.Windows.Application.Current?.Dispatcher != null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke(() => TotalAmount.Value = total);
@@ -258,23 +244,23 @@ public class DispenseViewModel : IDisposable
 
         ResetErrorCommand = Status
             .Select(s => s == CashDispenseStatus.Error)
-            .CombineLatest(_hardwareStatusManager.IsJammed, _hardwareStatusManager.IsOverlapped, (err, jammed, overlapped) => err || jammed || overlapped)
+            .CombineLatest(_facade.Status.IsJammed, _facade.Status.IsOverlapped, (err, jammed, overlapped) => err || jammed || overlapped)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
-        ResetErrorCommand.Subscribe(_ => _hardwareStatusManager.ResetError());
+        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
 
         SimulateJamCommand = IsJammed
             .Select(jammed => !jammed)
             .ToReactiveCommand()
             .AddTo(_disposables);
-        SimulateJamCommand.Subscribe(_ => _hardwareStatusManager.SetJammed(true));
+        SimulateJamCommand.Subscribe(_ => _facade.Status.SetJammed(true));
 
         SimulateOverlapCommand = IsOverlapped
             .Select(o => !o)
             .ToReactiveCommand()
             .AddTo(_disposables);
-        SimulateOverlapCommand.Subscribe(_ => _hardwareStatusManager.SetOverlapped(true));
+        SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
     }
 
     private void DispenseCash(decimal amount)
@@ -282,11 +268,11 @@ public class DispenseViewModel : IDisposable
         try
         {
             DispensingAmount.Value = amount;
-            _ = _controller.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode);
+            _ = _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode);
         }
         catch (PosControlException pcEx)
         {
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to dispense {amount}.");
             System.Windows.MessageBox.Show(pcEx.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
@@ -303,11 +289,11 @@ public class DispenseViewModel : IDisposable
         {
             var total = counts.Sum(x => x.Key.Value * x.Value);
             DispensingAmount.Value = total;
-            _ = _controller.DispenseCashAsync(counts, true, (code, ext) => { });
+            _ = _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { });
         }
         catch (PosControlException pcEx)
         {
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to dispense cash (bulk).");
             System.Windows.MessageBox.Show(pcEx.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }

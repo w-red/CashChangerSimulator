@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using R3;
 using System.Text.Json;
 
@@ -13,7 +14,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// </remarks>
 public class AdvancedSimulationViewModel : IDisposable
 {
-    private readonly SimulatorCashChanger _cashChanger;
+    private readonly IDeviceFacade _facade;
     private readonly IScriptExecutionService _scriptExecutionService;
     private readonly CompositeDisposable _disposables = [];
 
@@ -73,44 +74,41 @@ public class AdvancedSimulationViewModel : IDisposable
     public ReactiveCommand<Unit> ClearScriptInputCommand { get; }
 
     /// <summary>依存関係を注入して <see cref="AdvancedSimulationViewModel"/> を初期化します。</summary>
-    /// <param name="cashChanger">シミュレータ本体インスタンス <see cref="SimulatorCashChanger"/>。</param>
+    /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="scriptExecutionService">スクリプト実行を担う <see cref="IScriptExecutionService"/>。</param>
-    /// <param name="depositController">入金状態を管理する <see cref="DepositController"/>。</param>
     /// <param name="metadataProvider">通貨情報を表す <see cref="CurrencyMetadataProvider"/>。</param>
     public AdvancedSimulationViewModel(
-        SimulatorCashChanger cashChanger,
+        IDeviceFacade facade,
         IScriptExecutionService scriptExecutionService,
-        DepositController depositController,
         CurrencyMetadataProvider metadataProvider)
     {
-        ArgumentNullException.ThrowIfNull(cashChanger);
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(scriptExecutionService);
-        ArgumentNullException.ThrowIfNull(depositController);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
-        _cashChanger = cashChanger;
+        _facade = facade;
         _scriptExecutionService = scriptExecutionService;
 
-        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(cashChanger.RealTimeDataEnabled).AddTo(_disposables);
+        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(facade.Changer.RealTimeDataEnabled).AddTo(_disposables);
         ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
         ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
 
         CurrencyPrefix = metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
         CurrencySuffix = metadataProvider.SymbolSuffix.ToReadOnlyReactiveProperty().AddTo(_disposables);
 
-        CurrentDepositAmount = depositController.Changed
-                .Select(_ => depositController.DepositAmount)
-                .ToBindableReactiveProperty(depositController.DepositAmount)
+        CurrentDepositAmount = facade.Deposit.Changed
+                .Select(_ => facade.Deposit.DepositAmount)
+                .ToBindableReactiveProperty(facade.Deposit.DepositAmount)
                 .AddTo(_disposables);
 
-        IsDepositInProgress = depositController.Changed
-                .Select(_ => depositController.IsDepositInProgress)
-                .ToBindableReactiveProperty(depositController.IsDepositInProgress)
+        IsDepositInProgress = facade.Deposit.Changed
+                .Select(_ => facade.Deposit.IsDepositInProgress)
+                .ToBindableReactiveProperty(facade.Deposit.IsDepositInProgress)
                 .AddTo(_disposables);
 
-        IsJammed = cashChanger.HardwareStatus.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
-        IsOverlapped = cashChanger.HardwareStatus.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
-        IsDeviceError = cashChanger.HardwareStatus.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+        IsJammed = facade.Status.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
+        IsOverlapped = facade.Status.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
+        IsDeviceError = facade.Status.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
 
         IsAnyError = Observable.CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (j, o, e) => j || o || e)
                 .ToReadOnlyReactiveProperty()
@@ -123,13 +121,13 @@ public class AdvancedSimulationViewModel : IDisposable
         ClearScriptInputCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
 
         IsRealTimeDataEnabled
-            .Subscribe(enabled => _cashChanger.RealTimeDataEnabled = enabled)
+            .Subscribe(enabled => _facade.Changer.RealTimeDataEnabled = enabled)
             .AddTo(_disposables);
 
-        ResetErrorCommand.Subscribe(_ => _cashChanger.HardwareStatus.ResetError());
-        SimulateJamCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetJammed(true));
-        SimulateOverlapCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetOverlapped(true));
-        SimulateDeviceErrorCommand.Subscribe(_ => _cashChanger.HardwareStatus.SetDeviceError(999, 0));
+        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
+        SimulateJamCommand.Subscribe(_ => _facade.Status.SetJammed(true));
+        SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
+        SimulateDeviceErrorCommand.Subscribe(_ => _facade.Status.SetDeviceError(999, 0));
         ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
 
         // Enables command only if JSON is basically valid list
@@ -185,7 +183,7 @@ public class AdvancedSimulationViewModel : IDisposable
     public void Dispose()
     {
         // Explicitly disable event generation before disposal to prevent SDK exceptions
-        _cashChanger.RealTimeDataEnabled = false;
+        _facade.Changer.RealTimeDataEnabled = false;
         _disposables.Dispose();
         GC.SuppressFinalize(this);
     }

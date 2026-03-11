@@ -2,6 +2,7 @@ using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
@@ -19,8 +20,7 @@ public class PosTransactionViewModel : IDisposable
 {
     private readonly DepositViewModel _deposit;
     private readonly DispenseViewModel _dispense;
-    private readonly SimulatorCashChanger _cashChanger;
-    private readonly HardwareStatusManager _hardwareStatusManager;
+    private readonly IDeviceFacade _facade;
     private readonly INotifyService _notifyService;
     private readonly ILogger<PosTransactionViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
@@ -104,37 +104,30 @@ public class PosTransactionViewModel : IDisposable
     public ReactiveCommand<Unit> ManualCloseCommand { get; }
 
     /// <summary>必要なコンポーネントを注入して <see cref="PosTransactionViewModel"/> を初期化します。</summary>
+    /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="deposit">入金処理を管理する <see cref="DepositViewModel"/>。</param>
     /// <param name="dispense">出金処理を管理する <see cref="DispenseViewModel"/>。</param>
-    /// <param name="cashChanger">シミュレーターのメインデバイスクラス <see cref="SimulatorCashChanger"/>。</param>
-    /// <param name="hardwareStatusManager">ハードウェア状態を管理する <see cref="HardwareStatusManager"/>。</param>
     /// <param name="metadataProvider">通貨情報を表す <see cref="CurrencyMetadataProvider"/>。</param>
     /// <param name="getDenominations">利用可能な金種を取得する関数。</param>
-    /// <param name="depositController">入金ロジックを制御する <see cref="DepositController"/>。</param>
     /// <param name="notifyService">通知サービス。</param>
     public PosTransactionViewModel(
+        IDeviceFacade facade,
         DepositViewModel deposit,
         DispenseViewModel dispense,
-        SimulatorCashChanger cashChanger,
-        HardwareStatusManager hardwareStatusManager,
         CurrencyMetadataProvider metadataProvider,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
-        DepositController depositController,
         INotifyService notifyService)
     {
+        ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(deposit);
         ArgumentNullException.ThrowIfNull(dispense);
-        ArgumentNullException.ThrowIfNull(cashChanger);
-        ArgumentNullException.ThrowIfNull(hardwareStatusManager);
         ArgumentNullException.ThrowIfNull(metadataProvider);
         ArgumentNullException.ThrowIfNull(getDenominations);
-        ArgumentNullException.ThrowIfNull(depositController);
         ArgumentNullException.ThrowIfNull(notifyService);
 
+        _facade = facade;
         _deposit = deposit;
         _dispense = dispense;
-        _cashChanger = cashChanger;
-        _hardwareStatusManager = hardwareStatusManager;
         _notifyService = notifyService;
         _logger = LogProvider.CreateLogger<PosTransactionViewModel>();
 
@@ -242,7 +235,7 @@ public class PosTransactionViewModel : IDisposable
         {
             if (den != null && _status.Value == PosTransactionStatus.WaitingForCash)
             {
-                depositController.TrackDeposit(den.Key);
+                _facade.Deposit.TrackDeposit(den.Key);
                 LogOpos($"Cash inserted: {den.Name}");
             }
         });
@@ -273,19 +266,19 @@ public class PosTransactionViewModel : IDisposable
         try
         {
             LogOpos("Open()");
-            _cashChanger.Open();
+            _facade.Changer.Open();
 
             LogOpos("Claim(1000)");
-            _cashChanger.Claim(1000);
+            _facade.Changer.Claim(1000);
 
             LogOpos("DeviceEnabled = true");
-            _cashChanger.DeviceEnabled = true;
+            _facade.Changer.DeviceEnabled = true;
 
             LogOpos("DataEventEnabled = true");
-            _cashChanger.DataEventEnabled = true;
+            _facade.Changer.DataEventEnabled = true;
 
             LogOpos("BeginDeposit()");
-            _cashChanger.BeginDeposit();
+            _facade.Changer.BeginDeposit();
 
             _status.Value = PosTransactionStatus.WaitingForCash;
             ResetTimeout();
@@ -294,7 +287,7 @@ public class PosTransactionViewModel : IDisposable
         {
             _logger.ZLogError(pcEx, $"Failed to start OPOS sequence: {pcEx.Message}");
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _status.Value = PosTransactionStatus.Idle;
         }
         catch (Exception ex)
@@ -349,18 +342,18 @@ public class PosTransactionViewModel : IDisposable
         try
         {
             LogOpos("FixDeposit()");
-            _cashChanger.FixDeposit();
+            _facade.Changer.FixDeposit();
             LogOpos("Cancelling... EndDeposit(Repay)");
-            _cashChanger.EndDeposit(CashDepositAction.Repay);
+            _facade.Changer.EndDeposit(CashDepositAction.Repay);
             LogOpos("Release()");
-            _cashChanger.Release();
+            _facade.Changer.Release();
             LogOpos("Close()");
-            _cashChanger.Close();
+            _facade.Changer.Close();
         }
         catch (PosControlException pcEx)
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}] during cancel: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
@@ -383,28 +376,28 @@ public class PosTransactionViewModel : IDisposable
         try
         {
             LogOpos("FixDeposit()");
-            _cashChanger.FixDeposit();
+            _facade.Changer.FixDeposit();
 
             LogOpos("EndDeposit(NoChange)");
-            _cashChanger.EndDeposit(CashDepositAction.NoChange);
+            _facade.Changer.EndDeposit(CashDepositAction.NoChange);
 
             if (changeToDispense > 0)
             {
                 LogOpos($"DispenseChange({changeToDispense})");
-                _cashChanger.DispenseChange(changeToDispense);
+                _facade.Changer.DispenseChange(changeToDispense);
 
                 // Wait for dispense to complete
                 await Task.Delay(1000);
             }
 
             LogOpos("DeviceEnabled = false");
-            _cashChanger.DeviceEnabled = false;
+            _facade.Changer.DeviceEnabled = false;
 
             LogOpos("Release()");
-            _cashChanger.Release();
+            _facade.Changer.Release();
 
             LogOpos("Close()");
-            _cashChanger.Close();
+            _facade.Changer.Close();
 
             LogOpos("--- Sequence Completed ---");
         }
@@ -412,7 +405,7 @@ public class PosTransactionViewModel : IDisposable
         {
             _logger.ZLogError(pcEx, $"Failed to complete OPOS sequence: {pcEx.Message}");
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
@@ -432,19 +425,19 @@ public class PosTransactionViewModel : IDisposable
         LogOpos("--- Manual Open ---");
         try
         {
-            _cashChanger.Open();
+            _facade.Changer.Open();
             LogOpos("Open()");
-            _cashChanger.Claim(1000);
+            _facade.Changer.Claim(1000);
             LogOpos("Claim(1000)");
-            _cashChanger.DeviceEnabled = true;
+            _facade.Changer.DeviceEnabled = true;
             LogOpos("DeviceEnabled = true");
-            _cashChanger.DataEventEnabled = true;
+            _facade.Changer.DataEventEnabled = true;
             LogOpos("DataEventEnabled = true");
         }
         catch (PosControlException pcEx)
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
         }
         catch (Exception ex)
@@ -459,14 +452,14 @@ public class PosTransactionViewModel : IDisposable
         LogOpos("--- Manual Deposit ---");
         try
         {
-            _cashChanger.BeginDeposit();
+            _facade.Changer.BeginDeposit();
             LogOpos("BeginDeposit()");
             _status.Value = PosTransactionStatus.WaitingForCash;
         }
         catch (PosControlException pcEx)
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
@@ -479,9 +472,9 @@ public class PosTransactionViewModel : IDisposable
         LogOpos("--- Manual Dispense ---");
         try
         {
-            _cashChanger.FixDeposit();
+            _facade.Changer.FixDeposit();
             LogOpos("FixDeposit()");
-            _cashChanger.EndDeposit(CashDepositAction.NoChange);
+            _facade.Changer.EndDeposit(CashDepositAction.NoChange);
             LogOpos("EndDeposit(NoChange)");
 
             var inserted = InsertedAmount.Value;
@@ -490,14 +483,14 @@ public class PosTransactionViewModel : IDisposable
 
             if (changeToDispense > 0)
             {
-                _cashChanger.DispenseChange(changeToDispense);
+                _facade.Changer.DispenseChange(changeToDispense);
                 LogOpos($"DispenseChange({changeToDispense})");
             }
         }
         catch (PosControlException pcEx)
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
@@ -510,18 +503,18 @@ public class PosTransactionViewModel : IDisposable
         LogOpos("--- Manual Close ---");
         try
         {
-            _cashChanger.DeviceEnabled = false;
+            _facade.Changer.DeviceEnabled = false;
             LogOpos("DeviceEnabled = false");
-            _cashChanger.Release();
+            _facade.Changer.Release();
             LogOpos("Release()");
-            _cashChanger.Close();
+            _facade.Changer.Close();
             LogOpos("Close()");
             _status.Value = PosTransactionStatus.Idle;
         }
         catch (PosControlException pcEx)
         {
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _hardwareStatusManager.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
