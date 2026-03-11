@@ -39,6 +39,14 @@ public class DenominationViewModel : IDisposable
     /// <summary>詳細情報を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDetailCommand { get; }
 
+    // --- ローカライズされた文字列 ---
+    public string LabelInventoryDetail { get; }
+    public string LabelRecyclable { get; }
+    public string LabelCollection { get; }
+    public string LabelReject { get; }
+    public string LabelTotalCount { get; }
+    public string SuffixCount { get; }
+
     /// <summary>依存関係を注入して DenominationViewModel を初期化します。</summary>
     /// <param name="inventory">在庫データ管理用インスタンス。</param>
     /// <param name="key">対象となる金種のキー情報。</param>
@@ -89,6 +97,14 @@ public class DenominationViewModel : IDisposable
         RecyclableCount = new BindableReactiveProperty<int>(inventory.GetCount(key));
         CollectionCount = new BindableReactiveProperty<int>(inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value);
         RejectCount = new BindableReactiveProperty<int>(inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value);
+
+        // ローカライズ文字列の初期化
+        LabelInventoryDetail = isJapanese ? "在庫内訳" : "INVENTORY DETAIL";
+        LabelRecyclable = isJapanese ? "還流庫" : "RECYCLABLE";
+        LabelCollection = isJapanese ? "回収庫" : "COLLECTION";
+        LabelReject = isJapanese ? "リジェクト" : "REJECT";
+        LabelTotalCount = isJapanese ? "総枚数" : "TOTAL COUNT";
+        SuffixCount = isJapanese ? "枚" : "";
 
         inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)
