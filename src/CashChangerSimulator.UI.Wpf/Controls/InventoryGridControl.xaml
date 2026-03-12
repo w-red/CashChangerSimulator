@@ -30,12 +30,12 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding BillGridWidth.Value}" />
-                <ColumnDefinition Width="{Binding CoinGridWidth.Value}" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+                <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
                 <ItemsControl ItemsSource="{Binding BillDenominations}"
                               ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                               ItemTemplate="{StaticResource InventoryTileTemplate}"
@@ -44,7 +44,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+                <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
                 <ItemsControl ItemsSource="{Binding CoinDenominations}"
                               ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                               ItemTemplate="{StaticResource InventoryTileTemplate}">

@@ -18,7 +18,7 @@
             <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="11"/>
                 <Setter Property="FontWeight" Value="Black"/>
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
                 <Setter Property="Margin" Value="0,0,0,12"/>
             </Style>
         </ResourceDictionary>
@@ -37,8 +37,8 @@
                 <!-- Empty State Message -->
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20"
                             Visibility="{Binding IsEmpty.Value, Converter={StaticResource VisibilityConv}}">
-                    <materialDesign:PackIcon Kind="History" Width="32" Height="32" Opacity="0.2" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    <TextBlock Text="最近の取引はありません" FontSize="12" Opacity="0.4" Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <materialDesign:PackIcon Kind="History" Width="32" Height="32" Opacity="0.2" HorizontalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
+                    <TextBlock Text="最近の取引はありません" FontSize="12" Opacity="0.4" Margin="0,8,0,0" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
                 </StackPanel>
 
                 <!-- Transactions List -->

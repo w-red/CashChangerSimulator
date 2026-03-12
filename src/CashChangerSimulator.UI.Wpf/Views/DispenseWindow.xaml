@@ -12,9 +12,9 @@
         Title="DISPENSE TERMINAL" Height="650" Width="420"
         WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="DispenseWindow"
-        Background="{StaticResource BackgroundBrush}"
-        Foreground="{StaticResource OnBackgroundBrush}"
-        TextElement.Foreground="{StaticResource OnBackgroundBrush}"
+        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
+        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="16"
         ResizeMode="CanResize" MinWidth="360" MinHeight="450">
@@ -31,7 +31,7 @@
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="{StaticResource DispenseTerminal}" 
                                Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
-                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                                FontWeight="Black"/>
                 </StackPanel>
 

@@ -85,7 +85,7 @@
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource HeaderIconToggleButtonStyle}">
                         <Style.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="{StaticResource WarningBrush}" />
+                                <Setter Property="Background" Value="{DynamicResource WarningBrush}" />
                                 <Setter Property="Foreground" Value="Black" />
                             </Trigger>
                         </Style.Triggers>
@@ -100,9 +100,9 @@
             <Button Style="{StaticResource HeaderIconButtonStyle}"
                     Command="{Binding OpenSettingsCommand}"
                     ToolTip="System Settings"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource PrimaryBrush}">
-                <materialDesign:PackIcon Kind="Settings" Foreground="{StaticResource PrimaryBrush}"/>
+                    Background="{DynamicResource MaterialDesign.Brush.Surface}"
+                    BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
+                <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
             </Button>
         </StackPanel>
     </StackPanel>
