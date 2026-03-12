@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Currency and Symbols (Changeable regardless of UI Language) -->
+    <system:String x:Key="CurrencySymbol">¥</system:String>
+    <system:String x:Key="LabelSeparator">：</system:String>
+    
+    <!-- UI Symbols -->
+    <system:String x:Key="SymbolInfo">ℹ</system:String>
+    <system:String x:Key="SymbolClose">✕</system:String>
+    <system:String x:Key="SymbolRecycle">↻</system:String>
+    <system:String x:Key="SymbolCollect">⬇</system:String>
+    <system:String x:Key="SymbolWarning">⚠</system:String>
+    
+</ResourceDictionary>

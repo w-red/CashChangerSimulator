@@ -13,6 +13,9 @@
     <system:String x:Key="Connect">CONNECT</system:String>
     <system:String x:Key="Open">OPEN</system:String>
     <system:String x:Key="Close">CLOSE</system:String>
+    <system:String x:Key="StatusJam">JAM</system:String>
+    <system:String x:Key="StatusOverlap">OVERLAP</system:String>
+    <system:String x:Key="StatusDeviceError">DEVICE ERROR</system:String>
 
     <system:String x:Key="Bills">BILLS</system:String>
     <system:String x:Key="Coins">COINS</system:String>
@@ -27,6 +30,7 @@
 
     <system:String x:Key="CashBalance">CASH BALANCE</system:String>
     <system:String x:Key="ActivityFeed">ACTIVITY FEED</system:String>
+    <system:String x:Key="NoRecentTransactions">No recent transactions</system:String>
     <system:String x:Key="ValidationError">VAL ERROR</system:String>
     <system:String x:Key="JamError">JAM ERROR</system:String>
 
@@ -43,6 +47,12 @@
     <system:String x:Key="RestartRequired">* Requires restart for inventory recalibration.</system:String>
     <system:String x:Key="UIBehaviorNote">* Change the user interface behavior pattern.</system:String>
     <system:String x:Key="GlobalThresholds">GLOBAL THRESHOLDS</system:String>
+    <system:String x:Key="LabelActiveCurrency">Active Currency</system:String>
+    <system:String x:Key="LabelUIMode">Operating UI Mode</system:String>
+    <system:String x:Key="LabelDisplayLanguage">Display Language</system:String>
+    <system:String x:Key="LabelNearEmpty">Near Empty</system:String>
+    <system:String x:Key="LabelNearFull">Near Full</system:String>
+    <system:String x:Key="LabelFullLimit">Full Limit</system:String>
     <system:String x:Key="DenomCalibration">DENOMINATION CALIBRATION</system:String>
 
     <!-- Simulation Page -->
@@ -126,4 +136,17 @@
     <system:String x:Key="ActionEmpty">EMPTY</system:String>
     <system:String x:Key="ErrorDevicePrefix">Device Error [</system:String>
     <system:String x:Key="ErrorDeviceSuffix">]</system:String>
+    
+    <!-- ToolTips -->
+    <system:String x:Key="ToolTipSimulateJam">Simulate Mechanical Jam</system:String>
+    <system:String x:Key="ToolTipSimulateOverlap">Simulate Overlap Error</system:String>
+    <system:String x:Key="ToolTipSimulateReject">Simulate Reject</system:String>
+    <system:String x:Key="ToolTipClearInput">Clear Input</system:String>
+    <system:String x:Key="ToolTipReplenishAll">Replenish All (Set to Initial Counts)</system:String>
+    <system:String x:Key="ToolTipCollectAll">Collect All (Set to Zero)</system:String>
+    <system:String x:Key="ToolTipResetHardwareError">Reset Hardware Error</system:String>
+    <system:String x:Key="ToolTipSystemSettings">System Settings</system:String>
+
+    <!-- Window Titles -->
+    <system:String x:Key="TitleMainWindow">Cash Changer Simulator</system:String>
 </ResourceDictionary>
