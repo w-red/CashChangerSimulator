@@ -10,7 +10,7 @@
       mc:Ignorable="d" 
       d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
       d:DesignHeight="820" d:DesignWidth="1240"
-      Title="StandardSimulationPage">
+       Title="{StaticResource TitleMainWindow}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2.5*" />
@@ -54,8 +54,8 @@
                                 Command="{Binding OpenDepositCommand}"
                                 AutomationProperties.AutomationId="LaunchDepositButton">
                             <StackPanel>
-                                <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
-                                <TextBlock Text="{StaticResource Deposit}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
+                                <materialDesign:PackIcon Kind="ArrowDownBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
+                                <TextBlock Text="{StaticResource Deposit}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
                             </StackPanel>
                         </Button>
                         
@@ -67,8 +67,8 @@
                                 Command="{Binding OpenDispenseCommand}"
                                 AutomationProperties.AutomationId="LaunchDispenseButton">
                             <StackPanel>
-                                <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="White"/>
-                                <TextBlock Text="{StaticResource Dispense}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="White"/>
+                                <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" HorizontalAlignment="Center" Width="24" Height="24" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}"/>
+                                <TextBlock Text="{StaticResource Dispense}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}"/>
                             </StackPanel>
                         </Button>
 
@@ -80,39 +80,39 @@
                                 Command="{Binding OpenAdvancedSimulationCommand}"
                                 AutomationProperties.AutomationId="LaunchAdvancedSimulationButton">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Terminal" Width="20" Height="20" Margin="0,0,8,0" Foreground="White"/>
-                                <TextBlock Text="{StaticResource AdvancedSimulation}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Foreground="White"/>
+                                <materialDesign:PackIcon Kind="Terminal" Width="20" Height="20" Margin="0,0,8,0" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
+                                <TextBlock Text="{StaticResource AdvancedSimulation}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                             </StackPanel>
                         </Button>
 
                         <!-- Open/Close Device Buttons -->
                         <Button x:Name="DeviceOpenButton"
                                 Grid.Row="2" Grid.Column="0"
-                                Style="{StaticResource TagButtonStyle}"
+                                Style="{StaticResource ActionButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
                                 Background="{DynamicResource MaterialDesign.Brush.Primary}"
-                                Foreground="Black"
+                                Foreground="{DynamicResource MaterialDesign.Brush.OnPrimary}"
                                 Command="{Binding Inventory.OpenCommand}"
                                 Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}"
                                 AutomationProperties.AutomationId="DeviceOpenButton">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Power" Width="18" Height="18" Margin="0,0,6,0"/>
-                                <TextBlock Text="{StaticResource Open}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="Power" Width="18" Height="18" Margin="0,0,6,0" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                <TextBlock Text="{StaticResource Open}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                             </StackPanel>
                         </Button>
 
                         <Button x:Name="DeviceCloseButton"
                                 Grid.Row="2" Grid.Column="1"
-                                Style="{StaticResource TagButtonStyle}"
+                                Style="{StaticResource ActionButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
-                                Background="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
-                                Foreground="Black"
+                                Background="{DynamicResource MaterialDesign.Brush.Tertiary}"
+                                Foreground="{DynamicResource MaterialDesign.Brush.OnTertiary}"
                                 Command="{Binding Inventory.CloseCommand}"
                                 Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource VisibilityConv}}"
                                 AutomationProperties.AutomationId="DeviceCloseButton">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="PowerOff" Width="18" Height="18" Margin="0,0,6,0"/>
-                                <TextBlock Text="{StaticResource Close}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="PowerOff" Width="18" Height="18" Margin="0,0,6,0" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                <TextBlock Text="{StaticResource Close}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                             </StackPanel>
                         </Button>
                     </Grid>

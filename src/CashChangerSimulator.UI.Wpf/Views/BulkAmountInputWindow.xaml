@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
-        Title="BULK INPUT" Height="680" Width="440"
+        Title="{StaticResource BulkInput}" Height="680" Width="440"
         WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="BulkAmountInputWindow"
         Background="{DynamicResource MaterialDesign.Brush.Background}"

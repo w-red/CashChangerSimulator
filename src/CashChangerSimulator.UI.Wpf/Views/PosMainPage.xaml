@@ -9,7 +9,7 @@
       mc:Ignorable="d" 
       d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
       d:DesignHeight="600" d:DesignWidth="1200"
-      Title="PosMainPage">
+      Title="{StaticResource TitleMainWindow}">
     <Grid Margin="24,0">
         <ctrl:PosTransactionControl DataContext="{Binding PosTransaction}"/>
     </Grid>

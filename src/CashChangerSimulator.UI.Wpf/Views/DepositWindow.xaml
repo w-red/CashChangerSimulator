@@ -9,7 +9,7 @@
         xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:DepositViewModel}"
-        Title="DEPOSIT TERMINAL" Height="650" Width="420"
+        Title="{StaticResource DepositTerminal}" Height="650" Width="420"
         WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="DepositWindow"
         Background="{DynamicResource MaterialDesign.Brush.Background}"

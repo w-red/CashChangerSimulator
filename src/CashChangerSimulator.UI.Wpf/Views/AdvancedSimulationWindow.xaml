@@ -71,17 +71,17 @@
                         <Border x:Name="JamIndicator" Background="#F44336" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
                                 Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.AutomationId="JamIndicator">
-                            <TextBlock Text="JAM" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="JamIndicatorText"/>
+                            <TextBlock Text="{StaticResource StatusJam}" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="JamIndicatorText"/>
                         </Border>
                         <Border x:Name="OverlapIndicator" Background="#FF9800" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
                                 Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.AutomationId="OverlapIndicator">
-                            <TextBlock Text="OVERLAP" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                            <TextBlock Text="{StaticResource StatusOverlap}" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="OverlapIndicatorText"/>
                         </Border>
                         <Border x:Name="ErrorIndicator" Background="#9C27B0" CornerRadius="4" Padding="8,4"
                                 Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.AutomationId="ErrorIndicator">
-                            <TextBlock Text="DEVICE ERROR" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="ErrorIndicatorText"/>
+                            <TextBlock Text="{StaticResource StatusDeviceError}" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="ErrorIndicatorText"/>
                         </Border>
                     </StackPanel>
 
@@ -154,7 +154,7 @@
                                         Command="{Binding ClearScriptInputCommand}"
                                         Visibility="{Binding ScriptInput.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"
                                         Padding="0"
-                                        ToolTip="Clear Input">
+                                        ToolTip="{StaticResource ToolTipClearInput}">
                                     <materialDesign:PackIcon Kind="CloseCircle" Width="18" Height="18" Opacity="0.5"/>
                                 </Button>
                             </Grid>

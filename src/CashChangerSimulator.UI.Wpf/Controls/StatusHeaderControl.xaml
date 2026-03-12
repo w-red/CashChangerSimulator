@@ -51,7 +51,7 @@
             <Button Command="{Binding ResetErrorCommand}"
                     AutomationProperties.AutomationId="GlobalResetErrorButton"
                     Margin="0,0,8,0"
-                    ToolTip="Reset Hardware Error">
+                    ToolTip="{StaticResource ToolTipResetHardwareError}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
                         <Setter Property="Background" Value="#FF5252"/>
@@ -79,7 +79,7 @@
 
             <ToggleButton IsChecked="{Binding IsJammed.Value}"
                           AutomationProperties.AutomationId="SimulateJamButton"
-                          ToolTip="Simulate Mechanical Jam"
+                          ToolTip="{StaticResource ToolTipSimulateJam}"
                           Margin="0,0,8,0">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource HeaderIconToggleButtonStyle}">
@@ -99,7 +99,7 @@
 
             <Button Style="{StaticResource HeaderIconButtonStyle}"
                     Command="{Binding OpenSettingsCommand}"
-                    ToolTip="System Settings"
+                    ToolTip="{StaticResource ToolTipSystemSettings}"
                     Background="{DynamicResource MaterialDesign.Brush.Surface}"
                     BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
                 <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>

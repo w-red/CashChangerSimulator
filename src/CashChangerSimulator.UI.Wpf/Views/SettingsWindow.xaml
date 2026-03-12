@@ -10,7 +10,7 @@
     xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel, IsDesignTimeCreatable=False}"
-    Title="System Settings" Height="780" Width="720"
+    Title="{StaticResource SystemSettings}" Height="780" Width="720"
 
     Background="{DynamicResource MaterialDesign.Brush.Background}"
     Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"

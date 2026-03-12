@@ -34,7 +34,7 @@
                     <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Foreground="White" FontWeight="Bold" VerticalAlignment="Center">
                         <Run Text="{StaticResource Overflow}"/>
-                        <Run Text=": "/>
+                        <Run Text="{StaticResource LabelSeparator}"/>
                         <Run Text="{Binding CurrencyPrefix.Value}"/>
                         <Run Text="{Binding OverflowAmount.Value, StringFormat={}{0:N0}}"/>
                         <Run Text="{Binding CurrencySuffix.Value}"/>
@@ -48,7 +48,7 @@
                     <materialDesign:PackIcon Kind="Cancel" Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Foreground="White" FontWeight="Bold" VerticalAlignment="Center">
                         <Run Text="{StaticResource Reject}"/>
-                        <Run Text=": "/>
+                        <Run Text="{StaticResource LabelSeparator}"/>
                         <Run Text="{Binding CurrencyPrefix.Value}"/>
                         <Run Text="{Binding RejectAmount.Value, StringFormat={}{0:N0}}"/>
                         <Run Text="{Binding CurrencySuffix.Value}"/>
@@ -80,7 +80,7 @@
                         Grid.Column="1" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
                         Margin="4" Height="40"
-                        ToolTip="Simulate Overlap Error"
+                        ToolTip="{StaticResource ToolTipSimulateOverlap}"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline"
@@ -93,7 +93,7 @@
                         Grid.Column="2" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateRejectCommand}"
                         Margin="4" Height="40"
-                        ToolTip="Simulate Reject"
+                        ToolTip="{StaticResource ToolTipSimulateReject}"
                         AutomationProperties.AutomationId="SimulateRejectButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CashRemove"

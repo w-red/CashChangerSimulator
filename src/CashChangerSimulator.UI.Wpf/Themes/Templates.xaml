@@ -14,11 +14,11 @@
 
     <!-- ItemsPanel Templates -->
     <ItemsPanelTemplate x:Key="CenteredWrapPanelItemsPanel">
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" />
     </ItemsPanelTemplate>
 
     <ItemsPanelTemplate x:Key="DefaultWrapPanelItemsPanel">
-        <UniformGrid Columns="3" />
+        <WrapPanel Orientation="Horizontal" />
     </ItemsPanelTemplate>
 
     <!-- Inventory Tile Template -->
@@ -30,23 +30,24 @@
                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                 AutomationProperties.AutomationId="InventoryTile"
                 Cursor="Hand"
-                Margin="0,0,8,8" Width="180" Height="140">
+                Margin="0,0,6,6" Width="140" Height="95">
             <Border x:Name="TileBorder" ClipToBounds="True" RenderTransformOrigin="0.5,0.5" BorderThickness="2" BorderBrush="Transparent" CornerRadius="8">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="10" Color="{DynamicResource MaterialDesign.Color.Primary}" Opacity="0" ShadowDepth="0" />
+                    <DropShadowEffect BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0" ShadowDepth="0" />
                 </Border.Effect>
                 <Border.RenderTransform>
                     <ScaleTransform ScaleX="1" ScaleY="1" />
                 </Border.RenderTransform>
                 <Border.Style>
                     <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                        <Setter Property="Padding" Value="0"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsAcceptingCash.Value}" Value="True">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                            To="{DynamicResource MaterialDesign.Color.Primary}" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
+                                                            To="{StaticResource PrimaryColor}" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
                                                             To="0.6" Duration="0:0:0.5" RepeatBehavior="Forever" AutoReverse="True" />
                                         </Storyboard>
@@ -104,25 +105,24 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Margin="8,8,8,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="14" FontWeight="Bold" 
-                                   TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Margin="0,0,0,2"/>
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Border Background="{DynamicResource MaterialDesign.Brush.Secondary}" CornerRadius="2" Padding="4,1" Margin="0,0,4,0"
+                    <StackPanel Grid.Row="0" Margin="8,6,8,0">
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="12" FontWeight="Bold" 
+                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Top"/>
+                        
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
+                             <Border Background="{DynamicResource MaterialDesign.Brush.Secondary}" CornerRadius="2" Padding="3,1" Margin="0,0,4,0"
                                     Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedVisibilityConv}}">
-                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}" FontSize="10" FontWeight="Black"/>
+                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}" FontSize="9" FontWeight="Black"/>
                             </Border>
-                            <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="11" FontWeight="Black"/>
+                            <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="10" FontWeight="Black" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
                     
-                    <Grid Grid.Row="1" Margin="4">
-                        <TextBlock Text="{Binding Count.Value}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" 
-                                   FontSize="28" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Grid Grid.Row="1" Margin="4,0,4,4">
+                        <Viewbox Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding Count.Value}" Foreground="#FFFFFF" 
+                                       FontSize="48" FontWeight="Black"/>
+                        </Viewbox>
                     </Grid>
                 </Grid>
             </Border>
@@ -153,7 +153,7 @@
             
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="{Binding Type}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
-                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="11" Opacity="0.6" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
+                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
             </StackPanel>
             
             <StackPanel x:Name="AmountContainer" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

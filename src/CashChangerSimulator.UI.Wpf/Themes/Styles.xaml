@@ -13,7 +13,7 @@
     <Style x:Key="CardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Surface}"/>
         <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Padding" Value="15"/>
+        <Setter Property="Padding" Value="8"/>
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="20" ShadowDepth="2"/>
@@ -32,7 +32,7 @@
 
     <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Padding" Value="24,8"/>
         <Setter Property="Height" Value="40"/>
@@ -40,6 +40,7 @@
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#D7B1FF"/>
+                <Setter Property="Foreground" Value="#1A0033"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -95,12 +96,19 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="20"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+
     <Style x:Key="TagButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="12"/>
         <Setter Property="Height" Value="Auto"/>
         <Setter Property="Padding" Value="8,2"/>
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
     </Style>
 
     <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">

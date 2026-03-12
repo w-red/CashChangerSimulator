@@ -1,26 +1,52 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- These fixed colors are kept for backward compatibility if needed, 
-         but the UI should primarily use DynamicResource MaterialDesign.Brush.* -->
+    <!-- 
+      Cash Changer Simulator - Soft Dark Design System
+      Primary: BB86FC (Vibrant Light Purple)
+      Background: #0D0D0D (Soft Charcoal Black)
+      Surface: #161616 (Soft Card Black)
+    -->
     
-    <Color x:Key="BackgroundColor">#121212</Color>
-    <Color x:Key="SurfaceColor">#1E1E1E</Color>
+    <Color x:Key="BackgroundColor">#0D0D0D</Color>
+    <Color x:Key="SurfaceColor">#161616</Color>
     <Color x:Key="PrimaryColor">#BB86FC</Color>
-    <Color x:Key="SecondaryColor">#03DAC6</Color>
-    <Color x:Key="ErrorColor">#CF6679</Color>
-    <Color x:Key="OnBackgroundColor">#FFFFFF</Color>
+    <Color x:Key="SecondaryColor">#81C784</Color> <!-- Softened Green (Material 300) -->
+    <Color x:Key="ErrorColor">#FF5252</Color>
+    <Color x:Key="OnBackgroundColor">#E0E0E0</Color>
     <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
+    <Color x:Key="TertiaryColor">#FFF9C4</Color> <!-- Cream (Material Yellow 100) -->
+    <Color x:Key="OnTertiaryColor">#251A00</Color>
     <Color x:Key="SuccessColor">#4CAF50</Color>
     <Color x:Key="WarningColor">#FFB74D</Color>
 
-    <SolidColorBrush x:Key="BackgroundBrush" Color="#121212"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#1E1E1E"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#0D0D0D"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#161616"/>
     <SolidColorBrush x:Key="PrimaryBrush" Color="#BB86FC"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="#03DAC6"/>
-    <SolidColorBrush x:Key="ErrorBrush" Color="#CF6679"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#81C784"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FF5252"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="#4CAF50"/>
     <SolidColorBrush x:Key="WarningBrush" Color="#FFB74D"/>
-    <SolidColorBrush x:Key="OnBackgroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="OnSurfaceBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="OnBackgroundBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="OnSurfaceBrush" Color="#D0D0D0"/>
+
+    <!-- Fix MaterialDesign Brush Mappings (Soft Dark) -->
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Background" Color="#0D0D0D" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Surface" Color="#161616" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.SurfaceVariant" Color="#333333" />
+    
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnSurface" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnBackground" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnSurfaceVariant" Color="#BDBDBD" />
+
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary" Color="#BB86FC" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnPrimary" Color="#1A0033" /> <!-- Dark purple on Light purple -->
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Container" Color="#301B4B" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnPrimary.Container" Color="#EADDFF" />
+
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Secondary" Color="#81C784" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnSecondary" Color="#00330E" />
+
+    <SolidColorBrush x:Key="MaterialDesign.Brush.Tertiary" Color="#FFF9C4" />
+    <SolidColorBrush x:Key="MaterialDesign.Brush.OnTertiary" Color="#251A00" />
 
 </ResourceDictionary>

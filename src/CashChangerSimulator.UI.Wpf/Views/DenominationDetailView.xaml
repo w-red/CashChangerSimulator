@@ -15,7 +15,7 @@
         <StackPanel>
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="ℹ" Width="20" Height="20" Foreground="#BB86FC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" TextAlignment="Center"/>
+                    <TextBlock Text="{StaticResource SymbolInfo}" Width="20" Height="20" Foreground="#BB86FC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" TextAlignment="Center"/>
                     <TextBlock Text="{Binding LabelInventoryDetail}" FontSize="14" FontWeight="Bold" Foreground="#BB86FC" VerticalAlignment="Center"/>
                 </StackPanel>
                 <Button Style="{x:Null}" 
@@ -24,7 +24,7 @@
                         Click="CloseButton_Click"
                         AutomationProperties.AutomationId="CloseButton"
                         Background="Transparent" BorderThickness="0" Foreground="#E0E0E0" Cursor="Hand">
-                    <TextBlock Text="✕" FontSize="18"/>
+                    <TextBlock Text="{StaticResource SymbolClose}" FontSize="18"/>
                 </Button>
             </Grid>
             
@@ -35,7 +35,7 @@
                     <!-- Recyclable -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="↻" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
+                             <TextBlock Text="{StaticResource SymbolRecycle}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
                             <TextBlock Text="{Binding LabelRecyclable}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
                         </StackPanel>
                         <TextBlock Text="{Binding RecyclableCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>
@@ -46,7 +46,7 @@
                     <!-- Collection -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⬇" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
+                             <TextBlock Text="{StaticResource SymbolCollect}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
                             <TextBlock Text="{Binding LabelCollection}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
                         </StackPanel>
                         <TextBlock Text="{Binding CollectionCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>
@@ -57,7 +57,7 @@
                     <!-- Reject -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚠" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
+                             <TextBlock Text="{StaticResource SymbolWarning}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
                             <TextBlock Text="{Binding LabelReject}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
                         </StackPanel>
                         <TextBlock Text="{Binding RejectCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>

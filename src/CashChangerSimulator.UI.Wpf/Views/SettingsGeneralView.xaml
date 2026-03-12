@@ -22,7 +22,7 @@
                     Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                     Margin="0,0,0,20"/>
                 <ComboBox
-                    materialDesign:HintAssist.Hint="Active Currency"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelActiveCurrency}"
                     ItemsSource="{Binding AvailableCurrencyCodes}"
                     SelectedItem="{Binding CurrencyCode.Value}"
                     Style="{StaticResource ModernComboBoxStyle}"/>
@@ -33,7 +33,7 @@
                     Margin="4,4,0,0"/>
 
                 <ComboBox
-                    materialDesign:HintAssist.Hint="Operating UI Mode"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelUIMode}"
                     ItemsSource="{Binding AvailableUIModes}"
                     SelectedItem="{Binding ActiveUIMode.Value}"
                     Style="{StaticResource ModernComboBoxStyle}"
@@ -45,7 +45,7 @@
                     Margin="4,4,0,0"/>
 
                 <ComboBox
-                    materialDesign:HintAssist.Hint="Display Language"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelDisplayLanguage}"
                     ItemsSource="{Binding AvailableCultures}"
                     SelectedItem="{Binding CultureCode.Value}"
                     Style="{StaticResource ModernComboBoxStyle}"
@@ -80,15 +80,15 @@
                     Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                     Margin="0,0,0,20"/>
                 <TextBox
-                    materialDesign:HintAssist.Hint="Near Empty"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelNearEmpty}"
                     Text="{Binding NearEmpty.Value, UpdateSourceTrigger=PropertyChanged}"
                     Style="{StaticResource ModernTextBoxStyle}"/>
                 <TextBox
-                    materialDesign:HintAssist.Hint="Near Full"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelNearFull}"
                     Text="{Binding NearFull.Value, UpdateSourceTrigger=PropertyChanged}"
                     Style="{StaticResource ModernTextBoxStyle}"/>
                 <TextBox
-                    materialDesign:HintAssist.Hint="Full Limit"
+                    materialDesign:HintAssist.Hint="{StaticResource LabelFullLimit}"
                     Text="{Binding Full.Value, UpdateSourceTrigger=PropertyChanged}"
                     Style="{StaticResource ModernTextBoxStyle}"/>
             </StackPanel>
