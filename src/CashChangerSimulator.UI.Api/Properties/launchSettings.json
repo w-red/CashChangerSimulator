@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "CashChangerSimulator.UI.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54216;http://localhost:54217"
+    }
+  }
+}
