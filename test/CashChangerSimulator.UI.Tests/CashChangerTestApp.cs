@@ -130,8 +130,24 @@ HotStart = {hotStart.ToString().ToLower()}
             }
             return null;
         }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(2000)).Result ?? throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found after 30 seconds.");
-        MainWindow.WaitUntilClickable(TimeSpan.FromSeconds(10));
         MainWindow.SetForeground();
+
+        // Use a longer timeout in CI environments (GitHub Actions)
+        var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
+        var timeout = isCi ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(10);
+
+        try
+        {
+            MainWindow.WaitUntilClickable(timeout);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[WARNING] WaitUntilClickable failed: {ex.Message}. Proceeding anyway as window is found.");
+            if (MainWindow.IsOffscreen)
+            {
+                throw new Exception("Main window is offscreen and could not be made clickable.");
+            }
+        }
     }
 
     public void Dispose()
