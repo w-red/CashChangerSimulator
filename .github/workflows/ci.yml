@@ -28,8 +28,9 @@ jobs:
         run: dotnet test test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test_results_core.trx"
 
       - name: Test UI Modules (FlaUI requires Desktop session)
-        # WPF UI Tests might fail on standard GitHub Actions runners because they run headlessly as a service without an interactive desktop.
-        # Therefore, we set continue-on-error to true so it doesn't fail the entire pipeline if the environment lacks a UI session.
+        # Skip UI tests in CI to avoid hanging due to lack of interactive desktop session.
+        # The user has confirmed that Core/Device (Mock API) tests are sufficient for now.
+        if: false # runner.os == 'Windows'
         run: dotnet test test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test_results_ui.trx"
         continue-on-error: true
 
