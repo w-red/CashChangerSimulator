@@ -130,7 +130,17 @@ HotStart = {hotStart.ToString().ToLower()}
             }
             return null;
         }, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(2000)).Result ?? throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found after 30 seconds.");
-        MainWindow.SetForeground();
+        // Settlement period for UI Automation state
+        System.Threading.Thread.Sleep(500);
+
+        try
+        {
+            MainWindow.SetForeground();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[INFO] SetForeground failed (Expected in some headless environments): {ex.Message}");
+        }
 
         // Use a longer timeout in CI environments (GitHub Actions)
         var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
@@ -143,7 +153,19 @@ HotStart = {hotStart.ToString().ToLower()}
         catch (Exception ex)
         {
             Console.WriteLine($"[WARNING] WaitUntilClickable failed: {ex.Message}. Proceeding anyway as window is found.");
-            if (MainWindow.IsOffscreen)
+            
+            bool isOffscreen = false;
+            try
+            {
+                isOffscreen = MainWindow.IsOffscreen;
+            }
+            catch
+            {
+                // Property might not be supported in some environments
+                Console.WriteLine("[INFO] IsOffscreen property access failed/not supported.");
+            }
+
+            if (isOffscreen)
             {
                 throw new Exception("Main window is offscreen and could not be made clickable.");
             }
