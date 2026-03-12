@@ -29,13 +29,13 @@
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding BillGridWidth.Value}" />
-                    <ColumnDefinition Width="{Binding CoinGridWidth.Value}" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
                 
                 <!-- Bills Area -->
                 <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+                    <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
                     <ItemsControl ItemsSource="{Binding BillDenominations}"
                                   ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                                   ItemTemplate="{StaticResource InventoryTileTemplate}"
@@ -45,7 +45,7 @@
 
                 <!-- Coins Area -->
                 <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                    <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Margin="8,0,0,8" />
+                    <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
                     <ItemsControl ItemsSource="{Binding CoinDenominations}"
                                   ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                                   ItemTemplate="{StaticResource InventoryTileTemplate}">
@@ -93,9 +93,9 @@
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding OpenSettingsCommand}"
                                 ToolTip="System Settings"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource PrimaryBrush}">
-                            <materialDesign:PackIcon Kind="Settings" Foreground="{StaticResource PrimaryBrush}"/>
+                                Background="{DynamicResource MaterialDesign.Brush.Surface}"
+                                BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
+                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                         </Button>
                     </StackPanel>
                 </StackPanel>
@@ -104,24 +104,24 @@
             <!-- Bulk Operations -->
             <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="{StaticResource BulkOperations}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,12"/>
+                    <TextBlock Text="{StaticResource BulkOperations}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,12"/>
                     <UniformGrid Columns="2">
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding ReplenishAllCommand}"
                                 ToolTip="Replenish All (Set to Initial Counts)"
-                                Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource SuccessBrush}"
+                                Background="{DynamicResource MaterialDesign.Brush.Surface}"
+                                BorderBrush="{DynamicResource MaterialDesign.Brush.Success}"
                                 Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="HandCoin" Foreground="{StaticResource SuccessBrush}" Margin="0,0,4,0"/>
-                                <TextBlock Text="{StaticResource ActionFill}" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="HandCoin" Foreground="{DynamicResource MaterialDesign.Brush.Success}" Margin="0,0,4,0"/>
+                                <TextBlock Text="{StaticResource ActionFill}" Foreground="{DynamicResource MaterialDesign.Brush.Success}" FontWeight="Bold" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
 
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding CollectAllCommand}"
                                 ToolTip="Collect All (Set to Zero)"
-                                Background="{StaticResource SurfaceBrush}"
+                                Background="{DynamicResource MaterialDesign.Brush.Surface}"
                                 BorderBrush="OrangeRed">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="DeleteSweep" Foreground="OrangeRed" Margin="0,0,4,0"/>
@@ -135,7 +135,7 @@
             <!-- Activity Feed -->
             <Border Grid.Row="2" Style="{StaticResource CardStyle}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource ActivityFeed}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource ActivityFeed}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,16"/>
                     
                     <ListBox ItemsSource="{Binding RecentTransactions}" Background="Transparent" BorderThickness="0"
                              ItemContainerStyle="{StaticResource TransactionListStyle}"

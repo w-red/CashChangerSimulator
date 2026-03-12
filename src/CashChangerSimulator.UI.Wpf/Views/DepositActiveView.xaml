@@ -110,7 +110,7 @@
                     AutomationProperties.AutomationId="FixDepositButton">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Check" Margin="0,0,12,0" />
-                    <TextBlock Text="{StaticResource FinishCounting}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{StaticResource FinishCounting}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Bold" FontSize="14"/>
                 </StackPanel>
             </Button>
         </StackPanel>
