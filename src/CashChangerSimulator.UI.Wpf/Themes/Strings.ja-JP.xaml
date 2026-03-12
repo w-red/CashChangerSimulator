@@ -13,6 +13,9 @@
     <system:String x:Key="Connect">接続</system:String>
     <system:String x:Key="Open">オープン</system:String>
     <system:String x:Key="Close">クローズ</system:String>
+    <system:String x:Key="StatusJam">ジャム</system:String>
+    <system:String x:Key="StatusOverlap">重なり</system:String>
+    <system:String x:Key="StatusDeviceError">デバイスエラー</system:String>
     
     <system:String x:Key="Bills">紙幣</system:String>
     <system:String x:Key="Coins">硬貨</system:String>
@@ -27,6 +30,7 @@
 
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
+    <system:String x:Key="NoRecentTransactions">最近の取引はありません</system:String>
     <system:String x:Key="ValidationError">入力エラー</system:String>
     <system:String x:Key="JamError">ジャム発生</system:String>
 
@@ -43,6 +47,12 @@
     <system:String x:Key="RestartRequired">* 在庫再調整のため再起動が必要です。</system:String>
     <system:String x:Key="UIBehaviorNote">* ユーザーインターフェースの動作パターンを変更します。</system:String>
     <system:String x:Key="GlobalThresholds">共通しきい値</system:String>
+    <system:String x:Key="LabelActiveCurrency">有効な通貨</system:String>
+    <system:String x:Key="LabelUIMode">UI 動作モード</system:String>
+    <system:String x:Key="LabelDisplayLanguage">表示言語</system:String>
+    <system:String x:Key="LabelNearEmpty">ニアエンプティ</system:String>
+    <system:String x:Key="LabelNearFull">ニアフル</system:String>
+    <system:String x:Key="LabelFullLimit">最大容量</system:String>
     <system:String x:Key="DenomCalibration">金種別設定</system:String>
 
     <!-- Simulation Page -->
@@ -123,4 +133,17 @@
     <system:String x:Key="ActionEmpty">全回収</system:String>
     <system:String x:Key="ErrorDevicePrefix">デバイスエラー [</system:String>
     <system:String x:Key="ErrorDeviceSuffix">]</system:String>
+
+    <!-- ToolTips -->
+    <system:String x:Key="ToolTipSimulateJam">メカジャムをシミュレート</system:String>
+    <system:String x:Key="ToolTipSimulateOverlap">重なりエラーをシミュレート</system:String>
+    <system:String x:Key="ToolTipSimulateReject">リジェクトをシミュレート</system:String>
+    <system:String x:Key="ToolTipClearInput">表示をクリア</system:String>
+    <system:String x:Key="ToolTipReplenishAll">全補充 (初期枚数に設定)</system:String>
+    <system:String x:Key="ToolTipCollectAll">全回収 (ゼロに設定)</system:String>
+    <system:String x:Key="ToolTipResetHardwareError">ハードウェアエラーを解除</system:String>
+    <system:String x:Key="ToolTipSystemSettings">システム設定</system:String>
+
+    <!-- Window Titles -->
+    <system:String x:Key="TitleMainWindow">現金機シミュレーター</system:String>
 </ResourceDictionary>
