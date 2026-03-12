@@ -9,7 +9,7 @@
         xmlns:views="clr-namespace:CashChangerSimulator.UI.Wpf.Views"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:DispenseViewModel}"
-        Title="DISPENSE TERMINAL" Height="650" Width="420"
+        Title="{StaticResource DispenseTerminal}" Height="650" Width="420"
         WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="DispenseWindow"
         Background="{DynamicResource MaterialDesign.Brush.Background}"

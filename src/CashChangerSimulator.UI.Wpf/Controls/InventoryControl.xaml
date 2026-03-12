@@ -82,7 +82,7 @@
                         <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
                                       IsChecked="{Binding IsJammed.Value}"
                                       AutomationProperties.AutomationId="SimulateJamButton"
-                                      ToolTip="Simulate Mechanical Jam"
+                                      ToolTip="{StaticResource ToolTipSimulateJam}"
                                       Margin="0,0,8,0">
                             <materialDesign:PackIcon Kind="CarBrakeAlert" />
                             <materialDesign:ToggleButtonAssist.OnContent>
@@ -92,7 +92,7 @@
 
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding OpenSettingsCommand}"
-                                ToolTip="System Settings"
+                                ToolTip="{StaticResource ToolTipSystemSettings}"
                                 Background="{DynamicResource MaterialDesign.Brush.Surface}"
                                 BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
                             <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
@@ -108,7 +108,7 @@
                     <UniformGrid Columns="2">
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding ReplenishAllCommand}"
-                                ToolTip="Replenish All (Set to Initial Counts)"
+                                ToolTip="{StaticResource ToolTipReplenishAll}"
                                 Background="{DynamicResource MaterialDesign.Brush.Surface}"
                                 BorderBrush="{DynamicResource MaterialDesign.Brush.Success}"
                                 Margin="0,0,8,0">
@@ -120,7 +120,7 @@
 
                         <Button Style="{StaticResource ModernActionButtonStyle}"
                                 Command="{Binding CollectAllCommand}"
-                                ToolTip="Collect All (Set to Zero)"
+                                ToolTip="{StaticResource ToolTipCollectAll}"
                                 Background="{DynamicResource MaterialDesign.Brush.Surface}"
                                 BorderBrush="OrangeRed">
                             <StackPanel Orientation="Horizontal">

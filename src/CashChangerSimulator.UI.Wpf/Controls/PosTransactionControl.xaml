@@ -75,7 +75,7 @@
                         <TextBlock Text="{StaticResource ReadyForTransaction}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
                         <TextBox Text="{Binding TargetAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource ModernTextBoxStyle}"
-                                 materialDesign:HintAssist.Hint="Enter Target Amount"
+                                 materialDesign:HintAssist.Hint="{StaticResource TargetAmountHint}"
                                  materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
                                  FontSize="24" FontWeight="Bold" Height="60" Margin="0,8,0,0"/>
                         <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,12,12" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>

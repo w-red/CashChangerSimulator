@@ -28,29 +28,32 @@
                 HorizontalAlignment="Left" VerticalAlignment="Top" />
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,12,0">
+                <StackPanel.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
+                        <Setter Property="Margin" Value="8,0,0,8"/>
+                    </Style>
+                </StackPanel.Resources>
 
-            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                <TextBlock Text="{StaticResource Bills}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
+                <!-- Bills Section -->
+                <TextBlock Text="{StaticResource Bills}" />
                 <ItemsControl ItemsSource="{Binding BillDenominations}"
                               ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
                               ItemTemplate="{StaticResource InventoryTileTemplate}"
-                              Margin="0,0,0,16">
+                              Margin="0,0,0,12">
                 </ItemsControl>
-            </StackPanel>
 
-            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                <TextBlock Text="{StaticResource Coins}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="8,0,0,8" />
+                <!-- Coins Section -->
+                <TextBlock Text="{StaticResource Coins}" />
                 <ItemsControl ItemsSource="{Binding CoinDenominations}"
                               ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
-                              ItemTemplate="{StaticResource InventoryTileTemplate}">
+                              ItemTemplate="{StaticResource InventoryTileTemplate}"
+                              Margin="0,0,0,8">
                 </ItemsControl>
             </StackPanel>
-        </Grid>
         </ScrollViewer>
     </Grid>
 </UserControl>
