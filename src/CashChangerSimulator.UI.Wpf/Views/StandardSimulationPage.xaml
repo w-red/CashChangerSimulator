@@ -31,9 +31,9 @@
             </Grid.RowDefinitions>
 
             <!-- Terminal Launchers (Fixed) -->
-            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Margin="0,0,0,16">
+            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.Surface}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="{StaticResource TerminalAccess}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <TextBlock Text="{StaticResource TerminalAccess}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,16"/>
                     
                     <Grid>
                         <Grid.RowDefinitions>
@@ -50,7 +50,7 @@
                                 Grid.Row="0" Grid.Column="0" 
                                 Style="{StaticResource PrimaryButtonStyle}" 
                                 Height="60" Margin="4"
-                                Background="#0A8F08" BorderBrush="#0A8F08"
+                                Background="{DynamicResource MaterialDesign.Brush.Primary}" BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}"
                                 Command="{Binding OpenDepositCommand}"
                                 AutomationProperties.AutomationId="LaunchDepositButton">
                             <StackPanel>
@@ -63,7 +63,7 @@
                                 Grid.Row="0" Grid.Column="1" 
                                 Style="{StaticResource PrimaryButtonStyle}" 
                                 Height="60" Margin="4"
-                                Background="#6200EE" BorderBrush="#6200EE"
+                                Background="{DynamicResource MaterialDesign.Brush.Secondary}" BorderBrush="{DynamicResource MaterialDesign.Brush.Secondary}"
                                 Command="{Binding OpenDispenseCommand}"
                                 AutomationProperties.AutomationId="LaunchDispenseButton">
                             <StackPanel>
@@ -75,7 +75,7 @@
                         <Button x:Name="LaunchAdvancedSimulationButton"
                                 Grid.Row="1" Grid.ColumnSpan="2"
                                 Style="{StaticResource PrimaryButtonStyle}"
-                                Background="#37474F" BorderBrush="#37474F"
+                                Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}" BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}"
                                 Height="50" Margin="4,8,4,4"
                                 Command="{Binding OpenAdvancedSimulationCommand}"
                                 AutomationProperties.AutomationId="LaunchAdvancedSimulationButton">
@@ -90,7 +90,7 @@
                                 Grid.Row="2" Grid.Column="0"
                                 Style="{StaticResource TagButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
-                                Background="{StaticResource PrimaryBrush}"
+                                Background="{DynamicResource MaterialDesign.Brush.Primary}"
                                 Foreground="Black"
                                 Command="{Binding Inventory.OpenCommand}"
                                 Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}"
@@ -105,7 +105,7 @@
                                 Grid.Row="2" Grid.Column="1"
                                 Style="{StaticResource TagButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
-                                Background="#B0BEC5"
+                                Background="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                                 Foreground="Black"
                                 Command="{Binding Inventory.CloseCommand}"
                                 Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource VisibilityConv}}"

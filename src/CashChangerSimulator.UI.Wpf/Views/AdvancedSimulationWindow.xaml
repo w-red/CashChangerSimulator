@@ -10,8 +10,8 @@
         mc:Ignorable="d"
         Title="{StaticResource AdvancedSimulation}" Height="650" Width="420"
         AutomationProperties.AutomationId="AdvancedSimulationWindow"
-        Background="{StaticResource BackgroundBrush}"
-        TextElement.Foreground="{StaticResource TextPrimaryBrush}"
+        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
         WindowStartupLocation="CenterOwner">
     
     <Window.Resources>
@@ -30,7 +30,7 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,20">
                 <TextBlock Text="{StaticResource AdvancedSimulation}" 
                            Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
-                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                            FontWeight="Black"/>
             </StackPanel>
 
@@ -45,8 +45,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="{StaticResource UposConfig}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
-                                <TextBlock Text="{StaticResource RealTimeData}" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                <TextBlock Text="{StaticResource UposConfig}" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="{StaticResource RealTimeData}" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontSize="11"/>
                             </StackPanel>
                             <ToggleButton Grid.Column="1" 
                                            IsChecked="{Binding IsRealTimeDataEnabled.Value}" 
@@ -59,10 +59,10 @@
                     <Border Style="{StaticResource CardStyle}" Background="#106200EE" Margin="0,0,0,16" Padding="12"
                             Visibility="{Binding IsDepositInProgress.Value, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="{StaticResource CurrentDeposit}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
-                            <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
-                            <TextBlock Text="{Binding CurrencySuffix.Value}" Foreground="{StaticResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
+                            <TextBlock Text="{StaticResource CurrentDeposit}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrencySuffix.Value}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
                         </StackPanel>
                     </Border>
 
@@ -133,9 +133,9 @@
                     </Border>
 
                     <!-- Scripts Section -->
-                    <Border Style="{StaticResource CardStyle}" Background="{StaticResource SurfaceBrush}" Padding="12">
+                    <Border Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.Surface}" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="{StaticResource ScriptInput}" FontSize="11" FontWeight="Black" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                            <TextBlock Text="{StaticResource ScriptInput}" FontSize="11" FontWeight="Black" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Margin="0,0,0,12"/>
                             
                             <Grid>
                                 <TextBox x:Name="ScriptInputTextBox"
@@ -159,7 +159,7 @@
                                 </Button>
                             </Grid>
                             
-                            <TextBlock Text="{Binding ScriptError.Value}" Foreground="{StaticResource ErrorBrush}" 
+                            <TextBlock Text="{Binding ScriptError.Value}" Foreground="{DynamicResource MaterialDesign.Brush.Error}" 
                                        Visibility="{Binding ScriptError.Value, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}" 
                                        FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" TextWrapping="Wrap"/>
                             

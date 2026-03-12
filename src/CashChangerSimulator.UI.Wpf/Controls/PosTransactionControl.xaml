@@ -25,7 +25,7 @@
         <!-- Transaction Progress Area -->
         <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
             <StackPanel>
-                <TextBlock Text="{StaticResource TransactionStatus}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                <TextBlock Text="{StaticResource TransactionStatus}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,16"/>
                 
                 <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
@@ -34,14 +34,14 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel>
-                        <TextBlock Text="{Binding StatusText.Value}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="{Binding StatusText.Value}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                         <TextBlock Text="{Binding Message.Value}" FontSize="14" Opacity="0.7" Margin="0,4,0,0"/>
                     </StackPanel>
                     
-                    <materialDesign:PackIcon Grid.Column="1" Kind="CashMultiple" Width="48" Height="48" Foreground="{StaticResource PrimaryBrush}" Opacity="0.2"/>
+                    <materialDesign:PackIcon Grid.Column="1" Kind="CashMultiple" Width="48" Height="48" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" Opacity="0.2"/>
                 </Grid>
 
-                <ProgressBar Value="{Binding Progress.Value}" Height="4" Background="#15FFFFFF" Foreground="{StaticResource PrimaryBrush}"/>
+                <ProgressBar Value="{Binding Progress.Value}" Height="4" Background="#15FFFFFF" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                 
                 <Grid Margin="0,8,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -71,14 +71,14 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <!-- Idle State -->
                     <StackPanel Visibility="{Binding TransactionStatus.Value, Converter={StaticResource UIModeVisibilityConv}, ConverterParameter=Idle}">
-                        <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,16"/>
+                        <materialDesign:PackIcon Kind="CashRegister" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" Margin="0,0,0,16"/>
                         <TextBlock Text="{StaticResource ReadyForTransaction}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,24"/>
                         <TextBox Text="{Binding TargetAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource ModernTextBoxStyle}"
                                  materialDesign:HintAssist.Hint="Enter Target Amount"
                                  materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix}"
                                  FontSize="24" FontWeight="Bold" Height="60" Margin="0,8,0,0"/>
-                        <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,12,12" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
+                        <TextBlock Text="{Binding CurrencySuffix}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,12,12" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" Visibility="{Binding CurrencySuffix, Converter={StaticResource StringNullOrEmptyToVisibilityConv}}"/>
                         <Button Style="{StaticResource PrimaryButtonStyle}" 
                                 Content="{StaticResource StartSimulation}" 
                                 Command="{Binding StartCommand}"
@@ -109,7 +109,7 @@
             <!-- OPOS Events Log -->
             <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource OposDeviceLog}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black" Margin="0,0,0,16"/>
+                    <TextBlock DockPanel.Dock="Top" Text="{StaticResource OposDeviceLog}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,16"/>
                     <ListBox ItemsSource="{Binding OposLog}" 
                              Background="Transparent" BorderThickness="0"
                              ItemContainerStyle="{StaticResource LogItemStyle}"

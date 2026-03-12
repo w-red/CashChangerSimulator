@@ -11,7 +11,7 @@
 
     <!-- Shared Styles -->
     <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background" Value="#1AFFFFFF"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Surface}"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="15"/>
         <Setter Property="Effect">
@@ -31,7 +31,7 @@
     </Style>
 
     <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Setter Property="Foreground" Value="Black"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Padding" Value="24,8"/>
@@ -60,11 +60,11 @@
     </Style>
 
     <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
-        <Setter Property="Background" Value="#25FFFFFF"/>
-        <Setter Property="Foreground" Value="{StaticResource OnSurfaceBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Secondary.Container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Secondary.OnContainer}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Setter Property="BorderThickness" Value="1.5"/>
-        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#40FFFFFF"/>
@@ -74,9 +74,9 @@
     </Style>
 
     <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
-        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource WarningBrush}"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#15FFB74D"/>
@@ -110,7 +110,7 @@
     </Style>
 
     <Style TargetType="Button" x:Key="IconButtonStyle" BasedOn="{StaticResource MaterialDesignIconButton}">
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Setter Property="Width" Value="40"/>
         <Setter Property="Height" Value="40"/>
     </Style>
@@ -141,11 +141,11 @@
 
     <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
         <Setter Property="Background" Value="#333333"/>
-        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
     </Style>
 
     <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionLightCheckBox}">
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
     </Style>
 
     <!-- List Styles -->

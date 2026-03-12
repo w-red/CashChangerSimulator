@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:DispenseViewModel}">
     <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{StaticResource CashBalance}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Black"/>
+        <TextBlock Text="{StaticResource CashBalance}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black"/>
         <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -18,10 +18,10 @@
             
             <Viewbox Grid.Column="0" Stretch="Uniform" HorizontalAlignment="Left" MaxHeight="100">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding CurrencyPrefix}" FontSize="32" VerticalAlignment="Bottom" Margin="0,0,8,10" Foreground="{StaticResource PrimaryBrush}" FontWeight="Thin"/>
-                    <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="64" FontWeight="Thin" Foreground="{StaticResource OnBackgroundBrush}"
+                    <TextBlock Text="{Binding CurrencyPrefix}" FontSize="32" VerticalAlignment="Bottom" Margin="0,0,8,10" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Thin"/>
+                    <TextBlock Text="{Binding TotalAmount.Value, StringFormat={}{0:N0}}" FontSize="64" FontWeight="Thin" Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
                                AutomationProperties.AutomationId="TotalAmountText"/>
-                    <TextBlock Text="{Binding CurrencySuffix}" FontSize="32" VerticalAlignment="Bottom" Margin="8,0,0,10" Foreground="{StaticResource PrimaryBrush}" FontWeight="Thin"/>
+                    <TextBlock Text="{Binding CurrencySuffix}" FontSize="32" VerticalAlignment="Bottom" Margin="8,0,0,10" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Thin"/>
                 </StackPanel>
             </Viewbox>
 
