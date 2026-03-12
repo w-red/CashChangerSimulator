@@ -1,0 +1,12 @@
+.git/
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.sln.dotSettings.user
+TestResults/
+coveragereport/
+logs/
+run_output.txt
+config.toml (sensitive info if any)

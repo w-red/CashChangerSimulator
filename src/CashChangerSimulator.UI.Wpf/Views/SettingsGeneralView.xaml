@@ -19,7 +19,7 @@
                     Text="{StaticResource CoreParameters}"
                     FontSize="11"
                     FontWeight="Black"
-                    Foreground="{StaticResource TextSecondaryBrush}"
+                    Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                     Margin="0,0,0,20"/>
                 <ComboBox
                     materialDesign:HintAssist.Hint="Active Currency"
@@ -29,7 +29,7 @@
                 <TextBlock
                     Text="{StaticResource RestartRequired}"
                     FontSize="10"
-                    Foreground="{StaticResource SecondaryBrush}"
+                    Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
                     Margin="4,4,0,0"/>
 
                 <ComboBox
@@ -41,7 +41,7 @@
                 <TextBlock
                     Text="{StaticResource UIBehaviorNote}"
                     FontSize="10"
-                    Foreground="{StaticResource SecondaryBrush}"
+                    Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
                     Margin="4,4,0,0"/>
 
                 <ComboBox
@@ -57,8 +57,8 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="{StaticResource HotStart}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
-                        <TextBlock Text="{StaticResource HotStartDescription}" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" TextWrapping="Wrap" MaxWidth="300"/>
+                        <TextBlock Text="{StaticResource HotStart}" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBlock Text="{StaticResource HotStartDescription}" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontSize="10" TextWrapping="Wrap" MaxWidth="300"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="1" 
                                    IsChecked="{Binding HotStart.Value}" 
@@ -77,7 +77,7 @@
                     Text="{StaticResource GlobalThresholds}"
                     FontSize="11"
                     FontWeight="Black"
-                    Foreground="{StaticResource TextSecondaryBrush}"
+                    Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                     Margin="0,0,0,20"/>
                 <TextBox
                     materialDesign:HintAssist.Hint="Near Empty"

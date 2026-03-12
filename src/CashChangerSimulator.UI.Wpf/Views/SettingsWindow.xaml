@@ -12,11 +12,11 @@
     d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel, IsDesignTimeCreatable=False}"
     Title="System Settings" Height="780" Width="720"
 
-    Background="{StaticResource BackgroundBrush}"
-    Foreground="{StaticResource OnBackgroundBrush}"
+    Background="{DynamicResource MaterialDesign.Brush.Background}"
+    Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
     WindowStartupLocation="CenterOwner"
     ResizeMode="NoResize"
-    TextElement.Foreground="{StaticResource OnBackgroundBrush}"
+    TextElement.Foreground="{DynamicResource MaterialDesign.Brush.OnBackground}"
     TextOptions.TextFormattingMode="Ideal"
     TextOptions.TextRenderingMode="Auto">
 
@@ -33,7 +33,7 @@
                 Text="{StaticResource SystemSettings}"
                 FontSize="24"
                 FontWeight="Black"
-                Foreground="{StaticResource PrimaryBrush}"/>
+                Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
             <TextBlock
                 Text="{StaticResource SettingsSubtitle}"
                 FontSize="12"
@@ -69,7 +69,7 @@
                 Command="{Binding ResetToDefaultCommand}"
                 Style="{StaticResource MaterialDesignOutlinedButton}"
                 BorderBrush="#33FFFFFF"
-                Foreground="{StaticResource OnSurfaceBrush}"
+                Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"
                 materialDesign:ButtonAssist.CornerRadius="12"/>
 
             <Button

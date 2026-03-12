@@ -5,6 +5,7 @@ using CashChangerSimulator.Device;
 using R3;
 using System.IO;
 using System.Windows;
+using Microsoft.Extensions.Logging;
 using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf;
@@ -33,6 +34,9 @@ internal partial class App : Application
 
             // Apply language setting
             UpdateLanguage(config.System.CultureCode);
+
+            // Apply theme setting safely after window is created
+            Dispatcher.BeginInvoke(new Action(() => UpdateTheme(config.System.BaseTheme)));
 
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;
@@ -124,5 +128,35 @@ internal partial class App : Application
             // Silently ignore failures in resource loading (primarily for unit tests)
         }
     }
+
+    /// <summary>UIのベーステーマを更新します。</summary>
+    /// <param name="themeName">"Dark" または "Light"</param>
+    public static void UpdateTheme(string themeName)
+    {
+        if (Current == null) return;
+
+        try
+        {
+            var paletteHelper = new MaterialDesignThemes.Wpf.PaletteHelper();
+            var theme = paletteHelper.GetTheme();
+            
+            var baseTheme = themeName.Equals("Light", StringComparison.OrdinalIgnoreCase) 
+                ? MaterialDesignThemes.Wpf.BaseTheme.Light 
+                : MaterialDesignThemes.Wpf.BaseTheme.Dark;
+
+            // MaterialDesignThemes v4/v5 では ITheme に対する拡張メソッド SetBaseTheme を使用
+            MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(theme, baseTheme);
+
+            paletteHelper.SetTheme(theme);
+        }
+        catch (Exception ex)
+        {
+            // ZLogger の ZLogError は構造化ログの最適化のため ref を要求する場合がある。
+            // ここでは最も互換性の高い標準の LogError を使用する（Microsoft.Extensions.Logging の拡張メソッド）。
+            LogProvider.CreateLogger<App>().LogError(ex, "Failed to update theme to {Theme}", themeName);
+        }
+    }
+
+    // Removed ObserveThemeTrigger to avoid background thread interference during startup
 }
 

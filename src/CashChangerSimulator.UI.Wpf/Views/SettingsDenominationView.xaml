@@ -20,7 +20,7 @@
                     Text="{StaticResource DenomCalibration}"
                     FontSize="11"
                     FontWeight="Black"
-                    Foreground="{StaticResource TextSecondaryBrush}"/>
+                    Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
             </Border>
             
             <DataGrid
@@ -31,7 +31,7 @@
                 BorderThickness="0"
                 materialDesign:DataGridAssist.CellPadding="12,8"
                 materialDesign:DataGridAssist.ColumnHeaderPadding="12,8"
-                materialDesign:DataGridAssist.SelectedCellBorderBrush="{StaticResource PrimaryBrush}">
+                materialDesign:DataGridAssist.SelectedCellBorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
                 <DataGrid.Resources>
                     <Style
                         TargetType="DataGridColumnHeader"

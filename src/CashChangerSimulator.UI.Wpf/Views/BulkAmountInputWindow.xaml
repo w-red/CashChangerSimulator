@@ -7,9 +7,9 @@
         Title="BULK INPUT" Height="680" Width="440"
         WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="BulkAmountInputWindow"
-        Background="{StaticResource BackgroundBrush}"
-        Foreground="{StaticResource OnBackgroundBrush}"
-        TextElement.Foreground="{StaticResource OnBackgroundBrush}"
+        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"
+        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"
         ResizeMode="CanResize">
     <Window.Resources>
         <ResourceDictionary>
@@ -31,7 +31,7 @@
         <StackPanel Grid.Row="0" Margin="0,0,0,8">
             <TextBlock x:Name="TitleText" Text="{StaticResource BulkInput}" 
                        Style="{StaticResource MaterialDesignHeadline5TextBlock}" 
-                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
                        FontWeight="Black"/>
             <TextBlock x:Name="SubtitleText" Text="{StaticResource BulkInputDefaultSubtitle}" FontSize="11" Opacity="0.4" Margin="0,2,0,0"/>
         </StackPanel>
