@@ -50,6 +50,9 @@
     <system:String x:Key="LabelActiveCurrency">Active Currency</system:String>
     <system:String x:Key="LabelUIMode">Operating UI Mode</system:String>
     <system:String x:Key="LabelDisplayLanguage">Display Language</system:String>
+    <system:String x:Key="LabelBaseTheme">UI Theme</system:String>
+    <system:String x:Key="ThemeDark">Dark</system:String>
+    <system:String x:Key="ThemeLight">Light</system:String>
     <system:String x:Key="LabelNearEmpty">Near Empty</system:String>
     <system:String x:Key="LabelNearFull">Near Full</system:String>
     <system:String x:Key="LabelFullLimit">Full Limit</system:String>

@@ -50,6 +50,9 @@
     <system:String x:Key="LabelActiveCurrency">有効な通貨</system:String>
     <system:String x:Key="LabelUIMode">UI 動作モード</system:String>
     <system:String x:Key="LabelDisplayLanguage">表示言語</system:String>
+    <system:String x:Key="LabelBaseTheme">UI テーマ</system:String>
+    <system:String x:Key="ThemeDark">ダーク</system:String>
+    <system:String x:Key="ThemeLight">ライト</system:String>
     <system:String x:Key="LabelNearEmpty">ニアエンプティ</system:String>
     <system:String x:Key="LabelNearFull">ニアフル</system:String>
     <system:String x:Key="LabelFullLimit">最大容量</system:String>
