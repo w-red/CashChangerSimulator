@@ -13,7 +13,7 @@ public class CliConfigService(
 {
     private readonly ConfigurationProvider _configProvider = configProvider;
 
-    public void List()
+    public virtual void List()
     {
         _console.Write(new Rule($"[cyan]{_L["messages.config_header"]}[/]").LeftJustified());
         PrintObject(_configProvider.Config, "");
@@ -46,7 +46,7 @@ public class CliConfigService(
         }
     }
 
-    public void Get(string key)
+    public virtual void Get(string key)
     {
         var result = GetPropertyByPath(_configProvider.Config, key);
         if (result.Success)
@@ -59,7 +59,7 @@ public class CliConfigService(
         }
     }
 
-    public void Set(string key, string value)
+    public virtual void Set(string key, string value)
     {
         var result = SetPropertyByPath(_configProvider.Config, key, value);
         if (result)
@@ -72,7 +72,7 @@ public class CliConfigService(
         }
     }
 
-    public void Save()
+    public virtual void Save()
     {
         try
         {
@@ -85,7 +85,7 @@ public class CliConfigService(
         }
     }
 
-    public void Reload()
+    public virtual void Reload()
     {
         try
         {
