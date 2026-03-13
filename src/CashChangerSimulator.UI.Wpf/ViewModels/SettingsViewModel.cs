@@ -41,6 +41,12 @@ public class SettingsViewModel : IDisposable
 
     /// <summary>利用可能な言語のリスト。</summary>
     public string[] AvailableCultures { get; } = ["en-US", "ja-JP"];
+    
+    /// <summary>現在のベーステーマ ("Dark", "Light")。</summary>
+    public BindableReactiveProperty<string> ActiveBaseTheme { get; }
+
+    /// <summary>利用可能なテーマのリスト。</summary>
+    public string[] AvailableBaseThemes { get; } = ["Dark", "Light"];
 
     /// <summary>NearEmpty と判定するデフォルト枚数。</summary>
     public BindableReactiveProperty<int> NearEmpty { get; }
@@ -89,8 +95,10 @@ public class SettingsViewModel : IDisposable
         CurrencyCode = new BindableReactiveProperty<string>("JPY").AddTo(_disposables);
         ActiveUIMode = new BindableReactiveProperty<UIMode>(UIMode.Standard).AddTo(_disposables);
         CultureCode = new BindableReactiveProperty<string>("en-US").AddTo(_disposables);
+        ActiveBaseTheme = new BindableReactiveProperty<string>("Dark").AddTo(_disposables);
 
         CultureCode.Subscribe(App.UpdateLanguage).AddTo(_disposables);
+        ActiveBaseTheme.Subscribe(App.UpdateTheme).AddTo(_disposables);
 
         NearEmpty = new BindableReactiveProperty<int>(0)
             .EnableValidation(val =>
@@ -142,6 +150,7 @@ public class SettingsViewModel : IDisposable
         Full.Value = config.Thresholds.Full;
         ActiveUIMode.Value = config.System.UIMode;
         CultureCode.Value = config.System.CultureCode ?? "en-US";
+        ActiveBaseTheme.Value = config.System.BaseTheme ?? "Dark";
         HotStart.Value = config.Simulation.HotStart;
 
         DenominationSettings.Clear();
@@ -192,6 +201,7 @@ public class SettingsViewModel : IDisposable
 
         config.System.UIMode = ActiveUIMode.Value;
         config.System.CultureCode = CultureCode.Value;
+        config.System.BaseTheme = ActiveBaseTheme.Value;
         config.Simulation.HotStart = HotStart.Value;
 
         if (!config.Inventory.TryGetValue(config.System.CurrencyCode, out InventorySettings? activeInventory))
