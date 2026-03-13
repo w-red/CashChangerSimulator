@@ -9,23 +9,27 @@
 
     <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
 
-    <!-- Shared Styles -->
+    <!-- Shared Styles (Optimized for Contrast) -->
     <Style x:Key="CardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Outline}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="8"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="15" ShadowDepth="1"/>
+                <DropShadowEffect Color="Black" Opacity="{DynamicResource CardShadowOpacity}" BlurRadius="8" ShadowDepth="0.8"/>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="Black" Opacity="0.6" BlurRadius="25" ShadowDepth="6"/>
+                        <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="20" ShadowDepth="3"/>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                <Setter Property="BorderThickness" Value="2"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -39,8 +43,7 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#D7B1FF"/>
-                <Setter Property="Foreground" Value="#1A0033"/>
+                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -50,50 +53,39 @@
     </Style>
 
     <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-        <Setter Property="Background" Value="#FF5252"/>
-        <Setter Property="BorderBrush" Value="#FF5252"/>
+        <Setter Property="Background" Value="#E53935"/>
+        <Setter Property="BorderBrush" Value="#E53935"/>
         <Setter Property="Foreground" Value="White"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FF8686"/>
+                <Setter Property="Background" Value="#D32F2F"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
-        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Secondary.Container}"/>
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Secondary.OnContainer}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnPrimary.Container}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#40FFFFFF"/>
-                <Setter Property="BorderBrush" Value="#D7B1FF"/>
+                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Container.Hover}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
-        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#15FFB74D"/>
-                <Setter Property="BorderBrush" Value="#FFE0B2"/>
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}"/>
     </Style>
 
     <Style x:Key="ErrorResetButtonStyle" TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="12,4"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FF8686"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
@@ -107,8 +99,9 @@
         <Setter Property="Height" Value="Auto"/>
         <Setter Property="Padding" Value="8,2"/>
         <Setter Property="FontSize" Value="10"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
+        <Setter Property="FontWeight" Value="Black"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Container}"/>
     </Style>
 
     <Style x:Key="ModernActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
@@ -139,7 +132,6 @@
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
         <Setter Property="Margin" Value="0,8,0,8"/>
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
-        <!-- Ensure AutomationProperties.Name is not null to avoid template bindings assigning null to Name -->
         <Setter Property="AutomationProperties.Name" Value="" />
     </Style>
 
@@ -149,14 +141,13 @@
 
     <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
     </Style>
 
     <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionLightCheckBox}">
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
     </Style>
 
-    <!-- List Styles -->
     <Style x:Key="LogItemStyle" TargetType="ListBoxItem">
         <Setter Property="Padding" Value="2,1"/>
         <Setter Property="Template">
@@ -179,7 +170,7 @@
         <Setter Property="Margin" Value="0,0,8,0"/>
         <Style.Resources>
             <Style TargetType="TextBlock">
-                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="FontSize" Value="11"/>
             </Style>

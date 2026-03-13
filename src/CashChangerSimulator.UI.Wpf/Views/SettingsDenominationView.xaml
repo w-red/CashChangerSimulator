@@ -38,7 +38,7 @@
                         BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
                         <Setter
                             Property="Background"
-                            Value="#15FFFFFF"/>
+                            Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
                         <Setter
                             Property="FontSize"
                             Value="10"/>

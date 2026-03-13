@@ -30,7 +30,7 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,20">
                 <TextBlock Text="{StaticResource AdvancedSimulation}" 
                            Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
-                           Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"
+                           Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"
                            FontWeight="Black"/>
             </StackPanel>
 
@@ -38,15 +38,15 @@
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Cursor="">
                 <StackPanel>
                     <!-- Settings Section -->
-                    <Border Style="{StaticResource CardStyle}" Background="#05FFFFFF" Margin="0,0,0,16" Padding="12">
+                    <Border Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}" Margin="0,0,0,16" Padding="12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="{StaticResource UposConfig}" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" Margin="0,0,0,4"/>
-                                <TextBlock Text="{StaticResource RealTimeData}" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontSize="11"/>
+                                <TextBlock Text="{StaticResource UposConfig}" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="{StaticResource RealTimeData}" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="11" Opacity="0.8"/>
                             </StackPanel>
                             <ToggleButton Grid.Column="1" 
                                            IsChecked="{Binding IsRealTimeDataEnabled.Value}" 
@@ -56,27 +56,27 @@
                     </Border>
 
                     <!-- Status Section (During Deposit) -->
-                    <Border Style="{StaticResource CardStyle}" Background="#106200EE" Margin="0,0,0,16" Padding="12"
+                    <Border Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.Primary}" Opacity="0.1" Margin="0,0,0,16" Padding="12"
                             Visibility="{Binding IsDepositInProgress.Value, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="{StaticResource CurrentDeposit}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
-                            <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
-                            <TextBlock Text="{Binding CurrencySuffix.Value}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
+                            <TextBlock Text="{StaticResource CurrentDeposit}" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat='{}{0:N0}'}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding CurrencySuffix.Value}" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" FontWeight="Black" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,0" />
                         </StackPanel>
                     </Border>
 
                     <!-- Error Status Indicators -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,16" HorizontalAlignment="Left">
-                        <Border x:Name="JamIndicator" Background="#F44336" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
+                        <Border x:Name="JamIndicator" Background="{DynamicResource MaterialDesign.Brush.Error}" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
                                 Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.AutomationId="JamIndicator">
-                            <TextBlock Text="{StaticResource StatusJam}" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="JamIndicatorText"/>
+                            <TextBlock Text="{StaticResource StatusJam}" Foreground="{DynamicResource MaterialDesign.Brush.OnError}" FontWeight="Bold" AutomationProperties.AutomationId="JamIndicatorText"/>
                         </Border>
-                        <Border x:Name="OverlapIndicator" Background="#FF9800" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
+                        <Border x:Name="OverlapIndicator" Background="{DynamicResource WarningBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,10,0"
                                 Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
                                 AutomationProperties.AutomationId="OverlapIndicator">
-                            <TextBlock Text="{StaticResource StatusOverlap}" Foreground="White" FontWeight="Bold" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                            <TextBlock Text="{StaticResource StatusOverlap}" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}" FontWeight="Bold" AutomationProperties.AutomationId="OverlapIndicatorText"/>
                         </Border>
                         <Border x:Name="ErrorIndicator" Background="#9C27B0" CornerRadius="4" Padding="8,4"
                                 Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
@@ -87,7 +87,7 @@
 
                     <!-- Simulation Presets -->
                     <Border Style="{StaticResource CardStyle}"
-                            Background="#05FFFFFF" Margin="0,0,0,16" Padding="8">
+                            Background="{DynamicResource MaterialDesign.Brush.Surface}" Margin="0,0,0,16" Padding="8">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -144,6 +144,7 @@
                                          AutomationProperties.Name="ScriptInputTextBox"
                                          AutomationProperties.AutomationId="ScriptInputTextBox"
                                          materialDesign:HintAssist.Hint="{StaticResource ScriptInput}"
+                                         materialDesign:HintAssist.Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
                                          materialDesign:TextFieldAssist.HasClearButton="False"
                                          AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Height="150" FontFamily="Consolas" Margin="0,0,0,8"/>
 

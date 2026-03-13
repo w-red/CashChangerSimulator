@@ -11,69 +11,68 @@
              AutomationProperties.AutomationId="DenominationDetailDialogView"
              d:DesignHeight="350"
              d:DataContext="{d:DesignInstance Type=vm:DenominationViewModel}">
-    <Border Background="#1E1E1E" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="#33FFFFFF">
+    <Border Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}">
         <StackPanel>
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{StaticResource SymbolInfo}" Width="20" Height="20" Foreground="#BB86FC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" TextAlignment="Center"/>
-                    <TextBlock Text="{Binding LabelInventoryDetail}" FontSize="14" FontWeight="Bold" Foreground="#BB86FC" VerticalAlignment="Center"/>
+                    <TextBlock Text="{StaticResource SymbolInfo}" Width="20" Height="20" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" TextAlignment="Center"/>
+                    <TextBlock Text="{Binding LabelInventoryDetail}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" VerticalAlignment="Center"/>
                 </StackPanel>
-                <Button Style="{x:Null}" 
+                <Button Style="{StaticResource HeaderIconButtonStyle}" 
                         HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Padding="0" Width="30" Height="30"
                         Click="CloseButton_Click"
                         AutomationProperties.AutomationId="CloseButton"
-                        Background="Transparent" BorderThickness="0" Foreground="#E0E0E0" Cursor="Hand">
-                    <TextBlock Text="{StaticResource SymbolClose}" FontSize="18"/>
+                        Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}">
+                    <TextBlock Text="{StaticResource SymbolClose}" FontSize="20"/>
                 </Button>
             </Grid>
             
-            <TextBlock Text="{Binding Name}" FontSize="28" FontWeight="Black" HorizontalAlignment="Center" Margin="0,0,0,24" Foreground="#E0E0E0"/>
+            <TextBlock Text="{Binding Name}" FontSize="28" FontWeight="Black" HorizontalAlignment="Center" Margin="0,0,0,24" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
             
-            <Border Background="#10FFFFFF" CornerRadius="8" Padding="16">
+            <Border Background="{DynamicResource MaterialDesign.Brush.Surface}" CornerRadius="8" Padding="16" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}">
                 <StackPanel>
                     <!-- Recyclable -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                             <TextBlock Text="{StaticResource SymbolRecycle}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
-                            <TextBlock Text="{Binding LabelRecyclable}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
+                             <TextBlock Text="{StaticResource SymbolRecycle}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="16"/>
+                            <TextBlock Text="{Binding LabelRecyclable}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding RecyclableCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>
+                        <TextBlock Text="{Binding RecyclableCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                     </Grid>
                     
-                    <Separator Background="#20FFFFFF" Margin="0,4" />
+                    <Separator Background="{DynamicResource MaterialDesign.Brush.Outline}" Margin="0,4" />
                     
                     <!-- Collection -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                             <TextBlock Text="{StaticResource SymbolCollect}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
-                            <TextBlock Text="{Binding LabelCollection}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
+                             <TextBlock Text="{StaticResource SymbolCollect}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="16"/>
+                            <TextBlock Text="{Binding LabelCollection}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding CollectionCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>
+                        <TextBlock Text="{Binding CollectionCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                     </Grid>
                     
-                    <Separator Background="#20FFFFFF" Margin="0,4" />
+                    <Separator Background="{DynamicResource MaterialDesign.Brush.Outline}" Margin="0,4" />
                     
                     <!-- Reject -->
                     <Grid Margin="0,8">
                         <StackPanel Orientation="Horizontal">
-                             <TextBlock Text="{StaticResource SymbolWarning}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="#E0E0E0" FontSize="16"/>
-                            <TextBlock Text="{Binding LabelReject}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="#E0E0E0"/>
+                             <TextBlock Text="{StaticResource SymbolWarning}" VerticalAlignment="Center" Margin="0,0,12,0" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" FontSize="16"/>
+                            <TextBlock Text="{Binding LabelReject}" VerticalAlignment="Center" FontSize="15" Opacity="0.7" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding RejectCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#E0E0E0"/>
+                        <TextBlock Text="{Binding RejectCount.Value}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
                     </Grid>
                 </StackPanel>
             </Border>
             
-            <Border Margin="0,20,0,0" Padding="16,8" Background="#BB86FC" CornerRadius="8" Opacity="0.1" />
-            
-            <Grid Margin="16,-38,16,0">
-                <TextBlock Text="{Binding LabelTotalCount}" FontSize="12" FontWeight="Black" VerticalAlignment="Center" Opacity="0.6" Foreground="#E0E0E0"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding Count.Value}" FontSize="32" FontWeight="Black" Foreground="#BB86FC" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding SuffixCount}" FontSize="14" FontWeight="Bold" Foreground="#BB86FC" VerticalAlignment="Bottom" Margin="4,0,0,6"/>
-                </StackPanel>
-            </Grid>
+            <Border Margin="0,20,0,0" Padding="16,12" Background="{DynamicResource MaterialDesign.Brush.Surface}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}">
+                <Grid>
+                    <TextBlock Text="{Binding LabelTotalCount}" FontSize="12" FontWeight="Black" VerticalAlignment="Center" Opacity="0.6" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding Count.Value}" FontSize="32" FontWeight="Black" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SuffixCount}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" VerticalAlignment="Bottom" Margin="4,0,0,6"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </StackPanel>
     </Border>
 </UserControl>
