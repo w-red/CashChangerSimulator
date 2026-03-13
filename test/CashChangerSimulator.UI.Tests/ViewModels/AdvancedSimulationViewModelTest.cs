@@ -6,6 +6,7 @@ using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.Device.Services;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Moq;
@@ -14,77 +15,31 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.ViewModels;
 
-/// <summary>
-/// AdvancedSimulationViewModel の単体テスト。
-/// </summary>
-public class AdvancedSimulationViewModelTest : IDisposable
+public class AdvancedSimulationViewModelTest : IClassFixture<PosTransactionViewModelFixture>, IDisposable
 {
-    private readonly Mock<InternalSimulatorCashChanger> _mockCashChanger;
-    private readonly InternalSimulatorCashChanger _cashChanger;
-    private readonly Mock<IScriptExecutionService> _mockScriptExecutionService;
-    private readonly Mock<DepositController> _mockDepositController;
+    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly Mock<IScriptExecutionService> _mockScriptExecutionService = new();
     private readonly AdvancedSimulationViewModel _viewModel;
 
-    public AdvancedSimulationViewModelTest()
+    public AdvancedSimulationViewModelTest(PosTransactionViewModelFixture fixture)
     {
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.System.CurrencyCode = "JPY";
-        var inventory = new Inventory();
-        var history = new TransactionHistory();
-        var hardware = new HardwareStatusManager();
-        var manager = new CashChangerManager(inventory, history, new ChangeCalculator());
-        var metadataProvider = new CurrencyMetadataProvider(configProvider);
-        var monitors = new MonitorsProvider(inventory, configProvider, metadataProvider);
-        var aggregator = new OverallStatusAggregatorProvider(monitors);
-
-        _mockDepositController = new Mock<DepositController>(inventory, hardware, manager, configProvider);
-        _mockDepositController.Setup(c => c.Changed).Returns(Observable.Empty<Unit>());
-
-        var dummyDispense = new DispenseController(manager, hardware, new Mock<IDeviceSimulator>().Object);
-
-        _mockCashChanger = new Mock<InternalSimulatorCashChanger>(
-            configProvider,
-            inventory,
-            history,
-            manager,
-            _mockDepositController.Object,
-            dummyDispense,
-            aggregator,
-            hardware);
-
-        _mockCashChanger.SetupProperty(x => x.RealTimeDataEnabled);
-        _cashChanger = _mockCashChanger.Object;
-        _mockScriptExecutionService = new Mock<IScriptExecutionService>();
-
-        var facade = new DeviceFacade(
-            inventory,
-            manager,
-            _mockDepositController.Object,
-            dummyDispense,
-            hardware,
-            _cashChanger,
-            history,
-            aggregator,
-            monitors,
-            new Mock<INotifyService>().Object);
-
-        _viewModel = new AdvancedSimulationViewModel(facade, _mockScriptExecutionService.Object, metadataProvider);
+        _fixture = fixture;
+        _fixture.Initialize();
+        _viewModel = fixture.CreateAdvancedSimulationViewModel();
     }
-
     /// <summary>IsRealTimeDataEnabledを切り替えた際に、対象となるデバイスへ設定が反映されることを検証します。</summary>
     [Fact]
     public void IsRealTimeDataEnabledToggleShouldUpdateTargetDevice()
     {
         // Arrange
-        _cashChanger.RealTimeDataEnabled = false;
-
+        _fixture.CashChanger.RealTimeDataEnabled = false;
+ 
         // Act
         _viewModel.IsRealTimeDataEnabled.Value = true;
-
+ 
         // Assert
-        _cashChanger.RealTimeDataEnabled.ShouldBeTrue("Toggling the view model property should update the underlying cash changer property.");
+        _fixture.CashChanger.RealTimeDataEnabled.ShouldBeTrue("Toggling the view model property should update the underlying cash changer property.");
     }
-
     /// <summary>有効なJSON形式の文字列が入力された場合、実行コマンドが有効状態になることを検証します。</summary>
     [Fact]
     public void ScriptInputWithValidJsonShouldEnableExecuteCommand()
@@ -122,19 +77,23 @@ public class AdvancedSimulationViewModelTest : IDisposable
     {
         // Arrange
         var testScript = "[{ \"Op\": \"BeginDeposit\" }]";
-        _viewModel.ScriptInput.Value = testScript;
-
+        
+        // Mock を使った VM を作成
+        var vm = _fixture.CreateAdvancedSimulationViewModel(_mockScriptExecutionService);
+        vm.ScriptInput.Value = testScript;
+ 
         // Setup mock to verify execution
         _mockScriptExecutionService
             .Setup(s => s.ExecuteScriptAsync(It.IsAny<string>()))
             .Returns(Task.CompletedTask)
             .Verifiable();
-
+ 
         // Act
-        _viewModel.ExecuteScriptCommand.Execute(Unit.Default);
-
+        vm.ExecuteScriptCommand.Execute(Unit.Default);
+ 
         // Assert
         _mockScriptExecutionService.Verify(s => s.ExecuteScriptAsync(testScript), Times.Once, "The ExecuteScriptCommand should invoke ExecuteScriptAsync with the content of ScriptInput.");
+        vm.Dispose();
     }
 
     public void Dispose()
