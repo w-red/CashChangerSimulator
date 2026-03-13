@@ -42,7 +42,7 @@ public class Program
     }
 
     /// <summary>コマンドライン引数からグローバルオプションとコマンド引数を分離します。</summary>
-    private static (string[] global, string[] command) ExtractGlobalOptions(string[] args)
+    public static (string[] global, string[] command) ExtractGlobalOptions(string[] args)
     {
         var globals = new List<string>();
         var commands = new List<string>();
@@ -67,7 +67,7 @@ public class Program
     }
 
     /// <summary>抽出されたグローバルオプションをセッション設定に適用します。</summary>
-    private static void ApplyGlobalOptions(string[] globalArgs, CliSessionOptions options)
+    public static void ApplyGlobalOptions(string[] globalArgs, CliSessionOptions options)
     {
         for (int i = 0; i < globalArgs.Length; i++)
         {

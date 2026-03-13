@@ -28,7 +28,7 @@ public class CliCashService : CliServiceBase
         _options = options;
     }
 
-    public void ReadCashCounts()
+    public virtual void ReadCashCounts()
     {
         try
         {
@@ -65,7 +65,7 @@ public class CliCashService : CliServiceBase
         }
     }
 
-    public void Deposit(int? amount)
+    public virtual void Deposit(int? amount)
     {
         try
         {
@@ -90,7 +90,7 @@ public class CliCashService : CliServiceBase
         }
     }
 
-    public void FixDeposit()
+    public virtual void FixDeposit()
     {
         try
         {
@@ -103,7 +103,7 @@ public class CliCashService : CliServiceBase
         }
     }
 
-    public void EndDeposit()
+    public virtual void EndDeposit()
     {
         try
         {
@@ -116,7 +116,7 @@ public class CliCashService : CliServiceBase
         }
     }
 
-    public void AdjustCashCounts(string input)
+    public virtual void AdjustCashCounts(string input)
     {
         try
         {
@@ -143,7 +143,7 @@ public class CliCashService : CliServiceBase
         }
     }
 
-    public void Dispense(int amount)
+    public virtual void Dispense(int amount)
     {
         try
         {

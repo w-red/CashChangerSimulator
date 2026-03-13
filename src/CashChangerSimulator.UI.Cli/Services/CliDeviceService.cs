@@ -12,7 +12,7 @@ public class CliDeviceService(
 {
     private readonly SimulatorCashChanger _changer = changer;
 
-    public void Open()
+    public virtual void Open()
     {
         try
         {
@@ -25,7 +25,7 @@ public class CliDeviceService(
         }
     }
 
-    public void Claim(int timeout)
+    public virtual void Claim(int timeout)
     {
         try
         {
@@ -38,7 +38,7 @@ public class CliDeviceService(
         }
     }
 
-    public void Enable()
+    public virtual void Enable()
     {
         try
         {
@@ -51,7 +51,7 @@ public class CliDeviceService(
         }
     }
 
-    public void Disable()
+    public virtual void Disable()
     {
         try
         {
@@ -64,7 +64,7 @@ public class CliDeviceService(
         }
     }
 
-    public void Release()
+    public virtual void Release()
     {
         try
         {
@@ -77,7 +77,7 @@ public class CliDeviceService(
         }
     }
 
-    public void Close()
+    public virtual void Close()
     {
         try
         {

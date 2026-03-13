@@ -28,7 +28,7 @@ public class CliViewService : CliServiceBase
         _history = history;
     }
 
-    public void Status()
+    public virtual void Status()
     {
         _console.Write(new Rule($"[cyan]{_L["messages.status_header"]}[/]").LeftJustified());
         _console.MarkupLine($"{_L["messages.state_label"]}: [yellow]{_changer.State}[/]");
@@ -55,7 +55,7 @@ public class CliViewService : CliServiceBase
         _console.Write(table);
     }
 
-    public void History(int count)
+    public virtual void History(int count)
     {
         _console.Write(new Rule($"[cyan]{_L["messages.transaction_history_header", count]}[/]").LeftJustified());
 

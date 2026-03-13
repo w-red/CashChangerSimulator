@@ -15,7 +15,7 @@ public class CliScriptService(
 {
     private readonly IScriptExecutionService _scriptExecutionService = scriptExecutionService;
 
-    public async Task RunScriptAsync(string path)
+    public virtual async Task RunScriptAsync(string path)
     {
         if (!File.Exists(path))
         {
