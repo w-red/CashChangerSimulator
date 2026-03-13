@@ -169,12 +169,28 @@ internal partial class App : Application
             var paletteHelper = new MaterialDesignThemes.Wpf.PaletteHelper();
             var theme = paletteHelper.GetTheme();
             
-            var baseTheme = themeName.Equals("Light", StringComparison.OrdinalIgnoreCase) 
+            var isLight = themeName.Equals("Light", StringComparison.OrdinalIgnoreCase);
+            var baseTheme = isLight 
                 ? MaterialDesignThemes.Wpf.BaseTheme.Light 
                 : MaterialDesignThemes.Wpf.BaseTheme.Dark;
 
-            // MaterialDesignThemes v4/v5 では ITheme に対する拡張メソッド SetBaseTheme を使用
             MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(theme, baseTheme);
+
+            // Dynamically adjust Primary/Secondary colors for each mode
+            if (isLight)
+            {
+                // Vibrant Deep Purple and Deep Emerald for Light Mode
+                theme.SetPrimaryColor(System.Windows.Media.Color.FromRgb(0x62, 0x00, 0xEE));
+                theme.SetSecondaryColor(System.Windows.Media.Color.FromRgb(0x01, 0x87, 0x86));
+                theme.SetTertiaryColor(System.Windows.Media.Color.FromRgb(0x03, 0xDA, 0xC6));
+            }
+            else
+            {
+                // Soft light purple for dark mode, mint green for secondary
+                theme.SetPrimaryColor(System.Windows.Media.Color.FromRgb(0xBB, 0x86, 0xFC));
+                theme.SetSecondaryColor(System.Windows.Media.Color.FromRgb(0x03, 0xDA, 0xC6));
+                theme.SetTertiaryColor(System.Windows.Media.Color.FromRgb(0xFF, 0xAB, 0x91)); // Deep Orange for accents in dark
+            }
 
             paletteHelper.SetTheme(theme);
         }
