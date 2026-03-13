@@ -9,6 +9,7 @@ using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
@@ -18,77 +19,17 @@ using System.Windows.Input;
 namespace CashChangerSimulator.UI.Tests;
 
 /// <summary>クイック入金と POS 取引モードの連動を検証するテストクラス。</summary>
-public class QuickDepositAndPosModeTest
+public class QuickDepositAndPosModeTest : IClassFixture<PosTransactionViewModelFixture>
 {
-    private readonly Mock<Inventory> _mockInventory;
-    private readonly Mock<TransactionHistory> _mockHistory;
-    private readonly Mock<CashChangerManager> _mockManager;
-    private readonly DepositController DepositController;
-    private readonly DispenseController _dispenseController;
+    private readonly PosTransactionViewModelFixture _fixture;
     private readonly MainViewModel _mainViewModel;
-    private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly IDeviceFacade _facade;
 
-    /// <summary>QuickDepositAndPosModeTest の新しいインスタンスを初期化します。</summary>
-    public QuickDepositAndPosModeTest()
+    public QuickDepositAndPosModeTest(PosTransactionViewModelFixture fixture)
     {
-        _mockInventory = new Mock<Inventory>();
-        _mockInventory.Setup(i => i.Changed).Returns(Observable.Empty<DenominationKey>());
-        _mockInventory.Setup(i => i.CalculateTotal()).Returns(0m);
-
-        _mockHistory = new Mock<TransactionHistory>();
-        _mockHistory.Setup(h => h.Added).Returns(Observable.Empty<TransactionEntry>());
-
-        var configProvider = new ConfigurationProvider();
-        configProvider.Config.System.CurrencyCode = "JPY";
-
-        _mockManager = new Mock<CashChangerManager>(_mockInventory.Object, _mockHistory.Object, new ChangeCalculator());
-        var hardwareManager = new HardwareStatusManager();
-        DepositController = new DepositController(_mockInventory.Object, hardwareManager);
-        var mockSimulator = new Mock<IDeviceSimulator>();
-        _dispenseController = new DispenseController(_mockManager.Object, hardwareManager, mockSimulator.Object);
-
-        _metadataProvider = new CurrencyMetadataProvider(configProvider);
-        var monitorsProvider = new MonitorsProvider(_mockInventory.Object, configProvider, _metadataProvider);
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-
-        var changer = new InternalSimulatorCashChanger(new SimulatorDependencies(
-            configProvider, _mockInventory.Object, _mockHistory.Object, _mockManager.Object, 
-            DepositController, _dispenseController, aggregatorProvider, hardwareManager));
-
-        _facade = new DeviceFacade(
-            _mockInventory.Object,
-            _mockManager.Object,
-            DepositController,
-            _dispenseController,
-            hardwareManager,
-            changer,
-            _mockHistory.Object,
-            aggregatorProvider,
-            monitorsProvider,
-            new Mock<INotifyService>().Object);
-
-        var services = new ServiceCollection();
-        services.AddSingleton(_facade);
-        services.AddSingleton(configProvider);
-        services.AddSingleton(_metadataProvider);
-        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
-        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
-        services.AddSingleton(_facade.Notify);
-        services.AddSingleton<InventoryViewModel>();
-        services.AddSingleton<AdvancedSimulationViewModel>();
-
-        var provider = services.BuildServiceProvider();
-        var factory = provider.GetRequiredService<IViewModelFactory>();
-
-        _mainViewModel = new MainViewModel(
-            factory,
-            _facade,
-            configProvider,
-            _metadataProvider,
-            _facade.Notify,
-            provider.GetRequiredService<IScriptExecutionService>());
-        hardwareManager.SetConnected(true);
+        _fixture = fixture;
+        _fixture.Initialize();
+        _mainViewModel = _fixture.CreateMainViewModel();
+        _fixture.Hardware.SetConnected(true);
     }
 
     /// <summary>クイック入金コマンドが内訳を計算し、入金を完了させることを検証する。</summary>
@@ -96,17 +37,17 @@ public class QuickDepositAndPosModeTest
     public async Task QuickDepositCommandShouldCalculateBreakdownAndCompleteDeposit()
     {
         // Arrange
-        var monitor = new CashStatusMonitor(_mockInventory.Object, new DenominationKey(1, CurrencyCashType.Bill), 5, 90, 100);
+        var monitor = new CashStatusMonitor(_fixture.Inventory, new DenominationKey(1, CurrencyCashType.Bill), 5, 90, 100);
 
         var configProvider = _mainViewModel.ConfigProvider;
 
         _ = new List<DenominationViewModel>
         {
-            new(_facade, new DenominationKey(10000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
-            new(_facade, new DenominationKey(5000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
-            new(_facade, new DenominationKey(1000, CurrencyCashType.Bill), _metadataProvider, monitor, configProvider),
-            new(_facade, new DenominationKey(500, CurrencyCashType.Coin), _metadataProvider, monitor, configProvider),
-            new(_facade, new DenominationKey(100, CurrencyCashType.Coin), _metadataProvider, monitor, configProvider),
+            new(_mainViewModel.Facade, new DenominationKey(10000, CurrencyCashType.Bill), _fixture.MetadataProvider, monitor, configProvider),
+            new(_mainViewModel.Facade, new DenominationKey(5000, CurrencyCashType.Bill), _fixture.MetadataProvider, monitor, configProvider),
+            new(_mainViewModel.Facade, new DenominationKey(1000, CurrencyCashType.Bill), _fixture.MetadataProvider, monitor, configProvider),
+            new(_mainViewModel.Facade, new DenominationKey(500, CurrencyCashType.Coin), _fixture.MetadataProvider, monitor, configProvider),
+            new(_mainViewModel.Facade, new DenominationKey(100, CurrencyCashType.Coin), _fixture.MetadataProvider, monitor, configProvider),
         };
 
         var depositVm = _mainViewModel.Deposit;
