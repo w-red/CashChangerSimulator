@@ -102,11 +102,9 @@ public class DocumentationScreenshotGenerator : IDisposable
         // ダイアログが表示されるのを待機 (待機時間を 30 秒に延長)
         dialog = Retry.WhileNull(() =>
         {
-            if (_app == null || _app.MainWindow == null) return null;
-            
-            // Re-detect MainWindow if it was lost or recreated
             var mainWindow = _app.MainWindow;
-
+            if (mainWindow == null) return null;
+            
             // A. MainWindow の子孫
             var found = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
             if (found != null && !found.IsOffscreen) return found;
