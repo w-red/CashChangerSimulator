@@ -17,11 +17,16 @@ public class DocumentationScreenshotGenerator : IDisposable
     public DocumentationScreenshotGenerator()
     {
         _app = new CashChangerTestApp();
-        var triggerPath = Path.GetFullPath("open_dialog.trigger");
-        _app.Launch(envVars: new Dictionary<string, string> { { "TEST_AUTO_OPEN_INVENTORY_DIALOG_FILE", triggerPath } });
+        var dialogTriggerPath = Path.GetFullPath("open_dialog.trigger");
+        var themeTriggerPath = Path.GetFullPath("theme.trigger");
+
+        _app.Launch(envVars: new Dictionary<string, string> 
+        { 
+            { "TEST_AUTO_OPEN_INVENTORY_DIALOG_FILE", dialogTriggerPath },
+            { "TEST_AUTO_CHANGE_THEME_FILE", themeTriggerPath }
+        });
 
         // docs/images フォルダを特定
-        // 実行ディレクトリ (test/bin/Debug/...) からリポジトリルートの docs/images へ
         _outputDir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../../docs/images"));
         if (!Directory.Exists(_outputDir))
         {
@@ -79,37 +84,37 @@ public class DocumentationScreenshotGenerator : IDisposable
 
         AutomationElement? dialog = null;
 
-            // ダイアログが表示されるのを待機 (待機時間を 20 秒に延長)
-            dialog = Retry.WhileNull(() =>
+        // ダイアログが表示されるのを待機 (待機時間を 20 秒に延長)
+        dialog = Retry.WhileNull(() =>
+        {
+            if (_app == null) return null;
+            // A. MainWindow の子孫
+            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+            if (found != null && !found.IsOffscreen) return found;
+
+            // B. Desktop 直下の全要素から再帰的に検索
+            var automation = _app.Automation;
+            if (automation == null) return null;
+            var desktop = automation.GetDesktop();
+            
+            // プロセスIDで絞り込んで検索
+            var appWindows = desktop.FindAllChildren(cf => cf.ByProcessId(_app.Application.ProcessId));
+            foreach (var win in appWindows)
             {
-                if (_app == null) return null;
-                // A. MainWindow の子孫
-                var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
-                if (found != null && !found.IsOffscreen) return found;
+                var inWin = win.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                if (inWin != null && !inWin.IsOffscreen) return inWin;
+            }
 
-                // B. Desktop 直下の全要素から再帰的に検索
-                var automation = _app.Automation;
-                if (automation == null) return null;
-                var desktop = automation.GetDesktop();
-                
-                // プロセスIDで絞り込んで検索
-                var appWindows = desktop.FindAllChildren(cf => cf.ByProcessId(_app.Application.ProcessId));
-                foreach (var win in appWindows)
-                {
-                    var inWin = win.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
-                    if (inWin != null && !inWin.IsOffscreen) return inWin;
-                }
+            // C. 名前、あるいはクラス名でフォールバック検索
+            var fallback = desktop.FindFirstDescendant(cf => cf.ByClassName("Popup").Or(cf.ByClassName("DialogHost")).Or(cf.ByName("Denomination Detail")));
+            if (fallback != null && !fallback.IsOffscreen) return fallback;
 
-                // C. 名前、あるいはクラス名でフォールバック検索
-                var fallback = desktop.FindFirstDescendant(cf => cf.ByClassName("Popup").Or(cf.ByClassName("DialogHost")).Or(cf.ByName("Denomination Detail")));
-                if (fallback != null && !fallback.IsOffscreen) return fallback;
-
-                return null;
-            }, TimeSpan.FromSeconds(20)).Result;
+            return null;
+        }, TimeSpan.FromSeconds(20)).Result;
 
         if (dialog == null)
         {
-            throw new Exception($"Denomination detail dialog not found (ID: {dialogId}) after 3 attempts.");
+            throw new Exception($"Denomination detail dialog '{dialogId}' not found after writing trigger file.");
         }
 
         Thread.Sleep(2000); // 描画・アニメーション待ち

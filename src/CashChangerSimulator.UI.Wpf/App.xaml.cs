@@ -36,7 +36,11 @@ internal partial class App : Application
             UpdateLanguage(config.System.CultureCode);
 
             // Apply theme setting safely after window is created
-            Dispatcher.BeginInvoke(new Action(() => UpdateTheme(config.System.BaseTheme)));
+            Dispatcher.BeginInvoke(new Action(() => 
+            {
+                UpdateTheme(config.System.BaseTheme);
+                ObserveThemeTrigger();
+            }));
 
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;
@@ -53,6 +57,31 @@ internal partial class App : Application
                 ex.ToString() + "\n\nInner: " + ex.InnerException?.ToString());
             Shutdown();
         }
+    }
+
+    private void ObserveThemeTrigger()
+    {
+        var triggerFile = Environment.GetEnvironmentVariable("TEST_AUTO_CHANGE_THEME_FILE");
+        if (string.IsNullOrEmpty(triggerFile)) return;
+
+        Task.Run(async () =>
+        {
+            while (true)
+            {
+                await Task.Delay(1000);
+                if (System.IO.File.Exists(triggerFile))
+                {
+                    try
+                    {
+                        var theme = System.IO.File.ReadAllText(triggerFile).Trim();
+                        System.IO.File.Delete(triggerFile);
+                        
+                        Dispatcher.Invoke(() => UpdateTheme(theme));
+                    }
+                    catch { }
+                }
+            }
+        });
     }
 
     protected override void OnExit(ExitEventArgs e)

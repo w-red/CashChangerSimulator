@@ -311,7 +311,6 @@ public class InventoryViewModel : IDisposable
                             var vm = BillDenominations.FirstOrDefault();
                             if (vm != null) ShowDenominationDetailCommand.Execute(vm);
                         });
-                        break;
                     }
                 }
             });
