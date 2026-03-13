@@ -25,6 +25,9 @@ public class MainViewModel : IDisposable
     private readonly IViewModelFactory _viewModelFactory;
     private readonly IDeviceFacade _facade;
 
+    /// <summary>デバイスとコア機能の Facade。</summary>
+    public IDeviceFacade Facade => _facade;
+
     /// <summary>設定プロバイダー。</summary>
     public ConfigurationProvider ConfigProvider => _configProvider;
 
