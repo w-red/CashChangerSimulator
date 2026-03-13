@@ -14,19 +14,35 @@ public static class TestProcessCleanup
     /// </summary>
     public static void KillAllRunningProcesses()
     {
-        var processes = Process.GetProcessesByName(ProcessName);
-        foreach (var p in processes)
+        var targetNames = new[] { ProcessName, "CashChangerSimulator.UI.Wpf.exe" };
+        
+        foreach (var name in targetNames)
         {
-            try
+            var processes = Process.GetProcessesByName(name.Replace(".exe", ""));
+            foreach (var p in processes)
             {
-                // UIプロセスが残っていると、次のテストでの Claim に失敗するため強制終了する
-                p.Kill(true);
-                p.WaitForExit(5000);
-            }
-            catch
-            {
-                // 既に終了している場合などは無視
+                try
+                {
+                    // UIプロセスが残っていると、次のテストでの Claim に失敗するため強制終了する
+                    p.Kill(true);
+                    p.WaitForExit(2000);
+                }
+                catch { }
             }
         }
+
+        // Fallback for stubbornly remaining processes using CLI
+        try
+        {
+            using var proc = Process.Start(new ProcessStartInfo
+            {
+                FileName = "taskkill",
+                Arguments = $"/F /IM {ProcessName}.exe /T",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+            proc?.WaitForExit(2000);
+        }
+        catch { }
     }
 }

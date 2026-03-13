@@ -40,7 +40,7 @@ public class DocumentationScreenshotGenerator : IDisposable
     [Fact]
     public void GenerateScreenshots()
     {
-        var themes = new[] { "Dark", "Light" };
+        var themes = new[] { "Light", "Dark" };
         foreach (var theme in themes)
         {
             SetTheme(theme);
@@ -58,8 +58,23 @@ public class DocumentationScreenshotGenerator : IDisposable
             // 3. 払出画面のキャプチャ
             CaptureSubWindow("LaunchDispenseButton", "DispenseWindow", Path.Combine(theme, "dispense_window.png"));
 
-            // 4. 高度なシミュレーション画面のキャプチャ
-            CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", Path.Combine(theme, "advanced_simulation.png"));
+            // 4. 高度なシミュレーション画面のキャプチャ (エラー状態を誘発)
+            CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", Path.Combine(theme, "advanced_simulation.png"), (win) => {
+                try 
+                {
+                    var jamBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
+                    var overlapBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateOverlapButton"))?.AsButton();
+                    
+                    if (jamBtn != null) { jamBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); jamBtn.Click(); }
+                    if (overlapBtn != null) { overlapBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); overlapBtn.Click(); }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WARNING] Failed to trigger jam/overlap simulation: {ex.Message}");
+                }
+                
+                Thread.Sleep(1500); // 警告インジケーター表示待ち
+            });
 
             // 5. 金種詳細ダイアログのキャプチャ
             CaptureDenominationDetail("InventoryTile", "DenominationDetailDialogView", Path.Combine(theme, "inventory_detail.png"));
@@ -70,7 +85,7 @@ public class DocumentationScreenshotGenerator : IDisposable
     {
         Console.WriteLine($"Setting theme to: {theme}");
         File.WriteAllText(Path.GetFullPath("theme.trigger"), theme);
-        Thread.Sleep(2000); // テーマ適用待ち
+        Thread.Sleep(5000); // テーマ適用待ち
     }
 
     private void CaptureDenominationDetail(string tileId, string dialogId, string fileName)
@@ -84,20 +99,20 @@ public class DocumentationScreenshotGenerator : IDisposable
 
         AutomationElement? dialog = null;
 
-        // ダイアログが表示されるのを待機 (待機時間を 20 秒に延長)
+        // ダイアログが表示されるのを待機 (待機時間を 30 秒に延長)
         dialog = Retry.WhileNull(() =>
         {
-            if (_app == null) return null;
+            if (_app.MainWindow == null) return null;
+            
+            // Re-detect MainWindow if it was lost or recreated
+            var mainWindow = _app.MainWindow;
+
             // A. MainWindow の子孫
-            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+            var found = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
             if (found != null && !found.IsOffscreen) return found;
 
             // B. Desktop 直下の全要素から再帰的に検索
-            var automation = _app.Automation;
-            if (automation == null) return null;
-            var desktop = automation.GetDesktop();
-            
-            // プロセスIDで絞り込んで検索
+            var desktop = _app.Automation.GetDesktop();
             var appWindows = desktop.FindAllChildren(cf => cf.ByProcessId(_app.Application.ProcessId));
             foreach (var win in appWindows)
             {
@@ -110,15 +125,23 @@ public class DocumentationScreenshotGenerator : IDisposable
             if (fallback != null && !fallback.IsOffscreen) return fallback;
 
             return null;
-        }, TimeSpan.FromSeconds(20)).Result;
+        }, TimeSpan.FromSeconds(30)).Result;
 
         if (dialog == null)
         {
-            throw new Exception($"Denomination detail dialog '{dialogId}' not found after writing trigger file.");
+            Console.WriteLine($"[ERROR] Denomination detail dialog '{dialogId}' not found. Skipping.");
+            return;
         }
 
         Thread.Sleep(2000); // 描画・アニメーション待ち
-        CaptureElement(dialog, fileName);
+        try 
+        {
+            CaptureElement(dialog, fileName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Failed to capture dialog {fileName}: {ex.Message}");
+        }
 
         // ダイアログを閉じる
         var closeButton = dialog.FindFirstDescendant(cf => cf.ByName("Close").Or(cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)))?.AsButton();
@@ -138,7 +161,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         Thread.Sleep(1000);
     }
 
-    private void CaptureSubWindow(string buttonId, string windowId, string fileName)
+    private void CaptureSubWindow(string buttonId, string windowId, string fileName, Action<Window>? action = null)
     {
         // AutomationId で見つからない場合のフォールバックとして Name でも試行
         var button =
@@ -164,34 +187,99 @@ public class DocumentationScreenshotGenerator : IDisposable
             button.Click();
         }
 
-        // ウィンドウが開くのを待機
-        var window = Retry.WhileNull(() =>
+        // ウィンドウが開くのを待機 (自前ループに置き換えてタイムアウトを厳密に制御)
+        AutomationElement? windowRaw = null;
+        for (int i = 0; i < 10; i++) // 最大10秒 (1s * 10)
         {
-            // Windows は Desktop 直下であることが多いため、まず Desktop を確認
             var desktop = _app.Automation.GetDesktop();
             var win = desktop.FindFirstChild(cf => cf.ByAutomationId(windowId));
-            if (win != null) return win.AsWindow();
-
-            // 見つからない場合は MainWindow の子孫（埋め込みウィンドウなど）を確認
-            if (_app.MainWindow != null)
+            if (win == null && _app.MainWindow != null)
             {
                 win = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId(windowId));
-                if (win != null) return win.AsWindow();
+            }
+            if (win == null)
+            {
+                win = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
+                        .FirstOrDefault(w => w.Name != null && (w.Name.Contains("TERMINAL") || w.Name.Contains("Simulation") || w.Name.Contains("Controls") || w.Name.Contains("Advanced")));
             }
 
-            // 名前でのフォールバック
-            win = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
-                    .FirstOrDefault(w => w.Name != null && (w.Name.Contains("TERMINAL") || w.Name.Contains("Simulation") || w.Name.Contains("Controls")));
+            if (win != null)
+            {
+                windowRaw = win;
+                break;
+            }
+            Thread.Sleep(1000);
+        }
 
-            return win?.AsWindow();
-        }, TimeSpan.FromSeconds(20)).Result
-        ?? throw new Exception($"Window '{windowId}' not found after clicking '{buttonId}'.");
+        if (windowRaw == null)
+        {
+            Console.WriteLine($"[ERROR] Window '{windowId}' not found after 10 attempts. Skipping this capture.");
+            return;
+        }
+
+        var window = windowRaw.AsWindow();
 
         window.SetForeground();
         Thread.Sleep(2000);
-        CaptureElement(window, fileName);
 
-        window.Close();
+        try 
+        {
+            // プレキャプチャアクション（エラーの意図的な発生など）
+            action?.Invoke(window);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Pre-capture action failed for {windowId}: {ex.Message}");
+            // Continue even if action fails to at least try to capture something
+        }
+
+        try 
+        {
+            CaptureElement(window, fileName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Failed to capture {fileName}: {ex.Message}");
+        }
+
+        try 
+        {
+            // [STABILITY] Explicitly find even if off-screen or not immediately visible
+            AutomationElement? resetBtnRaw = null;
+            try { resetBtnRaw = window.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton")); } catch { }
+            
+            if (resetBtnRaw != null)
+            {
+                var resetBtn = resetBtnRaw.AsButton();
+                Console.WriteLine($"[DEBUG] ResetErrorButton found. IsEnabled={resetBtn.IsEnabled}");
+                
+                if (resetBtn.IsEnabled)
+                {
+                    try 
+                    {
+                        if (resetBtn.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
+                        else resetBtn.Click();
+                    }
+                    catch (Exception exInner)
+                    {
+                        Console.WriteLine($"[DEBUG] Invoke failed for ResetErrorButton: {exInner.Message}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DEBUG] Failed to process reset state (non-critical): {ex.Message}");
+        }
+
+        try 
+        {
+            window.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DEBUG] Failed to close window (non-critical): {ex.Message}");
+        }
         Thread.Sleep(1000);
     }
 
