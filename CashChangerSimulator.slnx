@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj" />
+    <Project Path="test/CashChangerSimulator.UI.Cli.Tests/CashChangerSimulator.UI.Cli.Tests.csproj" />
     <Project Path="test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj" />
   </Folder>
   <Folder Name="/ソリューション項目/">
