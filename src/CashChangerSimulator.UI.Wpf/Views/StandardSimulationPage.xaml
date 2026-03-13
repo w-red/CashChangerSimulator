@@ -105,8 +105,8 @@
                                 Grid.Row="2" Grid.Column="1"
                                 Style="{StaticResource ActionButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
-                                Background="{DynamicResource MaterialDesign.Brush.Tertiary}"
-                                Foreground="{DynamicResource MaterialDesign.Brush.OnTertiary}"
+                                Background="{DynamicResource App.Brush.Close.Background}"
+                                Foreground="{DynamicResource App.Brush.Close.Foreground}"
                                 Command="{Binding Inventory.CloseCommand}"
                                 Visibility="{Binding Inventory.IsConnected.Value, Converter={StaticResource VisibilityConv}}"
                                 AutomationProperties.AutomationId="DeviceCloseButton">

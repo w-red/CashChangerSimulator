@@ -110,9 +110,9 @@
                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Top"/>
                         
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2,0,0">
-                             <Border Background="{DynamicResource MaterialDesign.Brush.Secondary}" CornerRadius="2" Padding="3,1" Margin="0,0,4,0"
+                             <Border Background="{DynamicResource WarningBrush}" CornerRadius="2" Padding="4,1" Margin="0,0,4,0"
                                     Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedVisibilityConv}}">
-                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="{DynamicResource MaterialDesign.Brush.OnSecondary}" FontSize="9" FontWeight="Black"/>
+                                <TextBlock Text="{StaticResource BadgeCollection}" Foreground="White" FontSize="9" FontWeight="Black"/>
                             </Border>
                             <TextBlock Text="{Binding Status.Value}" Foreground="{Binding Status.Value, Converter={StaticResource StatusBrushConv}}" FontSize="10" FontWeight="Black" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -120,7 +120,7 @@
                     
                     <Grid Grid.Row="1" Margin="4,0,4,4">
                         <Viewbox Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <TextBlock Text="{Binding Count.Value}" Foreground="#FFFFFF" 
+                            <TextBlock Text="{Binding Count.Value}" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}" 
                                        FontSize="48" FontWeight="Black"/>
                         </Viewbox>
                     </Grid>
@@ -211,11 +211,13 @@
     <DataTemplate x:Key="DepositErrorTemplate">
         <Grid>
             <!-- DepositErrorView does not exist yet. Only showing reset button for now if ever used. -->
-            <Button Content="{StaticResource ResetError}"
-                    Command="{Binding ResetErrorCommand}"
-                    Style="{StaticResource ErrorResetButtonStyle}"
-                    Margin="0,0,0,20" Padding="30,10" FontSize="18" FontWeight="Bold"
-                    VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            <Border Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}" Margin="0,0,0,16" Padding="12">
+                <Button Content="{StaticResource ResetError}"
+                        Command="{Binding ResetErrorCommand}"
+                        Style="{StaticResource ErrorResetButtonStyle}"
+                        Padding="30,10" FontSize="18" FontWeight="Bold"
+                        VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            </Border>
         </Grid>
     </DataTemplate>
 
