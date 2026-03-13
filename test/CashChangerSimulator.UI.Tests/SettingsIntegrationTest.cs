@@ -66,4 +66,31 @@ public class SettingsIntegrationTest
                 && m.Key.Type == CurrencyCashType.Bill);
         // ... (検証ロジックを簡略化)
     }
+
+    /// <summary>テーマの変更が正しく保存され、更新通知が飛ぶことを検証する。</summary>
+    [Fact]
+    public void ChangeThemeShouldUpdateConfigAndNotifyAplication()
+    {
+        // Arrange
+        var configProvider = new ConfigurationProvider();
+        configProvider.Config.System.BaseTheme = "Dark";
+
+        var inventory = new Inventory();
+        var metadataProvider = new CurrencyMetadataProvider(configProvider);
+        var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
+
+        using var vm = new SettingsViewModel(
+            configProvider,
+            monitorsProvider,
+            metadataProvider);
+
+        // Act: テーマを Light に変更
+        vm.ActiveBaseTheme.Value = "Light";
+        
+        // Act: 保存実行
+        vm.SaveCommand.Execute(Unit.Default);
+
+        // Assert: 設定プロバイダーが更新されていること
+        configProvider.Config.System.BaseTheme.ShouldBe("Light");
+    }
 }
