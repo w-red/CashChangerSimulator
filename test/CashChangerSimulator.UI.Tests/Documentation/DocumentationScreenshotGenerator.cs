@@ -102,7 +102,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         // ダイアログが表示されるのを待機 (待機時間を 30 秒に延長)
         dialog = Retry.WhileNull(() =>
         {
-            if (_app.MainWindow == null) return null;
+            if (_app == null || _app.MainWindow == null) return null;
             
             // Re-detect MainWindow if it was lost or recreated
             var mainWindow = _app.MainWindow;
