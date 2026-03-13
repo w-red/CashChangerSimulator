@@ -1,3 +1,4 @@
+using CashChangerSimulator.UI.Tests.Helpers;
 using CashChangerSimulator.UI.Tests.Specs;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
@@ -57,137 +58,149 @@ public class CashChangerTestApp : IDisposable
 
     public void Launch(string? customConfigToml = null, bool hotStart = true, Dictionary<string, string>? envVars = null)
     {
-        string fullPath = Path.GetFullPath(_executablePath);
-        string? appDir = Path.GetDirectoryName(fullPath);
-
-        // Clean up state files to ensure a fresh start for each test
-        if (appDir != null)
+        try
         {
-            var filesToClean = new[] { "inventory.toml", "history.bin", "config.toml", "history.bin" };
-            foreach (var file in filesToClean)
-            {
-                var filePath = Path.Combine(appDir, file);
-                try { if (File.Exists(filePath)) File.Delete(filePath); } catch { }
-            }
+            // 安全策として、同名のプロセスが残っている場合は掃除する（ただし本来は各テストが責任を持つべき）
+            TestProcessCleanup.KillAllRunningProcesses();
 
-            // Write custom config or default with hotStart properly set
-            if (!string.IsNullOrEmpty(customConfigToml))
+            string fullPath = Path.GetFullPath(_executablePath);
+            string? appDir = Path.GetDirectoryName(fullPath);
+
+            // Clean up state files to ensure a fresh start for each test
+            if (appDir != null)
             {
-                var configPath = Path.Combine(appDir, "config.toml");
-                File.WriteAllText(configPath, customConfigToml);
-            }
-            else
-            {
-                // Create a basic config that enforces the desired HotStart state for the test
-                var configPath = Path.Combine(appDir, "config.toml");
-                var configContent = $@"[Simulation]
+                var filesToClean = new[] { "inventory.toml", "history.bin", "config.toml" };
+                foreach (var file in filesToClean)
+                {
+                    var filePath = Path.Combine(appDir, file);
+                    try { if (File.Exists(filePath)) File.Delete(filePath); } catch { }
+                }
+
+                // Write custom config or default with hotStart properly set
+                if (!string.IsNullOrEmpty(customConfigToml))
+                {
+                    var configPath = Path.Combine(appDir, "config.toml");
+                    File.WriteAllText(configPath, customConfigToml);
+                }
+                else
+                {
+                    // Create a basic config that enforces the desired HotStart state for the test
+                    var configPath = Path.Combine(appDir, "config.toml");
+                    var configContent = $@"[Simulation]
 DispenseDelayMs = 500
 HotStart = {hotStart.ToString().ToLower()}
 ";
-                File.WriteAllText(configPath, configContent);
+                    File.WriteAllText(configPath, configContent);
+                }
             }
-        }
 
-        Console.WriteLine($"[CashChangerTestApp] Launching: {fullPath}");
+            Console.WriteLine($"[CashChangerTestApp] Launching: {fullPath}");
 
-        // Start fresh
-        Automation = new UIA3Automation();
-        var startInfo = new System.Diagnostics.ProcessStartInfo(_executablePath);
-        startInfo.EnvironmentVariables["SKIP_STATE_VERIFICATION"] = "true";
-        if (envVars != null)
-        {
-            foreach (var kvp in envVars)
+            // Start fresh
+            Automation = new UIA3Automation();
+            var startInfo = new System.Diagnostics.ProcessStartInfo(_executablePath);
+            startInfo.EnvironmentVariables["SKIP_STATE_VERIFICATION"] = "true";
+            if (envVars != null)
             {
-                startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
+                foreach (var kvp in envVars)
+                {
+                    startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
+                }
             }
-        }
-        Application = Application.Launch(startInfo);
+            Application = Application.Launch(startInfo);
 
-        // Use a more robust wait for the window
-        var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-        var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(5) : TimeSpan.FromSeconds(30);
+            // Use a more robust wait for the window
+            var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
+            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(5) : TimeSpan.FromSeconds(30);
 
-        MainWindow = Retry.WhileNull(() =>
-        {
-            var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(2));
-            if (win != null) return win;
+            MainWindow = Retry.WhileNull(() =>
+            {
+                var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(2));
+                if (win != null) return win;
 
-            // Fallback: Robust search on desktop
-            var desktop = Automation.GetDesktop();
-            var mainWindowById = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
-            if (mainWindowById != null) return mainWindowById.AsWindow();
+                // Fallback: Robust search on desktop
+                var desktop = Automation.GetDesktop();
+                var mainWindowById = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
+                if (mainWindowById != null) return mainWindowById.AsWindow();
 
-            var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-            foreach (var w in windows)
+                var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                foreach (var w in windows)
+                {
+                    try
+                    {
+                        if (w.Name.Contains("Cash Changer Simulator"))
+                        {
+                            return w.AsWindow();
+                        }
+                    }
+                    catch { }
+                }
+                return null;
+            }, windowWaitTimeout, TimeSpan.FromMilliseconds(1000)).Result;
+
+            if (MainWindow == null)
+            {
+                if (isCi)
+                {
+                    Console.WriteLine("[WARNING] Main window not found in CI environment. Skipping UI interactions.");
+                    return;
+                }
+                throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found.");
+            }
+
+            // Settlement period for UI Automation state
+            System.Threading.Thread.Sleep(500);
+
+            if (!isCi)
             {
                 try
                 {
-                    if (w.Name.Contains("Cash Changer Simulator"))
+                    MainWindow.SetForeground();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[INFO] SetForeground failed: {ex.Message}");
+                }
+            }
+
+            // Skip clickable wait in CI as it often hangs
+            if (!isCi)
+            {
+                var timeout = TimeSpan.FromSeconds(10);
+                try
+                {
+                    MainWindow.WaitUntilClickable(timeout);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WARNING] WaitUntilClickable failed: {ex.Message}. Proceeding anyway as window is found.");
+                    
+                    bool isOffscreen = false;
+                    try
                     {
-                        return w.AsWindow();
+                        isOffscreen = MainWindow.IsOffscreen;
+                    }
+                    catch
+                    {
+                        Console.WriteLine("[INFO] IsOffscreen property access failed/not supported.");
+                    }
+
+                    if (isOffscreen)
+                    {
+                        throw new Exception("Main window is offscreen and could not be made clickable.");
                     }
                 }
-                catch { }
             }
-            return null;
-        }, windowWaitTimeout, TimeSpan.FromMilliseconds(1000)).Result;
-
-        if (MainWindow == null)
-        {
-            if (isCi)
+            else
             {
-                Console.WriteLine("[WARNING] Main window not found in CI environment. Skipping UI interactions.");
-                return;
-            }
-            throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found.");
-        }
-
-        // Settlement period for UI Automation state
-        System.Threading.Thread.Sleep(500);
-
-        if (!isCi)
-        {
-            try
-            {
-                MainWindow.SetForeground();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[INFO] SetForeground failed: {ex.Message}");
+                Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment.");
             }
         }
-
-        // Skip clickable wait in CI as it often hangs
-        if (!isCi)
+        catch (Exception)
         {
-            var timeout = TimeSpan.FromSeconds(10);
-            try
-            {
-                MainWindow.WaitUntilClickable(timeout);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[WARNING] WaitUntilClickable failed: {ex.Message}. Proceeding anyway as window is found.");
-                
-                bool isOffscreen = false;
-                try
-                {
-                    isOffscreen = MainWindow.IsOffscreen;
-                }
-                catch
-                {
-                    Console.WriteLine("[INFO] IsOffscreen property access failed/not supported.");
-                }
-
-                if (isOffscreen)
-                {
-                    throw new Exception("Main window is offscreen and could not be made clickable.");
-                }
-            }
-        }
-        else
-        {
-            Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment.");
+            // 起動中に失敗した場合、中途半端に起動したプロセスを掃除してから例外を投げ直す
+            Dispose();
+            throw;
         }
     }
 
