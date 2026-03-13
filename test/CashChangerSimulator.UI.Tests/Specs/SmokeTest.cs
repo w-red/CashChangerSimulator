@@ -20,7 +20,7 @@ public class SmokeTest : IDisposable
     {
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
-        window.Title.ShouldBe("Cash Changer Simulator v1.1.0 (Componentized)");
+        window.Title.ShouldBe("Cash Changer Simulator");
     }
 
     /// <summary>合計金額のラベルが表示されていることを検証する。</summary>
