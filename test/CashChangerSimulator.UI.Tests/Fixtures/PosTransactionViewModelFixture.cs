@@ -118,9 +118,32 @@ public class PosTransactionViewModelFixture : IDisposable
             NotifyServiceMock.Object);
     }
 
+    /// <summary>検証用の AdvancedSimulationViewModel を生成します。</summary>
+    internal AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(Mock<IScriptExecutionService>? scriptServiceMock = null)
+    {
+        var scriptService = scriptServiceMock?.Object ?? new Mock<IScriptExecutionService>().Object;
+        
+        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
+        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
+
+        var facade = new DeviceFacade(
+            Inventory,
+            Manager,
+            DepositController,
+            DispenseController,
+            Hardware,
+            CashChanger,
+            History,
+            aggregatorProvider,
+            monitorsProvider,
+            NotifyServiceMock.Object);
+
+        return new AdvancedSimulationViewModel(facade, scriptService, MetadataProvider);
+    }
+
     public void Dispose()
     {
-        // cleanup if necessary
+        CashChanger?.Dispose();
         GC.SuppressFinalize(this);
     }
 }
