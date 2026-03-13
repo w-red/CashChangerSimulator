@@ -11,12 +11,12 @@
 
     <!-- Shared Styles -->
     <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Surface}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="8"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="20" ShadowDepth="2"/>
+                <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="15" ShadowDepth="1"/>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
@@ -75,9 +75,9 @@
     </Style>
 
     <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
-        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource WarningBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
+        <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#15FFB74D"/>
@@ -148,7 +148,7 @@
     </Style>
 
     <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
-        <Setter Property="Background" Value="#333333"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Error}"/>
     </Style>
 

@@ -31,7 +31,7 @@
             </Grid.RowDefinitions>
 
             <!-- Terminal Launchers (Fixed) -->
-            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Background="{DynamicResource MaterialDesign.Brush.Surface}" Margin="0,0,0,16">
+            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="{StaticResource TerminalAccess}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black" Margin="0,0,0,16"/>
                     
