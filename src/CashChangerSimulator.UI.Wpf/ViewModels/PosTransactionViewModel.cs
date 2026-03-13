@@ -263,39 +263,16 @@ public class PosTransactionViewModel : IDisposable
         _logger.ZLogInformation($"Starting POS transaction for amount: {TargetAmountInput.Value}");
         LogOpos("--- Sequence Start ---");
 
-        try
+        ExecuteOposAction(() =>
         {
-            LogOpos("Open()");
-            _facade.Changer.Open();
-
-            LogOpos("Claim(1000)");
-            _facade.Changer.Claim(1000);
-
-            LogOpos("DeviceEnabled = true");
-            _facade.Changer.DeviceEnabled = true;
-
-            LogOpos("DataEventEnabled = true");
-            _facade.Changer.DataEventEnabled = true;
-
+            InitializeDeviceSequence();
             LogOpos("BeginDeposit()");
             _facade.Changer.BeginDeposit();
 
             _status.Value = PosTransactionStatus.WaitingForCash;
             ResetTimeout();
-        }
-        catch (PosControlException pcEx)
-        {
-            _logger.ZLogError(pcEx, $"Failed to start OPOS sequence: {pcEx.Message}");
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-            _status.Value = PosTransactionStatus.Idle;
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to start OPOS sequence: {ex.Message}");
-            LogOpos($"ERROR: {ex.Message}");
-            _status.Value = PosTransactionStatus.Idle;
-        }
+        }, "start transaction", onException: () => _status.Value = PosTransactionStatus.Idle);
+
         _logger.ZLogInformation($"StartTransaction finished. Status: {_status.Value}");
     }
 
@@ -339,26 +316,14 @@ public class PosTransactionViewModel : IDisposable
         _logger.ZLogInformation($"Canceling POS transaction.");
         StopTimeout();
 
-        try
+        ExecuteOposAction(() =>
         {
             LogOpos("FixDeposit()");
             _facade.Changer.FixDeposit();
             LogOpos("Cancelling... EndDeposit(Repay)");
             _facade.Changer.EndDeposit(CashDepositAction.Repay);
-            LogOpos("Release()");
-            _facade.Changer.Release();
-            LogOpos("Close()");
-            _facade.Changer.Close();
-        }
-        catch (PosControlException pcEx)
-        {
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}] during cancel: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-        }
-        catch (Exception ex)
-        {
-            LogOpos($"Error during cancel: {ex.Message}");
-        }
+            FinalizeDeviceSequence();
+        }, "cancel transaction");
 
         _status.Value = PosTransactionStatus.Idle;
     }
@@ -373,7 +338,7 @@ public class PosTransactionViewModel : IDisposable
         _logger.ZLogInformation($"Amount met. Completing transaction. Inserted: {inserted}, Target: {targetValue}, Change: {changeToDispense}");
         _status.Value = PosTransactionStatus.DispensingChange;
 
-        try
+        await ExecuteOposActionAsync(async () =>
         {
             LogOpos("FixDeposit()");
             _facade.Changer.FixDeposit();
@@ -385,36 +350,18 @@ public class PosTransactionViewModel : IDisposable
             {
                 LogOpos($"DispenseChange({changeToDispense})");
                 _facade.Changer.DispenseChange(changeToDispense);
-
-                // Wait for dispense to complete
-                await Task.Delay(1000);
+                await Task.Delay(PosTransactionConstants.DispenseWaitDelay);
             }
 
             LogOpos("DeviceEnabled = false");
             _facade.Changer.DeviceEnabled = false;
-
-            LogOpos("Release()");
-            _facade.Changer.Release();
-
-            LogOpos("Close()");
-            _facade.Changer.Close();
+            FinalizeDeviceSequence();
 
             LogOpos("--- Sequence Completed ---");
-        }
-        catch (PosControlException pcEx)
-        {
-            _logger.ZLogError(pcEx, $"Failed to complete OPOS sequence: {pcEx.Message}");
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to complete OPOS sequence: {ex.Message}");
-            LogOpos($"ERROR: {ex.Message}");
-        }
+        }, "complete transaction");
 
         _status.Value = PosTransactionStatus.Completed;
-        await Task.Delay(3000); // Show "Completed" for a while
+        await Task.Delay(PosTransactionConstants.CompletionResetDelay);
 
         _status.Value = PosTransactionStatus.Idle;
         TargetAmountInput.Value = "";
@@ -423,59 +370,29 @@ public class PosTransactionViewModel : IDisposable
     private void ExecuteManualOpen()
     {
         LogOpos("--- Manual Open ---");
-        try
-        {
-            _facade.Changer.Open();
-            LogOpos("Open()");
-            _facade.Changer.Claim(1000);
-            LogOpos("Claim(1000)");
-            _facade.Changer.DeviceEnabled = true;
-            LogOpos("DeviceEnabled = true");
-            _facade.Changer.DataEventEnabled = true;
-            LogOpos("DataEventEnabled = true");
-        }
-        catch (PosControlException pcEx)
-        {
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-            _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
-        }
-        catch (Exception ex)
-        {
-            LogOpos($"ERROR: {ex.Message}");
-            _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
-        }
+        ExecuteOposAction(InitializeDeviceSequence, "manual open", showNotification: true);
     }
 
     private void ExecuteManualDeposit()
     {
         LogOpos("--- Manual Deposit ---");
-        try
+        ExecuteOposAction(() =>
         {
             _facade.Changer.BeginDeposit();
             LogOpos("BeginDeposit()");
             _status.Value = PosTransactionStatus.WaitingForCash;
-        }
-        catch (PosControlException pcEx)
-        {
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-        }
-        catch (Exception ex)
-        {
-            LogOpos($"ERROR: {ex.Message}");
-        }
+        }, "manual deposit");
     }
 
     private void ExecuteManualDispense()
     {
         LogOpos("--- Manual Dispense ---");
-        try
+        ExecuteOposAction(() =>
         {
-            _facade.Changer.FixDeposit();
             LogOpos("FixDeposit()");
-            _facade.Changer.EndDeposit(CashDepositAction.NoChange);
+            _facade.Changer.FixDeposit();
             LogOpos("EndDeposit(NoChange)");
+            _facade.Changer.EndDeposit(CashDepositAction.NoChange);
 
             var inserted = InsertedAmount.Value;
             var targetValue = decimal.TryParse(TargetAmountInput.Value, out var v) ? v : 0m;
@@ -483,41 +400,87 @@ public class PosTransactionViewModel : IDisposable
 
             if (changeToDispense > 0)
             {
-                _facade.Changer.DispenseChange(changeToDispense);
                 LogOpos($"DispenseChange({changeToDispense})");
+                _facade.Changer.DispenseChange(changeToDispense);
             }
-        }
-        catch (PosControlException pcEx)
-        {
-            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-        }
-        catch (Exception ex)
-        {
-            LogOpos($"ERROR: {ex.Message}");
-        }
+        }, "manual dispense");
     }
 
     private void ExecuteManualClose()
     {
         LogOpos("--- Manual Close ---");
+        ExecuteOposAction(() =>
+        {
+            LogOpos("DeviceEnabled = false");
+            _facade.Changer.DeviceEnabled = false;
+            FinalizeDeviceSequence();
+            _status.Value = PosTransactionStatus.Idle;
+        }, "manual close");
+    }
+
+    // --- Helpers ---
+
+    private void InitializeDeviceSequence()
+    {
+        LogOpos("Open()");
+        _facade.Changer.Open();
+
+        LogOpos($"Claim({PosTransactionConstants.DefaultClaimTimeout})");
+        _facade.Changer.Claim(PosTransactionConstants.DefaultClaimTimeout);
+
+        LogOpos("DeviceEnabled = true");
+        _facade.Changer.DeviceEnabled = true;
+
+        LogOpos("DataEventEnabled = true");
+        _facade.Changer.DataEventEnabled = true;
+    }
+
+    private void FinalizeDeviceSequence()
+    {
+        LogOpos("Release()");
+        _facade.Changer.Release();
+        LogOpos("Close()");
+        _facade.Changer.Close();
+    }
+
+    private void ExecuteOposAction(Action action, string actionName, bool showNotification = false, Action? onException = null)
+    {
         try
         {
-            _facade.Changer.DeviceEnabled = false;
-            LogOpos("DeviceEnabled = false");
-            _facade.Changer.Release();
-            LogOpos("Release()");
-            _facade.Changer.Close();
-            LogOpos("Close()");
-            _status.Value = PosTransactionStatus.Idle;
+            action();
         }
         catch (PosControlException pcEx)
         {
+            _logger.ZLogError(pcEx, $"Failed to execute OPOS {actionName}: {pcEx.Message}");
+            LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
+            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+            if (showNotification) _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
+            onException?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex, $"Failed to execute OPOS {actionName}: {ex.Message}");
+            LogOpos($"ERROR: {ex.Message}");
+            if (showNotification) _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
+            onException?.Invoke();
+        }
+    }
+
+    private async Task ExecuteOposActionAsync(Func<Task> action, string actionName)
+    {
+        try
+        {
+            await action();
+        }
+        catch (PosControlException pcEx)
+        {
+            _logger.ZLogError(pcEx, $"Failed to execute OPOS {actionName}: {pcEx.Message}");
             LogOpos($"POS ERROR [{pcEx.ErrorCode}]: {pcEx.Message}");
             _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
         }
         catch (Exception ex)
         {
+            _logger.ZLogError(ex, $"Failed to execute OPOS {actionName}: {ex.Message}");
             LogOpos($"ERROR: {ex.Message}");
         }
     }
