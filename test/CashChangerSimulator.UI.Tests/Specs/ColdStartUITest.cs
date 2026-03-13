@@ -6,13 +6,13 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>コールドスタート（HotStart=false）時のUI動作を検証するテストクラス。</summary>
 [Collection("SequentialTests")]
-public class ColdStartUITest : IDisposable
+public class ColdStartUITest : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
-    public ColdStartUITest()
+    public ColdStartUITest(CashChangerTestApp app)
     {
-        _app = new CashChangerTestApp();
+        _app = app;
     }
 
     /// <summary>HotStart=false で起動した際に、UIが適切に制限されていることを検証する。</summary>
@@ -160,9 +160,4 @@ public class ColdStartUITest : IDisposable
             : UiTestRetry.Find(() => container.FindFirstDescendant(cf => cf.ByAutomationId(automationId)), UITestTimings.RetryLongTimeout);
     }
 
-    public void Dispose()
-    {
-        _app.Dispose();
-        GC.SuppressFinalize(this);
-    }
 }

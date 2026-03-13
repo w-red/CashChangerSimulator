@@ -6,21 +6,21 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>出金フロー（通常出金、一括出金）を検証する UI テスト。</summary>
 [Collection("SequentialTests")]
-public class DispenseTest : IDisposable
+public class DispenseTest : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
-    /// <summary>テストアプリを起動し、初期状態をセットアップする。</summary>
-    public DispenseTest()
+    /// <summary>テストアプリのフィクスチャを受け取り、初期状態をセットアップする。</summary>
+    public DispenseTest(CashChangerTestApp app)
     {
-        _app = new CashChangerTestApp();
-        _app.Launch();
+        _app = app;
     }
 
     /// <summary>一括出金（Bulk Dispense）機能の正常系フローを検証する。</summary>
     [Fact]
     public void ShouldCompleteBulkDispenseFlow()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
@@ -62,6 +62,7 @@ public class DispenseTest : IDisposable
     [Fact]
     public void ShouldPerformSimpleDispense()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var dispenseWindow = OpenDispenseTerminal(window);
 
@@ -86,6 +87,7 @@ public class DispenseTest : IDisposable
     [Fact]
     public void ShouldDisableControlsWhenErrorOccurs()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var dispenseWindow = OpenDispenseTerminal(window);
 
@@ -166,9 +168,4 @@ public class DispenseTest : IDisposable
         return decimal.TryParse(cleaned, out var result) ? result : 0;
     }
 
-    public void Dispose()
-    {
-        _app?.Dispose();
-        GC.SuppressFinalize(this);
-    }
 }
