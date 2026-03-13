@@ -5,21 +5,22 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金フロー（開始、投入、確定、返却）を検証する UI テスト。</summary>
 [Collection("SequentialTests")]
-public class DepositTest : IDisposable
+public class DepositTest : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
-    /// <summary>テストアプリを起動し、初期状態をセットアップする。</summary>
-    public DepositTest()
+    /// <summary>テストアプリのフィクスチャを受け取り、初期状態をセットアップする。</summary>
+    public DepositTest(CashChangerTestApp app)
     {
-        _app = new CashChangerTestApp();
-        _app.Launch();
+        _app = app;
+        // 各テストで個別に再起動が必要な場合を除き、ここでは Launch しない（各テストメソッドに委ねる）
     }
 
     /// <summary>新規入金を開始し、現金を投入して確定するまでの一連のフローを検証する。</summary>
     [Fact]
     public void ShouldCompleteDepositFlow()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
@@ -90,6 +91,7 @@ public class DepositTest : IDisposable
     [Fact]
     public void ShouldInsertBulkCash()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
 
@@ -113,6 +115,7 @@ public class DepositTest : IDisposable
     [Fact]
     public void ShouldPauseAndResumeDeposit()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var depositWindow = OpenDepositTerminal(window);
 
@@ -150,6 +153,7 @@ public class DepositTest : IDisposable
     [Fact]
     public void ShouldRepayDepositWhenReturning()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         decimal initialTotal = ParseAmount(totalAmountText?.Text ?? "0");
@@ -178,6 +182,7 @@ public class DepositTest : IDisposable
     [Fact]
     public void ShouldDisableControlsWhenErrorOccurs()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var depositWindow = OpenDepositTerminal(window);
 
@@ -223,6 +228,7 @@ public class DepositTest : IDisposable
     [Fact]
     public void ShouldPreventFixWhenOverlapped()
     {
+        _app.Launch();
         var window = _app.MainWindow;
         var depositWindow = OpenDepositTerminal(window);
 
@@ -331,9 +337,4 @@ public class DepositTest : IDisposable
         return decimal.TryParse(cleaned, out var result) ? result : 0;
     }
 
-    public void Dispose()
-    {
-        _app?.Dispose();
-        GC.SuppressFinalize(this);
-    }
 }

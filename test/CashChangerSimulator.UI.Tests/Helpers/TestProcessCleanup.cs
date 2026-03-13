@@ -10,11 +10,11 @@ public static class TestProcessCleanup
     private const string ProcessName = "CashChangerSimulator.UI.Wpf";
 
     /// <summary>
-    /// 実行中のすべての CashChangerSimulator.UI.Wpf プロセスを強制終了します。
+    /// 実行中のすべてのシミュレータ関連プロセスを強制終了します。
     /// </summary>
     public static void KillAllRunningProcesses()
     {
-        var targetNames = new[] { ProcessName, "CashChangerSimulator.UI.Wpf.exe" };
+        var targetNames = new[] { "CashChangerSimulator.UI.Wpf", "CashChangerSimulator.UI.Cli", "CashChangerSimulator.UI" };
         
         foreach (var name in targetNames)
         {
