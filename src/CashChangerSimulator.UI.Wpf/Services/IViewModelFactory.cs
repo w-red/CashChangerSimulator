@@ -10,7 +10,6 @@ public interface IViewModelFactory
     DepositViewModel CreateDepositViewModel(Func<IEnumerable<DenominationViewModel>> getDenominations, BindableReactiveProperty<bool> isDispenseBusy);
     DispenseViewModel CreateDispenseViewModel(BindableReactiveProperty<bool> isInDepositMode, Func<IEnumerable<DenominationViewModel>> getDenominations);
     InventoryViewModel CreateInventoryViewModel();
-    PosTransactionViewModel CreatePosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, Func<IEnumerable<DenominationViewModel>> getDenominations);
     AdvancedSimulationViewModel CreateAdvancedSimulationViewModel();
     DenominationViewModel CreateDenominationViewModel(DenominationKey key);
 }

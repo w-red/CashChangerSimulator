@@ -27,11 +27,6 @@ public class ViewModelFactory : IViewModelFactory
 
     public InventoryViewModel CreateInventoryViewModel() => _serviceProvider.GetRequiredService<InventoryViewModel>();
 
-    public PosTransactionViewModel CreatePosTransactionViewModel(DepositViewModel deposit, DispenseViewModel dispense, Func<IEnumerable<DenominationViewModel>> getDenominations)
-    {
-        return ActivatorUtilities.CreateInstance<PosTransactionViewModel>(_serviceProvider, deposit, dispense, getDenominations);
-    }
-
     public AdvancedSimulationViewModel CreateAdvancedSimulationViewModel() => _serviceProvider.GetRequiredService<AdvancedSimulationViewModel>();
 
     public DenominationViewModel CreateDenominationViewModel(DenominationKey key)
