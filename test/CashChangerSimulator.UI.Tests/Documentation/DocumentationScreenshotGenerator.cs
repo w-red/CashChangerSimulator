@@ -102,19 +102,19 @@ public class DocumentationScreenshotGenerator : IDisposable
         // ダイアログが表示されるのを待機 (待機時間を 30 秒に延長)
         dialog = Retry.WhileNull(() =>
         {
-            var mainWindow = _app.MainWindow;
-            if (mainWindow == null) return null;
+            var win = _app!.MainWindow;
+            if (win == null) return null;
             
             // A. MainWindow の子孫
-            var found = mainWindow.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+            var found = win.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
             if (found != null && !found.IsOffscreen) return found;
 
             // B. Desktop 直下の全要素から再帰的に検索
             var desktop = _app.Automation.GetDesktop();
             var appWindows = desktop.FindAllChildren(cf => cf.ByProcessId(_app.Application.ProcessId));
-            foreach (var win in appWindows)
+            foreach (var appWin in appWindows)
             {
-                var inWin = win.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
+                var inWin = appWin.FindFirstDescendant(cf => cf.ByAutomationId(dialogId));
                 if (inWin != null && !inWin.IsOffscreen) return inWin;
             }
 
@@ -292,7 +292,20 @@ public class DocumentationScreenshotGenerator : IDisposable
 
     public void Dispose()
     {
-        _app?.Dispose();
+        try { _app?.Dispose(); } catch { }
+        
+        // Ensure the process is definitely gone to prevent DLL entry locking
+        try
+        {
+            var processName = "CashChangerSimulator.UI.Wpf";
+            var processes = System.Diagnostics.Process.GetProcessesByName(processName);
+            foreach (var p in processes)
+            {
+                try { p.Kill(true); } catch { }
+            }
+        }
+        catch { }
+
         GC.SuppressFinalize(this);
     }
 }
