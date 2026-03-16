@@ -241,12 +241,16 @@ internal partial class App : Application
             Current.Resources["SecondaryColor"] = secondary;
             Current.Resources["SurfaceColor"] = surface;
             Current.Resources["OnSurfaceColor"] = fg;
-            Current.Resources["CardShadowOpacity"] = isLight ? 0.05 : 0.4;
+            Current.Resources["CardShadowOpacity"] = isActuallyDark ? 0.4 : 0.05; // Drastically reduce light mode shadow
+
+            // Enhanced grounding colors for light mode
+            Current.Resources["MaterialDesign.Brush.Outline"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0x44, 0x44, 0x44) : System.Windows.Media.Color.FromRgb(0x88, 0x88, 0x88));
+            Current.Resources["MaterialDesign.Brush.SurfaceVariant"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0x22, 0x22, 0x22) : System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0));
 
             // App specific semantic brushes
             Current.Resources["App.Brush.Foreground"] = fgBrush;
             Current.Resources["App.Brush.Primary"] = primaryBrush;
-            Current.Resources["WarningBrush"] = secondaryBrush;
+            Current.Resources["WarningBrush"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0xFF, 0xAB, 0x40) : System.Windows.Media.Color.FromRgb(0xFF, 0x8C, 0x00));
             Current.Resources["TextPrimaryBrush"] = fgBrush;
             Current.Resources["PrimaryBrush"] = primaryBrush;
             Current.Resources["SecondaryBrush"] = secondaryBrush;

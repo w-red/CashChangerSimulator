@@ -18,7 +18,7 @@
         <Setter Property="Padding" Value="8"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="Black" Opacity="{DynamicResource CardShadowOpacity}" BlurRadius="8" ShadowDepth="0.8"/>
+                <DropShadowEffect Color="Black" Opacity="{DynamicResource CardShadowOpacity}" BlurRadius="4" ShadowDepth="0.5"/>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
