@@ -1,5 +1,5 @@
 [messages]
-welcome = "現役入出金機シミュレータ CLI"
+welcome = "自動釣銭機シミュレータ CLI"
 help_hint = "[bold yellow]help[/] と入力すると利用可能なコマンドが表示されます。"
 exit_hint = "[bold yellow]exit[/] と入力すると終了します。"
 error_format = "[red][[{0}: {1} ({2})]] {3}[/]"

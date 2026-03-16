@@ -26,6 +26,7 @@ public class PosTransactionViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
     private CancellationTokenSource? _timeoutCts;
     private readonly ReactiveProperty<PosTransactionStatus> _status = new(PosTransactionStatus.Idle);
+    private bool _disposed;
 
     // --- State Properties ---
 
@@ -282,20 +283,29 @@ public class PosTransactionViewModel : IDisposable
         _timeoutCts?.Dispose();
 
         var timeoutSec = TransactionTimeoutSeconds.Value;
-        if (timeoutSec <= 0) return;
+        if (timeoutSec <= 0 || _disposed) return;
 
         _timeoutCts = new CancellationTokenSource();
         var token = _timeoutCts.Token;
 
-        Task.Delay(TimeSpan.FromSeconds(timeoutSec), token).ContinueWith(t =>
+        _ = Task.Run(async () =>
         {
-            if (t.IsCompletedSuccessfully && !token.IsCancellationRequested)
+            try
             {
-                _logger.ZLogWarning($"Transaction timed out after {timeoutSec} seconds.");
-                LogOpos($"TIMEOUT: {timeoutSec}s exceeded.");
-                CancelTransaction();
+                await Task.Delay(TimeSpan.FromSeconds(timeoutSec), token);
+                if (!token.IsCancellationRequested && !_disposed)
+                {
+                    _logger.ZLogWarning($"Transaction timed out after {timeoutSec} seconds.");
+                    LogOpos($"TIMEOUT: {timeoutSec}s exceeded.");
+                    CancelTransaction();
+                }
             }
-        }, TaskScheduler.Default);
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                _logger.ZLogError($"Unhandled exception in transaction timeout task: {ex.Message}");
+            }
+        }, token);
     }
 
     private void StopTimeout()
@@ -307,12 +317,14 @@ public class PosTransactionViewModel : IDisposable
 
     private void LogOpos(string message)
     {
+        if (_disposed) return;
         var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
         OposLog.Add($"[{timestamp}] {message}");
     }
 
     private void CancelTransaction()
     {
+        if (_disposed) return;
         _logger.ZLogInformation($"Canceling POS transaction.");
         StopTimeout();
 
@@ -488,7 +500,10 @@ public class PosTransactionViewModel : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _disposables.Dispose();
+        _timeoutCts?.Cancel();
         _timeoutCts?.Dispose();
         GC.SuppressFinalize(this);
     }

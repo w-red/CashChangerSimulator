@@ -148,5 +148,5 @@
     <system:String x:Key="ToolTipSystemSettings">システム設定</system:String>
 
     <!-- Window Titles -->
-    <system:String x:Key="TitleMainWindow">現金機シミュレーター</system:String>
+    <system:String x:Key="TitleMainWindow">自動釣銭機シミュレーター</system:String>
 </ResourceDictionary>
