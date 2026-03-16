@@ -1,8 +1,8 @@
 using System;
+using System.Reflection;
 using System.Windows;
-using CashChangerSimulator.UI.Wpf;
-using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Core;
+using CashChangerSimulator.UI.Wpf;
 
 namespace Diagnostic
 {
@@ -13,13 +13,18 @@ namespace Diagnostic
         {
             try
             {
-                var app = new App();
+                var wpfAssembly = Assembly.Load("CashChangerSimulator.UI.Wpf");
+                var appType = wpfAssembly.GetType("CashChangerSimulator.UI.Wpf.App");
+                var app = Activator.CreateInstance(appType) as Application;
+                
                 // We don't call Run() because it blocks. 
                 // We just want to see if we can create the window and measure it.
                 
                 DIContainer.Initialize();
                 
-                var window = new MainWindow();
+                var mainWindowType = wpfAssembly.GetType("CashChangerSimulator.UI.Wpf.Views.MainWindow");
+                var window = Activator.CreateInstance(mainWindowType) as Window;
+                
                 window.Show();
                 window.UpdateLayout(); 
                 

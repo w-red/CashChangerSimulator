@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Shouldly;
 using CashChangerSimulator.Core;
 
-namespace CashChangerSimulator.UI.Tests.Performance;
+namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>POS取引フローのパフォーマンスを計測するベンチマークテスト。</summary>
 public class PerformanceBenchmarkTest(PosTransactionViewModelFixture fixture) : IClassFixture<PosTransactionViewModelFixture>

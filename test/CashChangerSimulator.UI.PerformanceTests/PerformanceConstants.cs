@@ -1,4 +1,4 @@
-namespace CashChangerSimulator.UI.Tests.Performance;
+namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>パフォーマンステスト用の定数設定。</summary>
 public static class PerformanceConstants

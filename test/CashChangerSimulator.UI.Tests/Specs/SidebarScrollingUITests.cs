@@ -48,20 +48,23 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
         var initialY = depositBtn.BoundingRectangle.Y;
 
         // Act: Generate many transactions to trigger scrolling in the sidebar
-        var closeBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton();
-        
         for (int i = 0; i < 50; i++)
         {
-            closeBtn?.Click();
+            var closeBtn = Retry.WhileNull(() => {
+                var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton();
+                return (btn != null && btn.IsEnabled) ? btn : null;
+            }, TimeSpan.FromSeconds(5)).Result;
+            closeBtn.ShouldNotBeNull($"DeviceCloseButton not found or not enabled during iteration {i}");
+            closeBtn.Click();
             Thread.Sleep(200);
             
-            openBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton(), TimeSpan.FromSeconds(10)).Result;
-            openBtn.ShouldNotBeNull($"DeviceOpenButton not found during iteration {i}");
-            openBtn.Click();
-            Thread.Sleep(500);
-            
-            closeBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton(), TimeSpan.FromSeconds(5)).Result;
-            closeBtn.ShouldNotBeNull($"DeviceCloseButton not found during iteration {i}");
+            var openBtnIteration = Retry.WhileNull(() => {
+                var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton();
+                return (btn != null && btn.IsEnabled) ? btn : null;
+            }, TimeSpan.FromSeconds(10)).Result;
+            openBtnIteration.ShouldNotBeNull($"DeviceOpenButton not found or not enabled during iteration {i}");
+            openBtnIteration.Click();
+            Thread.Sleep(200);
         }
 
         // Wait for layout update

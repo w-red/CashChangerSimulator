@@ -3,8 +3,9 @@ using FlaUI.Core.Capturing;
 using FlaUI.Core.Tools;
 using System.IO;
 using Shouldly;
+using CashChangerSimulator.UI.Tests;
 
-namespace CashChangerSimulator.UI.Tests.Documentation;
+namespace CashChangerSimulator.UI.DocumentationTests;
 
 /// <summary>
 /// FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。

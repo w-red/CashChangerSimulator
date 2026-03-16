@@ -1,10 +1,11 @@
+using CashChangerSimulator.UI.Tests;
 using CashChangerSimulator.UI.Tests.Specs;
 using FlaUI.Core.AutomationElements;
 using Shouldly;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
-namespace CashChangerSimulator.UI.Tests.Performance;
+namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>
 /// ZLogger等の連携時に、大量のトランザクションがUIの応答性に深刻な影響を与えないかを検証するUIパフォーマンステスト。

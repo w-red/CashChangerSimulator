@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO;
 
-namespace CashChangerSimulator.UI.Tests.Performance;
+namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>パフォーマンス測定のためのテストクラス。</summary>
 /// <param name="output">テスト出力ヘルパー。</param>
