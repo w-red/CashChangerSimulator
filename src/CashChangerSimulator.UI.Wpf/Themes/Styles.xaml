@@ -78,7 +78,7 @@
 
     <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
         <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}"/>
     </Style>
