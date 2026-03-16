@@ -190,7 +190,9 @@ public class PosTransactionViewModelFixture : IDisposable
 
     public void Dispose()
     {
-        CashChanger?.Dispose();
+        try { CashChanger?.Close(); } catch { }
+        try { CashChanger?.Dispose(); } catch { }
+        try { (Monitors as IDisposable)?.Dispose(); } catch { }
         GC.SuppressFinalize(this);
     }
 }
