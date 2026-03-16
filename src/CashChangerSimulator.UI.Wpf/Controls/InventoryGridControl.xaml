@@ -18,15 +18,6 @@
     </UserControl.Resources>
     
     <Grid>
-        <!-- テスト専用ボタン: 金種詳細ダイアログを確実に開くためのエントリポイント。本番 UI には表示されない。-->
-        <Button AutomationProperties.AutomationId="ShowFirstDenominationDetailTestButton"
-                Width="100" Height="100" Opacity="0.01" Background="Transparent"
-                Command="{Binding OpenFirstBillDenominationDetailCommand}"
-                Focusable="False"
-                IsTabStop="False"
-                Panel.ZIndex="999"
-                HorizontalAlignment="Left" VerticalAlignment="Top" />
-
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,0,12,0">
                 <StackPanel.Resources>

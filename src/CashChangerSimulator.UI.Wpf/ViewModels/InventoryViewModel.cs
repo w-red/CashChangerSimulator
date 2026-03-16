@@ -72,8 +72,6 @@ public class InventoryViewModel : IDisposable
     /// <summary>金種詳細を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
 
-    /// <summary>最初の紙幣金種の詳細ダイアログを開くコマンド（テスト専用）。</summary>
-    public ReactiveCommand OpenFirstBillDenominationDetailCommand { get; }
 
     /// <summary>最近の取引履歴。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
@@ -215,42 +213,6 @@ public class InventoryViewModel : IDisposable
             });
         });
 
-        // テスト専用コマンド: パラメータ不要で最初の紙幣金種の詳細ダイアログを独立 Window で開く
-        OpenFirstBillDenominationDetailCommand = new ReactiveCommand().AddTo(_disposables);
-        OpenFirstBillDenominationDetailCommand.Subscribe(_ =>
-        {
-            var denominationVm = BillDenominations.FirstOrDefault();
-            if (denominationVm == null || System.Windows.Application.Current == null) return;
-
-            var dispatcher = System.Windows.Application.Current.Dispatcher;
-            if (dispatcher == null || dispatcher.Thread.GetApartmentState() != System.Threading.ApartmentState.STA)
-            {
-                return;
-            }
-
-            dispatcher.Invoke(() =>
-            {
-                try {
-                    var view = new DenominationDetailView { DataContext = denominationVm };
-                    var win = new System.Windows.Window
-                    {
-                        Title = "Denomination Detail",
-                        Content = view,
-                        SizeToContent = System.Windows.SizeToContent.WidthAndHeight,
-                        WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen,
-                        ResizeMode = System.Windows.ResizeMode.NoResize,
-                    };
-
-                    foreach (var dict in System.Windows.Application.Current.Resources.MergedDictionaries)
-                    {
-                        win.Resources.MergedDictionaries.Add(dict);
-                    }
-
-                    System.Windows.Automation.AutomationProperties.SetAutomationId(win, "DenominationDetailDialogView");
-                    win.Show();
-                } catch (Exception) { }
-            });
-        });
     }
 
     private void SafeInvoke(Action action)
@@ -292,27 +254,6 @@ public class InventoryViewModel : IDisposable
         }
 
         UpdateGridRatios();
-
-        var triggerFile = Environment.GetEnvironmentVariable("TEST_AUTO_OPEN_INVENTORY_DIALOG_FILE");
-        if (!string.IsNullOrEmpty(triggerFile))
-        {
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    await Task.Delay(500);
-                    if (System.IO.File.Exists(triggerFile))
-                    {
-                        try { System.IO.File.Delete(triggerFile); } catch { }
-                        SafeInvoke(() =>
-                        {
-                            var vm = BillDenominations.FirstOrDefault();
-                            if (vm != null) ShowDenominationDetailCommand.Execute(vm);
-                        });
-                    }
-                }
-            });
-        }
     }
 
     private void UpdateGridRatios()
