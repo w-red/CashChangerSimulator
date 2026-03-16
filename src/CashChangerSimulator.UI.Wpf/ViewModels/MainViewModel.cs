@@ -37,8 +37,6 @@ public class MainViewModel : IDisposable
     public DispenseViewModel Dispense { get; }
     /// <summary>在庫管理用の ViewModel。</summary>
     public InventoryViewModel Inventory { get; }
-    /// <summary>POS取引モード用の ViewModel。</summary>
-    public PosTransactionViewModel PosTransaction { get; }
     /// <summary>高度なシミュレーション設定 ViewModel。</summary>
     public AdvancedSimulationViewModel AdvancedSimulation { get; }
 
@@ -103,12 +101,6 @@ public class MainViewModel : IDisposable
             .AddTo(_disposables);
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
-
-        PosTransaction = _viewModelFactory.CreatePosTransactionViewModel(
-            Deposit,
-            Dispense,
-            () => Inventory.Denominations)
-            .AddTo(_disposables);
 
         AdvancedSimulation = _viewModelFactory.CreateAdvancedSimulationViewModel().AddTo(_disposables);
 

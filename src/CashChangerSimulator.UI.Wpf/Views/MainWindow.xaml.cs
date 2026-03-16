@@ -31,9 +31,6 @@ internal partial class MainWindow : Window
 
         switch (mode)
         {
-            case UIMode.PosTransaction:
-                MainFrame.Navigate(new PosMainPage { DataContext = _viewModel });
-                break;
             case UIMode.Standard:
             default:
                 MainFrame.Navigate(new StandardSimulationPage { DataContext = _viewModel });

@@ -34,7 +34,7 @@ public class SettingsViewModel : IDisposable
     public BindableReactiveProperty<UIMode> ActiveUIMode { get; }
 
     /// <summary>利用可能な UI モードのリスト。</summary>
-    public UIMode[] AvailableUIModes { get; } = [UIMode.Standard, UIMode.PosTransaction];
+    public UIMode[] AvailableUIModes { get; } = [UIMode.Standard];
 
     /// <summary>表示言語（カルチャコード）。</summary>
     public BindableReactiveProperty<string> CultureCode { get; }
