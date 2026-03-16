@@ -12,6 +12,8 @@
     <Project Path="test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj" />
     <Project Path="test/CashChangerSimulator.UI.Cli.Tests/CashChangerSimulator.UI.Cli.Tests.csproj" />
     <Project Path="test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj" />
+    <Project Path="test/CashChangerSimulator.UI.PerformanceTests/CashChangerSimulator.UI.PerformanceTests.csproj" />
+    <Project Path="test/CashChangerSimulator.UI.DocumentationTests/CashChangerSimulator.UI.DocumentationTests.csproj" />
   </Folder>
   <Folder Name="/ソリューション項目/">
     <File Path="config.toml" />
