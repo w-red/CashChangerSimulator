@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <UseDotNetTestExperience>true</UseDotNetTestExperience>
   </PropertyGroup>
 
   <ItemGroup>
