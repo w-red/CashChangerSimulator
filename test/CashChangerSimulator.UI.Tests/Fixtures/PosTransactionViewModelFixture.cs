@@ -8,6 +8,7 @@ using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
 
@@ -25,6 +26,7 @@ public class PosTransactionViewModelFixture : IDisposable
     public InternalSimulatorCashChanger CashChanger { get; private set; } = null!;
     public ConfigurationProvider ConfigProvider { get; private set; } = null!;
     public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
+    public MonitorsProvider Monitors { get; private set; } = null!;
     public IScriptExecutionService ScriptExecutionService { get; private set; } = null!;
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
 
@@ -50,11 +52,11 @@ public class PosTransactionViewModelFixture : IDisposable
         DispenseController = new DispenseController(Manager, Hardware, new Mock<IDeviceSimulator>().Object);
         var diagnosticController = new DiagnosticController(Inventory, Hardware);
 
-        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-
-        ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
         NotifyServiceMock = new Mock<INotifyService>();
+        ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
+
+        Monitors = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
+        var aggregatorProvider = new OverallStatusAggregatorProvider(Monitors);
 
         CashChanger = new InternalSimulatorCashChanger(
             new SimulatorDependencies(
@@ -63,7 +65,7 @@ public class PosTransactionViewModelFixture : IDisposable
                 History,
                 Manager,
                 DepositController,
-                DispenseController,
+                null!, // Will be set after creation
                 aggregatorProvider,
                 Hardware,
                 diagnosticController))
@@ -71,15 +73,26 @@ public class PosTransactionViewModelFixture : IDisposable
             CurrencyCode = currencyCode
         };
         CashChanger.SkipStateVerification = true;
+
+        DispenseController = new DispenseController(Manager, Hardware, CashChanger);
+
+        // Open and enable device for testing
+        CashChanger.Open();
+        CashChanger.Claim(100);
+        CashChanger.DeviceEnabled = true;
     }
 
-    /// <summary>検証用の ViewModel を生成します。</summary>
-    internal PosTransactionViewModel CreateViewModel()
+    /// <summary>リセットします。</summary>
+    public void Reset()
     {
-        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-        
-        var facade = new DeviceFacade(
+        Initialize();
+    }
+
+    /// <summary>デバイスとコア機能の Facade を生成します。</summary>
+    internal IDeviceFacade CreateFacade()
+    {
+        var aggregatorProvider = new OverallStatusAggregatorProvider(Monitors);
+        return new DeviceFacade(
             Inventory,
             Manager,
             DepositController,
@@ -88,57 +101,91 @@ public class PosTransactionViewModelFixture : IDisposable
             CashChanger,
             History,
             aggregatorProvider,
-            monitorsProvider,
+            Monitors,
             NotifyServiceMock.Object);
+    }
 
-        var isDispenseBusy = new BindableReactiveProperty<bool>(false);
-        var isInDepositMode = new BindableReactiveProperty<bool>(false);
+    /// <summary>検証用の MainViewModel を生成します。</summary>
+    internal MainViewModel CreateMainViewModel()
+    {
+        var services = new ServiceCollection();
+        var facade = CreateFacade();
+        
+        services.AddSingleton(facade);
+        services.AddSingleton(ConfigProvider);
+        services.AddSingleton(MetadataProvider);
+        services.AddSingleton(NotifyServiceMock.Object);
+        services.AddSingleton(ScriptExecutionService);
+        
+        // Register ViewModels for the factory to resolve via ActivatorUtilities or GetRequiredService
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<InventoryViewModel>();
+        services.AddTransient<DepositViewModel>();
+        services.AddTransient<DispenseViewModel>();
+        services.AddTransient<PosTransactionViewModel>();
+        services.AddTransient<AdvancedSimulationViewModel>();
+        
+        var provider = services.BuildServiceProvider();
+        var factory = new ViewModelFactory(provider);
+        services.AddSingleton<IViewModelFactory>(factory);
 
-        var depVm = new DepositViewModel(
-            facade,
-            () => [],
-            isDispenseBusy,
+        // Re-build provider to include the factory
+        var finalProvider = services.BuildServiceProvider();
+        
+        return finalProvider.GetRequiredService<MainViewModel>();
+    }
+
+    /// <summary>検証用の InventoryViewModel を生成します。</summary>
+    internal InventoryViewModel CreateInventoryViewModel()
+    {
+        return new InventoryViewModel(CreateFacade(), ConfigProvider, MetadataProvider, NotifyServiceMock.Object);
+    }
+
+    /// <summary>検証用の DepositViewModel を生成します。</summary>
+    internal DepositViewModel CreateDepositViewModel(Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null, BindableReactiveProperty<bool>? isDispenseBusy = null)
+    {
+        return new DepositViewModel(
+            CreateFacade(),
+            denominationsFactory ?? (() => []),
+            isDispenseBusy ?? new BindableReactiveProperty<bool>(false),
             NotifyServiceMock.Object,
             MetadataProvider);
+    }
 
-        var dispVm = new DispenseViewModel(
-            facade,
+    /// <summary>検証用の DispenseViewModel を生成します。</summary>
+    internal DispenseViewModel CreateDispenseViewModel(BindableReactiveProperty<bool>? isInDepositMode = null, Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null)
+    {
+        return new DispenseViewModel(
+            CreateFacade(),
             ConfigProvider,
-            isInDepositMode,
-            () => [],
+            isInDepositMode ?? new BindableReactiveProperty<bool>(false),
+            denominationsFactory ?? (() => []),
             NotifyServiceMock.Object,
             MetadataProvider);
+    }
+
+    /// <summary>検証用の PosTransactionViewModel を生成します。</summary>
+    internal PosTransactionViewModel CreateViewModel()
+    {
+        var facade = CreateFacade();
+        var depVm = CreateDepositViewModel();
+        var dispVm = CreateDispenseViewModel();
 
         return new PosTransactionViewModel(
             facade,
             depVm,
             dispVm,
             MetadataProvider,
-            () => [],
+            () => MetadataProvider.SupportedDenominations.Select(key => 
+                new DenominationViewModel(facade, key, MetadataProvider, Monitors.Monitors.FirstOrDefault(m => m.Key.Equals(key))!, ConfigProvider)),
             NotifyServiceMock.Object);
     }
 
     /// <summary>検証用の AdvancedSimulationViewModel を生成します。</summary>
     internal AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(Mock<IScriptExecutionService>? scriptServiceMock = null)
     {
-        var scriptService = scriptServiceMock?.Object ?? new Mock<IScriptExecutionService>().Object;
-        
-        var monitorsProvider = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
-        var aggregatorProvider = new OverallStatusAggregatorProvider(monitorsProvider);
-
-        var facade = new DeviceFacade(
-            Inventory,
-            Manager,
-            DepositController,
-            DispenseController,
-            Hardware,
-            CashChanger,
-            History,
-            aggregatorProvider,
-            monitorsProvider,
-            NotifyServiceMock.Object);
-
-        return new AdvancedSimulationViewModel(facade, scriptService, MetadataProvider);
+        var scriptService = scriptServiceMock?.Object ?? ScriptExecutionService;
+        return new AdvancedSimulationViewModel(CreateFacade(), scriptService, MetadataProvider);
     }
 
     public void Dispose()
