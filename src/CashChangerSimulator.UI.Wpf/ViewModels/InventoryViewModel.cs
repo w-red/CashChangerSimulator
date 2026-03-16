@@ -193,25 +193,26 @@ public class InventoryViewModel : IDisposable
         ShowDenominationDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
-            if (vm != null)
+            if (vm == null || System.Windows.Application.Current == null)
             {
-                var view = new DenominationDetailView { DataContext = vm };
-                var dispatcher = Application.Current?.Dispatcher;
-                if (dispatcher != null)
-                {
-                    dispatcher.InvokeAsync(async () =>
-                    {
-                        try
-                        {
-                            await MaterialDesignThemes.Wpf.DialogHost.Show(view, "RootDialog");
-                        }
-                        catch (Exception)
-                        {
-                            // Suppress
-                        }
-                    });
-                }
+                return;
             }
+
+            var dispatcher = System.Windows.Application.Current.Dispatcher;
+            if (dispatcher == null || dispatcher.Thread.GetApartmentState() != System.Threading.ApartmentState.STA)
+            {
+                return;
+            }
+
+            dispatcher.InvokeAsync(async () =>
+            {
+                try
+                {
+                    var view = new DenominationDetailView { DataContext = vm };
+                    await MaterialDesignThemes.Wpf.DialogHost.Show(view, "RootDialog");
+                }
+                catch (Exception) { /* Suppress */ }
+            });
         });
 
         // テスト専用コマンド: パラメータ不要で最初の紙幣金種の詳細ダイアログを独立 Window で開く
@@ -219,14 +220,18 @@ public class InventoryViewModel : IDisposable
         OpenFirstBillDenominationDetailCommand.Subscribe(_ =>
         {
             var denominationVm = BillDenominations.FirstOrDefault();
-            if (denominationVm == null) return;
+            if (denominationVm == null || System.Windows.Application.Current == null) return;
 
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            dispatcher?.Invoke(() =>
+            var dispatcher = System.Windows.Application.Current.Dispatcher;
+            if (dispatcher == null || dispatcher.Thread.GetApartmentState() != System.Threading.ApartmentState.STA)
+            {
+                return;
+            }
+
+            dispatcher.Invoke(() =>
             {
                 try {
                     var view = new DenominationDetailView { DataContext = denominationVm };
-                    
                     var win = new System.Windows.Window
                     {
                         Title = "Denomination Detail",
@@ -236,21 +241,14 @@ public class InventoryViewModel : IDisposable
                         ResizeMode = System.Windows.ResizeMode.NoResize,
                     };
 
-                    // 完全に独立したウィンドウとして開く場合、Application.Current.Resources が自動的に引き継がれない場合があるため
-                    // 明示的にリソースをマージして DynamicResource ルックアップエラー (不整合) を防ぐ
-                    if (System.Windows.Application.Current != null)
+                    foreach (var dict in System.Windows.Application.Current.Resources.MergedDictionaries)
                     {
-                        foreach (var dict in System.Windows.Application.Current.Resources.MergedDictionaries)
-                        {
-                            win.Resources.MergedDictionaries.Add(dict);
-                        }
+                        win.Resources.MergedDictionaries.Add(dict);
                     }
 
                     System.Windows.Automation.AutomationProperties.SetAutomationId(win, "DenominationDetailDialogView");
                     win.Show();
-                } catch (Exception) {
-                    // Suppress for test reliability
-                }
+                } catch (Exception) { }
             });
         });
     }
@@ -329,13 +327,13 @@ public class InventoryViewModel : IDisposable
         }
         else if (billCount == 0)
         {
-            BillGridWidth.Value = new GridLength(0);
+            BillGridWidth.Value = new GridLength(0, GridUnitType.Pixel); // Use Pixel 0 instead of Star 0
             CoinGridWidth.Value = new GridLength(1, GridUnitType.Star);
         }
         else if (coinCount == 0)
         {
             BillGridWidth.Value = new GridLength(1, GridUnitType.Star);
-            CoinGridWidth.Value = new GridLength(0);
+            CoinGridWidth.Value = new GridLength(0, GridUnitType.Pixel); // Use Pixel 0 instead of Star 0
         }
         else
         {
