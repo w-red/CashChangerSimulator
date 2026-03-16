@@ -8,7 +8,6 @@
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
     <UseWPF>true</UseWPF>
-    <UseDotNetTestExperience>true</UseDotNetTestExperience>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +29,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="10.0.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="PolySharp" Version="1.15.0">
