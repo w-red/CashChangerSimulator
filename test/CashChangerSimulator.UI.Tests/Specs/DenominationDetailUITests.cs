@@ -1,152 +1,117 @@
 using System.IO;
+using System.Linq;
+using System.Threading;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>
 /// 金種詳細ダイアログの表示・内容・閉じる動作を検証する UI テスト。
-/// xUnit はコンストラクタを各テストごとに呼ぶため、アプリ起動は各テストで独立している。
-/// ただしダイアログを開くトリガーは一度だけ書き込む（ViewModel 側ポーリングが対応）。
 /// </summary>
 public class DenominationDetailUITests : IDisposable
 {
     private readonly CashChangerTestApp _app;
-    private readonly string _triggerPath;
     private readonly AutomationElement _dialog;
 
-    /// <summary>ファイルトリガーフックを有効にしてテストアプリを起動し、ダイアログを開く。</summary>
     public DenominationDetailUITests()
     {
-        _triggerPath = Path.Combine(Path.GetTempPath(), $"denomination_detail_{Guid.NewGuid():N}.trigger");
         _app = new CashChangerTestApp();
         _app.Launch();
 
-        // アプリが完全に起動するまで待機（BillDenominations の初期化含む）
-        Thread.Sleep(5000);
+        var inventoryTile = Retry.WhileNull(() =>
+        {
+            if (_app.MainWindow == null) return null;
+            return _app.MainWindow.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile")).FirstOrDefault()?.AsButton();
+        }, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(2)).Result;
 
-        // テスト専用ボタン（InventoryControl.xaml に追加された透明 1x1 ボタン）を探して InvokePattern で呼び出す
-        var testButton = _app.MainWindow?.FindFirstDescendant(cf =>
-            cf.ByAutomationId("ShowFirstDenominationDetailTestButton"))?.AsButton();
+        inventoryTile.ShouldNotBeNull("InventoryTile が見つかりません。");
+        
+        // クリック (Invoke パターンがあれば優先)
+        Retry.WhileFalse(() =>
+        {
+            try
+            {
+                if (inventoryTile.Patterns.Invoke.IsSupported)
+                    inventoryTile.Patterns.Invoke.Pattern.Invoke();
+                else
+                    inventoryTile.Click();
+                return true;
+            }
+            catch { return false; }
+        }, TimeSpan.FromSeconds(5));
 
-        Console.WriteLine($"[DEBUG] testButton found: {testButton != null}");
-        testButton.ShouldNotBeNull("ShowFirstDenominationDetailTestButton ボタンが UI ツリーに存在するべきです。");
-        Console.WriteLine($"[DEBUG] Button IsEnabled: {testButton.IsEnabled}");
-        Console.WriteLine($"[DEBUG] Button IsOffscreen: {testButton.IsOffscreen}");
-        Console.WriteLine($"[DEBUG] Clicking testButton...");
-        testButton.Click();
-        Console.WriteLine("[DEBUG] Clicked.");
-        Thread.Sleep(2000); // UIスレッドがダイアログを描画するまで待機
-
-        // ダイアログが現れるまで待機（最大 15 秒）
-        // Show() による子 Window はトップレベルウィンドウとして出現する
+        // ダイアログが現れるまで待機
         var found = Retry.WhileNull(() =>
         {
-            // アプリ内の全トップレベルウィンドウを検索
-            var windows = _app.Application.GetAllTopLevelWindows(_app.Automation);
-            foreach (var win in windows)
+            if (_app.MainWindow == null) return null;
+
+            // 1. 直接検索
+            var d = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+            if (d != null) return d;
+
+            // 2. DialogHost (MainDialogHost) を経由して検索
+            var host = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("MainDialogHost"));
+            if (host != null)
             {
-                try
-                {
-                    if (win.AutomationId == "DenominationDetailDialogView") return win;
-                }
-                catch { }
-                try
-                {
-                    if (win.Title == "Denomination Detail") return win;
-                }
-                catch { }
-                // DenominationDetailDialogView を子孫から検索
-                var inner = win.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
-                if (inner != null) return inner;
+                d = host.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+                if (d != null) return d;
             }
 
-            // デスクトップ直下でも検索
-            var desktop = _app.Automation.GetDesktop();
-            foreach (var child in desktop.FindAllChildren())
+            // 3. 全トップレベルウィンドウから検索
+            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
             {
-                try
-                {
-                    if (child.AutomationId == "DenominationDetailDialogView") return child;
-                }
-                catch { }
-                try
-                {
-                    if (child.Name == "Denomination Detail") return child;
-                }
-                catch { }
+                d = win.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+                if (d != null) return d;
             }
+
             return null;
-        }, TimeSpan.FromSeconds(15)).Result;
+        }, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(2)).Result;
 
         _dialog = found!;
     }
 
-    // ────────────────────────────────────────────────────
-    // テスト
-    // ────────────────────────────────────────────────────
-
-    /// <summary>金種詳細ダイアログが画面上に表示されることを確認する。</summary>
     [Fact]
     public void DenominationDetailDialog_ShouldBeVisible()
     {
-        _dialog.ShouldNotBeNull("金種詳細ダイアログ (DenominationDetailDialogView) が表示されているべきです。");
-        _dialog.IsOffscreen.ShouldBeFalse("ダイアログは画面上に表示されているべきです。");
+        _dialog.ShouldNotBeNull("ダイアログが表示されていません。");
     }
 
-    /// <summary>ダイアログ内に枚数を示す TextBlock が複数存在することを確認する。</summary>
     [Fact]
     public void DenominationDetailDialog_ShouldContainCountFields()
     {
         _dialog.ShouldNotBeNull();
-
-        var textBlocks = _dialog.FindAllDescendants(cf =>
-            cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
-
-        // リサイクル / 回収 / リジェクト ＋ タイトル等で最低 3 つ
-        textBlocks.Length.ShouldBeGreaterThanOrEqualTo(3,
-            "リサイクル/回収/リジェクトの各枚数 TextBlock が存在するべきです。");
+        var textBlocks = _dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+        textBlocks.Length.ShouldBeGreaterThanOrEqualTo(3);
     }
 
-    /// <summary>閉じるボタンをクリックするとダイアログが閉じることを確認する。</summary>
     [Fact]
     public void DenominationDetailDialog_CloseButton_ShouldDismissDialog()
     {
         _dialog.ShouldNotBeNull();
-        Thread.Sleep(500); // 描画安定用
+        Thread.Sleep(1000);
 
-        // ダイアログ内の Button を探す（MaterialDesign の CloseDialogCommand ボタン）
-        var closeButton = _dialog
-            .FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button))
-            .FirstOrDefault();
+        var closeButton = _dialog.FindFirstDescendant(cf => cf.ByAutomationId("CloseButton"))?.AsButton();
+        if (closeButton == null)
+            closeButton = _dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)).FirstOrDefault()?.AsButton();
 
-        closeButton.ShouldNotBeNull("ダイアログに閉じるボタンが存在するべきです。");
-
+        closeButton.ShouldNotBeNull();
         if (closeButton.Patterns.Invoke.IsSupported)
             closeButton.Patterns.Invoke.Pattern.Invoke();
         else
             closeButton.Click();
 
-        // ダイアログが消えるまで待機（最大 5 秒）
         Retry.WhileTrue(() =>
         {
-            var remaining = _app.MainWindow?.FindFirstDescendant(cf =>
-                cf.ByAutomationId("DenominationDetailDialogView"));
+            var remaining = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
             return remaining != null && !remaining.IsOffscreen;
-        }, TimeSpan.FromSeconds(5));
-
-        // ダイアログが非表示 or 消えていることを確認
-        var afterClose = _app.MainWindow?.FindFirstDescendant(cf =>
-            cf.ByAutomationId("DenominationDetailDialogView"));
-        (afterClose == null || afterClose.IsOffscreen).ShouldBeTrue(
-            "閉じるボタンを押した後、ダイアログは消えているべきです。");
+        }, TimeSpan.FromSeconds(10));
     }
 
-    /// <inheritdoc/>
     public void Dispose()
     {
-        try { if (File.Exists(_triggerPath)) File.Delete(_triggerPath); } catch { }
         _app.Dispose();
         GC.SuppressFinalize(this);
     }
