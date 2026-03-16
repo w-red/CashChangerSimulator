@@ -6,7 +6,7 @@ using R3;
 using Xunit;
 using System.Windows.Input;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>BulkAmountInputViewModel の動作を検証するテストクラス。</summary>
 public class BulkInputViewModelTest

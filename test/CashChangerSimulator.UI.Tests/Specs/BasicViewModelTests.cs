@@ -14,7 +14,7 @@ using Shouldly;
 using Xunit;
 using R3;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class BasicViewModelTests
 {

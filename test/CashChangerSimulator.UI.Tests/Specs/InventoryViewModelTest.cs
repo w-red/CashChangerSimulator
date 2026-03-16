@@ -10,7 +10,7 @@ using Moq;
 using Xunit;
 using R3;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>InventoryViewModel の動作を検証するテストクラス。</summary>
 public class InventoryViewModelTest : IClassFixture<PosTransactionViewModelFixture>

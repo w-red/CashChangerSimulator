@@ -5,7 +5,7 @@ using CashChangerSimulator.Device;
 using Microsoft.PointOfService;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>デバイスの初回起動状態（Cold Start）に関連する動作を検証するテストクラス。</summary>
 public class ColdStartTest

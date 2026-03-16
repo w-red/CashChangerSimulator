@@ -15,7 +15,7 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>状態競合時の警告ダイアログ動作を検証するテストクラス。</summary>
 public class StateConflictTest : IAsyncLifetime

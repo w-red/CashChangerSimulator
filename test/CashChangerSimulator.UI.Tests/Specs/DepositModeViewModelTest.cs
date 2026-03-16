@@ -16,7 +16,7 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金モードの ViewModel 動作をシミュレートして検証するテストクラス。</summary>
 public class DepositModeViewModelTest : IClassFixture<PosTransactionViewModelFixture>

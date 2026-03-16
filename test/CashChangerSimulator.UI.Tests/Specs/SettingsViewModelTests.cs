@@ -7,7 +7,7 @@ using R3;
 using Shouldly;
 using System.Windows.Input;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 /// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
 public class SettingsViewModelTests
 {

@@ -16,7 +16,7 @@ using R3;
 using Shouldly;
 using System.Windows.Input;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>クイック入金と POS 取引モードの連動を検証するテストクラス。</summary>
 public class QuickDepositAndPosModeTest : IClassFixture<PosTransactionViewModelFixture>

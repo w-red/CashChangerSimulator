@@ -6,7 +6,7 @@ using Moq;
 using Xunit;
 using R3;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>POS 取引フローのViewModelレベルでの動作を検証するテストクラス。</summary>
 public class PosTransactionFlowTest : IClassFixture<PosTransactionViewModelFixture>

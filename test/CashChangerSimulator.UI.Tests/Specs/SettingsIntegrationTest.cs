@@ -6,7 +6,7 @@ using R3;
 using Shouldly;
 using System.IO;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>設定の保存と再読み込みの統合動作を検証するテスト。</summary>
 public class SettingsIntegrationTest

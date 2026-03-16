@@ -229,35 +229,49 @@ HotStart = {hotStart.ToString().ToLower()}
                     catch { }
                 }
             }
-            MainWindow?.Close();
         }
         catch { }
 
+        try
+        {
+            if (MainWindow != null)
+            {
+                MainWindow.Close();
+                Thread.Sleep(500); // Give it a moment to close
+            }
+        }
+        catch { /* Ignore errors during close */ }
+
         // Dispose Automation BEFORE closing the Application to avoid COM issues
-        Automation?.Dispose();
+        try { Automation?.Dispose(); } catch { }
 
         try
         {
             if (Application != null)
             {
-                var processId = Application.ProcessId;
+                int pid = Application.ProcessId;
                 if (!Application.HasExited)
                 {
                     Application.Close();
+                    // Wait up to 2 seconds for clean exit
+                    if (!Application.HasExited)
+                    {
+                        Thread.Sleep(2000);
+                    }
                 }
 
-                // Force kill if it doesn't close within 3 seconds
+                // If still running, kill it forcefully
                 try
                 {
-                    using var process = System.Diagnostics.Process.GetProcessById(processId);
-                    if (!process.HasExited && !process.WaitForExit(3000))
+                    using var process = System.Diagnostics.Process.GetProcessById(pid);
+                    if (!process.HasExited)
                     {
                         process.Kill(true); // Kill entire process tree
                         process.WaitForExit(1000);
                     }
                 }
-                catch (ArgumentException) { }
-                catch (InvalidOperationException) { }
+                catch (ArgumentException) { /* Process already gone */ }
+                catch (Exception) { /* Ignore other errors */ }
                 
                 Application.Dispose();
             }

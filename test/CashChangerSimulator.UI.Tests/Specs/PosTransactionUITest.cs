@@ -9,7 +9,7 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 [Collection("StaCollection")]
 public class PosTransactionUITest : IDisposable

@@ -14,16 +14,15 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
-/// <summary>ViewModel 全体の基本動作や初期状態を検証するテストクラス。</summary>
-public class ViewModelTest : IClassFixture<PosTransactionViewModelFixture>
+public class ViewModelTest : IDisposable
 {
     private readonly PosTransactionViewModelFixture _fixture;
 
-    public ViewModelTest(PosTransactionViewModelFixture fixture)
+    public ViewModelTest()
     {
-        _fixture = fixture;
+        _fixture = new PosTransactionViewModelFixture();
         _fixture.Initialize();
     }
 
@@ -45,5 +44,10 @@ public class ViewModelTest : IClassFixture<PosTransactionViewModelFixture>
 
         // Verify: DispenseAmountInput is empty by default
         vm.Dispense.DispenseAmountInput.Value.ShouldBe("");
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 }

@@ -13,7 +13,7 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>ターミナル画面の操作コントロール制御（CanOperate）を検証するテストクラス。</summary>
 public class TerminalOperationTest

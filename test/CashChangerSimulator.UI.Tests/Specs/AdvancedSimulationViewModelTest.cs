@@ -13,7 +13,7 @@ using Moq;
 using R3;
 using Shouldly;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class AdvancedSimulationViewModelTest : IClassFixture<PosTransactionViewModelFixture>, IDisposable
 {

@@ -23,7 +23,7 @@ using CashChangerSimulator.UI.Wpf.Converters;
 using System.IO.Packaging;
 using System.Windows.Controls;
 
-namespace CashChangerSimulator.UI.Tests;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class UISmokeTests
 {

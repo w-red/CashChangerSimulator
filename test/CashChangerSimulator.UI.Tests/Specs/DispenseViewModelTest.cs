@@ -8,7 +8,7 @@ using CashChangerSimulator.Core.Monitoring;
 using R3;
 using Microsoft.PointOfService;
 
-namespace CashChangerSimulator.UI.Tests.ViewModels;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>DispenseViewModel の動作を検証するテストクラス。</summary>
 public class DispenseViewModelTest : IClassFixture<PosTransactionViewModelFixture>
