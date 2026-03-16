@@ -19,13 +19,13 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金モードの ViewModel 動作をシミュレートして検証するテストクラス。</summary>
-public class DepositModeViewModelTest : IClassFixture<PosTransactionViewModelFixture>
+public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly UIViewModelFixture _fixture;
     private readonly MainViewModel _mainViewModel;
     private readonly DenominationKey _testKey = new(1000, CurrencyCashType.Bill);
 
-    public DepositModeViewModelTest(PosTransactionViewModelFixture fixture)
+    public DepositModeViewModelTest(UIViewModelFixture fixture)
     {
         _fixture = fixture;
         _fixture.Initialize();

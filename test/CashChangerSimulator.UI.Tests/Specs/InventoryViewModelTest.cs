@@ -13,12 +13,12 @@ using R3;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>InventoryViewModel の動作を検証するテストクラス。</summary>
-public class InventoryViewModelTest : IClassFixture<PosTransactionViewModelFixture>
+public class InventoryViewModelTest : IClassFixture<UIViewModelFixture>
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly UIViewModelFixture _fixture;
 
     /// <summary>テスト用のフィクスチャを初期化します。</summary>
-    public InventoryViewModelTest(PosTransactionViewModelFixture fixture)
+    public InventoryViewModelTest(UIViewModelFixture fixture)
     {
         _fixture = fixture;
         _fixture.Reset();
@@ -162,17 +162,6 @@ public class InventoryViewModelTest : IClassFixture<PosTransactionViewModelFixtu
         // Assert
         vm.BillGridWidth.Value.Value.ShouldBeGreaterThan(0);
         vm.CoinGridWidth.Value.Value.ShouldBeGreaterThan(0);
-    }
-
-    /// <summary>金種詳細ダイアログ表示コマンドが実行可能であることを検証します。</summary>
-    [Fact]
-    public void OpenFirstBillDenominationDetailCommandShouldExecuteWithoutError()
-    {
-        // Assemble
-        var vm = _fixture.CreateInventoryViewModel();
-
-        // Act & Assert
-        vm.OpenFirstBillDenominationDetailCommand.CanExecute().ShouldBeTrue();
     }
 
     /// <summary>デバイスオープン時の例外発生が正しくハンドリングされることを検証します。</summary>

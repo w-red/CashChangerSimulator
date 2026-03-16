@@ -18,11 +18,11 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class ViewModelTest : IDisposable
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly UIViewModelFixture _fixture;
 
     public ViewModelTest()
     {
-        _fixture = new PosTransactionViewModelFixture();
+        _fixture = new UIViewModelFixture();
         _fixture.Initialize();
     }
 
@@ -37,7 +37,6 @@ public class ViewModelTest : IDisposable
         vm.Deposit.ShouldNotBeNull();
         vm.Dispense.ShouldNotBeNull();
         vm.Inventory.ShouldNotBeNull();
-        vm.PosTransaction.ShouldNotBeNull();
 
         // Verify: IsInDepositMode is false by default
         vm.Deposit.IsInDepositMode.Value.ShouldBeFalse();

@@ -15,13 +15,13 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
-public class AdvancedSimulationViewModelTest : IClassFixture<PosTransactionViewModelFixture>, IDisposable
+public class AdvancedSimulationViewModelTest : IClassFixture<UIViewModelFixture>, IDisposable
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly UIViewModelFixture _fixture;
     private readonly Mock<IScriptExecutionService> _mockScriptExecutionService = new();
     private readonly AdvancedSimulationViewModel _viewModel;
 
-    public AdvancedSimulationViewModelTest(PosTransactionViewModelFixture fixture)
+    public AdvancedSimulationViewModelTest(UIViewModelFixture fixture)
     {
         _fixture = fixture;
         _fixture.Initialize();

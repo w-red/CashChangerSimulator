@@ -11,12 +11,12 @@ using Microsoft.PointOfService;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>DispenseViewModel の動作を検証するテストクラス。</summary>
-public class DispenseViewModelTest : IClassFixture<PosTransactionViewModelFixture>
+public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
 {
-    private readonly PosTransactionViewModelFixture _fixture;
+    private readonly UIViewModelFixture _fixture;
 
     /// <summary>テスト用のフィクスチャを初期化します。</summary>
-    public DispenseViewModelTest(PosTransactionViewModelFixture fixture)
+    public DispenseViewModelTest(UIViewModelFixture fixture)
     {
         _fixture = fixture;
         _fixture.Reset();
