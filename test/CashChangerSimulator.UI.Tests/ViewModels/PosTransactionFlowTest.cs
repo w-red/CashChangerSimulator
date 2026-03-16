@@ -50,7 +50,7 @@ public class PosTransactionFlowTest : IClassFixture<PosTransactionViewModelFixtu
         vm.InsertCashCommand.Execute(den);
         
         // Give some time for async completion logic
-        await Task.Delay(200);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         // Assert
         vm.OposLog.Any(l => l.Contains("FixDeposit()")).ShouldBeTrue();
@@ -86,7 +86,7 @@ public class PosTransactionFlowTest : IClassFixture<PosTransactionViewModelFixtu
         vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.WaitingForCash);
 
         // Act
-        await Task.Delay(1500); // Wait for timeout
+        await Task.Delay(1500, TestContext.Current.CancellationToken); // Wait for timeout
 
         // Assert
         vm.TransactionStatus.Value.ShouldBe(PosTransactionStatus.Idle);
