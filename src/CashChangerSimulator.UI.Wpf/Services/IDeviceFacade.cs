@@ -19,4 +19,5 @@ public interface IDeviceFacade
     OverallStatusAggregatorProvider AggregatorProvider { get; }
     MonitorsProvider Monitors { get; }
     INotifyService Notify { get; }
+    IDispatcherService Dispatcher { get; }
 }
