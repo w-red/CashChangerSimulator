@@ -30,22 +30,28 @@
                 </StackPanel.Resources>
 
                 <!-- Bills Section -->
-                <TextBlock Text="{StaticResource Bills}" />
-                <ItemsControl ItemsSource="{Binding BillDenominations}"
-                              ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
-                              ItemTemplate="{StaticResource InventoryTileTemplate}"
-                              Margin="0,0,0,16">
-                </ItemsControl>
-
-                <Separator Background="{DynamicResource MaterialDesign.Brush.Outline}" Margin="8,8,16,16" Opacity="0.5"/>
+                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource Bills}" />
+                        <ItemsControl ItemsSource="{Binding BillDenominations}"
+                                      ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
+                                      ItemTemplate="{StaticResource InventoryTileTemplate}"
+                                      Margin="0,8,0,0">
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
 
                 <!-- Coins Section -->
-                <TextBlock Text="{StaticResource Coins}" />
-                <ItemsControl ItemsSource="{Binding CoinDenominations}"
-                              ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
-                              ItemTemplate="{StaticResource InventoryTileTemplate}"
-                              Margin="0,0,0,8">
-                </ItemsControl>
+                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource Coins}" />
+                        <ItemsControl ItemsSource="{Binding CoinDenominations}"
+                                      ItemsPanel="{StaticResource DefaultWrapPanelItemsPanel}"
+                                      ItemTemplate="{StaticResource InventoryTileTemplate}"
+                                      Margin="0,8,0,0">
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>
