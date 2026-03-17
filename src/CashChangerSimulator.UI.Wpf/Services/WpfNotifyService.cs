@@ -9,7 +9,18 @@ namespace CashChangerSimulator.UI.Wpf.Services;
 /// </summary>
 public class WpfNotifyService : INotifyService
 {
-    public void ShowWarning(string message, string title)
+    private readonly IDispatcherService _dispatcher;
+
+    public WpfNotifyService(IDispatcherService dispatcher)
+    {
+        _dispatcher = dispatcher;
+    }
+
+    public void ShowWarning(string message, string title = "Warning") => ShowDialog(message, title);
+    public void ShowError(string message, string title = "Error") => ShowDialog(message, title);
+    public void ShowInfo(string message, string title = "Info") => ShowDialog(message, title);
+
+    private void ShowDialog(string message, string title)
     {
         var dialog = new MessageDialog
         {
@@ -18,9 +29,15 @@ public class WpfNotifyService : INotifyService
         };
 
         // UI スレッドで実行
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        _dispatcher.SafeInvoke(() =>
         {
-            var activeWindow = System.Windows.Application.Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(x => x.IsActive);
+            var app = System.Windows.Application.Current;
+            if (app == null) return;
+
+            var activeWindow = app.Windows.OfType<System.Windows.Window>().FirstOrDefault(x => x.IsActive) 
+                               ?? app.MainWindow;
+
+            if (activeWindow == null) return;
 
             // Try to find a DialogHost in the active window.
             var dialogHost = FindVisualChild<DialogHost>(activeWindow);

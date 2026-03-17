@@ -181,8 +181,18 @@ internal sealed class CliResolverServiceProvider(IServiceProvider provider) : IS
 
 public class CliNotifyService : INotifyService
 {
-    public void ShowWarning(string message, string title)
+    public void ShowWarning(string message, string title = "Warning")
     {
         AnsiConsole.MarkupLine($"[yellow][[{title}]] {message}[/]");
+    }
+
+    public void ShowError(string message, string title = "Error")
+    {
+        AnsiConsole.MarkupLine($"[red][[{title}]] {message}[/]");
+    }
+
+    public void ShowInfo(string message, string title = "Info")
+    {
+        AnsiConsole.MarkupLine($"[blue][[{title}]] {message}[/]");
     }
 }
