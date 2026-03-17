@@ -5,7 +5,7 @@
     <Project Path="src/CashChangerSimulator.UI.Wpf/CashChangerSimulator.UI.Wpf.csproj" />
     <Project Path="src/CashChangerSimulator.UI.Cli/CashChangerSimulator.UI.Cli.csproj" />
     <Project Path="src/CashChangerSimulator.UI.Api/CashChangerSimulator.UI.Api.csproj">
-      <Build Solution="Debug|*" Project="false" />
+      <Build Project="false" />
     </Project>
   </Folder>
   <Folder Name="/test/">
