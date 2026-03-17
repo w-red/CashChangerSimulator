@@ -35,12 +35,10 @@ internal partial class App : Application
             // Apply language setting
             UpdateLanguage(config.System.CultureCode);
 
-            // Apply theme setting safely after window is created
-            Dispatcher.BeginInvoke(new Action(() => 
-            {
-                UpdateTheme(config.System.BaseTheme);
-                ObserveThemeTrigger();
-            }));
+            // [REFINE] Apply theme setting immediately to prevent flicker from gray to dark.
+            // ウインドウが表示される前にテーマを適用し、灰色からのチラつきを防止します。
+            UpdateTheme(config.System.BaseTheme);
+            ObserveThemeTrigger();
 
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;
@@ -250,7 +248,17 @@ internal partial class App : Application
             // App specific semantic brushes
             Current.Resources["App.Brush.Foreground"] = fgBrush;
             Current.Resources["App.Brush.Primary"] = primaryBrush;
-            Current.Resources["WarningBrush"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0xFF, 0xAB, 0x40) : System.Windows.Media.Color.FromRgb(0xFF, 0x8C, 0x00));
+            
+            var warningColor = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xFF, 0xAB, 0x40) : System.Windows.Media.Color.FromRgb(0xFF, 0x8C, 0x00);
+            var warningBrush = new System.Windows.Media.SolidColorBrush(warningColor); warningBrush.Freeze();
+            Current.Resources["WarningBrush"] = warningBrush;
+
+            // [REFINE] Use black text for bright warning backgrounds as requested.
+            // 明るい警告背景にはユーザーのリクエスト通り黒文字を使用します。
+            var warningFg = System.Windows.Media.Colors.Black;
+            var warningFgBrush = new System.Windows.Media.SolidColorBrush(warningFg); warningFgBrush.Freeze();
+            Current.Resources["WarningForegroundBrush"] = warningFgBrush;
+
             Current.Resources["TextPrimaryBrush"] = fgBrush;
             Current.Resources["PrimaryBrush"] = primaryBrush;
             Current.Resources["SecondaryBrush"] = secondaryBrush;
