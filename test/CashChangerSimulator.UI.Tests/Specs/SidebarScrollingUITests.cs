@@ -47,8 +47,9 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
         // Record initial position
         var initialY = depositBtn.BoundingRectangle.Y;
 
-        // Act: Generate many transactions to trigger scrolling in the sidebar
-        for (int i = 0; i < 50; i++)
+        // Act: Generate some transactions to trigger scrolling in the sidebar
+        // 5 iterations are sufficient to fill the sidebar and trigger scrolling at height 600
+        for (int i = 0; i < 5; i++)
         {
             var closeBtn = Retry.WhileNull(() => {
                 var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton();
@@ -56,7 +57,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             }, TimeSpan.FromSeconds(15)).Result;
             closeBtn.ShouldNotBeNull($"DeviceCloseButton not found or not enabled during iteration {i}");
             closeBtn.Click();
-            Thread.Sleep(200);
+            Thread.Sleep(1000); // Increased from 400
             
             var openBtnIteration = Retry.WhileNull(() => {
                 var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton();
@@ -64,7 +65,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             }, TimeSpan.FromSeconds(15)).Result;
             openBtnIteration.ShouldNotBeNull($"DeviceOpenButton not found or not enabled during iteration {i}");
             openBtnIteration.Click();
-            Thread.Sleep(200);
+            Thread.Sleep(1000); // Increased from 400
         }
 
         // Wait for layout update

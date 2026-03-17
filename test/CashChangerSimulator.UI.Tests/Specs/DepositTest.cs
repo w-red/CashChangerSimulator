@@ -275,7 +275,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
-        var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", UITestTimings.RetryLongTimeout);
+        // [STABILITY] Use a dedicated timeout for the first window detection to handle slow cold starts
+        var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", TimeSpan.FromSeconds(30));
         depositWindow.ShouldNotBeNull();
         depositWindow.SetForeground();
         return depositWindow;

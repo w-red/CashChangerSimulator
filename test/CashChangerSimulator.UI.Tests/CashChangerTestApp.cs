@@ -16,7 +16,6 @@ public class CashChangerTestApp : IDisposable
     public Application Application { get; private set; } = null!;
     public UIA3Automation Automation { get; private set; } = null!;
     public Window? MainWindow { get; private set; }
-
     private readonly string _executablePath;
 
     public CashChangerTestApp()
@@ -58,11 +57,12 @@ public class CashChangerTestApp : IDisposable
 
     public void Launch(string? customConfigToml = null, bool hotStart = true, Dictionary<string, string>? envVars = null)
     {
+        // [STABILITY] Ensure previous session is cleaned up
+        Dispose();
+        KillOrphanedProcesses();
+
         try
         {
-            // 安全策として、同名のプロセスが残っている場合は掃除する（ただし本来は各テストが責任を持つべき）
-            TestProcessCleanup.KillAllRunningProcesses();
-
             string fullPath = Path.GetFullPath(_executablePath);
             string? appDir = Path.GetDirectoryName(fullPath);
 
@@ -208,86 +208,124 @@ HotStart = {hotStart.ToString().ToLower()}
     {
         try
         {
-            // Close all windows explicitly
-            if (Application != null && Automation != null)
+            try
             {
-                try
+                // [STABILITY] Explicitly find and close ALL windows belonging to this process
+                if (Application != null && Automation != null)
                 {
-                    var desktop = Automation.GetDesktop();
-                    var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-                    var appProcessId = Application.ProcessId;
+                    try
+                    {
+                        var desktop = Automation.GetDesktop();
+                        var appProcessId = Application.ProcessId;
+                        
+                        // Retry finding windows a few times to catch any popping up during closure
+                        for (int i = 0; i < 2; i++)
+                        {
+                            var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                            foreach (var window in windows)
+                            {
+                                try
+                                {
+                                    if (window.Properties.ProcessId.Value == appProcessId)
+                                    {
+                                        var win = window.AsWindow();
+                                        win.Close();
+                                    }
+                                }
+                                catch { }
+                            }
+                            if (i == 0) Thread.Sleep(300);
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
 
-                    foreach (var window in allWindows)
+            try
+            {
+                if (MainWindow != null)
+                {
+                    MainWindow.Close();
+                    Thread.Sleep(200); // Short wait
+                }
+            }
+            catch { }
+
+            // Dispose Automation BEFORE closing the Application to avoid COM issues
+            try { Automation?.Dispose(); } catch { }
+
+            try
+            {
+                if (Application != null)
+                {
+                    int pid = Application.ProcessId;
+                    if (!Application.HasExited)
+                    {
+                        try { Application.Close(); } catch { }
+                        
+                        // Wait up to 1 seconds for clean exit
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (Application.HasExited) break;
+                            Thread.Sleep(200);
+                        }
+                    }
+
+                    // If still running, kill it forcefully along with its children
+                    if (!Application.HasExited)
                     {
                         try
                         {
-                            // ONLY close windows belonging to OUR test application process
-                            if (window.Properties.ProcessId.Value == appProcessId)
+                            // Use a safer way to get the process to avoid masking the original exception
+                            var process = System.Diagnostics.Process.GetProcesses().FirstOrDefault(p => p.Id == pid);
+                            if (process != null && !process.HasExited)
                             {
-                                var win = window.AsWindow();
-                                win.Close();
+                                process.Kill(true); // Kill entire process tree
+                                process.WaitForExit(1000);
                             }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[INFO] Failed to kill process {pid}: {ex.Message}");
+                        }
                     }
+                    
+            try { Application.Dispose(); } catch { }
+                }
+            }
+            catch { }
+
+            // Final pause to let the OS/UIA clean up traces
+            Thread.Sleep(UITestTimings.AppCleanupDelayMs);
+        }
+        catch { }
+        finally
+        {
+            Application = null!;
+            Automation = null!;
+            MainWindow = null;
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    private void KillOrphanedProcesses()
+    {
+        try
+        {
+            var appName = Path.GetFileNameWithoutExtension(_executablePath);
+            var processes = System.Diagnostics.Process.GetProcessesByName(appName);
+            foreach (var p in processes)
+            {
+                try
+                {
+                    p.Kill(true);
+                    p.WaitForExit(1000);
                 }
                 catch { }
             }
         }
         catch { }
-
-        try
-        {
-            if (MainWindow != null)
-            {
-                MainWindow.Close();
-                Thread.Sleep(200); // Short wait
-            }
-        }
-        catch { }
-
-        // Dispose Automation BEFORE closing the Application to avoid COM issues
-        try { Automation?.Dispose(); } catch { }
-
-        try
-        {
-            if (Application != null)
-            {
-                int pid = Application.ProcessId;
-                if (!Application.HasExited)
-                {
-                    try { Application.Close(); } catch { }
-                    
-                    // Wait up to 1 seconds for clean exit
-                    for (int i = 0; i < 5; i++)
-                    {
-                        if (Application.HasExited) break;
-                        Thread.Sleep(200);
-                    }
-                }
-
-                // If still running, kill it forcefully along with its children
-                if (!Application.HasExited)
-                {
-                    try
-                    {
-                        using var process = System.Diagnostics.Process.GetProcessById(pid);
-                        if (!process.HasExited)
-                        {
-                            process.Kill(true); // Kill entire process tree
-                            process.WaitForExit(1000);
-                        }
-                    }
-                    catch { }
-                }
-                
-        try { Application.Dispose(); } catch { }
-            }
-        }
-        catch { }
-
-        // Final pause to let the OS/UIA clean up traces
-        Thread.Sleep(UITestTimings.AppCleanupDelayMs);
-        GC.SuppressFinalize(this);
     }
 }
