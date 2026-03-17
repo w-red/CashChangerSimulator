@@ -20,4 +20,5 @@ public interface IDeviceFacade
     MonitorsProvider Monitors { get; }
     INotifyService Notify { get; }
     IDispatcherService Dispatcher { get; }
+    IViewService View { get; }
 }

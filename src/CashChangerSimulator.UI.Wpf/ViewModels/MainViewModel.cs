@@ -155,13 +155,7 @@ public class MainViewModel : IDisposable
                 return;
             }
 
-            _facade.Dispatcher.SafeInvoke(() =>
-            {
-                var mainWindow = System.Windows.Application.Current?.MainWindow;
-                var window = new DepositWindow(Deposit, () => Inventory.Denominations);
-                if (mainWindow != null) window.Owner = mainWindow;
-                window.Show();
-            });
+            _facade.View.ShowDepositWindow(Deposit, () => Inventory.Denominations);
         });
 
         OpenDispenseCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
@@ -175,25 +169,13 @@ public class MainViewModel : IDisposable
                 return;
             }
 
-            _facade.Dispatcher.SafeInvoke(() =>
-            {
-                var mainWindow = System.Windows.Application.Current?.MainWindow;
-                var window = new DispenseWindow(Dispense, () => Inventory.Denominations);
-                if (mainWindow != null) window.Owner = mainWindow;
-                window.Show();
-            });
+            _facade.View.ShowDispenseWindow(Dispense, () => Inventory.Denominations);
         });
 
         OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
-            _facade.Dispatcher.SafeInvoke(() =>
-            {
-                var mainWindow = System.Windows.Application.Current?.MainWindow;
-                var window = new AdvancedSimulationWindow(AdvancedSimulation);
-                if (mainWindow != null) window.Owner = mainWindow;
-                window.Show();
-            });
+            _facade.View.ShowAdvancedSimulationWindow(AdvancedSimulation);
         });
     }
 

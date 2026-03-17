@@ -31,6 +31,7 @@ public class UIViewModelFixture : IDisposable
     public IScriptExecutionService ScriptExecutionService { get; private set; } = null!;
     public IDispatcherService DispatcherService { get; private set; } = null!;
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
+    public Mock<IViewService> ViewServiceMock { get; private set; } = null!;
 
     public UIViewModelFixture()
     {
@@ -55,6 +56,7 @@ public class UIViewModelFixture : IDisposable
         var diagnosticController = new DiagnosticController(Inventory, Hardware);
 
         NotifyServiceMock = new Mock<INotifyService>();
+        ViewServiceMock = new Mock<IViewService>();
         ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
         DispatcherService = new ImmediateDispatcherService();
 
@@ -106,7 +108,8 @@ public class UIViewModelFixture : IDisposable
             aggregatorProvider,
             Monitors,
             NotifyServiceMock.Object,
-            DispatcherService);
+            DispatcherService,
+            ViewServiceMock.Object);
     }
 
     /// <summary>検証用の MainViewModel を生成します。</summary>
@@ -180,6 +183,7 @@ public class UIViewModelFixture : IDisposable
         try { CashChanger?.Close(); } catch { }
         try { CashChanger?.Dispose(); } catch { }
         try { (Monitors as IDisposable)?.Dispose(); } catch { }
+        try { ConfigProvider?.Dispose(); } catch { }
         GC.SuppressFinalize(this);
     }
 }

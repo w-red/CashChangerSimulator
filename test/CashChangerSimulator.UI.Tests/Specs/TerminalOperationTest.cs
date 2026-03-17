@@ -74,7 +74,8 @@ public class TerminalOperationTest
             aggregatorProvider,
             monitorsProvider,
             new Mock<INotifyService>().Object,
-            new ImmediateDispatcherService());
+            new ImmediateDispatcherService(),
+            new Mock<IViewService>().Object);
     }
 
     /// <summary>入金 ViewModel の操作可能状態がハードウェアエラーとビジー状態を正しく反映することを検証します。</summary>

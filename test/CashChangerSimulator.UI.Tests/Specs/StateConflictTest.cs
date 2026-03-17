@@ -41,7 +41,8 @@ public class StateConflictTest : IAsyncLifetime
             _fixture.AggregatorProvider,
             _fixture.MonitorsProvider,
             _fixture.MockNotify.Object,
-            new ImmediateDispatcherService());
+            new ImmediateDispatcherService(),
+            new Mock<IViewService>().Object);
 
         var services = new ServiceCollection();
         services.AddSingleton(facade);

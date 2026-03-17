@@ -116,7 +116,8 @@ public class UISmokeTests
                     new OverallStatusAggregatorProvider(monitors),
                     monitors,
                     mockNotify.Object,
-                    new ImmediateDispatcherService());
+                    new ImmediateDispatcherService(),
+                    new Mock<IViewService>().Object);
 
                 var invVM = new InventoryViewModel(
                     facade,
