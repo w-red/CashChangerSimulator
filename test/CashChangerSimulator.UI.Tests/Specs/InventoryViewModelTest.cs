@@ -9,6 +9,7 @@ using Shouldly;
 using Moq;
 using Xunit;
 using R3;
+using Microsoft.PointOfService;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -365,5 +366,44 @@ public class InventoryViewModelTest : IClassFixture<UIViewModelFixture>
 
         // Act & Assert
         Should.NotThrow(() => vm.Dispose());
+    }
+
+    /// <summary>OpenCommand が null の場合に ShowDenominationDetailCommand が安全に終了することを検証します。</summary>
+    [Fact]
+    public void ShowDenominationDetailCommandShouldDoNothingWhenViewModelIsNull()
+    {
+        // Assemble
+        var vm = _fixture.CreateInventoryViewModel();
+
+        // Act & Assert
+        Should.NotThrow(() => vm.ShowDenominationDetailCommand.Execute(null!));
+    }
+
+    /// <summary>Application.Current が null の場合でも ShowDenominationDetailCommand がクラッシュしないことを検証します。</summary>
+    [Fact]
+    public void ShowDenominationDetailCommandShouldHandleNullApplication()
+    {
+        // Assemble
+        var vm = _fixture.CreateInventoryViewModel();
+        var denVm = vm.Denominations.First();
+
+        // Act & Assert (Testing logic that checks Application.Current)
+        Should.NotThrow(() => vm.ShowDenominationDetailCommand.Execute(denVm));
+    }
+
+    /// <summary>デバイスの初期化中にエラーが発生した場合の状態を検証します。</summary>
+    [Fact]
+    public void OpenCommandShouldHandleMultipleExceptionsGracefully()
+    {
+        // Assemble
+        var vm = _fixture.CreateInventoryViewModel();
+        _fixture.CashChanger.SimulateOpenException = true;
+        
+        // Act
+        vm.OpenCommand.Execute(Unit.Default);
+
+        // Assert
+        vm.IsDeviceError.Value.ShouldBeTrue();
+        vm.CurrentErrorCode.Value.ShouldBe((int)ErrorCode.Failure);
     }
 }

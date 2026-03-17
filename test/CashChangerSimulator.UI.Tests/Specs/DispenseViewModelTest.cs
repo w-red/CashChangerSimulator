@@ -178,4 +178,83 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         // Assert
         vm.IsJammed.CurrentValue.ShouldBeFalse();
     }
+
+    /// <summary>入金モード中に払出を実行しようとした場合に警告が表示されることを検証します。</summary>
+    [Fact]
+    public void DispenseCommandShouldShowWarningInDepositMode()
+    {
+        // Assemble
+        var isInDepositMode = new BindableReactiveProperty<bool>(true);
+        var vm = _fixture.CreateDispenseViewModel(isInDepositMode);
+        vm.DispenseAmountInput.Value = "1000";
+
+        // Act
+        vm.DispenseCommand.Execute(Unit.Default);
+
+        // Assert
+        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    /// <summary>空の入力（カウントが0）でバルク払出を実行した場合に何もしないことを検証します。</summary>
+    [Fact]
+    public void DispenseBulkCommandShouldDoNothingWhenCountsIsEmpty()
+    {
+        // Assemble
+        var vm = _fixture.CreateDispenseViewModel();
+        var counts = new Dictionary<DenominationKey, int>();
+
+        // Act
+        vm.DispenseBulkCommand.Execute(counts);
+
+        // Assert
+        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    /// <summary>null の入力でバルク払出を実行した場合に何もしないことを検証します。</summary>
+    [Fact]
+    public void DispenseBulkCommandShouldDoNothingWhenCountsIsNull()
+    {
+        // Assemble
+        var vm = _fixture.CreateDispenseViewModel();
+
+        // Act
+        vm.DispenseBulkCommand.Execute(null!);
+
+        // Assert
+        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    /// <summary>入金モード中にクイック払出を実行しようとした場合に警告が表示されることを検証します。</summary>
+    [Fact]
+    public void QuickDispenseCommandShouldShowWarningInDepositMode()
+    {
+        // Assemble
+        var isInDepositMode = new BindableReactiveProperty<bool>(true);
+        var vm = _fixture.CreateDispenseViewModel(isInDepositMode);
+        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
+        var facade = _fixture.CreateFacade();
+        var monitor = _fixture.Monitors.Monitors.First(m => m.Key.Equals(denKey));
+        var denVm = new DenominationViewModel(facade, denKey, _fixture.MetadataProvider, monitor, _fixture.ConfigProvider);
+
+        // Act
+        vm.QuickDispenseCommand.Execute(denVm);
+
+        // Assert
+        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    /// <summary>null の金種でクイック払出を実行した場合に何もしないことを検証します。</summary>
+    [Fact]
+    public void QuickDispenseCommandShouldDoNothingWhenDenominationIsNull()
+    {
+        // Assemble
+        var vm = _fixture.CreateDispenseViewModel();
+
+        // Act
+        vm.QuickDispenseCommand.Execute(null!);
+
+        // Assert
+        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")).ShouldBeFalse();
+    }
 }
