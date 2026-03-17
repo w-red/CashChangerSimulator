@@ -31,6 +31,7 @@ public static class DIContainer
         var services = new ServiceCollection();
 
         // 1. Providers (Singleton)
+        services.AddSingleton<IDispatcherService, WpfDispatcherService>();
         services.AddSingleton<ConfigurationProvider>();
         services.AddSingleton<ICurrencyMetadataProvider, CurrencyMetadataProvider>();
         services.AddSingleton<CurrencyMetadataProvider>();
