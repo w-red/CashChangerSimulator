@@ -155,14 +155,7 @@ public class DispenseViewModel : IDisposable
             .Subscribe(_ =>
             {
                 var total = _facade.Inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode);
-                if (System.Windows.Application.Current?.Dispatcher != null)
-                {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => TotalAmount.Value = total);
-                }
-                else
-                {
-                    TotalAmount.Value = total;
-                }
+                _facade.Dispatcher.SafeInvoke(() => TotalAmount.Value = total);
             })
             .AddTo(_disposables);
 
@@ -274,12 +267,12 @@ public class DispenseViewModel : IDisposable
         {
             _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to dispense {amount}.");
-            System.Windows.MessageBox.Show(pcEx.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            _notifyService.ShowError(pcEx.Message);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to dispense {amount}.");
-            System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            _notifyService.ShowError(ex.Message);
         }
     }
 
@@ -295,12 +288,12 @@ public class DispenseViewModel : IDisposable
         {
             _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to dispense cash (bulk).");
-            System.Windows.MessageBox.Show(pcEx.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            _notifyService.ShowError(pcEx.Message, "Dispense Error");
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to dispense cash (bulk).");
-            System.Windows.MessageBox.Show(ex.Message, "Dispense Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            _notifyService.ShowError(ex.Message, "Dispense Error");
         }
     }
 

@@ -129,8 +129,11 @@ public class InventoryViewModel : IDisposable
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
         {
-            var mainWindow = Application.Current?.MainWindow;
-            new SettingsWindow { Owner = mainWindow }.ShowDialog();
+            _facade.Dispatcher.SafeInvoke(() =>
+            {
+                var mainWindow = Application.Current?.MainWindow;
+                new SettingsWindow { Owner = mainWindow }.ShowDialog();
+            });
         });
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
@@ -191,18 +194,9 @@ public class InventoryViewModel : IDisposable
         ShowDenominationDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
-            if (vm == null || System.Windows.Application.Current == null)
-            {
-                return;
-            }
+            if (vm == null) return;
 
-            var dispatcher = System.Windows.Application.Current.Dispatcher;
-            if (dispatcher == null || dispatcher.Thread.GetApartmentState() != System.Threading.ApartmentState.STA)
-            {
-                return;
-            }
-
-            dispatcher.InvokeAsync(async () =>
+            _facade.Dispatcher.InvokeAsync(async () =>
             {
                 try
                 {
@@ -217,15 +211,7 @@ public class InventoryViewModel : IDisposable
 
     private void SafeInvoke(Action action)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher != null && !dispatcher.CheckAccess())
-        {
-            dispatcher.Invoke(action);
-        }
-        else
-        {
-            action();
-        }
+        _facade.Dispatcher.SafeInvoke(action);
     }
 
     private void InitializeDenominations()

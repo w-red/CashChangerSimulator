@@ -155,17 +155,13 @@ public class MainViewModel : IDisposable
                 return;
             }
 
-            var mainWindow = System.Windows.Application.Current?.MainWindow;
-            if (mainWindow != null)
+            _facade.Dispatcher.SafeInvoke(() =>
             {
-                var window = new DepositWindow(Deposit, () => Inventory.Denominations) { Owner = mainWindow };
-                window.Show();
-            }
-            else
-            {
+                var mainWindow = System.Windows.Application.Current?.MainWindow;
                 var window = new DepositWindow(Deposit, () => Inventory.Denominations);
+                if (mainWindow != null) window.Owner = mainWindow;
                 window.Show();
-            }
+            });
         });
 
         OpenDispenseCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
@@ -179,17 +175,25 @@ public class MainViewModel : IDisposable
                 return;
             }
 
-            var mainWindow = System.Windows.Application.Current?.MainWindow;
-            var window = new DispenseWindow(Dispense, () => Inventory.Denominations) { Owner = mainWindow };
-            window.Show();
+            _facade.Dispatcher.SafeInvoke(() =>
+            {
+                var mainWindow = System.Windows.Application.Current?.MainWindow;
+                var window = new DispenseWindow(Dispense, () => Inventory.Denominations);
+                if (mainWindow != null) window.Owner = mainWindow;
+                window.Show();
+            });
         });
 
         OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
-            var mainWindow = System.Windows.Application.Current?.MainWindow;
-            var window = new AdvancedSimulationWindow(AdvancedSimulation) { Owner = mainWindow };
-            window.Show();
+            _facade.Dispatcher.SafeInvoke(() =>
+            {
+                var mainWindow = System.Windows.Application.Current?.MainWindow;
+                var window = new AdvancedSimulationWindow(AdvancedSimulation);
+                if (mainWindow != null) window.Owner = mainWindow;
+                window.Show();
+            });
         });
     }
 
