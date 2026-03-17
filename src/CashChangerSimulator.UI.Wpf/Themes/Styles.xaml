@@ -78,7 +78,7 @@
 
     <Style x:Key="SimulationErrorButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
+        <Setter Property="Foreground" Value="{DynamicResource WarningForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
         <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}"/>
     </Style>
@@ -129,6 +129,26 @@
         <Setter Property="Padding" Value="0"/>
     </Style>
 
+    <Style x:Key="BillButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
+        <Setter Property="Background" Value="#1A4CAF50"/>
+        <Setter Property="BorderBrush" Value="#4CAF50"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#4CAF50"/>
+    </Style>
+
+    <Style x:Key="CoinButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
+        <Setter Property="Background" Value="#1A2196F3"/>
+        <Setter Property="BorderBrush" Value="#2196F3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#2196F3"/>
+    </Style>
+
+    <Style x:Key="DeviceCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource App.Brush.Close.Background}"/>
+        <Setter Property="Foreground" Value="{DynamicResource App.Brush.Close.Foreground}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
         <Setter Property="Margin" Value="0,8,0,8"/>
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
@@ -170,7 +190,7 @@
         <Setter Property="Margin" Value="0,0,8,0"/>
         <Style.Resources>
             <Style TargetType="TextBlock">
-                <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
+                <Setter Property="Foreground" Value="{DynamicResource WarningForegroundBrush}"/>
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="FontSize" Value="11"/>
             </Style>
