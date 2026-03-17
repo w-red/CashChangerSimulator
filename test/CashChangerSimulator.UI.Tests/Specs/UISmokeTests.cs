@@ -22,6 +22,7 @@ using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.UI.Wpf.Converters;
 using System.IO.Packaging;
 using System.Windows.Controls;
+using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -114,7 +115,8 @@ public class UISmokeTests
                     mockHistory.Object,
                     new OverallStatusAggregatorProvider(monitors),
                     monitors,
-                    mockNotify.Object);
+                    mockNotify.Object,
+                    new ImmediateDispatcherService());
 
                 var invVM = new InventoryViewModel(
                     facade,

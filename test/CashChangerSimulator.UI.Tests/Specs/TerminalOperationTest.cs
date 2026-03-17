@@ -8,6 +8,7 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Tests.Helpers;
 using Microsoft.PointOfService;
 using Moq;
 using R3;
@@ -72,7 +73,8 @@ public class TerminalOperationTest
             new TransactionHistory(),
             aggregatorProvider,
             monitorsProvider,
-            new Mock<INotifyService>().Object);
+            new Mock<INotifyService>().Object,
+            new ImmediateDispatcherService());
     }
 
     /// <summary>入金 ViewModel の操作可能状態がハードウェアエラーとビジー状態を正しく反映することを検証します。</summary>

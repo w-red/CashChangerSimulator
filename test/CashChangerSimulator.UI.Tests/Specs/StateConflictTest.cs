@@ -10,6 +10,7 @@ using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
@@ -28,6 +29,7 @@ public class StateConflictTest : IAsyncLifetime
     {
         _fixture.Initialize();
 
+
         var facade = new DeviceFacade(
             _fixture.Inventory,
             _fixture.Manager,
@@ -38,7 +40,8 @@ public class StateConflictTest : IAsyncLifetime
             _fixture.History,
             _fixture.AggregatorProvider,
             _fixture.MonitorsProvider,
-            _fixture.MockNotify.Object);
+            _fixture.MockNotify.Object,
+            new ImmediateDispatcherService());
 
         var services = new ServiceCollection();
         services.AddSingleton(facade);

@@ -101,7 +101,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         vm.QuickDispenseCommand.Execute(denVm);
         
         // Wait for async operation (ExecuteDispense in Controller runs in Task.Run)
-        System.Threading.Thread.Sleep(50);
+        System.Threading.Thread.Sleep(200);
 
         // Assert
         _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")).ShouldBeTrue();
@@ -120,7 +120,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         vm.DispenseBulkCommand.Execute(counts);
         
         // Wait for async operation
-        System.Threading.Thread.Sleep(50);
+        System.Threading.Thread.Sleep(200);
 
         // Assert
         _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")).ShouldBeTrue();
@@ -141,7 +141,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         vm.DispenseCommand.Execute(Unit.Default);
         
         // Wait for async operation
-        System.Threading.Thread.Sleep(50);
+        System.Threading.Thread.Sleep(200);
 
         // Assert
         System.Threading.Thread.Sleep(100); // Wait for async operation to complete

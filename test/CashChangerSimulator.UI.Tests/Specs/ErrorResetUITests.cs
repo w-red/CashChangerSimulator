@@ -42,9 +42,11 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Sidebar の Jam ボタン（またはヘッダーのシミュレーションボタン）を押してエラー状態にする
         sidebarJamBtn.Click();
 
-        // ヘッダーの Reset ボタンは常にUIツリーに存在するが、エラー発生時にのみ Enabled になる
-        var resetBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton"))?.AsButton();
-        resetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+        // ヘッダーの Reset ボタンはエラー発生時にのみ Visible になり UI ツリーに出現する
+        // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
+        var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
+        var resetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
+        resetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
         Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Assert: Jam インジケータ（ステータスタブなど）を確認
@@ -85,9 +87,11 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Simulate Jam
         sidebarJamBtn.Click();
 
-        // Global Reset ボタン（ヘッダー部分）を探す。常に存在するが Enabled を待つ
-        var globalResetBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton"))?.AsButton();
-        globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+        // Global Reset ボタン（ヘッダー部分）はエラー発生時にのみ Visible になり UI ツリーに出現する
+        // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
+        var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
+        var globalResetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
+        globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
         Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Act: Click Global Reset
