@@ -4,6 +4,7 @@ using FlaUI.Core.AutomationElements;
 using Shouldly;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
+using FlaUI.Core.Tools;
 
 namespace CashChangerSimulator.UI.PerformanceTests;
 
@@ -48,10 +49,13 @@ HotStart = true
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         window.SetForeground();
-
         // 1. Advanced Simulation ウィンドウを開く
-        var terminalButton = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchAdvancedSimulationButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
-        terminalButton.ShouldNotBeNull();
+        var terminalButton = Retry.WhileNull(() => {
+            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchAdvancedSimulationButton"))?.AsButton();
+            return (btn != null && btn.IsEnabled && !btn.IsOffscreen) ? btn : null;
+        }, TimeSpan.FromSeconds(20)).Result;
+
+        terminalButton.ShouldNotBeNull("LaunchAdvancedSimulationButton not found or not ready");
         if (terminalButton.Patterns.Invoke.IsSupported)
         {
             terminalButton.Patterns.Invoke.Pattern.Invoke();

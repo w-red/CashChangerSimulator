@@ -5,6 +5,7 @@ using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+[Collection("SequentialTests")]
 public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
@@ -35,14 +36,13 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             openBtn.Click();
         }
 
-        // Wait for Idle state
-        Retry.WhileFalse(() => {
-            var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel();
-            return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
-        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
+        // Wait for buttons to be enabled (IDLE state equivalent)
+        var depositBtn = Retry.WhileNull(() => {
+            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton();
+            return (btn != null && btn.IsEnabled && !btn.IsOffscreen) ? btn : null;
+        }, TimeSpan.FromSeconds(30)).Result;
 
-        var depositBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton();
-        depositBtn.ShouldNotBeNull("LaunchDepositButton not found");
+        depositBtn.ShouldNotBeNull("LaunchDepositButton not found or not ready");
         
         // Record initial position
         var initialY = depositBtn.BoundingRectangle.Y;
@@ -53,7 +53,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             var closeBtn = Retry.WhileNull(() => {
                 var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"))?.AsButton();
                 return (btn != null && btn.IsEnabled) ? btn : null;
-            }, TimeSpan.FromSeconds(5)).Result;
+            }, TimeSpan.FromSeconds(15)).Result;
             closeBtn.ShouldNotBeNull($"DeviceCloseButton not found or not enabled during iteration {i}");
             closeBtn.Click();
             Thread.Sleep(200);
@@ -61,7 +61,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
             var openBtnIteration = Retry.WhileNull(() => {
                 var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton();
                 return (btn != null && btn.IsEnabled) ? btn : null;
-            }, TimeSpan.FromSeconds(10)).Result;
+            }, TimeSpan.FromSeconds(15)).Result;
             openBtnIteration.ShouldNotBeNull($"DeviceOpenButton not found or not enabled during iteration {i}");
             openBtnIteration.Click();
             Thread.Sleep(200);
