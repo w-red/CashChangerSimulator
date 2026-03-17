@@ -13,6 +13,7 @@ namespace CashChangerSimulator.UI.DocumentationTests;
 /// <summary>
 /// FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。
 /// </summary>
+[Collection("SequentialTests")]
 public class DocumentationScreenshotGenerator : IDisposable
 {
     private readonly CashChangerTestApp _app;
@@ -39,50 +40,68 @@ public class DocumentationScreenshotGenerator : IDisposable
     }
 
     /// <summary>
-    /// 主要な画面をライトテーマとダークテーマの両方でキャプチャする。
+    /// 主要な画面をライトテーマでキャプチャする。
     /// </summary>
     [Fact]
-    public void GenerateScreenshots()
+    public void GenerateLightModeScreenshots()
     {
-        var themes = new[] { "Light", "Dark" };
-        foreach (var theme in themes)
-        {
-            SetTheme(theme);
-            var themeDir = Path.Combine(_outputDir, theme);
-            if (!Directory.Exists(themeDir)) Directory.CreateDirectory(themeDir);
+        CaptureScreenshotsForTheme("Light");
+    }
 
-            // 1. メインダッシュボードのキャプチャ
-            Thread.Sleep(3000); // UI更新待ち
-            _app.MainWindow.ShouldNotBeNull();
-            CaptureElement(_app.MainWindow, Path.Combine(theme, "main_dashboard.png"));
+    /// <summary>
+    /// 主要な画面をダークテーマでキャプチャする。
+    /// </summary>
+    [Fact]
+    public void GenerateDarkModeScreenshots()
+    {
+        CaptureScreenshotsForTheme("Dark");
+    }
 
-            // 2. 入金画面のキャプチャ
-            CaptureSubWindow("LaunchDepositButton", "DepositWindow", Path.Combine(theme, "deposit_window.png"));
+    private void CaptureScreenshotsForTheme(string theme)
+    {
+        SetTheme(theme);
+        var themeDir = Path.Combine(_outputDir, theme);
+        if (!Directory.Exists(themeDir)) Directory.CreateDirectory(themeDir);
 
-            // 3. 払出画面のキャプチャ
-            CaptureSubWindow("LaunchDispenseButton", "DispenseWindow", Path.Combine(theme, "dispense_window.png"));
+        // 1. メインダッシュボードのキャプチャ
+        Thread.Sleep(5000); // 待機時間を延長 (3s -> 5s)
+        
+        // [STABILITY] Get a fresh reference to the MainWindow if needed
+        var window = Retry.WhileNull(() => {
+            var win = _app.MainWindow;
+            if (win != null && !win.IsOffscreen) return win;
+            return null;
+        }, TimeSpan.FromSeconds(15)).Result;
 
-            // 4. 高度なシミュレーション画面のキャプチャ (エラー状態を誘発)
-            CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", Path.Combine(theme, "advanced_simulation.png"), (win) => {
-                try 
-                {
-                    var jamBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
-                    var overlapBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateOverlapButton"))?.AsButton();
-                    
-                    if (jamBtn != null) { jamBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); jamBtn.Click(); }
-                    if (overlapBtn != null) { overlapBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); overlapBtn.Click(); }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[WARNING] Failed to trigger jam/overlap simulation: {ex.Message}");
-                }
+        window.ShouldNotBeNull("MainWindow is not available or offscreen.");
+        CaptureElement(window, Path.Combine(theme, "main_dashboard.png"));
+
+        // 2. 入金画面のキャプチャ
+        CaptureSubWindow("LaunchDepositButton", "DepositWindow", Path.Combine(theme, "deposit_window.png"));
+
+        // 3. 払出画面のキャプチャ
+        CaptureSubWindow("LaunchDispenseButton", "DispenseWindow", Path.Combine(theme, "dispense_window.png"));
+
+        // 4. 高度なシミュレーション画面のキャプチャ (エラー状態を誘発)
+        CaptureSubWindow("LaunchAdvancedSimulationButton", "AdvancedSimulationWindow", Path.Combine(theme, "advanced_simulation.png"), (win) => {
+            try 
+            {
+                var jamBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
+                var overlapBtn = win.FindFirstDescendant(cf => cf.ByAutomationId("SimulateOverlapButton"))?.AsButton();
                 
-                Thread.Sleep(1500); // 警告インジケーター表示待ち
-            });
+                if (jamBtn != null) { jamBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); jamBtn.Click(); }
+                if (overlapBtn != null) { overlapBtn.WaitUntilClickable(TimeSpan.FromSeconds(2)); overlapBtn.Click(); }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WARNING] Failed to trigger jam/overlap simulation: {ex.Message}");
+            }
+            
+            Thread.Sleep(1500); // 警告インジケーター表示待ち
+        });
 
-            // 5. 金種詳細ダイアログのキャプチャ
-            CaptureDenominationDetail("InventoryTile", "DenominationDetailDialogView", Path.Combine(theme, "inventory_detail.png"));
-        }
+        // 5. 金種詳細ダイアログのキャプチャ
+        CaptureDenominationDetail("InventoryTile", "DenominationDetailDialogView", Path.Combine(theme, "inventory_detail.png"));
     }
 
     private void SetTheme(string theme)
@@ -165,17 +184,23 @@ public class DocumentationScreenshotGenerator : IDisposable
 
     private void CaptureSubWindow(string buttonId, string windowId, string fileName, Action<Window>? action = null)
     {
-        // AutomationId で見つからない場合のフォールバックとして Name でも試行
-        var button =
-            (_app.MainWindow
-            ?.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))
-            ?.AsButton()
-            ?? _app.MainWindow
-                ?.FindFirstDescendant(
-                    cf => cf
-                        .ByName(buttonId.Replace("Launch", "")))
-                ?.AsButton())
-                ?? throw new Exception($"Button '{buttonId}' not found in MainWindow.");
+        // Use Retry for button because UI might be slow to load fully
+        var button = Retry.WhileNull(() =>
+        {
+            var win = _app.MainWindow;
+            if (win == null) return null;
+            
+            var btn = win.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))?.AsButton();
+            if (btn != null && btn.IsEnabled && !btn.IsOffscreen) return btn;
+            
+            // Fallback: Name search
+            btn = win.FindFirstDescendant(cf => cf.ByName(buttonId.Replace("Launch", "")))?.AsButton();
+            if (btn != null && btn.IsEnabled && !btn.IsOffscreen) return btn;
+            
+            return null;
+        }, TimeSpan.FromSeconds(20)).Result;
+
+        if (button == null) throw new Exception($"Button '{buttonId}' not found or not ready in MainWindow.");
         
         button.WaitUntilEnabled(TimeSpan.FromSeconds(5));
         button.WaitUntilClickable(TimeSpan.FromSeconds(5));

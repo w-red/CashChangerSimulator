@@ -8,6 +8,7 @@ using CashChangerSimulator.Core;
 namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>取引フローのパフォーマンスを計測するベンチマークテスト。</summary>
+[Collection("SequentialTests")]
 public class PerformanceBenchmarkTest(UIViewModelFixture fixture) : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture = fixture;

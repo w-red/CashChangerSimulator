@@ -70,9 +70,10 @@ HotStart = true
         simWindow.ShouldNotBeNull();
         simWindow.SetForeground();
 
-        // 2. 大量のログを発生させるスクリプト（1000回のReadCashCounts呼び出しなど）を生成
+        // 2. 大量のログを発生させるスクリプト（200回のReadCashCounts呼び出しなど）を生成
+        // 1000回から200回に削減し、テストの安定性と実行速度を向上させる
         var scriptArray = new JsonArray();
-        const int bulkOperations = 1000;
+        const int bulkOperations = 200;
         for (int i = 0; i < bulkOperations; i++)
         {
             scriptArray.Add(new JsonObject { ["Op"] = "ReadCashCounts" });

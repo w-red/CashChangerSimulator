@@ -53,6 +53,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CashChangerSimulator.Core\CashChangerSimulator.Core.csproj" />
+    <ProjectReference Include="..\..\src\CashChangerSimulator.Device\CashChangerSimulator.Device.csproj" />
     <ProjectReference Include="..\..\src\CashChangerSimulator.UI.Wpf\CashChangerSimulator.UI.Wpf.csproj" />
     <ProjectReference Include="..\CashChangerSimulator.UI.Tests\CashChangerSimulator.UI.Tests.csproj" />
   </ItemGroup>
