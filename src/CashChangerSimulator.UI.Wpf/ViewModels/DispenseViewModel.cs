@@ -261,7 +261,12 @@ public class DispenseViewModel : IDisposable
         try
         {
             DispensingAmount.Value = amount;
-            _ = _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode);
+            _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode)
+                .ContinueWith(t => {
+                    if (t.IsFaulted) {
+                        _logger.ZLogError(t.Exception, $"Background dispense (amount) failed potentially late.");
+                    }
+                });
         }
         catch (PosControlException pcEx)
         {
@@ -282,7 +287,12 @@ public class DispenseViewModel : IDisposable
         {
             var total = counts.Sum(x => x.Key.Value * x.Value);
             DispensingAmount.Value = total;
-            _ = _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { });
+            _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { })
+                .ContinueWith(t => {
+                    if (t.IsFaulted) {
+                        _logger.ZLogError(t.Exception, $"Background dispense (bulk) failed potentially late.");
+                    }
+                });
         }
         catch (PosControlException pcEx)
         {

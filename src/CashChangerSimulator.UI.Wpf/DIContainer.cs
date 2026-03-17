@@ -38,6 +38,7 @@ public static class DIContainer
         services.AddSingleton<MonitorsProvider>();
         services.AddSingleton<OverallStatusAggregatorProvider>();
         services.AddSingleton<INotifyService, Services.WpfNotifyService>();
+        services.AddSingleton<IViewService, WpfViewService>();
 
         // 2. Core Services (Singleton)
         services.AddSingleton<Inventory>();

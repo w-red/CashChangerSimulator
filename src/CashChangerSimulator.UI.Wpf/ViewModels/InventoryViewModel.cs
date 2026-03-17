@@ -129,11 +129,7 @@ public class InventoryViewModel : IDisposable
         OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
         {
-            _facade.Dispatcher.SafeInvoke(() =>
-            {
-                var mainWindow = Application.Current?.MainWindow;
-                new SettingsWindow { Owner = mainWindow }.ShowDialog();
-            });
+            _facade.View.ShowSettingsWindow();
         });
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
@@ -195,16 +191,8 @@ public class InventoryViewModel : IDisposable
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
             if (vm == null) return;
-
-            _facade.Dispatcher.InvokeAsync(async () =>
-            {
-                try
-                {
-                    var view = new DenominationDetailView { DataContext = vm };
-                    await MaterialDesignThemes.Wpf.DialogHost.Show(view, "RootDialog");
-                }
-                catch (Exception) { /* Suppress */ }
-            });
+            var view = new DenominationDetailView { DataContext = vm };
+            _ = _facade.View.ShowDialogAsync(view, "RootDialog");
         });
 
     }

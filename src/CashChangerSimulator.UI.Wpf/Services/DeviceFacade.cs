@@ -20,6 +20,7 @@ public class DeviceFacade : IDeviceFacade
     public MonitorsProvider Monitors { get; }
     public INotifyService Notify { get; }
     public IDispatcherService Dispatcher { get; }
+    public IViewService View { get; }
 
     public DeviceFacade(
         Inventory inventory,
@@ -32,7 +33,8 @@ public class DeviceFacade : IDeviceFacade
         OverallStatusAggregatorProvider aggregatorProvider,
         MonitorsProvider monitors,
         INotifyService notify,
-        IDispatcherService dispatcher)
+        IDispatcherService dispatcher,
+        IViewService view)
     {
         ArgumentNullException.ThrowIfNull(inventory);
         ArgumentNullException.ThrowIfNull(manager);
@@ -45,6 +47,7 @@ public class DeviceFacade : IDeviceFacade
         ArgumentNullException.ThrowIfNull(monitors);
         ArgumentNullException.ThrowIfNull(notify);
         ArgumentNullException.ThrowIfNull(dispatcher);
+        ArgumentNullException.ThrowIfNull(view);
 
         Inventory = inventory;
         Manager = manager;
@@ -57,5 +60,6 @@ public class DeviceFacade : IDeviceFacade
         Monitors = monitors;
         Notify = notify;
         Dispatcher = dispatcher;
+        View = view;
     }
 }
