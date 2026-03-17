@@ -23,6 +23,8 @@ internal class TransactionTypeToSymbolConverter : IValueConverter
                 TransactionType.Close => PackIconKind.PowerOff,
                 TransactionType.Claim => PackIconKind.Lock,
                 TransactionType.Release => PackIconKind.LockOpen,
+                TransactionType.HardwareError => PackIconKind.AlertCircle,
+                TransactionType.ErrorRecovery => PackIconKind.CheckCircle,
                 TransactionType.Error => PackIconKind.AlertCircleOutline,
                 _ => PackIconKind.HelpCircleOutline
             }
