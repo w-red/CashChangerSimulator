@@ -211,23 +211,27 @@ HotStart = {hotStart.ToString().ToLower()}
             // Close all windows explicitly
             if (Application != null && Automation != null)
             {
-                var desktop = Automation.GetDesktop();
-                var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-                var appProcessId = Application.ProcessId;
-
-                foreach (var window in allWindows)
+                try
                 {
-                    try
+                    var desktop = Automation.GetDesktop();
+                    var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                    var appProcessId = Application.ProcessId;
+
+                    foreach (var window in allWindows)
                     {
-                        // ONLY close windows belonging to OUR test application process
-                        if (window.Properties.ProcessId.Value == appProcessId)
+                        try
                         {
-                            var win = window.AsWindow();
-                            win.Close();
+                            // ONLY close windows belonging to OUR test application process
+                            if (window.Properties.ProcessId.Value == appProcessId)
+                            {
+                                var win = window.AsWindow();
+                                win.Close();
+                            }
                         }
+                        catch { }
                     }
-                    catch { }
                 }
+                catch { }
             }
         }
         catch { }
@@ -237,10 +241,10 @@ HotStart = {hotStart.ToString().ToLower()}
             if (MainWindow != null)
             {
                 MainWindow.Close();
-                Thread.Sleep(500); // Give it a moment to close
+                Thread.Sleep(200); // Short wait
             }
         }
-        catch { /* Ignore errors during close */ }
+        catch { }
 
         // Dispose Automation BEFORE closing the Application to avoid COM issues
         try { Automation?.Dispose(); } catch { }
@@ -252,28 +256,32 @@ HotStart = {hotStart.ToString().ToLower()}
                 int pid = Application.ProcessId;
                 if (!Application.HasExited)
                 {
-                    Application.Close();
-                    // Wait up to 2 seconds for clean exit
-                    if (!Application.HasExited)
+                    try { Application.Close(); } catch { }
+                    
+                    // Wait up to 1 seconds for clean exit
+                    for (int i = 0; i < 5; i++)
                     {
-                        Thread.Sleep(2000);
+                        if (Application.HasExited) break;
+                        Thread.Sleep(200);
                     }
                 }
 
-                // If still running, kill it forcefully
-                try
+                // If still running, kill it forcefully along with its children
+                if (!Application.HasExited)
                 {
-                    using var process = System.Diagnostics.Process.GetProcessById(pid);
-                    if (!process.HasExited)
+                    try
                     {
-                        process.Kill(true); // Kill entire process tree
-                        process.WaitForExit(1000);
+                        using var process = System.Diagnostics.Process.GetProcessById(pid);
+                        if (!process.HasExited)
+                        {
+                            process.Kill(true); // Kill entire process tree
+                            process.WaitForExit(1000);
+                        }
                     }
+                    catch { }
                 }
-                catch (ArgumentException) { /* Process already gone */ }
-                catch (Exception) { /* Ignore other errors */ }
                 
-                Application.Dispose();
+        try { Application.Dispose(); } catch { }
             }
         }
         catch { }

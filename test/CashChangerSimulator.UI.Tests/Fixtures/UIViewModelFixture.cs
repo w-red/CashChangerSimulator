@@ -8,6 +8,7 @@ using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using R3;
@@ -28,6 +29,7 @@ public class UIViewModelFixture : IDisposable
     public CurrencyMetadataProvider MetadataProvider { get; private set; } = null!;
     public MonitorsProvider Monitors { get; private set; } = null!;
     public IScriptExecutionService ScriptExecutionService { get; private set; } = null!;
+    public IDispatcherService DispatcherService { get; private set; } = null!;
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
 
     public UIViewModelFixture()
@@ -54,6 +56,7 @@ public class UIViewModelFixture : IDisposable
 
         NotifyServiceMock = new Mock<INotifyService>();
         ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
+        DispatcherService = new ImmediateDispatcherService();
 
         Monitors = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
         var aggregatorProvider = new OverallStatusAggregatorProvider(Monitors);
@@ -102,7 +105,8 @@ public class UIViewModelFixture : IDisposable
             History,
             aggregatorProvider,
             Monitors,
-            NotifyServiceMock.Object);
+            NotifyServiceMock.Object,
+            DispatcherService);
     }
 
     /// <summary>検証用の MainViewModel を生成します。</summary>
@@ -116,6 +120,7 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(MetadataProvider);
         services.AddSingleton(NotifyServiceMock.Object);
         services.AddSingleton(ScriptExecutionService);
+        services.AddSingleton(DispatcherService);
         
         // Register ViewModels for the factory to resolve
         services.AddTransient<MainViewModel>();
