@@ -103,7 +103,7 @@
 
                         <Button x:Name="DeviceCloseButton"
                                 Grid.Row="2" Grid.Column="1"
-                                Style="{StaticResource ActionButtonStyle}"
+                                Style="{StaticResource DeviceCloseButtonStyle}"
                                 Height="40" Margin="4,8,4,4"
                                 Background="{DynamicResource App.Brush.Close.Background}"
                                 Foreground="{DynamicResource App.Brush.Close.Foreground}"
