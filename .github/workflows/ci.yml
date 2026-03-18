@@ -51,6 +51,12 @@ jobs:
       - name: Check .NET Version
         run: dotnet --version
 
+      - name: Cleanup Zombie Processes
+        run: |
+          Get-Process -Name "CashChangerSimulator.UI.Wpf" -ErrorAction SilentlyContinue | Stop-Process -Force
+          Get-Process -Name "CashChangerSimulator.UI.Cli" -ErrorAction SilentlyContinue | Stop-Process -Force
+        continue-on-error: true
+
       - name: Test UI Modules (Requires Desktop session)
         # self-hosted環境で実行されるため、UIAutomation(FlaUI)が正常に動作します。
         # 競合を防ぐため .runsettings を明示的に指定します。
