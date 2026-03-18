@@ -40,13 +40,14 @@ try {
     }
     Write-Host "Successfully fetched new registration token." -ForegroundColor Cyan
 
-    Write-Host "[2/6] Installing Python (Silent)..." -ForegroundColor Green
-    $PythonInstaller = "C:\python-installer.exe"
-    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe" -OutFile $PythonInstaller
-    $proc = Start-Process -FilePath $PythonInstaller -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0" -PassThru -NoNewWindow
-    $proc.WaitForExit()
-    
-    $env:PATH = [Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH", "User")
+    Write-Host "[2/6] Getting Python (Portable ZIP)..." -ForegroundColor Green
+    $PythonZip = "C:\python-portable.zip"
+    $PythonDir = "C:\python"
+    # 埋め込み用(embeddable)パッケージをダウンロード（超軽量・インストール不要）
+    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd64.zip" -OutFile $PythonZip
+    Expand-Archive -Path $PythonZip -DestinationPath $PythonDir -Force
+    $env:PATH += ";$PythonDir"
+    [Environment]::SetEnvironmentVariable("PATH", $env:PATH, "Machine")
 
     Write-Host "[3/6] Installing .NET 10.0 SDK (Silent)..." -ForegroundColor Green
     $DotNetInstallScript = "C:\dotnet-install.ps1"
@@ -62,15 +63,14 @@ try {
     Expand-Archive -Path $RunnerZip -DestinationPath $RunnerDir -Force
     Set-Location $RunnerDir
 
-    Write-Host "[5/6] Configuring Ephemeral Runner..." -ForegroundColor Green
-    .\config.cmd --url "https://github.com/$Owner/$Repo" --token $RunnerToken --ephemeral --name "Sandbox-UI-Runner" --labels "windows,ui-test" --unattended --replace
+    Write-Host "[5/6] Configuring Runner (Continuous Mode)..." -ForegroundColor Green
+    .\config.cmd --url "https://github.com/$Owner/$Repo" --token $RunnerToken --name "Sandbox-UI-Runner" --labels "windows,ui-test" --unattended --replace
 
     Write-Host "[6/6] Listening for Jobs..." -ForegroundColor Green
     .\run.cmd
 
-    Write-Host "Job completed. Press Enter to shutdown Sandbox..." -ForegroundColor Cyan
+    Write-Host "Runner has stopped. Press Enter to close this window..." -ForegroundColor Cyan
     Read-Host
-    Stop-Computer -Force
 } catch {
     Write-Host "[ERROR] An error occurred:" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
