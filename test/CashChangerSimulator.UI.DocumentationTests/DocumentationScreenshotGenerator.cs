@@ -1,11 +1,15 @@
+using CashChangerSimulator.UI.Tests;
+using CashChangerSimulator.UI.Tests.Specs;
+using CashChangerSimulator.UI.Tests.Fixtures;
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Models;
+using Xunit;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Tools;
 using System.IO;
 using Shouldly;
-using CashChangerSimulator.UI.Tests;
-using CashChangerSimulator.UI.Tests.Fixtures;
-using CashChangerSimulator.UI.Tests.Specs;
 
 
 namespace CashChangerSimulator.UI.DocumentationTests;

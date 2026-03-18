@@ -1,5 +1,7 @@
 using CashChangerSimulator.UI.Tests;
 using CashChangerSimulator.UI.Tests.Specs;
+using CashChangerSimulator.UI.Tests.Fixtures;
+using Xunit;
 using FlaUI.Core.AutomationElements;
 using Shouldly;
 using System.Diagnostics;
