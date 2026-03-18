@@ -45,14 +45,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
+      # Self-hosted環境（自身のPC）ではすでに.NETがインストールされていることを前提とし、
+      # 権限エラーを避けるため setup-dotnet ステップを省略します。
 
-      # Core/Deviceのテストでビルド済みですが、Self-hosted環境用に念のためビルドキャッシュがなければ再構築されます
-      # --no-restore などを外すか、単に dotnet test で必要な依存を解決させるのが安全です。
-      # ここではUIテスト単体をビルド・テストします。
+      - name: Check .NET Version
+        run: dotnet --version
+
       - name: Test UI Modules (Requires Desktop session)
         # self-hosted環境で実行されるため、UIAutomation(FlaUI)が正常に動作します。
         # 競合を防ぐため .runsettings を明示的に指定します。
