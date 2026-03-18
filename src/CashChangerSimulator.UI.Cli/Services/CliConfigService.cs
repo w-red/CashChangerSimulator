@@ -64,7 +64,7 @@ public class CliConfigService(
         var result = SetPropertyByPath(_configProvider.Config, key, value);
         if (result)
         {
-            _console.MarkupLine(_L["messages.config_updated", key, value]);
+            ReportSuccess(_L["messages.config_updated", key, value]);
         }
         else
         {
@@ -77,7 +77,7 @@ public class CliConfigService(
         try
         {
             ConfigurationLoader.Save(_configProvider.Config);
-            _console.MarkupLine(_L["messages.config_saved"]);
+            ReportSuccess(_L["messages.config_saved"]);
         }
         catch (Exception ex)
         {
@@ -90,7 +90,7 @@ public class CliConfigService(
         try
         {
             _configProvider.Reload();
-            _console.MarkupLine(_L["messages.config_reloaded"]);
+            ReportSuccess(_L["messages.config_reloaded"]);
         }
         catch (Exception ex)
         {

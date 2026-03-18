@@ -33,7 +33,7 @@ public class CliCashService : CliServiceBase
         try
         {
             var counts = _changer.ReadCashCounts();
-            _console.MarkupLine(_L["messages.cash_counts_updated"]);
+            ReportSuccess(_L["messages.cash_counts_updated"]);
 
             var table = new Table().Border(TableBorder.Rounded);
             table.AddColumn(_L["messages.denomination_label"]);
@@ -81,7 +81,7 @@ public class CliCashService : CliServiceBase
                 _changer.BeginDeposit();
                 _changer.FixDeposit();
                 _changer.EndDeposit(CashDepositAction.Change);
-                _console.MarkupLine(_L["messages.deposit_completed"]);
+                ReportSuccess(_L["messages.deposit_completed"]);
             }
         }
         catch (Exception ex)
@@ -95,7 +95,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.FixDeposit();
-            _console.MarkupLine(_L["messages.deposit_fixed"]);
+            ReportSuccess(_L["messages.deposit_fixed"]);
         }
         catch (Exception ex)
         {
@@ -108,7 +108,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.EndDeposit(CashDepositAction.Change);
-            _console.MarkupLine(_L["messages.end_deposit_completed"]);
+            ReportSuccess(_L["messages.end_deposit_completed"]);
         }
         catch (Exception ex)
         {
@@ -130,7 +130,7 @@ public class CliCashService : CliServiceBase
             if (counts.Any())
             {
                 _changer.AdjustCashCounts(counts);
-                _console.MarkupLine(_L["messages.adjust_cash_counts_success", input]);
+                ReportSuccess(_L["messages.adjust_cash_counts_success", input]);
             }
             else
             {
@@ -148,7 +148,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.DispenseChange(amount);
-            _console.MarkupLine(_L["messages.dispensed_success", amount]);
+            ReportSuccess(_L["messages.dispensed_success", amount]);
         }
         catch (Exception ex)
         {
