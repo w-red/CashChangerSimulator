@@ -37,13 +37,22 @@ public class CliInteractiveShell(
             var prompt = _options.IsAsync ? "async > " : "> ";
             var line = _reader.Read(prompt);
 
-            if (string.IsNullOrWhiteSpace(line)) continue;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                if (await SelectCommandAsync()) break;
+                continue;
+            }
 
             var trimmed = line.Trim();
             var lower = trimmed.ToLowerInvariant();
             if (lower is "exit" or "quit")
             {
                 if (ConfirmExit()) break;
+                continue;
+            }
+            if (lower is "menu" or "select")
+            {
+                if (await SelectCommandAsync()) break;
                 continue;
             }
 
@@ -144,5 +153,75 @@ public class CliInteractiveShell(
             }
         }
         return true;
+    }
+
+    private async Task<bool> SelectCommandAsync()
+    {
+        var choices = new[]
+        {
+            "status", "read-counts", "deposit", "fix-deposit", "end-deposit", "dispense",
+            "open", "claim", "enable", "disable", "release", "close",
+            "history", "config", "log-level", "run-script", "exit"
+        };
+
+        var command = _console.Prompt(
+            new SelectionPrompt<string>()
+                .Title((string)_L["messages.select_command"])
+                .PageSize(10)
+                .AddChoices(choices));
+
+        if (command == "exit")
+        {
+            return ConfirmExit();
+        }
+
+        string finalLine = command;
+
+        switch (command)
+        {
+            case "claim":
+                var timeout = _console.Prompt(new TextPrompt<int>("Timeout (ms):"));
+                finalLine = $"claim {timeout}";
+                break;
+            case "deposit":
+                var amountStr = _console.Prompt(new TextPrompt<string>("Amount (optional, empty for all):").AllowEmpty());
+                finalLine = string.IsNullOrWhiteSpace(amountStr) ? "deposit" : $"deposit {amountStr}";
+                break;
+            case "dispense":
+                var dispAmt = _console.Prompt(new TextPrompt<int>("Amount:"));
+                finalLine = $"dispense {dispAmt}";
+                break;
+            case "history":
+                var histCount = _console.Prompt(new TextPrompt<int>("Count:"));
+                finalLine = $"history {histCount}";
+                break;
+            case "config":
+                var subChoices = new[] { "list", "get", "set", "save", "reload" };
+                var sub = _console.Prompt(new SelectionPrompt<string>().AddChoices(subChoices));
+                if (sub == "get" || sub == "set")
+                {
+                    var key = _console.Prompt(new TextPrompt<string>("Key:"));
+                    if (sub == "set")
+                    {
+                        var val = _console.Prompt(new TextPrompt<string>("Value:"));
+                        finalLine = $"config set {key} {val}";
+                    }
+                    else finalLine = $"config get {key}";
+                }
+                else finalLine = $"config {sub}";
+                break;
+            case "log-level":
+                var levels = new[] { "Trace", "Debug", "Information", "Warning", "Error" };
+                var level = _console.Prompt(new SelectionPrompt<string>().AddChoices(levels));
+                finalLine = $"log-level {level}";
+                break;
+            case "run-script":
+                var path = _console.Prompt(new TextPrompt<string>("Path:"));
+                finalLine = $"run-script {path}";
+                break;
+        }
+
+        await _dispatcher.DispatchAsync(finalLine);
+        return false;
     }
 }
