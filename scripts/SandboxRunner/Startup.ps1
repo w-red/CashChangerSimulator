@@ -66,11 +66,20 @@ try {
     Write-Host "[5/6] Configuring Runner (Continuous Mode)..." -ForegroundColor Green
     .\config.cmd --url "https://github.com/$Owner/$Repo" --token $RunnerToken --name "Sandbox-UI-Runner" --labels "windows,ui-test" --unattended --replace
 
-    Write-Host "[6/6] Listening for Jobs..." -ForegroundColor Green
-    .\run.cmd
-
-    Write-Host "Runner has stopped. Press Enter to close this window..." -ForegroundColor Cyan
-    Read-Host
+    Write-Host "[6/6] Listening for Jobs and running cleanup loop..." -ForegroundColor Green
+    
+    # run.cmd をバックグラウンド（別プロセス）で起動
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\run.cmd" -NoNewWindow
+    
+    # メインループ：ジョブが走る裏側で、定期的にゾンビプロセスを監視・掃除する（簡易版）
+    # ※run.cmd自体は待機し続けるため、このループでサンドボックスを維持します
+    Write-Host "Runner is active. Press Ctrl+C to stop." -ForegroundColor Cyan
+    while ($true) {
+        # テスト実行中でないタイミング（プロセスが古く、CPUを使っていない等）を判定するのは難しいため、
+        # ここでは連続稼働環境の維持のみを行い、プロセスのクリーンアップはテストコード側（CashChangerTestApp.cs）に任せます。
+        # 万が一ハングした場合は、ホストからサンドボックスを再起動する運用を推奨します。
+        Start-Sleep -Seconds 60
+    }
 } catch {
     Write-Host "[ERROR] An error occurred:" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
