@@ -18,7 +18,7 @@ public class Program
         var (globalArgs, commandArgs) = ExtractGlobalOptions(args);
 
         var builder = CoconaApp.CreateBuilder(commandArgs);
-        CliDIContainer.ConfigureServices(builder.Services, commandArgs);
+        CliDIContainer.ConfigureServices(builder.Services, args);
 
         var app = builder.Build();
         app.AddCommands<CliCommands>();
@@ -49,7 +49,7 @@ public class Program
 
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == "--async")
+            if (args[i] == "--async" || args[i] == "--verbose")
             {
                 globals.Add(args[i]);
             }
@@ -76,6 +76,9 @@ public class Program
                 case "--async":
                     options.IsAsync = true;
                     break;
+                case "--verbose":
+                    options.Verbose = true;
+                    break;
                 case "--lang":
                     if (i + 1 < globalArgs.Length)
                     {
@@ -98,6 +101,20 @@ public class Program
                     if (i + 1 < globalArgs.Length) options.CurrencyCode = globalArgs[++i].ToUpperInvariant();
                     break;
             }
+        }
+
+        // Always apply the selected language to the culture
+        try
+        {
+            var culture = new CultureInfo(options.Language);
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+        }
+        catch
+        {
+            // Fallback if invalid language code
         }
     }
 }

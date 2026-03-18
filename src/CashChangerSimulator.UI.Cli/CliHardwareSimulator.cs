@@ -1,4 +1,5 @@
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Core.Configuration;
 
 namespace CashChangerSimulator.UI.Cli;
 
@@ -7,7 +8,7 @@ namespace CashChangerSimulator.UI.Cli;
 /// </summary>
 public class CliHardwareSimulator : HardwareSimulator
 {
-    public CliHardwareSimulator() : base(null)
+    public CliHardwareSimulator(ConfigurationProvider configProvider) : base(configProvider)
     {
     }
 }

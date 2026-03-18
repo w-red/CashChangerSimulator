@@ -1,3 +1,4 @@
+using System.Linq;
 using Spectre.Console;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
@@ -31,11 +32,13 @@ public static class CliDIContainer
     public static void ConfigureServices(IServiceCollection services, string[] args)
     {
         // Logging
+        var isVerbose = args.Contains("--verbose");
         LogProvider.Initialize(new LoggingSettings
         {
             LogLevel = "Information",
-            EnableConsole = true,
-            EnableFile = false
+            EnableConsole = isVerbose,
+            EnableFile = true,
+            LogFileName = "cli-app.log"
         });
 
         // Providers
@@ -100,6 +103,7 @@ public static class CliDIContainer
         services.AddSingleton<DepositController>();
         services.AddSingleton<DispenseController>();
         services.AddSingleton<DeviceEventHistoryObserver>();
+        services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
         // CLI Services
         services.AddSingleton<CliDeviceService>();
         services.AddSingleton<CliCashService>();
