@@ -64,7 +64,7 @@ public class DenominationDetailUITests : IDisposable
                 // [DIAGNOSTICS] もし見つからない場合、全トップレベルウィンドウの子要素をダンプする
                 foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
                 {
-                    _output.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
+                    Console.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
                     DumpElements(win, 0);
                 }
             }
@@ -94,7 +94,7 @@ public class DenominationDetailUITests : IDisposable
             var children = element.FindAllChildren();
             foreach (var child in children)
             {
-                _output.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
                 DumpElements(child, depth + 1);
             }
         }
