@@ -1,0 +1,13 @@
+﻿<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\scripts\SandboxRunner</HostFolder>
+      <SandboxFolder>C:\SandboxShared</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>C:\SandboxShared\Launch.cmd</Command>
+  </LogonCommand>
+  <MemoryInMB>4096</MemoryInMB>
+</Configuration>
