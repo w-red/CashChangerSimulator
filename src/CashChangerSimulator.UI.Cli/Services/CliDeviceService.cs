@@ -91,6 +91,33 @@ public class CliDeviceService(
         }
     }
 
+    public virtual void SetCollectionBoxRemoved(bool removed)
+    {
+        try
+        {
+            _changer.HardwareStatus.SetCollectionBoxRemoved(removed);
+            var msg = removed ? _L["messages.box_removed"] : _L["messages.box_inserted"];
+            ReportSuccess(msg);
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
+        }
+    }
+
+    public virtual void ResetBox()
+    {
+        try
+        {
+            _changer.HardwareStatus.SetCollectionBoxRemoved(false);
+            ReportSuccess(_L["messages.box_reset"]);
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
+        }
+    }
+
     protected override string GetSummary(ErrorCode errorCode, int errorCodeExtended = 0)
     {
         if (errorCode == ErrorCode.Extended)

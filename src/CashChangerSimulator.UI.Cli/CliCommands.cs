@@ -116,6 +116,10 @@ public partial class CliCommands(
     [Command("close")]
     public virtual void Close() => _deviceService.Close();
 
+    /// <summary>回収庫の取り外し状態を設定します。</summary>
+    [Command("set-box-removed")]
+    public virtual void SetBoxRemoved([Argument(Description = "取り外し状態 (true/false)")] bool removed) => _deviceService.SetCollectionBoxRemoved(removed);
+
     /// <summary>設定を一覧表示または変更します。</summary>
     [Command("config")]
     public virtual void Config() => _console.MarkupLine(_L["messages.usage_config"] ?? "[yellow]Usage: config <list|get|set|save>[/]");
@@ -183,6 +187,7 @@ public partial class CliCommands(
         table.AddRow(Markup.Escape("release"), _L["commands.release"]);
         table.AddRow(Markup.Escape("close"), _L["commands.close"]);
         table.AddRow(Markup.Escape("history"), _L["commands.history"]);
+        table.AddRow(Markup.Escape("set-box-removed <t|f>"), _L["commands.set-box-removed"]);
         table.AddRow(Markup.Escape("config <list|get|set|save|reload>"), _L["commands.config"]);
         table.AddRow(Markup.Escape("log-level <level>"), _L["commands.log-level"]);
         table.AddRow(Markup.Escape("run-script <path>"), _L["commands.run-script"]);

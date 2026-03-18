@@ -79,6 +79,10 @@ public class CliCommandDispatcher(CliCommands commands) : ICliCommandDispatcher
                 if (parts.Length > 1)
                     _commands.LogLevel(parts[1]);
                 break;
+            case "set-box-removed":
+                if (parts.Length > 1 && bool.TryParse(parts[1], out var removed))
+                    _commands.SetBoxRemoved(removed);
+                break;
             case "help":
                 _commands.Help();
                 break;
