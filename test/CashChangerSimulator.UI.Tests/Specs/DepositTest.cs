@@ -277,6 +277,16 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
         // [STABILITY] Use a dedicated timeout for the first window detection to handle slow cold starts
         var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", TimeSpan.FromSeconds(30));
+        
+        if (depositWindow == null)
+        {
+            Console.WriteLine("[DIAG] DepositWindow NOT FOUND. Dumping all top-level windows:");
+            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
+            {
+                Console.WriteLine($"[DIAG] Window: Name='{win.Name}', ID='{win.AutomationId}', Type={win.ControlType}");
+            }
+        }
+
         depositWindow.ShouldNotBeNull();
         depositWindow.SetForeground();
         return depositWindow;
