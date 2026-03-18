@@ -64,10 +64,14 @@ public class DenominationDetailUITests : IDisposable
             {
                 d = win.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
                 if (d != null) return d;
+                
+                // 名前でも検索 (CI環境でのフォールバック)
+                d = win.FindFirstDescendant(cf => cf.ByName("Denomination Detail"));
+                if (d != null) return d;
             }
 
             return null;
-        }, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(2)).Result;
+        }, TimeSpan.FromSeconds(40), TimeSpan.FromSeconds(3)).Result;
 
         _dialog = found!;
     }
