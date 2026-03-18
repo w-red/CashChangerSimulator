@@ -144,8 +144,8 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         System.Threading.Thread.Sleep(200);
 
         // Assert
-        System.Threading.Thread.Sleep(100); // Wait for async operation to complete
-        vm.IsDeviceError.CurrentValue.ShouldBeTrue();
+        var result = FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsDeviceError.CurrentValue, TimeSpan.FromSeconds(5));
+        result.Success.ShouldBeTrue("IsDeviceError が True になりませんでした。");
     }
 
     /// <summary>シミュレーションコマンドがハードウェアの状態を正しく変化させることを検証します。</summary>
