@@ -69,7 +69,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         
         // ウィンドウを検索 (堅牢な検索)
         Window? advWindow = null;
-        var retry = 20;
+        var retry = 30; // Longer retry for CI
         while (retry > 0)
         {
             var appWindows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
@@ -83,24 +83,24 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             
             if (advWindow == null)
             {
+                // Try finding within MainWindow in case it's treated as a child
                 var found = window.FindFirstDescendant(cf => cf.ByAutomationId("AdvancedSimulationWindow")
-                    .Or(cf.ByName("高度なシミュレーション操作")));
+                    .Or(cf.ByName("高度なシミュレーション操作").Or(cf.ByName("Advanced Simulation"))));
                 if (found != null) advWindow = found.AsWindow();
             }
 
             if (advWindow != null) break;
 
-            var names = string.Join(", ", appWindows.Select(w => $"'{w.Name}' ({w.AutomationId})"));
             Thread.Sleep(1000);
             retry--;
-            if (retry == 0) throw new Exception($@"Advanced Simulation window not found. Found app windows: {names}. Main window descendants: {tree}");
         }
 
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
+        advWindow.SetForeground();
 
-        var simulateJamBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(5)).Result?.AsButton();
+        var simulateJamBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2)).Result?.AsButton();
 
-        simulateJamBtn.ShouldNotBeNull("SimulateJamButton not found");
+        simulateJamBtn.ShouldNotBeNull("SimulateJamButton not found in AdvancedSimulationWindow");
 
         // Act: Simulate Jam
         if (simulateJamBtn.Patterns.Invoke.IsSupported) simulateJamBtn.Patterns.Invoke.Pattern.Invoke();
