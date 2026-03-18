@@ -86,6 +86,17 @@ public class CliCashServiceTests
         _mockChanger.Verify(c => c.BeginDeposit(), Times.Once);
     }
 
+    /// <summary>金額 null での Deposit 操作が全額入金として処理されることを検証します。</summary>
+    [Fact]
+    public void DepositWithNullAmountShouldInvokeBeginDeposit()
+    {
+        // Act
+        _service.Deposit(null);
+
+        // Assert
+        _mockChanger.Verify(c => c.BeginDeposit(), Times.Once);
+    }
+
     /// <summary>FixDeposit 操作が FixDeposit を呼び出すことを検証します。</summary>
     [Fact]
     public void FixDepositShouldInvokeFixDeposit()
@@ -106,6 +117,17 @@ public class CliCashServiceTests
 
         // Assert
         _mockChanger.Verify(c => c.DispenseChange(1000), Times.Once);
+    }
+
+    /// <summary>EndDeposit 操作が EndDeposit を呼び出すことを検証します。</summary>
+    [Fact]
+    public void EndDepositShouldInvokeEndDeposit()
+    {
+        // Act
+        _service.EndDeposit();
+
+        // Assert
+        _mockChanger.Verify(c => c.EndDeposit(CashDepositAction.Change), Times.Once);
     }
 
     /// <summary>非同期設定での Deposit 操作が適切に開始されることを検証します。</summary>
@@ -146,5 +168,42 @@ public class CliCashServiceTests
         // Assert
         _mockChanger.Verify(c => c.AdjustCashCounts(It.IsAny<IEnumerable<CashCount>>()), Times.Never);
         _mockLocalizer.Verify(l => l["messages.invalid_adjust_format"], Times.Once);
+    }
+
+    /// <summary>各メソッドで例外が発生した場合に HandleException が呼ばれることを検証するための理論テスト。</summary>
+    [Theory]
+    [InlineData("ReadCashCounts")]
+    [InlineData("Deposit")]
+    [InlineData("FixDeposit")]
+    [InlineData("EndDeposit")]
+    [InlineData("AdjustCashCounts")]
+    [InlineData("Dispense")]
+    public void MethodsShouldHandleExceptions(string methodName)
+    {
+        // Arrange
+        var exception = new PosControlException("Error", ErrorCode.Failure);
+        switch (methodName)
+        {
+            case "ReadCashCounts": _mockChanger.Setup(c => c.ReadCashCounts()).Throws(exception); break;
+            case "Deposit": _mockChanger.Setup(c => c.BeginDeposit()).Throws(exception); break;
+            case "FixDeposit": _mockChanger.Setup(c => c.FixDeposit()).Throws(exception); break;
+            case "EndDeposit": _mockChanger.Setup(c => c.EndDeposit(It.IsAny<CashDepositAction>())).Throws(exception); break;
+            case "AdjustCashCounts": _mockChanger.Setup(c => c.AdjustCashCounts(It.IsAny<IEnumerable<CashCount>>())).Throws(exception); break;
+            case "Dispense": _mockChanger.Setup(c => c.DispenseChange(It.IsAny<int>())).Throws(exception); break;
+        }
+
+        // Act
+        switch (methodName)
+        {
+            case "ReadCashCounts": _service.ReadCashCounts(); break;
+            case "Deposit": _service.Deposit(1000); break;
+            case "FixDeposit": _service.FixDeposit(); break;
+            case "EndDeposit": _service.EndDeposit(); break;
+            case "AdjustCashCounts": _service.AdjustCashCounts("1000:1"); break;
+            case "Dispense": _service.Dispense(1000); break;
+        }
+
+        // Assert
+        _mockLocalizer.Verify(l => l["messages.error_label"], Times.Once);
     }
 }

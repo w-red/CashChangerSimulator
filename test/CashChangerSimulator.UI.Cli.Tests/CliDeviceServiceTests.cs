@@ -125,6 +125,20 @@ public class CliDeviceServiceTests
         _consoleOutput.ToString().ShouldContain("messages.success_label");
     }
 
+    /// <summary>GetSummary で金庫満杯時のカスタムサマリが返されることを検証します。</summary>
+    [Fact]
+    public void GetSummaryShouldReturnCustomMessageForExtendedErrorFull()
+    {
+        // Arrange
+        var ex = new PosControlException("Full", ErrorCode.Extended, (int)UposCashChangerErrorCodeExtended.Full);
+
+        // Act
+        _service.HandleException(ex);
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_summary_full");
+    }
+
     /// <summary>GetSummary で金庫空時のカスタムサマリが返されることを検証します。</summary>
     [Fact]
     public void GetSummaryShouldReturnCustomMessageForExtendedErrorEmpty()
@@ -151,5 +165,72 @@ public class CliDeviceServiceTests
 
         // Assert
         _consoleOutput.ToString().ShouldContain("messages.error_summary_timeout");
+    }
+
+    /// <summary>GetSummary でリソースが見つからない場合に汎用メッセージが返されることを検証します。</summary>
+    [Fact]
+    public void GetSummaryShouldReturnGenericMessageWhenResourceNotFound()
+    {
+        // Arrange
+        var ex = new PosControlException("Failure", ErrorCode.Failure);
+        _mockLocalizer.Setup(l => l["messages.error_summary_failure"]).Returns(new LocalizedString("messages.error_summary_failure", "Summary", true));
+
+        // Act
+        _service.HandleException(ex);
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_summary_generic");
+    }
+
+    /// <summary>GetHint でリソースが見つからない場合に汎用メッセージが返されることを検証します。</summary>
+    [Fact]
+    public void GetHintShouldReturnGenericMessageWhenResourceNotFound()
+    {
+        // Arrange
+        var ex = new PosControlException("Failure", ErrorCode.Failure);
+        _mockLocalizer.Setup(l => l["messages.error_hint_failure"]).Returns(new LocalizedString("messages.error_hint_failure", "Hint", true));
+
+        // Act
+        _service.HandleException(ex);
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_hint_generic");
+    }
+
+    /// <summary>各メソッドで例外が発生した場合に HandleException が呼ばれることを検証するための理論テスト。</summary>
+    [Theory]
+    [InlineData("Open")]
+    [InlineData("Claim")]
+    [InlineData("Enable")]
+    [InlineData("Disable")]
+    [InlineData("Release")]
+    [InlineData("Close")]
+    public void MethodsShouldHandleExceptions(string methodName)
+    {
+        // Arrange
+        var exception = new PosControlException("Error", ErrorCode.Failure);
+        switch (methodName)
+        {
+            case "Open": _mockChanger.Setup(c => c.Open()).Throws(exception); break;
+            case "Claim": _mockChanger.Setup(c => c.Claim(It.IsAny<int>())).Throws(exception); break;
+            case "Enable": _mockChanger.SetupSet(c => c.DeviceEnabled = true).Throws(exception); break;
+            case "Disable": _mockChanger.SetupSet(c => c.DeviceEnabled = false).Throws(exception); break;
+            case "Release": _mockChanger.Setup(c => c.Release()).Throws(exception); break;
+            case "Close": _mockChanger.Setup(c => c.Close()).Throws(exception); break;
+        }
+
+        // Act
+        switch (methodName)
+        {
+            case "Open": _service.Open(); break;
+            case "Claim": _service.Claim(1000); break;
+            case "Enable": _service.Enable(); break;
+            case "Disable": _service.Disable(); break;
+            case "Release": _service.Release(); break;
+            case "Close": _service.Close(); break;
+        }
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_label");
     }
 }
