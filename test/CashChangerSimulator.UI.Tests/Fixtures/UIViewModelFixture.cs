@@ -40,11 +40,17 @@ public class UIViewModelFixture : IDisposable
 
     public void Initialize(string currencyCode = "JPY")
     {
+        // 既存のインスタンスがあれば破棄してリソースリークを防ぐ
+        try { CashChanger?.Close(); } catch { }
+        try { CashChanger?.Dispose(); } catch { }
+        try { (Monitors as IDisposable)?.Dispose(); } catch { }
+        try { ConfigProvider?.Dispose(); } catch { }
+
         Inventory = new Inventory();
         History = new TransactionHistory();
         Manager = new CashChangerManager(Inventory, History, new ChangeCalculator());
         Hardware = new HardwareStatusManager();
-        
+
         // Configuration
         ConfigProvider = new ConfigurationProvider();
         ConfigProvider.Config.Inventory.TryAdd(currencyCode, new InventorySettings());
