@@ -2,6 +2,7 @@ using Microsoft.PointOfService;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.Core.Opos;
 
 namespace CashChangerSimulator.UI.Cli.Services;
 
@@ -17,7 +18,7 @@ public class CliDeviceService(
         try
         {
             _changer.Open();
-            _console.MarkupLine(_L["messages.device_opened"]);
+            ReportSuccess(_L["messages.device_opened"]);
         }
         catch (Exception ex)
         {
@@ -30,7 +31,7 @@ public class CliDeviceService(
         try
         {
             _changer.Claim(timeout);
-            _console.MarkupLine(_L["messages.device_claimed"]);
+            ReportSuccess(_L["messages.device_claimed"]);
         }
         catch (Exception ex)
         {
@@ -43,7 +44,7 @@ public class CliDeviceService(
         try
         {
             _changer.DeviceEnabled = true;
-            _console.MarkupLine(_L["messages.device_enabled"]);
+            ReportSuccess(_L["messages.device_enabled"]);
         }
         catch (Exception ex)
         {
@@ -56,7 +57,7 @@ public class CliDeviceService(
         try
         {
             _changer.DeviceEnabled = false;
-            _console.MarkupLine(_L["messages.device_disabled"]);
+            ReportSuccess(_L["messages.device_disabled"]);
         }
         catch (Exception ex)
         {
@@ -69,7 +70,7 @@ public class CliDeviceService(
         try
         {
             _changer.Release();
-            _console.MarkupLine(_L["messages.device_released"]);
+            ReportSuccess(_L["messages.device_released"]);
         }
         catch (Exception ex)
         {
@@ -82,7 +83,7 @@ public class CliDeviceService(
         try
         {
             _changer.Close();
-            _console.MarkupLine(_L["messages.device_closed"]);
+            ReportSuccess(_L["messages.device_closed"]);
         }
         catch (Exception ex)
         {
@@ -90,7 +91,25 @@ public class CliDeviceService(
         }
     }
 
-    protected override string GetHint(ErrorCode errorCode)
+    protected override string GetSummary(ErrorCode errorCode, int errorCodeExtended = 0)
+    {
+        if (errorCode == ErrorCode.Extended)
+        {
+            // UPOS Standard: Full = 206, Empty = 205
+            if (errorCodeExtended == 206) return (string)_L["messages.error_summary_full"];
+            if (errorCodeExtended == 205) return (string)_L["messages.error_summary_empty"];
+        }
+
+        var summaryKey = $"messages.error_summary_{errorCode.ToString().ToLowerInvariant()}";
+        var summary = _L[summaryKey];
+        if (summary.ResourceNotFound)
+        {
+            return errorCode == ErrorCode.Illegal && !_changer.DeviceEnabled ? (string)_L["messages.error_summary_illegal"] : (string)_L["messages.error_summary_generic"];
+        }
+        return summary;
+    }
+
+    protected override string GetHint(ErrorCode errorCode, int errorCodeExtended = 0)
     {
         var hintKey = $"messages.error_hint_{errorCode.ToString().ToLowerInvariant()}";
         var hint = _L[hintKey];
