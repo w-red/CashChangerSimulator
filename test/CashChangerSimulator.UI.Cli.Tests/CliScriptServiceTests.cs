@@ -54,7 +54,7 @@ public class CliScriptServiceTests
         // Arrange
         var tempFile = Path.GetTempFileName();
         var jsonContent = "{\"script\": \"test\"}";
-        await File.WriteAllTextAsync(tempFile, jsonContent);
+        await File.WriteAllTextAsync(tempFile, jsonContent, TestContext.Current.CancellationToken);
 
         try
         {
@@ -85,7 +85,7 @@ public class CliScriptServiceTests
     {
         // Arrange
         var tempFile = Path.GetTempFileName();
-        await File.WriteAllTextAsync(tempFile, "{}");
+        await File.WriteAllTextAsync(tempFile, "{}", TestContext.Current.CancellationToken);
 
         try
         {

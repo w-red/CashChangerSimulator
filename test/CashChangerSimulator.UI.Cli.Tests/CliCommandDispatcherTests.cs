@@ -47,18 +47,18 @@ public class CliCommandDispatcherTests
 
     /// <summary>各種コマンドが正しくディスパッチされることを検証します。</summary>
     [Theory]
-    [InlineData("open", "Open")]
-    [InlineData("claim", "Claim")]
-    [InlineData("enable", "Enable")]
-    [InlineData("disable", "Disable")]
-    [InlineData("status", "Status")]
-    [InlineData("read-counts", "ReadCashCounts")]
-    [InlineData("fix-deposit", "FixDeposit")]
-    [InlineData("end-deposit", "EndDeposit")]
-    [InlineData("release", "Release")]
-    [InlineData("close", "Close")]
-    [InlineData("help", "Help")]
-    public async Task DispatchAsyncShouldCallCorrectCommand(string line, string methodName)
+    [InlineData("open")]
+    [InlineData("claim")]
+    [InlineData("enable")]
+    [InlineData("disable")]
+    [InlineData("status")]
+    [InlineData("read-counts")]
+    [InlineData("fix-deposit")]
+    [InlineData("end-deposit")]
+    [InlineData("release")]
+    [InlineData("close")]
+    [InlineData("help")]
+    public async Task DispatchAsyncShouldCallCorrectCommand(string line)
     {
         // Act
         await _dispatcher.DispatchAsync(line);
