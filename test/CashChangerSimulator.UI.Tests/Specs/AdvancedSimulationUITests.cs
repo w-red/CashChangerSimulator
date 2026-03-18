@@ -153,4 +153,20 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         // Cleanup: Close the window
         advWindow.Close();
     }
+
+    private void CaptureElements(AutomationElement element, int depth, System.Text.StringBuilder sb)
+    {
+        if (depth > 8) return;
+        var indent = new string(' ', depth * 2);
+        try
+        {
+            var children = element.FindAllChildren();
+            foreach (var child in children)
+            {
+                sb.AppendLine($"{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\", Off:\"{child.IsOffscreen}\", Rect:\"{child.BoundingRectangle}\"");
+                CaptureElements(child, depth + 1, sb);
+            }
+        }
+        catch { }
+    }
 }

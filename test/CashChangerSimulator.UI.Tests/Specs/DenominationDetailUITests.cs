@@ -113,14 +113,14 @@ public class DenominationDetailUITests : IDisposable
 
     private void DumpElements(AutomationElement element, int depth)
     {
-        if (depth > 5) return;
+        if (depth > 8) return;
         var indent = new string(' ', depth * 2);
         try
         {
             var children = element.FindAllChildren();
             foreach (var child in children)
             {
-                Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\", Off:\"{child.IsOffscreen}\", Rect:\"{child.BoundingRectangle}\"");
                 DumpElements(child, depth + 1);
             }
         }
@@ -129,14 +129,14 @@ public class DenominationDetailUITests : IDisposable
 
     private void CaptureElements(AutomationElement element, int depth, System.Text.StringBuilder sb)
     {
-        if (depth > 3) return; // 例外メッセージが長くなりすぎないよう制限
+        if (depth > 5) return; 
         var indent = new string(' ', depth * 2);
         try
         {
             var children = element.FindAllChildren();
             foreach (var child in children)
             {
-                sb.AppendLine($"{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                sb.AppendLine($"{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\", Off:\"{child.IsOffscreen}\"");
                 CaptureElements(child, depth + 1, sb);
             }
         }
