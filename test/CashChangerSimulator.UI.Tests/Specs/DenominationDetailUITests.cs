@@ -117,13 +117,13 @@ public class DenominationDetailUITests : IDisposable
         catch { }
     }
 
-    [Fact]
+    [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_ShouldBeVisible()
     {
         _dialog.ShouldNotBeNull("ダイアログが表示されていません。");
     }
 
-    [Fact]
+    [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_ShouldContainCountFields()
     {
         _dialog.ShouldNotBeNull();
@@ -131,7 +131,7 @@ public class DenominationDetailUITests : IDisposable
         textBlocks.Length.ShouldBeGreaterThanOrEqualTo(3);
     }
 
-    [Fact]
+    [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_CloseButton_ShouldDismissDialog()
     {
         _dialog.ShouldNotBeNull();

@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
+using Xunit;
 
-[assembly: InternalsVisibleTo("CashChangerSimulator.UI.DocumentationTests")]
-[assembly: InternalsVisibleTo("CashChangerSimulator.UI.PerformanceTests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // For Moq
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
