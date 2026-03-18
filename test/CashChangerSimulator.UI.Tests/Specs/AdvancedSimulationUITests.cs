@@ -121,9 +121,17 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             Console.WriteLine("[WARNING] InventoryTiles did not appear within timeout.");
         }
 
-        var simulateJamBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2)).Result?.AsButton();
+        var simulateJamBtnResult = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2));
+        var simulateJamBtn = simulateJamBtnResult.Result?.AsButton();
 
-        simulateJamBtn.ShouldNotBeNull("SimulateJamButton not found in AdvancedSimulationWindow");
+        if (simulateJamBtn == null)
+        {
+            Console.WriteLine("[DIAG] SimulateJamButton NOT FOUND in AdvancedSimulationWindow. Dumping tree:");
+            var dump = new System.Text.StringBuilder();
+            CaptureElements(advWindow, 0, dump);
+            Console.WriteLine(dump.ToString());
+            throw new Exception($"SimulateJamButton not found in AdvancedSimulationWindow. Tree:\n{dump}");
+        }
 
         // Act: Simulate Jam
         if (simulateJamBtn.Patterns.Invoke.IsSupported) simulateJamBtn.Patterns.Invoke.Pattern.Invoke();

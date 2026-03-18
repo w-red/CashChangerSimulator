@@ -44,9 +44,13 @@ public class DenominationDetailUITests : IDisposable
                 Console.WriteLine($"[DIAG] InventoryComponent found: {comp != null}");
                 if (comp != null)
                 {
-                    var children = comp.FindAllChildren();
-                    Console.WriteLine($"[DIAG] InventoryComponent has {children.Length} children");
-                    foreach(var c in children) Console.WriteLine($"[DIAG]   - Child: {c.Name} ({c.AutomationId})");
+                    Console.WriteLine($"[DIAG] InventoryComponent: Visible={!comp.IsOffscreen}, Rect={comp.BoundingRectangle}");
+                    DumpElements(comp, 0);
+                }
+                else
+                {
+                    Console.WriteLine("[DIAG] CRITICAL: InventoryComponent NOT FOUND. Dumping MainWindow children:");
+                    foreach(var c in _app.MainWindow.FindAllChildren()) Console.WriteLine($"[DIAG]   - {c.Name} ({c.AutomationId}) {c.ControlType}");
                 }
             }
 
