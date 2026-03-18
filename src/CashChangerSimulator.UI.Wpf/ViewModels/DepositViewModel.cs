@@ -46,6 +46,12 @@ public class DepositViewModel : IDisposable
     /// <summary>現在の動作モードの表示名。</summary>
     public BindableReactiveProperty<string> CurrentModeName { get; }
 
+    /// <summary>要求額。</summary>
+    public BindableReactiveProperty<decimal> RequiredAmount { get; }
+
+    /// <summary>不足額。</summary>
+    public ReadOnlyReactiveProperty<decimal> RemainingAmount { get; }
+
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
     private readonly BindableReactiveProperty<bool> _isOverlapped;
@@ -206,6 +212,15 @@ public class DepositViewModel : IDisposable
         CurrentModeName = _facade.Deposit.Changed
             .Select(_ => GetModeName())
             .ToBindableReactiveProperty(GetModeName())
+            .AddTo(_disposables);
+
+        RequiredAmount = _facade.Deposit.Changed
+            .Select(_ => _facade.Changer is SimulatorCashChanger scc ? scc.RequiredAmount : 0)
+            .ToBindableReactiveProperty(_facade.Changer is SimulatorCashChanger s ? s.RequiredAmount : 0)
+            .AddTo(_disposables);
+
+        RemainingAmount = CurrentDepositAmount.CombineLatest(RequiredAmount, (current, required) => Math.Max(0, required - current))
+            .ToReadOnlyReactiveProperty()
             .AddTo(_disposables);
 
         // Commands Logic

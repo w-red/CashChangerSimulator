@@ -13,15 +13,37 @@
     <StackPanel>
         <!-- Current Amount Display -->
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
-            <StackPanel HorizontalAlignment="Center">
-                <TextBlock Text="{StaticResource CurrentDeposit}" FontSize="10" FontWeight="Bold" 
-                           Opacity="0.5" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="0,0,4,8" Opacity="0.7"/>
-                    <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat={}{0:N0}}"  
-                               FontSize="40" FontWeight="Thin"
-                               AutomationProperties.AutomationId="CurrentDepositText"/>
-                    <TextBlock Text="{Binding CurrencySuffix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,8" Opacity="0.7"/>
+            <StackPanel>
+                <Grid>
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="REQUIRED" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="12" VerticalAlignment="Center" Opacity="0.7"/>
+                            <TextBlock Text="{Binding RequiredAmount.Value, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel HorizontalAlignment="Right">
+                        <TextBlock Text="REMAINING" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2" HorizontalAlignment="Right"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="12" VerticalAlignment="Center" Opacity="0.7" Foreground="IndianRed"/>
+                            <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="IndianRed"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <Separator Background="{DynamicResource MaterialDesign.Brush.Outline}" Margin="0,12" Opacity="0.3"/>
+
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{StaticResource CurrentDeposit}" FontSize="10" FontWeight="Bold" 
+                               Opacity="0.5" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="0,0,4,8" Opacity="0.7"/>
+                        <TextBlock Text="{Binding CurrentDepositAmount.Value, StringFormat={}{0:N0}}"  
+                                   FontSize="40" FontWeight="Thin"
+                                   AutomationProperties.AutomationId="CurrentDepositText"/>
+                        <TextBlock Text="{Binding CurrencySuffix.Value}" FontSize="20" VerticalAlignment="Bottom" Margin="4,0,0,8" Opacity="0.7"/>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </Border>
