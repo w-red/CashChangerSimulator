@@ -7,7 +7,7 @@ on:
     branches: ["main", "master"]
 
 jobs:
-  build:
+  build-and-test-core:
     runs-on: windows-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -29,16 +29,38 @@ jobs:
       - name: Test Core and Device Modules
         run: dotnet test test/CashChangerSimulator.Tests/CashChangerSimulator.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test_results_core.trx"
 
-      - name: Test UI Modules (FlaUI requires Desktop session)
-        # Skip UI tests in CI to avoid hanging due to lack of interactive desktop session.
-        # The user has confirmed that Core/Device (Mock API) tests are sufficient for now.
-        if: false # runner.os == 'Windows'
-        run: dotnet test test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test_results_ui.trx"
-        continue-on-error: true
-
-      - name: Upload Test Results
+      - name: Upload Core Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: "**/TestResults/*.trx"
+          name: core-test-results
+          path: "**/TestResults/test_results_core.trx"
+
+  test-ui:
+    needs: build-and-test-core
+    runs-on: [self-hosted, windows, ui-test]
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # Core/Deviceのテストでビルド済みですが、Self-hosted環境用に念のためビルドキャッシュがなければ再構築されます
+      # --no-restore などを外すか、単に dotnet test で必要な依存を解決させるのが安全です。
+      # ここではUIテスト単体をビルド・テストします。
+      - name: Test UI Modules (Requires Desktop session)
+        # self-hosted環境で実行されるため、UIAutomation(FlaUI)が正常に動作します。
+        # 競合を防ぐため .runsettings を明示的に指定します。
+        run: dotnet test test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj --configuration Release --settings local.runsettings --verbosity normal --logger "trx;LogFileName=test_results_ui.trx"
+
+      - name: Upload UI Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: "**/TestResults/test_results_ui.trx"
