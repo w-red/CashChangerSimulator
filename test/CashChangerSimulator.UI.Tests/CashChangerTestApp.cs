@@ -86,7 +86,11 @@ public class CashChangerTestApp : IDisposable
                 {
                     // Create a basic config that enforces the desired HotStart state for the test
                     var configPath = Path.Combine(appDir, "config.toml");
-                    var configContent = $@"[Simulation]
+                    var configContent = $@"[System]
+CurrencyCode = 'JPY'
+CultureCode = 'ja-JP'
+
+[Simulation]
 DispenseDelayMs = 500
 HotStart = {hotStart.ToString().ToLower()}
 
