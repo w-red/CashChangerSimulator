@@ -105,4 +105,158 @@ public class CliCommandsTests
         _mockConsole.Verify(c => c.Write(It.IsAny<Rule>()), Times.Once);
         _mockConsole.Verify(c => c.Write(It.IsAny<Table>()), Times.Once);
     }
+
+    /// <summary>Claim コマンドが DeviceService.Claim を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ClaimShouldCallDeviceService()
+    {
+        _commands.Claim(1000);
+        _mockDeviceService.Verify(s => s.Claim(1000), Times.Once);
+    }
+
+    /// <summary>Enable コマンドが DeviceService.Enable を呼び出すことを検証します。</summary>
+    [Fact]
+    public void EnableShouldCallDeviceService()
+    {
+        _commands.Enable();
+        _mockDeviceService.Verify(s => s.Enable(), Times.Once);
+    }
+
+    /// <summary>Disable コマンドが DeviceService.Disable を呼び出すことを検証します。</summary>
+    [Fact]
+    public void DisableShouldCallDeviceService()
+    {
+        _commands.Disable();
+        _mockDeviceService.Verify(s => s.Disable(), Times.Once);
+    }
+
+    /// <summary>Release コマンドが DeviceService.Release を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ReleaseShouldCallDeviceService()
+    {
+        _commands.Release();
+        _mockDeviceService.Verify(s => s.Release(), Times.Once);
+    }
+
+    /// <summary>Close コマンドが DeviceService.Close を呼び出すことを検証します。</summary>
+    [Fact]
+    public void CloseShouldCallDeviceService()
+    {
+        _commands.Close();
+        _mockDeviceService.Verify(s => s.Close(), Times.Once);
+    }
+
+    /// <summary>ReadCashCounts コマンドが CashService.ReadCashCounts を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ReadCashCountsShouldCallCashService()
+    {
+        _commands.ReadCashCounts();
+        _mockCashService.Verify(s => s.ReadCashCounts(), Times.Once);
+    }
+
+    /// <summary>Deposit コマンドが CashService.Deposit を呼び出すことを検証します。</summary>
+    [Fact]
+    public void DepositShouldCallCashService()
+    {
+        _commands.Deposit(1000);
+        _mockCashService.Verify(s => s.Deposit(1000), Times.Once);
+    }
+
+    /// <summary>FixDeposit コマンドが CashService.FixDeposit を呼び出すことを検証します。</summary>
+    [Fact]
+    public void FixDepositShouldCallCashService()
+    {
+        _commands.FixDeposit();
+        _mockCashService.Verify(s => s.FixDeposit(), Times.Once);
+    }
+
+    /// <summary>EndDeposit コマンドが CashService.EndDeposit を呼び出すことを検証します。</summary>
+    [Fact]
+    public void EndDepositShouldCallCashService()
+    {
+        _commands.EndDeposit();
+        _mockCashService.Verify(s => s.EndDeposit(), Times.Once);
+    }
+
+    /// <summary>Dispense コマンドが CashService.Dispense を呼び出すことを検証します。</summary>
+    [Fact]
+    public void DispenseShouldCallCashService()
+    {
+        _commands.Dispense(1000);
+        _mockCashService.Verify(s => s.Dispense(1000), Times.Once);
+    }
+
+    /// <summary>AdjustCashCounts コマンドが CashService.AdjustCashCounts を呼び出すことを検証します。</summary>
+    [Fact]
+    public void AdjustCashCountsShouldCallCashService()
+    {
+        _commands.AdjustCashCounts("1000:1");
+        _mockCashService.Verify(s => s.AdjustCashCounts("1000:1"), Times.Once);
+    }
+
+    /// <summary>History コマンドが ViewService.History を呼び出すことを検証します。</summary>
+    [Fact]
+    public void HistoryShouldCallViewService()
+    {
+        _commands.History(10);
+        _mockViewService.Verify(s => s.History(10), Times.Once);
+    }
+
+    /// <summary>Run Script コマンドが ScriptService.RunScriptAsync を呼び出すことを検証します。</summary>
+    [Fact]
+    public async Task RunScriptShouldCallScriptService()
+    {
+        await _commands.RunScript("test.json");
+        _mockScriptService.Verify(s => s.RunScriptAsync("test.json"), Times.Once);
+    }
+
+
+    /// <summary>ConfigList コマンドが ConfigService.List を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ConfigListShouldCallConfigService()
+    {
+        _commands.ConfigList();
+        _mockConfigService.Verify(s => s.List(), Times.Once);
+    }
+
+    /// <summary>ConfigGet コマンドが ConfigService.Get を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ConfigGetShouldCallConfigService()
+    {
+        _commands.ConfigGet("key");
+        _mockConfigService.Verify(s => s.Get("key"), Times.Once);
+    }
+
+    /// <summary>ConfigSet コマンドが ConfigService.Set を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ConfigSetShouldCallConfigService()
+    {
+        _commands.ConfigSet("key", "value");
+        _mockConfigService.Verify(s => s.Set("key", "value"), Times.Once);
+    }
+
+    /// <summary>ConfigSave コマンドが ConfigService.Save を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ConfigSaveShouldCallConfigService()
+    {
+        _commands.ConfigSave();
+        _mockConfigService.Verify(s => s.Save(), Times.Once);
+    }
+
+    /// <summary>ConfigReload コマンドが ConfigService.Reload を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ConfigReloadShouldCallConfigService()
+    {
+        _commands.ConfigReload();
+        _mockConfigService.Verify(s => s.Reload(), Times.Once);
+    }
+
+    /// <summary>HandleAsyncError がコンソールに出力することを検証します。</summary>
+    [Fact]
+    public void HandleAsyncErrorShouldWriteToConsole()
+    {
+        var args = new Microsoft.PointOfService.DeviceErrorEventArgs(Microsoft.PointOfService.ErrorCode.Failure, 0, Microsoft.PointOfService.ErrorLocus.Output, Microsoft.PointOfService.ErrorResponse.Clear);
+        _commands.HandleAsyncError(null, args);
+        _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
+    }
 }
