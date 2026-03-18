@@ -89,6 +89,17 @@ public class CashChangerTestApp : IDisposable
                     var configContent = $@"[Simulation]
 DispenseDelayMs = 500
 HotStart = {hotStart.ToString().ToLower()}
+
+[Inventory.JPY.Denominations]
+B10000 = {{ InitialCount = 10, DisplayNameJP = '一万円札' }}
+B5000  = {{ InitialCount = 10, DisplayNameJP = '五千円札' }}
+B1000  = {{ InitialCount = 50, DisplayNameJP = '千円札' }}
+C500   = {{ InitialCount = 50, DisplayNameJP = '五百円玉' }}
+C100   = {{ InitialCount = 100, DisplayNameJP = '百円玉' }}
+C50    = {{ InitialCount = 100, DisplayNameJP = '五十円玉' }}
+C10    = {{ InitialCount = 100, DisplayNameJP = '十円玉' }}
+C5     = {{ InitialCount = 100, DisplayNameJP = '五円玉' }}
+C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
 ";
                     File.WriteAllText(configPath, configContent);
                 }
