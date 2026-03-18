@@ -11,6 +11,7 @@ using R3;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 
+/// <summary>CliCashService の現金操作機能を検証するためのテストクラス。</summary>
 public class CliCashServiceTests
 {
     private readonly Mock<SimulatorCashChanger> _mockChanger;
@@ -55,15 +56,15 @@ public class CliCashServiceTests
             _mockLocalizer.Object);
     }
 
+    /// <summary>ReadCashCounts 操作でコンソールに表が出力されることを検証します。</summary>
     [Fact]
-    public void ReadCashCounts_ShouldWriteTableToConsole()
+    public void ReadCashCountsShouldWriteTableToConsole()
     {
         // Arrange
-        // Microsoft.PointOfService.CashCount uses its own enum
         var counts = new CashCounts(new[] { 
             new CashCount(CashCountType.Bill, 1000, 10), 
             new CashCount(CashCountType.Bill, 500, 5) 
-        }, false);
+            }, false);
         _mockChanger.Setup(c => c.ReadCashCounts()).Returns(counts);
 
         // Act
@@ -74,8 +75,9 @@ public class CliCashServiceTests
         _mockConsole.Verify(c => c.Write(It.IsAny<Table>()), Times.Once);
     }
 
+    /// <summary>Deposit 操作が BeginDeposit を呼び出すことを検証します。</summary>
     [Fact]
-    public void Deposit_ShouldInvokeBeginDeposit()
+    public void DepositShouldInvokeBeginDeposit()
     {
         // Act
         _service.Deposit(1000);
@@ -84,8 +86,9 @@ public class CliCashServiceTests
         _mockChanger.Verify(c => c.BeginDeposit(), Times.Once);
     }
 
+    /// <summary>FixDeposit 操作が FixDeposit を呼び出すことを検証します。</summary>
     [Fact]
-    public void FixDeposit_ShouldInvokeFixDeposit()
+    public void FixDepositShouldInvokeFixDeposit()
     {
         // Act
         _service.FixDeposit();
@@ -94,13 +97,54 @@ public class CliCashServiceTests
         _mockChanger.Verify(c => c.FixDeposit(), Times.Once);
     }
 
+    /// <summary>Dispense 操作が DispenseChange を呼び出すことを検証します。</summary>
     [Fact]
-    public void Dispense_ShouldInvokeDispenseChange()
+    public void DispenseShouldInvokeDispenseChange()
     {
         // Act
         _service.Dispense(1000);
 
         // Assert
         _mockChanger.Verify(c => c.DispenseChange(1000), Times.Once);
+    }
+
+    /// <summary>非同期設定での Deposit 操作が適切に開始されることを検証します。</summary>
+    [Fact]
+    public void DepositAsyncShouldOnlyInvokeBeginDeposit()
+    {
+        // Arrange
+        var options = new CliSessionOptions { IsAsync = true };
+        var service = new CliCashService(
+            _mockChanger.Object, new Inventory(), _mockMetadata.Object, options, _mockConsole.Object, _mockLocalizer.Object);
+
+        // Act
+        service.Deposit(1000);
+
+        // Assert
+        _mockChanger.Verify(c => c.BeginDeposit(), Times.Once);
+        _mockChanger.Verify(c => c.FixDeposit(), Times.Never);
+    }
+
+    /// <summary>正しい形式の AdjustCashCounts 操作が成功することを検証します。</summary>
+    [Fact]
+    public void AdjustCashCountsShouldInvokeAdjustOnChanger()
+    {
+        // Act
+        _service.AdjustCashCounts("1000:5,500:10");
+
+        // Assert
+        _mockChanger.Verify(c => c.AdjustCashCounts(It.IsAny<IEnumerable<CashCount>>()), Times.Once);
+    }
+
+    /// <summary>不正な形式の AdjustCashCounts 操作がエラーを報告することを検証します。</summary>
+    [Fact]
+    public void AdjustCashCountsInvalidFormatShouldReportError()
+    {
+        // Act
+        _service.AdjustCashCounts("invalid");
+
+        // Assert
+        _mockChanger.Verify(c => c.AdjustCashCounts(It.IsAny<IEnumerable<CashCount>>()), Times.Never);
+        _mockLocalizer.Verify(l => l["messages.invalid_adjust_format"], Times.Once);
     }
 }

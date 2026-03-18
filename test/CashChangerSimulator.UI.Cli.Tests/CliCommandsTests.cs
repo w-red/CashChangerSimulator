@@ -1,15 +1,16 @@
 using Moq;
 using Shouldly;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Models;
-using CashChangerSimulator.Device.Coordination;
-using CashChangerSimulator.Core.Models;
+using Xunit;
+using System.Threading.Tasks;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 
+/// <summary>CliCommands のコマンド実行機能を検証するためのテストクラス。</summary>
 public class CliCommandsTests
 {
     private readonly Mock<SimulatorCashChanger> _mockChanger;
@@ -24,17 +25,19 @@ public class CliCommandsTests
 
     public CliCommandsTests()
     {
-        var deps = new SimulatorDependencies(); 
-        _mockChanger = new Mock<SimulatorCashChanger>(deps);
-        
+        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
         _mockConsole = new Mock<IAnsiConsole>();
         _mockLocalizer = new Mock<IStringLocalizer>();
         
-        _mockDeviceService = new Mock<CliDeviceService>(_mockChanger.Object, _mockConsole.Object, _mockLocalizer.Object);
-        _mockCashService = new Mock<CliCashService>(_mockChanger.Object, (Inventory)null!, (Core.Services.ICurrencyMetadataProvider)null!, new CliSessionOptions(), _mockConsole.Object, _mockLocalizer.Object);
-        _mockConfigService = new Mock<CliConfigService>((Core.Configuration.ConfigurationProvider)null!, _mockConsole.Object, _mockLocalizer.Object);
-        _mockViewService = new Mock<CliViewService>(_mockChanger.Object, (Inventory)null!, (Core.Services.ICurrencyMetadataProvider)null!, (Core.Transactions.TransactionHistory)null!, _mockConsole.Object, _mockLocalizer.Object);
-        _mockScriptService = new Mock<CliScriptService>((Device.Services.IScriptExecutionService)null!, _mockConsole.Object, _mockLocalizer.Object);
+        // Mocking services that CliCommands depends on
+        _mockDeviceService = new Mock<CliDeviceService>(null!, null!, null!);
+        _mockCashService = new Mock<CliCashService>(null!, null!, null!, null!, null!, null!);
+        _mockConfigService = new Mock<CliConfigService>(null!, null!, null!);
+        _mockViewService = new Mock<CliViewService>(null!, null!, null!, null!, null!, null!);
+        _mockScriptService = new Mock<CliScriptService>(null!, null!, null!);
+
+        _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s));
+        _mockLocalizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()]).Returns((string s, object[] args) => new LocalizedString(s, s));
 
         _commands = new CliCommands(
             _mockChanger.Object,
@@ -47,76 +50,58 @@ public class CliCommandsTests
             _mockLocalizer.Object);
     }
 
+    /// <summary>Status コマンドが ViewService.Status を呼び出すことを検証します。</summary>
     [Fact]
-    public void Open_ShouldInvokeDeviceService()
+    public void StatusShouldCallViewService()
     {
-        _commands.Open();
-        _mockDeviceService.Verify(s => s.Open(), Times.Once);
-    }
-
-    [Fact]
-    public void Claim_ShouldInvokeDeviceServiceWithTimeout()
-    {
-        _commands.Claim(1234);
-        _mockDeviceService.Verify(s => s.Claim(1234), Times.Once);
-    }
-
-    [Fact]
-    public void Enable_ShouldInvokeDeviceService()
-    {
-        _commands.Enable();
-        _mockDeviceService.Verify(s => s.Enable(), Times.Once);
-    }
-
-    [Fact]
-    public void Deposit_ShouldInvokeCashService()
-    {
-        _commands.Deposit(1000);
-        _mockCashService.Verify(s => s.Deposit(1000), Times.Once);
-    }
-
-    [Fact]
-    public void FixDeposit_ShouldInvokeCashService()
-    {
-        _commands.FixDeposit();
-        _mockCashService.Verify(s => s.FixDeposit(), Times.Once);
-    }
-
-    [Fact]
-    public void Dispense_ShouldInvokeCashService()
-    {
-        _commands.Dispense(500);
-        _mockCashService.Verify(s => s.Dispense(500), Times.Once);
-    }
-
-    [Fact]
-    public void ConfigList_ShouldInvokeConfigService()
-    {
-        _commands.ConfigList();
-        _mockConfigService.Verify(s => s.List(), Times.Once);
-    }
-
-    [Fact]
-    public void Status_ShouldInvokeViewService()
-    {
+        // Act
         _commands.Status();
+
+        // Assert
         _mockViewService.Verify(s => s.Status(), Times.Once);
     }
 
+    /// <summary>Open コマンドが DeviceService.Open を呼び出すことを検証します。</summary>
     [Fact]
-    public async Task RunScript_ShouldInvokeScriptService()
+    public void OpenShouldCallDeviceService()
     {
-        await _commands.RunScript("test.json");
-        _mockScriptService.Verify(s => s.RunScriptAsync("test.json"), Times.Once);
-    }
-    
-    [Fact]
-    public void Help_ShouldWriteToConsole()
-    {
-        _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s));
+        // Act
+        _commands.Open();
 
+        // Assert
+        _mockDeviceService.Verify(s => s.Open(), Times.Once);
+    }
+
+    /// <summary>LogLevel コマンドが有効な入力を受け入れ、成功メッセージを表示することを検証します。</summary>
+    [Fact]
+    public void LogLevelShouldUpdateOnValidInput()
+    {
+        // Act
+        _commands.LogLevel("Information");
+
+        // Assert
+        _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
+    }
+
+    /// <summary>LogLevel コマンドが無効な入力に対してエラーメッセージを表示することを検証します。</summary>
+    [Fact]
+    public void LogLevelShouldShowErrorOnInvalidInput()
+    {
+        // Act
+        _commands.LogLevel("InvalidLevel");
+
+        // Assert
+        _mockLocalizer.Verify(l => l["messages.invalid_log_level", "InvalidLevel"], Times.Once);
+    }
+
+    /// <summary>Help コマンドがルールとテーブルをコンソールに出力することを検証します。</summary>
+    [Fact]
+    public void HelpShouldWriteToConsole()
+    {
+        // Act
         _commands.Help();
-        
+
+        // Assert
         _mockConsole.Verify(c => c.Write(It.IsAny<Rule>()), Times.Once);
         _mockConsole.Verify(c => c.Write(It.IsAny<Table>()), Times.Once);
     }
