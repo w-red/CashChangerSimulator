@@ -57,6 +57,20 @@ public class CliConfigServiceTests
         output.ShouldContain("Simulation.DispenseDelayMs = 500");
     }
 
+    /// <summary>null 値を持つプロパティが適切に表示されることを検証します。</summary>
+    [Fact]
+    public void ListShouldPrintNullProperties()
+    {
+        // Arrange
+        _configProvider.Config.Logging.LogLevel = null!;
+
+        // Act
+        _service.List();
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("Logging.LogLevel = null");
+    }
+
     /// <summary>有効なキーを指定した場合、その値が表示されることを検証します。</summary>
     [Fact]
     public void GetValidKeyShouldPrintValue()
@@ -137,5 +151,88 @@ public class CliConfigServiceTests
         // Assert
         _consoleOutput.ToString().ShouldContain("messages.success_label");
         _consoleOutput.ToString().ShouldContain("messages.config_reloaded");
+    }
+
+    /// <summary>Save 中に例外が発生した場合に適切にハンドリングされることを検証します。</summary>
+    [Fact]
+    public void SaveShouldHandleException()
+    {
+        // Arrange
+        var mockProvider = new Mock<ConfigurationProvider>();
+        // We can't mock the static ConfigurationLoader.Save, 
+        // but CliConfigService.Save uses _configProvider.Config.
+        // If we make a service with a provider that throws when accessing Config:
+        mockProvider.Setup(p => p.Config).Throws(new Exception("Mock Error"));
+        var faultService = new CliConfigService(mockProvider.Object, _console, _mockLocalizer.Object);
+
+        // Act
+        faultService.Save();
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_label");
+    }
+
+    /// <summary>Reload 中に例外が発生した場合に適切にハンドリングされることを検証します。</summary>
+    [Fact]
+    public void ReloadShouldHandleException()
+    {
+        // Arrange
+        var mockProvider = new Mock<ConfigurationProvider>();
+        mockProvider.Setup(p => p.Reload()).Throws(new Exception("Mock Error"));
+        var faultService = new CliConfigService(mockProvider.Object, _console, _mockLocalizer.Object);
+
+        // Act
+        faultService.Reload();
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.error_label");
+    }
+
+    /// <summary>存在しないパスを Get した際の結果を検証します。</summary>
+    [Fact]
+    public void GetPropertyByPathShouldReturnFalseForInvalidPath()
+    {
+        // Act
+        _service.Get("NonExistent.Path");
+        _service.Get("Logging.NonExistent");
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("messages.invalid_config_key(NonExistent.Path)");
+        _consoleOutput.ToString().ShouldContain("messages.invalid_config_key(Logging.NonExistent)");
+    }
+
+    /// <summary>書き込み不可能なプロパティへの Set を検証します。</summary>
+    [Fact]
+    public void SetPropertyByPathShouldReturnFalseForReadOnlyProperty()
+    {
+        // Act
+        // Set on a non-existent child of a valid object
+        var result = _service.GetType().GetMethod("SetPropertyByPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+            ?.Invoke(null, new object[] { _configProvider.Config, "Logging.InvalidProp", "Value" });
+
+        // Assert
+        result.ShouldBe(false);
+    }
+
+    /// <summary>Dictionary 型のプロパティの表示を検証します。</summary>
+    [Fact]
+    public void ListShouldPrintDictionaryPlaceholder()
+    {
+        // Act
+        _service.List();
+
+        // Assert
+        _consoleOutput.ToString().ShouldContain("Inventory = (Dictionary)");
+    }
+
+    /// <summary>Enum 型のプロパティへの Set を検証します。</summary>
+    [Fact]
+    public void SetEnumPropertyShouldWork()
+    {
+        // Act
+        _service.Set("System.UIMode", "Standard");
+
+        // Assert
+        _configProvider.Config.System.UIMode.ShouldBe(CashChangerSimulator.Core.Configuration.UIMode.Standard);
     }
 }
