@@ -5,17 +5,20 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>
 /// 金種詳細ダイアログの表示・内容・閉じる動作を検証する UI テスト。
 /// </summary>
+public class DenominationDetailUITests : IDisposable
+{
     private readonly CashChangerTestApp _app;
     private readonly AutomationElement _dialog;
-    private readonly Xunit.Abstractions.ITestOutputHelper _output;
+    private readonly ITestOutputHelper _output;
 
-    public DenominationDetailUITests(Xunit.Abstractions.ITestOutputHelper output)
+    public DenominationDetailUITests(ITestOutputHelper output)
     {
         _output = output;
         _app = new CashChangerTestApp();
