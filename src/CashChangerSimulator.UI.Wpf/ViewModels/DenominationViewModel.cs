@@ -32,6 +32,8 @@ public class DenominationViewModel : IDisposable
     public BindableReactiveProperty<int> CollectionCount { get; }
     /// <summary>リジェクト庫の枚数。</summary>
     public BindableReactiveProperty<int> RejectCount { get; }
+    /// <summary>入金トレイ（エスクロー）の枚数。</summary>
+    public BindableReactiveProperty<int> EscrowCount { get; }
 
     /// <summary>リサイクル（払い出し）可能かどうか。</summary>
     public bool IsRecyclable { get; }
@@ -45,6 +47,7 @@ public class DenominationViewModel : IDisposable
     public string LabelRecyclable { get; }
     public string LabelCollection { get; }
     public string LabelReject { get; }
+    public string LabelEscrow { get; }
     public string LabelTotalCount { get; }
     public string SuffixCount { get; }
 
@@ -93,14 +96,16 @@ public class DenominationViewModel : IDisposable
         Count = new BindableReactiveProperty<int>(facade.Inventory.GetTotalCount(key));
 
         RecyclableCount = new BindableReactiveProperty<int>(facade.Inventory.GetCount(key));
-        CollectionCount = new BindableReactiveProperty<int>(facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value);
-        RejectCount = new BindableReactiveProperty<int>(facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value);
+        CollectionCount = new BindableReactiveProperty<int>(facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
+        RejectCount = new BindableReactiveProperty<int>(facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
+        EscrowCount = new BindableReactiveProperty<int>(facade.Inventory.EscrowCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
 
         // ローカライズ文字列の初期化
         LabelInventoryDetail = isJapanese ? "在庫内訳" : "INVENTORY DETAIL";
         LabelRecyclable = isJapanese ? "還流庫" : "RECYCLABLE";
         LabelCollection = isJapanese ? "回収庫" : "COLLECTION";
         LabelReject = isJapanese ? "リジェクト" : "REJECT";
+        LabelEscrow = isJapanese ? "入金トレイ" : "ESCROW";
         LabelTotalCount = isJapanese ? "総枚数" : "TOTAL COUNT";
         SuffixCount = isJapanese ? "枚" : "";
 
@@ -110,8 +115,9 @@ public class DenominationViewModel : IDisposable
             {
                 Count.Value = facade.Inventory.GetTotalCount(key);
                 RecyclableCount.Value = facade.Inventory.GetCount(key);
-                CollectionCount.Value = facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key == key).Value;
-                RejectCount.Value = facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key == key).Value;
+                CollectionCount.Value = facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value;
+                RejectCount.Value = facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value;
+                EscrowCount.Value = facade.Inventory.EscrowCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value;
             }))
             .AddTo(_disposables);
 
