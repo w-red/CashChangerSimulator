@@ -115,7 +115,7 @@ public class InventoryViewModel : IDisposable
         CoinGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
         IsEmpty = new BindableReactiveProperty<bool>(RecentTransactions.Count == 0).AddTo(_disposables);
 
-        InitializeDenominations();
+        SafeInvoke(InitializeDenominations);
 
         _facade.Monitors.Changed
             .Subscribe(_ => SafeInvoke(InitializeDenominations))
