@@ -29,23 +29,22 @@ public class DenominationDetailUITests : IDisposable
 
         inventoryTile.ShouldNotBeNull("InventoryTile が見つかりません。");
         
-        // クリック (Invoke パターンがあれば優先)
-        Retry.WhileFalse(() =>
+        // クリックとダイアログ検索をセットで行い、見つかるまで再試行する（空振り対策）
+        var found = Retry.WhileNull(() =>
         {
+            // まずクリックを試みる
             try
             {
                 if (inventoryTile.Patterns.Invoke.IsSupported)
                     inventoryTile.Patterns.Invoke.Pattern.Invoke();
                 else
                     inventoryTile.Click();
-                return true;
             }
-            catch { return false; }
-        }, TimeSpan.FromSeconds(5));
+            catch { }
 
-        // ダイアログが現れるまで待機
-        var found = Retry.WhileNull(() =>
-        {
+            // クリック後の描画待ち
+            Thread.Sleep(1500);
+
             if (_app.MainWindow == null) return null;
 
             // 1. 直接検索
