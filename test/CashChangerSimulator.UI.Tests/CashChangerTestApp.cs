@@ -59,7 +59,7 @@ public class CashChangerTestApp : IDisposable
     {
         // [STABILITY] Ensure previous session is cleaned up
         Dispose();
-        KillOrphanedProcesses();
+        TestProcessCleanup.KillAllRunningProcesses();
 
         try
         {
