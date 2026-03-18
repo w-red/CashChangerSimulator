@@ -32,6 +32,11 @@ public class DenominationDetailUITests : IDisposable
             var tiles = _app.MainWindow.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
             Console.WriteLine($"[DIAG] Found {tiles.Length} InventoryTiles");
             
+            foreach (var t in tiles)
+            {
+                Console.WriteLine($"[DIAG] Tile: Name={t.Name}, Offscreen={t.IsOffscreen}, Rect={t.BoundingRectangle}");
+            }
+
             if (tiles.Length == 0)
             {
                 // デバッグ：InventoryComponent があるか確認

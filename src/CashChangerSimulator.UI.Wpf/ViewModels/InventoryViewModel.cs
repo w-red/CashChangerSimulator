@@ -1,3 +1,6 @@
+using CashChangerSimulator.Core;
+using Microsoft.Extensions.Logging;
+using ZLogger;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
@@ -17,6 +20,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// <summary>現金在庫の可視化とデバイスの基本操作（接続・エラー解除）を担当する ViewModel。</summary>
 public class InventoryViewModel : IDisposable
 {
+    private readonly ILogger<InventoryViewModel> _logger = LogProvider.CreateLogger<InventoryViewModel>();
     private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
@@ -210,10 +214,12 @@ public class InventoryViewModel : IDisposable
         BillDenominations.Clear();
         CoinDenominations.Clear();
 
+        _logger.ZLogDebug($"InitializeDenominations: Found {_facade.Monitors.Monitors.Count()} monitors.");
         foreach (var monitor in _facade.Monitors.Monitors)
         {
             var key = monitor.Key;
             var setting = _configProvider.Config.GetDenominationSetting(key);
+            _logger.ZLogDebug($"InitializeDenominations: Denom {key} - IsRecyclable: {setting.IsRecyclable}, IsDepositable: {setting.IsDepositable}");
 
             if (setting.IsRecyclable || setting.IsDepositable)
             {
@@ -221,14 +227,17 @@ public class InventoryViewModel : IDisposable
                 vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
                 if (key.Type == CurrencyCashType.Bill)
                 {
+                    _logger.ZLogDebug($"InitializeDenominations: Adding Bill {key}");
                     BillDenominations.Add(vm);
                 }
                 else
                 {
+                    _logger.ZLogDebug($"InitializeDenominations: Adding Coin {key}");
                     CoinDenominations.Add(vm);
                 }
             }
         }
+        _logger.ZLogDebug($"InitializeDenominations: Finished. Bills: {BillDenominations.Count}, Coins: {CoinDenominations.Count}");
 
         UpdateGridRatios();
     }
