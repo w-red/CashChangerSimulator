@@ -5,7 +5,6 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -16,11 +15,9 @@ public class DenominationDetailUITests : IDisposable
 {
     private readonly CashChangerTestApp _app;
     private readonly AutomationElement _dialog;
-    private readonly ITestOutputHelper _output;
 
-    public DenominationDetailUITests(ITestOutputHelper output)
+    public DenominationDetailUITests()
     {
-        _output = output;
         _app = new CashChangerTestApp();
         _app.Launch();
 
