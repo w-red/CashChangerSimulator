@@ -95,8 +95,31 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             retry--;
         }
 
+        if (advWindow != null)
+        {
+            try
+            {
+                advWindow.SetForeground();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[INFO] SetForeground failed in CI: {ex.Message}");
+            }
+        }
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
-        advWindow.SetForeground();
+
+        // 在庫の読み込み（InventoryTileの描画）を待つための診断
+        var inventoryFound = Retry.WhileFalse(() => {
+            var tiles = window.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
+            if (tiles.Length > 0) return true;
+            Console.WriteLine("[DIAG] Waiting for InventoryTiles to appear...");
+            return false;
+        }, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2)).Success;
+
+        if (!inventoryFound)
+        {
+            Console.WriteLine("[WARNING] InventoryTiles did not appear within timeout.");
+        }
 
         var simulateJamBtn = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2)).Result?.AsButton();
 

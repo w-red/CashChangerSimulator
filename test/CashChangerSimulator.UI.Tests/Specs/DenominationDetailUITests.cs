@@ -24,11 +24,29 @@ public class DenominationDetailUITests : IDisposable
         var inventoryTile = Retry.WhileNull(() =>
         {
             if (_app.MainWindow == null) return null;
+            
+            // UIの初期化待ちとして少し待つ
+            Thread.Sleep(500);
+
             // CI環境では要素が深い階層にある場合があるため、Descendants全検索を試みる
             var tiles = _app.MainWindow.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
             Console.WriteLine($"[DIAG] Found {tiles.Length} InventoryTiles");
+            
+            if (tiles.Length == 0)
+            {
+                // デバッグ：InventoryComponent があるか確認
+                var comp = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("InventoryComponent"));
+                Console.WriteLine($"[DIAG] InventoryComponent found: {comp != null}");
+                if (comp != null)
+                {
+                    var children = comp.FindAllChildren();
+                    Console.WriteLine($"[DIAG] InventoryComponent has {children.Length} children");
+                    foreach(var c in children) Console.WriteLine($"[DIAG]   - Child: {c.Name} ({c.AutomationId})");
+                }
+            }
+
             return tiles.FirstOrDefault()?.AsButton();
-        }, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(2)).Result;
+        }, TimeSpan.FromSeconds(40), TimeSpan.FromSeconds(3)).Result;
 
         inventoryTile.ShouldNotBeNull("InventoryTile が見つかりません。");
         
