@@ -64,6 +64,43 @@ public class CliCashService : CliServiceBase
             HandleException(ex);
         }
     }
+    
+    public virtual void ShowDepositTray()
+    {
+        var escrow = _inventory.EscrowCounts.ToList();
+        if (!escrow.Any() && !_changer.IsDepositInProgress) return;
+
+        var table = new Table().Border(TableBorder.Rounded).BorderColor(Color.Yellow);
+        table.Title($"[yellow]{_L["messages.deposit_tray_label"]}[/]");
+        table.AddColumn(_L["messages.denomination_label"]);
+        table.AddColumn(new TableColumn(_L["messages.count_label"]).RightAligned());
+        table.AddColumn(new TableColumn(_L["messages.amount_label"]).RightAligned());
+
+        var prefix = _metadata.SymbolPrefix.CurrentValue;
+        var suffix = _metadata.SymbolSuffix.CurrentValue;
+        decimal trayTotal = 0;
+
+        foreach (var key in _metadata.SupportedDenominations)
+        {
+            var count = escrow.FirstOrDefault(e => e.Key.Value == key.Value && e.Key.Type == key.Type).Value;
+            if (count > 0)
+            {
+                var amount = key.Value * count;
+                trayTotal += amount;
+                table.AddRow(
+                    key.ToDenominationString(),
+                    count.ToString(),
+                    $"{prefix}{amount:N0}{suffix}"
+                );
+            }
+        }
+
+        var required = _changer.RequiredAmount;
+        var remaining = Math.Max(0, required - trayTotal);
+        
+        table.Caption($"{_L["messages.total_caption"]}: {prefix}{trayTotal:N0}{suffix} / {_L["messages.required_amount_label"]}: {prefix}{required:N0}{suffix} ([red]{_L["messages.remaining_label"]}: {prefix}{remaining:N0}{suffix}[/])");
+        _console.Write(table);
+    }
 
     public virtual void Deposit(int? amount)
     {
@@ -72,14 +109,18 @@ public class CliCashService : CliServiceBase
             if (_options.IsAsync)
             {
                 _console.MarkupLine(_L["messages.deposit_started", amount?.ToString() ?? "All", "True"]);
+                if (amount.HasValue) _changer.RequiredAmount = amount.Value;
                 _changer.BeginDeposit();
                 _console.MarkupLine(_L["messages.deposit_async_warning"]);
+                ShowDepositTray();
             }
             else
             {
                 _console.MarkupLine(_L["messages.deposit_started", amount?.ToString() ?? "All", "False"]);
+                if (amount.HasValue) _changer.RequiredAmount = amount.Value;
                 _changer.BeginDeposit();
                 _changer.FixDeposit();
+                ShowDepositTray();
                 _changer.EndDeposit(CashDepositAction.Change);
                 ReportSuccess(_L["messages.deposit_completed"]);
             }
@@ -95,6 +136,7 @@ public class CliCashService : CliServiceBase
         try
         {
             _changer.FixDeposit();
+            ShowDepositTray();
             ReportSuccess(_L["messages.deposit_fixed"]);
         }
         catch (Exception ex)
@@ -107,6 +149,7 @@ public class CliCashService : CliServiceBase
     {
         try
         {
+            ShowDepositTray();
             _changer.EndDeposit(CashDepositAction.Change);
             ReportSuccess(_L["messages.end_deposit_completed"]);
         }

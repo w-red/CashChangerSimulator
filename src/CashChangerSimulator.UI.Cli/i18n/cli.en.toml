@@ -77,6 +77,9 @@ transaction_history_header = "Recent Transactions (up to {0})"
 timestamp_label = "Timestamp"
 type_label = "Type"
 currency_label = "Currency"
+deposit_tray_label = "Deposit Tray (Escrow)"
+required_amount_label = "Required Amount"
+remaining_label = "Remaining"
 
 [commands]
 open = "Open the device"
