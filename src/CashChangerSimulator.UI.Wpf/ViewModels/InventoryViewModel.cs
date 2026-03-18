@@ -191,8 +191,11 @@ public class InventoryViewModel : IDisposable
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
             if (vm == null) return;
-            var view = new DenominationDetailView { DataContext = vm };
-            _ = _facade.View.ShowDialogAsync(view, "RootDialog");
+            SafeInvoke(() =>
+            {
+                var view = new DenominationDetailView { DataContext = vm };
+                _ = _facade.View.ShowDialogAsync(view, "RootDialog");
+            });
         });
 
     }
