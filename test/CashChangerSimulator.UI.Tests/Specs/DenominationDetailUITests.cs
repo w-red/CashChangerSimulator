@@ -59,21 +59,40 @@ public class DenominationDetailUITests : IDisposable
                 if (d != null) return d;
             }
 
-            // 3. 全トップレベルウィンドウから検索
-            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
+            if (d == null)
             {
-                d = win.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
-                if (d != null) return d;
-                
-                // 名前でも検索 (CI環境でのフォールバック)
-                d = win.FindFirstDescendant(cf => cf.ByName("Denomination Detail"));
-                if (d != null) return d;
+                // [DIAGNOSTICS] もし見つからない場合、全トップレベルウィンドウの子要素をダンプする
+                foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
+                {
+                    System.Console.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
+                    DumpElements(win, 0);
+                }
             }
 
-            return null;
+            return d;
         }, TimeSpan.FromSeconds(40), TimeSpan.FromSeconds(3)).Result;
 
-        _dialog = found!;
+        if (found == null)
+        {
+            throw new System.Exception("ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。CI ログの [DIAG] 出力を確認してください。");
+        }
+        _dialog = found;
+    }
+
+    private void DumpElements(AutomationElement element, int depth)
+    {
+        if (depth > 5) return; // 深すぎるとノイズになるので制限
+        var indent = new string(' ', depth * 2);
+        try
+        {
+            var children = element.FindAllChildren();
+            foreach (var child in children)
+            {
+                System.Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                DumpElements(child, depth + 1);
+            }
+        }
+        catch { }
     }
 
     [Fact]
