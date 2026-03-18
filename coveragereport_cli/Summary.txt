@@ -1,0 +1,143 @@
+Summary
+  Generated on: 2026/03/18 - 10:32:04
+  Coverage date: 2026/03/17 - 13:04:40 - 2026/03/18 - 10:31:59
+  Parser: MultiReport (2x Cobertura)
+  Assemblies: 3
+  Classes: 117
+  Files: 118
+  Line coverage: 15.6%
+  Covered lines: 731
+  Uncovered lines: 3953
+  Coverable lines: 4684
+  Total lines: 8209
+  Branch coverage: 7.6% (130 of 1702)
+  Covered branches: 130
+  Total branches: 1702
+  Method coverage: 21.5% (176 of 818)
+  Full method coverage: 19.1% (157 of 818)
+  Covered methods: 176
+  Fully covered methods: 157
+  Total methods: 818
+
+CashChangerSimulator.Core                                                          14.7%
+  CashChangerSimulator.Core.Configuration.ConfigurationLoader                      38.4%
+  CashChangerSimulator.Core.Configuration.ConfigurationProvider                    45.2%
+  CashChangerSimulator.Core.Configuration.DenominationSettings                      100%
+  CashChangerSimulator.Core.Configuration.HistorySettings                           100%
+  CashChangerSimulator.Core.Configuration.HistoryState                                0%
+  CashChangerSimulator.Core.Configuration.InventorySettings                         100%
+  CashChangerSimulator.Core.Configuration.InventoryState                              0%
+  CashChangerSimulator.Core.Configuration.LoggingSettings                           100%
+  CashChangerSimulator.Core.Configuration.SimulationSettings                         80%
+  CashChangerSimulator.Core.Configuration.SimulatorConfiguration                   77.7%
+  CashChangerSimulator.Core.Configuration.SystemSettings                            100%
+  CashChangerSimulator.Core.Configuration.ThresholdSettings                         100%
+  CashChangerSimulator.Core.Exceptions.InsufficientCashException                      0%
+  CashChangerSimulator.Core.LogProvider                                             5.2%
+  CashChangerSimulator.Core.Managers.CashChangerManager                            10.7%
+  CashChangerSimulator.Core.Managers.HardwareStatusManager                         14.7%
+  CashChangerSimulator.Core.Managers.VirtualMockDevice                                0%
+  CashChangerSimulator.Core.Models.DenominationKey                                 19.8%
+  CashChangerSimulator.Core.Models.Inventory                                        8.3%
+  CashChangerSimulator.Core.Monitoring.CashStatusMonitor                              0%
+  CashChangerSimulator.Core.Monitoring.OverallStatusAggregator                     47.6%
+  CashChangerSimulator.Core.Services.ChangeCalculator                                 0%
+  CashChangerSimulator.Core.Services.CurrencyMetadataProvider                         0%
+  CashChangerSimulator.Core.Services.MonitorsProvider                                 0%
+  CashChangerSimulator.Core.Services.OverallStatusAggregatorProvider                  0%
+  CashChangerSimulator.Core.SimulatorServices                                         0%
+  CashChangerSimulator.Core.Transactions.HistoryPersistenceService                    0%
+  CashChangerSimulator.Core.Transactions.TransactionEntry                             0%
+  CashChangerSimulator.Core.Transactions.TransactionHistory                        18.9%
+
+CashChangerSimulator.Device                                                        14.9%
+  CashChangerSimulator.Device.CashCountAdapter                                        0%
+  CashChangerSimulator.Device.CashCountParser                                         0%
+  CashChangerSimulator.Device.Commands.AdjustCashCountsCommand                        0%
+  CashChangerSimulator.Device.Commands.BeginDepositCommand                            0%
+  CashChangerSimulator.Device.Commands.CheckHealthCommand                             0%
+  CashChangerSimulator.Device.Commands.ClearOutputCommand                             0%
+  CashChangerSimulator.Device.Commands.DispenseCashCommand                            0%
+  CashChangerSimulator.Device.Commands.DispenseChangeCommand                          0%
+  CashChangerSimulator.Device.Commands.EndDepositCommand                              0%
+  CashChangerSimulator.Device.Commands.FixDepositCommand                              0%
+  CashChangerSimulator.Device.Commands.PauseDepositCommand                            0%
+  CashChangerSimulator.Device.Commands.PurgeCashCommand                               0%
+  CashChangerSimulator.Device.Commands.ReadCashCountsCommand                          0%
+  CashChangerSimulator.Device.Commands.RepayDepositCommand                            0%
+  CashChangerSimulator.Device.Commands.ResetStatisticsCommand                         0%
+  CashChangerSimulator.Device.Commands.RetrieveStatisticsCommand                      0%
+  CashChangerSimulator.Device.Commands.UpdateStatisticsCommand                        0%
+  CashChangerSimulator.Device.Coordination.LifecycleManager                        63.6%
+  CashChangerSimulator.Device.Coordination.SimulatorDependencies                    100%
+  CashChangerSimulator.Device.Coordination.SkipVerificationLifecycleHandler           0%
+  CashChangerSimulator.Device.Coordination.StandardLifecycleHandler                 4.4%
+  CashChangerSimulator.Device.Coordination.StatusCoordinator                         52%
+  CashChangerSimulator.Device.Coordination.UposMediator                               6%
+  CashChangerSimulator.Device.DepositController                                    14.2%
+  CashChangerSimulator.Device.DeviceEventHistoryObserver                              0%
+  CashChangerSimulator.Device.DiagnosticController                                 17.9%
+  CashChangerSimulator.Device.DirectIOHandler                                      85.7%
+  CashChangerSimulator.Device.DispenseController                                    8.2%
+  CashChangerSimulator.Device.Facades.CapabilitiesFacade                           12.5%
+  CashChangerSimulator.Device.Facades.DepositFacade                                10.8%
+  CashChangerSimulator.Device.Facades.DiagnosticsFacade                               5%
+  CashChangerSimulator.Device.Facades.InventoryFacade                               3.4%
+  CashChangerSimulator.Device.HardwareSimulator                                    33.3%
+  CashChangerSimulator.Device.InternalSimulatorCashChanger                            0%
+  CashChangerSimulator.Device.Lifecycle.ClaimedState                                  0%
+  CashChangerSimulator.Device.Lifecycle.ClosedState                                   0%
+  CashChangerSimulator.Device.Lifecycle.DeviceLifecycleContext                        0%
+  CashChangerSimulator.Device.Lifecycle.OpenedState                                   0%
+  CashChangerSimulator.Device.Models.SimulatorContext                              79.4%
+  CashChangerSimulator.Device.Services.ScriptCommand                                  0%
+  CashChangerSimulator.Device.Services.ScriptCommands.AssertCommandHandler            0%
+  CashChangerSimulator.Device.Services.ScriptCommands.BeginDepositCommandHandler      0%
+  CashChangerSimulator.Device.Services.ScriptCommands.DelayCommandHandler             0%
+  CashChangerSimulator.Device.Services.ScriptCommands.DispenseCommandHandler          0%
+  CashChangerSimulator.Device.Services.ScriptCommands.EndDepositCommandHandler        0%
+  CashChangerSimulator.Device.Services.ScriptCommands.FixDepositCommandHandler        0%
+  CashChangerSimulator.Device.Services.ScriptCommands.InjectErrorCommandHandler       0%
+  CashChangerSimulator.Device.Services.ScriptCommands.OpenCommandHandler              0%
+  CashChangerSimulator.Device.Services.ScriptCommands.SetCommandHandler               0%
+  CashChangerSimulator.Device.Services.ScriptCommands.TrackDepositCommandHandler      0%
+  CashChangerSimulator.Device.Services.ScriptExecutionContext                         0%
+  CashChangerSimulator.Device.Services.ScriptExecutionService                         0%
+  CashChangerSimulator.Device.Services.UposConfigurationManager                      29%
+  CashChangerSimulator.Device.Services.UposEventNotifier                            9.3%
+  CashChangerSimulator.Device.SimulatorCashChanger                                 13.4%
+  CashChangerSimulator.Device.Strategies.AdjustCashCountsStrStrategy                6.2%
+  CashChangerSimulator.Device.Strategies.GetDepositedSerialsStrategy                 20%
+  CashChangerSimulator.Device.Strategies.GetDiagnosticLogStrategy                    25%
+  CashChangerSimulator.Device.Strategies.GetJamLocationStrategy                      20%
+  CashChangerSimulator.Device.Strategies.GetVersionStrategy                          20%
+  CashChangerSimulator.Device.Strategies.SetDiscrepancyStrategy                      20%
+  CashChangerSimulator.Device.Strategies.SetJamStrategy                             7.1%
+  CashChangerSimulator.Device.Strategies.SetOverlapStrategy                          20%
+  CashChangerSimulator.Device.Strategies.SimulateInsertedStrategy                    20%
+  CashChangerSimulator.Device.Strategies.SimulateRemovedStrategy                     20%
+  CashChangerSimulator.Device.Testing.SimulatorTestingExtensions                      0%
+  CashChangerSimulator.Device.UposCurrencyHelper                                      0%
+  CashChangerSimulator.Device.UposDispenseFacade                                   39.6%
+
+CashChangerSimulator.UI.Cli                                                          18%
+  CashChangerSimulator.UI.Cli.CliAutoCompleteHandler                                100%
+  CashChangerSimulator.UI.Cli.CliCommands                                          56.5%
+  CashChangerSimulator.UI.Cli.CliConfigurationProvider                                0%
+  CashChangerSimulator.UI.Cli.CliDIContainer                                          0%
+  CashChangerSimulator.UI.Cli.CliHardwareSimulator                                    0%
+  CashChangerSimulator.UI.Cli.CliNotifyService                                        0%
+  CashChangerSimulator.UI.Cli.CliResolverServiceProvider                              0%
+  CashChangerSimulator.UI.Cli.CliSessionOptions                                     100%
+  CashChangerSimulator.UI.Cli.Localization.TomlStringLocalizer                        0%
+  CashChangerSimulator.UI.Cli.Localization.TomlStringLocalizerFactory                 0%
+  CashChangerSimulator.UI.Cli.Program                                              70.8%
+  CashChangerSimulator.UI.Cli.Services.CliCashService                              52.2%
+  CashChangerSimulator.UI.Cli.Services.CliCommandDispatcher                           0%
+  CashChangerSimulator.UI.Cli.Services.CliConfigService                             1.9%
+  CashChangerSimulator.UI.Cli.Services.CliDeviceService                             2.5%
+  CashChangerSimulator.UI.Cli.Services.CliInteractiveShell                            0%
+  CashChangerSimulator.UI.Cli.Services.CliScriptService                             9.5%
+  CashChangerSimulator.UI.Cli.Services.CliServiceBase                              15.3%
+  CashChangerSimulator.UI.Cli.Services.CliViewService                              15.2%
+  CashChangerSimulator.UI.Cli.Services.ReadLineReader                                 0%

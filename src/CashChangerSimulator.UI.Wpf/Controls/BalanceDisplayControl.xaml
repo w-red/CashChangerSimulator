@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:DispenseViewModel}">
     <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{StaticResource CashBalance}" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black"/>
+        <TextBlock Text="{StaticResource CashBalance}" AutomationProperties.AutomationId="CashBalanceLabel" FontSize="11" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" FontWeight="Black"/>
         <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />

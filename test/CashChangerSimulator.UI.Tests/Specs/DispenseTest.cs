@@ -76,11 +76,11 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         dispenseButton.SmartClick();
 
         // 3. Verify Busy state appears on terminal
-        var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")), UITestTimings.RetryShortTimeout);
+        var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")), UITestTimings.RetryShortTimeout);
         busyIndicator.ShouldNotBeNull();
 
         // Wait for completion (Return to Idle)
-        Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByText("DISPENSING...")) != null, UITestTimings.RetryLongTimeout);
+        Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")) != null, UITestTimings.RetryLongTimeout);
     }
 
     /// <summary>エラー状態（ジャム等）の際にコントロールが無効化されることを検証する。</summary>
