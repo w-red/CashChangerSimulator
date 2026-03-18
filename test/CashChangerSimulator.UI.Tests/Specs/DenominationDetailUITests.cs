@@ -11,13 +11,13 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 /// <summary>
 /// 金種詳細ダイアログの表示・内容・閉じる動作を検証する UI テスト。
 /// </summary>
-public class DenominationDetailUITests : IDisposable
-{
     private readonly CashChangerTestApp _app;
     private readonly AutomationElement _dialog;
+    private readonly Xunit.Abstractions.ITestOutputHelper _output;
 
-    public DenominationDetailUITests()
+    public DenominationDetailUITests(Xunit.Abstractions.ITestOutputHelper output)
     {
+        _output = output;
         _app = new CashChangerTestApp();
         _app.Launch();
 
@@ -64,7 +64,7 @@ public class DenominationDetailUITests : IDisposable
                 // [DIAGNOSTICS] もし見つからない場合、全トップレベルウィンドウの子要素をダンプする
                 foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
                 {
-                    System.Console.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
+                    _output.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
                     DumpElements(win, 0);
                 }
             }
@@ -74,22 +74,44 @@ public class DenominationDetailUITests : IDisposable
 
         if (found == null)
         {
-            throw new System.Exception("ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。CI ログの [DIAG] 出力を確認してください。");
+            var dump = new System.Text.StringBuilder();
+            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
+            {
+                dump.AppendLine($"Window: {win.Name} (ID: {win.Properties.AutomationId})");
+                CaptureElements(win, 0, dump);
+            }
+            throw new System.Exception($"ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。\n[UI TREE SNAPSHOT]\n{dump}\nCI ログの詳細出力を確認してください。");
         }
         _dialog = found;
     }
 
     private void DumpElements(AutomationElement element, int depth)
     {
-        if (depth > 5) return; // 深すぎるとノイズになるので制限
+        if (depth > 5) return;
         var indent = new string(' ', depth * 2);
         try
         {
             var children = element.FindAllChildren();
             foreach (var child in children)
             {
-                System.Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                _output.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
                 DumpElements(child, depth + 1);
+            }
+        }
+        catch { }
+    }
+
+    private void CaptureElements(AutomationElement element, int depth, System.Text.StringBuilder sb)
+    {
+        if (depth > 3) return; // 例外メッセージが長くなりすぎないよう制限
+        var indent = new string(' ', depth * 2);
+        try
+        {
+            var children = element.FindAllChildren();
+            foreach (var child in children)
+            {
+                sb.AppendLine($"{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\"");
+                CaptureElements(child, depth + 1, sb);
             }
         }
         catch { }
