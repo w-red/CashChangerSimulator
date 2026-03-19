@@ -131,8 +131,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
-        var launchButton = UiTestRetry.Find(() => mainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
-        launchButton.SmartClick();
+        var licenseCloseBtn = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
+        licenseCloseBtn.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
         var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", UITestTimings.RetryLongTimeout);

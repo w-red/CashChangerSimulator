@@ -5,12 +5,14 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
 using Xunit;
+using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>
 /// 金種詳細ダイアログの表示・内容・閉じる動作を検証する UI テスト。
 /// </summary>
+[Collection("SequentialTests")]
 public class DenominationDetailUITests : IDisposable
 {
     private readonly CashChangerTestApp _app;
@@ -25,126 +27,45 @@ public class DenominationDetailUITests : IDisposable
         {
             if (_app.MainWindow == null) return null;
             
-            // UIの初期化待ちとして少し待つ
-            Thread.Sleep(500);
-
             // CI環境では要素が深い階層にある場合があるため、Descendants全検索を試みる
             var tiles = _app.MainWindow.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
-            Console.WriteLine($"[DIAG] Found {tiles.Length} InventoryTiles");
-            
-            foreach (var t in tiles)
-            {
-                Console.WriteLine($"[DIAG] Tile: Name={t.Name}, Offscreen={t.IsOffscreen}, Rect={t.BoundingRectangle}");
-            }
-
-            if (tiles.Length == 0)
-            {
-                // デバッグ：InventoryComponent があるか確認
-                var comp = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("InventoryComponent"));
-                Console.WriteLine($"[DIAG] InventoryComponent found: {comp != null}");
-                if (comp != null)
-                {
-                    Console.WriteLine($"[DIAG] InventoryComponent: Visible={!comp.IsOffscreen}, Rect={comp.BoundingRectangle}");
-                    DumpElements(comp, 0);
-                }
-                else
-                {
-                    Console.WriteLine("[DIAG] CRITICAL: InventoryComponent NOT FOUND. Dumping MainWindow children:");
-                    foreach(var c in _app.MainWindow.FindAllChildren()) Console.WriteLine($"[DIAG]   - {c.Name} ({c.AutomationId}) {c.ControlType}");
-                }
-            }
-
             return tiles.FirstOrDefault()?.AsButton();
-        }, TimeSpan.FromSeconds(40), TimeSpan.FromSeconds(3)).Result;
+        }, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(2)).Result;
 
-        inventoryTile.ShouldNotBeNull("InventoryTile が見つかりません。");
-        
-        // クリックとダイアログ検索をセットで行い、見つかるまで再試行する（空振り対策）
-        var found = Retry.WhileNull(() =>
+        if (inventoryTile == null)
         {
-            // まずクリックを試みる
-            try
-            {
-                if (inventoryTile.Patterns.Invoke.IsSupported)
-                    inventoryTile.Patterns.Invoke.Pattern.Invoke();
-                else
-                    inventoryTile.Click();
-            }
-            catch { }
-
-            // クリック後の描画待ち
-            Thread.Sleep(1500);
-
-            if (_app.MainWindow == null) return null;
-
-            // 1. 直接検索
-            var d = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
-            if (d != null) return d;
-
-            // 2. DialogHost (MainDialogHost) を経由して検索
-            var host = _app.MainWindow.FindFirstDescendant(cf => cf.ByAutomationId("MainDialogHost"));
-            if (host != null)
-            {
-                d = host.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
-                if (d != null) return d;
-            }
-
-            if (d == null)
-            {
-                // [DIAGNOSTICS] もし見つからない場合、全トップレベルウィンドウの子要素をダンプする
-                foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
-                {
-                    Console.WriteLine($"[DIAG] Investigating Window: {win.Name} (ID: {win.Properties.AutomationId})");
-                    DumpElements(win, 0);
-                }
-            }
-
-            return d;
-        }, TimeSpan.FromSeconds(40), TimeSpan.FromSeconds(3)).Result;
-
-        if (found == null)
-        {
-            var dump = new System.Text.StringBuilder();
-            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
-            {
-                dump.AppendLine($"Window: {win.Name} (ID: {win.Properties.AutomationId})");
-                CaptureElements(win, 0, dump);
-            }
-            throw new System.Exception($"ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。\n[UI TREE SNAPSHOT]\n{dump}\nCI ログの詳細出力を確認してください。");
+            Console.WriteLine("[ERROR] InventoryTile not found. Tree dump:");
+            var sbDump = new System.Text.StringBuilder();
+            _app.MainWindow?.CaptureElements(0, sbDump);
+            Console.WriteLine(sbDump.ToString());
+            throw new Exception("InventoryTile が見つかりません。");
         }
-        _dialog = found;
-    }
 
-    private void DumpElements(AutomationElement element, int depth)
-    {
-        if (depth > 8) return;
-        var indent = new string(' ', depth * 2);
-        try
-        {
-            var children = element.FindAllChildren();
-            foreach (var child in children)
-            {
-                Console.WriteLine($"[DIAG]{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\", Off:\"{child.IsOffscreen}\", Rect:\"{child.BoundingRectangle}\"");
-                DumpElements(child, depth + 1);
-            }
-        }
-        catch { }
-    }
+        // Act: 金種タイルをクリックして詳細ダイアログを開く
+        inventoryTile.SmartClick();
 
-    private void CaptureElements(AutomationElement element, int depth, System.Text.StringBuilder sb)
-    {
-        if (depth > 5) return; 
-        var indent = new string(' ', depth * 2);
-        try
+        // [STABILITY] ダイアログの出現を待機
+        var dialog = UiTestRetry.Find(() => 
         {
-            var children = element.FindAllChildren();
-            foreach (var child in children)
-            {
-                sb.AppendLine($"{indent} - {child.ControlType} Name:\"{child.Name}\", ID:\"{child.Properties.AutomationId}\", Off:\"{child.IsOffscreen}\"");
-                CaptureElements(child, depth + 1, sb);
-            }
+            // Try MainWindow children (DialogHost standard)
+            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+            if (found != null) return found;
+
+            // Try Desktop fallback (in case it behaves like a popup window in CI)
+            var win = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DenominationDetailDialogView", TimeSpan.FromSeconds(1));
+            return win;
+        }, TimeSpan.FromSeconds(20));
+
+        if (dialog == null)
+        {
+            Console.WriteLine("[ERROR] DenominationDetailDialogView not found. Dumping MainWindow tree:");
+            var sb = new System.Text.StringBuilder();
+            _app.MainWindow?.CaptureElements(0, sb);
+            Console.WriteLine(sb.ToString());
+            throw new Exception("ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。");
         }
-        catch { }
+
+        _dialog = dialog;
     }
 
     [Fact(Timeout = 60000)]
@@ -172,10 +93,7 @@ public class DenominationDetailUITests : IDisposable
             closeButton = _dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)).FirstOrDefault()?.AsButton();
 
         closeButton.ShouldNotBeNull();
-        if (closeButton.Patterns.Invoke.IsSupported)
-            closeButton.Patterns.Invoke.Pattern.Invoke();
-        else
-            closeButton.Click();
+        closeButton.SmartClick();
 
         Retry.WhileTrue(() =>
         {

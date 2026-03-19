@@ -123,44 +123,55 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
                 }
             }
             Application = Application.Launch(startInfo);
+            
+            // [STABILITY] Wait for process and UI to settle
+            Thread.Sleep(2000);
 
             // Use a more robust wait for the window
             var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(5) : TimeSpan.FromSeconds(30);
+            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(20);
 
             MainWindow = Retry.WhileNull(() =>
             {
-                var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(2));
+                // Try standard Application API
+                var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(1));
                 if (win != null) return win;
 
-                // Fallback: Robust search on desktop
+                // Fallback: Proactive desktop scan
                 var desktop = Automation.GetDesktop();
-                var mainWindowById = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
-                if (mainWindowById != null) return mainWindowById.AsWindow();
+                
+                // Priority 1: By AutomationId
+                var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
+                if (byId != null) return byId.AsWindow();
 
-                var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-                foreach (var w in windows)
-                {
-                    try
-                    {
-                        if (w.Name.Contains("Cash Changer Simulator"))
-                        {
-                            return w.AsWindow();
-                        }
-                    }
-                    catch { }
-                }
-                return null;
-            }, windowWaitTimeout, TimeSpan.FromMilliseconds(1000)).Result;
+                // Priority 2: By Name/Title for this process
+                var appProcessId = Application.ProcessId;
+                var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                var byProcess = allWindows.FirstOrDefault(w => 
+                    w.Properties.ProcessId == appProcessId && 
+                    (w.Name.Contains("Cash Changer") || w.Name.Contains("シミュレーター")));
+                
+                return byProcess?.AsWindow();
+            }, windowWaitTimeout, TimeSpan.FromMilliseconds(2000)).Result;
 
             if (MainWindow == null)
             {
+                Console.WriteLine("[ERROR] Main window not found after retry.");
+                // Dump ALL windows for debugging if it fails
+                try
+                {
+                    var all = Automation.GetDesktop().FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                    foreach (var w in all) Console.WriteLine($"- Global Window: Name='{w.Name}', ID='{w.AutomationId}', PID={w.Properties.ProcessId}");
+                } catch { }
+
                 if (isCi)
                 {
-                    Console.WriteLine("[WARNING] Main window not found in CI environment. Skipping UI interactions.");
-                    return;
+                    Console.WriteLine("[WARNING] Proceeding in CI even if MainWindow is null to see if subsequent steps can recover or provide more logs.");
                 }
-                throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found.");
+                else
+                {
+                    throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found.");
+                }
             }
 
             // Settlement period for UI Automation state

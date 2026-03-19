@@ -22,7 +22,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         _app.Launch();
         var window = _app.MainWindow;
-        window.ShouldNotBeNull();
+        if (window == null) throw new Exception("MainWindow is null");
         window.SetForeground();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs * 2); // Wait longer for initial load
 
@@ -155,6 +155,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         _app.Launch();
         var window = _app.MainWindow;
+        if (window == null) throw new Exception("MainWindow is null");
         var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         decimal initialTotal = ParseAmount(totalAmountText?.Text ?? "0");
 
@@ -230,6 +231,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         _app.Launch();
         var window = _app.MainWindow;
+        if (window == null) throw new Exception("MainWindow is null");
         var depositWindow = OpenDepositTerminal(window);
 
         // 1. Begin Deposit
@@ -243,7 +245,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // 3. Verify Overlap indicator appears
-        var errorIndicator = UiTestRetry.Find(() => window!.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")), UITestTimings.RetryLongTimeout);
+        var errorIndicator = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")), UITestTimings.RetryLongTimeout);
         errorIndicator.ShouldNotBeNull();
 
         // 4. Try to click FINISH (FixDeposit) -> Should be disabled
@@ -253,7 +255,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         fixButton.IsEnabled.ShouldBeFalse();
 
         // Verify Overlap indicator still exists
-        window!.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldNotBeNull();
+        window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldNotBeNull();
 
         // 5. Cancel (RETURN) should work, but does NOT clear the hardware error
         var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
@@ -269,9 +271,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldBeNull();
     }
 
-    private Window OpenDepositTerminal(Window? mainWindow)
+    private Window OpenDepositTerminal(Window mainWindow)
     {
-        var launchButton = UiTestRetry.Find(() => mainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
+        var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
         launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
@@ -280,11 +282,16 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         
         if (depositWindow == null)
         {
-            Console.WriteLine("[DIAG] DepositWindow NOT FOUND. Dumping all top-level windows:");
-            foreach (var win in _app.Application.GetAllTopLevelWindows(_app.Automation))
+            Console.WriteLine("[DEBUG] DepositWindow not found. Current windows for this process:");
+            try
             {
-                Console.WriteLine($"[DIAG] Window: Name='{win.Name}', ID='{win.AutomationId}', Type={win.ControlType}");
-            }
+                var desktop = _app.Automation.GetDesktop();
+                var pid = _app.Application.ProcessId;
+                var windows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
+                                     .Where(w => w.Properties.ProcessId == pid);
+                foreach (var w in windows) Console.WriteLine($"- Candidate: '{w.Name}' ({w.AutomationId})");
+            } catch { }
+            throw new Exception("DepositWindow not found.");
         }
 
         depositWindow.ShouldNotBeNull();
