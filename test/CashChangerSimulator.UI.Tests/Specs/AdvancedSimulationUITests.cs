@@ -1,6 +1,7 @@
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
+using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -43,70 +44,44 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
 
         // 接続完了まで待機
         var closeBtn = Retry.WhileNull(() => window.FindFirstDescendant("DeviceCloseButton"), TimeSpan.FromSeconds(15)).Result;
-        closeBtn.ShouldNotBeNull($@"DeviceCloseButton not found. Tree: {tree}");
+        closeBtn.ShouldNotBeNull("DeviceCloseButton not found.");
         closeBtn.WaitUntilEnabled(TimeSpan.FromSeconds(15));
 
         // Advanced Simulation ウィンドウを開く
         var launchBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchAdvancedSimulationButton"));
-        if (launchBtn == null) throw new Exception($@"LaunchAdvancedSimulationButton not found. Tree: {tree}");
+        if (launchBtn == null)
+        {
+            var sb = new System.Text.StringBuilder();
+            CaptureElements(window, 0, sb);
+            throw new Exception($"LaunchAdvancedSimulationButton not found. MainWindow Tree:\n{sb}");
+        }
         
-        // 有効になるまで待つ
         Retry.WhileFalse(() => launchBtn.IsEnabled, TimeSpan.FromSeconds(10));
-        
-        // フォーカスを当ててからクリック
+        System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", $"[DIAG] LaunchBtn: Found={launchBtn != null}, Enabled={launchBtn?.IsEnabled}, Offscreen={launchBtn?.IsOffscreen}\n");
+
         launchBtn.Focus();
-        if (launchBtn.Patterns.Invoke.IsSupported)
-        {
-            launchBtn.Patterns.Invoke.Pattern.Invoke();
-        }
-        else
-        {
-            launchBtn.AsButton().Click();
-        }
+        Thread.Sleep(500);
         
-        // click後のウィンドウリスト取得用（自プロセスのみ）
-        var desktop = _app.Automation.GetDesktop();
-        
-        // ウィンドウを検索 (堅牢な検索)
-        Window? advWindow = null;
-        var retry = 30; // Longer retry for CI
-        while (retry > 0)
+        // Ensure it's clicked. Try multiple ways if needed.
+        try
         {
-            var appWindows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
-                .Where(w => w.Properties.ProcessId.ValueOrDefault == _app.Application.ProcessId)
-                .ToList();
-            
-            advWindow = appWindows.FirstOrDefault(w => 
+            if (launchBtn.Patterns.Invoke.IsSupported)
             {
-                try { return w.AutomationId == "AdvancedSimulationWindow" || (w.Name != null && (w.Name.Contains("Simulation") || w.Name.Contains("シミュレーション"))); } catch { return false; }
-            })?.AsWindow();
-            
-            if (advWindow == null)
-            {
-                // Try finding within MainWindow in case it's treated as a child
-                var found = window.FindFirstDescendant(cf => cf.ByAutomationId("AdvancedSimulationWindow")
-                    .Or(cf.ByName("高度なシミュレーション操作").Or(cf.ByName("Advanced Simulation"))));
-                if (found != null) advWindow = found.AsWindow();
+                System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", "[DIAG] Using InvokePattern to launch.\n");
+                launchBtn.Patterns.Invoke.Pattern.Invoke();
             }
-
-            if (advWindow != null) break;
-
-            Thread.Sleep(1000);
-            retry--;
-        }
-
-        if (advWindow != null)
-        {
-            try
+            else
             {
-                advWindow.SetForeground();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[INFO] SetForeground failed in CI: {ex.Message}");
+                System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", "[DIAG] Using Click() to launch.\n");
+                launchBtn.Click();
             }
         }
+        catch (Exception ex)
+        {
+        // ウィンドウを検索 (堅牢な共通ロジックを使用)
+        var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", TimeSpan.FromSeconds(30));
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
+        advWindow.SetForeground();
 
         // 在庫の読み込み（InventoryTileの描画）を待つための診断
         var inventoryFound = Retry.WhileFalse(() => {
@@ -134,13 +109,18 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         }
 
         // Act: Simulate Jam
-        if (simulateJamBtn.Patterns.Invoke.IsSupported) simulateJamBtn.Patterns.Invoke.Pattern.Invoke();
-        else simulateJamBtn.Click();
+        simulateJamBtn.Focus();
+        simulateJamBtn.SmartClick();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
-        // Assert: Now it should be in the tree and visible
-        var jamIndicator = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("JamIndicatorText")), TimeSpan.FromSeconds(10)).Result;
+        var jamIndicator = Retry.WhileNull(() => 
+        {
+            var el = advWindow.FindFirstDescendant(cf => cf.ByAutomationId("JamIndicatorText"));
+            if (el != null && !el.IsOffscreen) return el;
+            return null;
+        }, TimeSpan.FromSeconds(15)).Result;
+        
         jamIndicator.ShouldNotBeNull("JamIndicator should be visible after simulation");
-        jamIndicator.IsOffscreen.ShouldBeFalse();
 
         // ResetErrorButton は常にツリーに配置されているが、エラー発生後にのみ Enabled となる
         var resetBtn = advWindow.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton"))?.AsButton();
