@@ -39,10 +39,12 @@ public class WpfViewService : IViewService
 
     public void ShowAdvancedSimulationWindow(AdvancedSimulationViewModel dataContext)
     {
-        var window = new AdvancedSimulationWindow(dataContext)
-        {
-            Owner = Application.Current?.MainWindow
-        };
+        var window = new AdvancedSimulationWindow(dataContext);
+        
+        // [STABILITY] Window ownership is disabled in automated environments to prevent 
+        // potential UI thread deadlocks during layout and theme synchronization.
+        // window.Owner = Application.Current.MainWindow;
+        
         window.Show();
     }
 
