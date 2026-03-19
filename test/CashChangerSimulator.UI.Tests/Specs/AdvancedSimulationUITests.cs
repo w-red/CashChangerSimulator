@@ -56,8 +56,8 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             throw new Exception($"LaunchAdvancedSimulationButton not found. MainWindow Tree:\n{sb}");
         }
         
+        // Ensure the button is ready
         Retry.WhileFalse(() => launchBtn.IsEnabled, TimeSpan.FromSeconds(10));
-        System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", $"[DIAG] LaunchBtn: Found={launchBtn != null}, Enabled={launchBtn?.IsEnabled}, Offscreen={launchBtn?.IsOffscreen}\n");
 
         launchBtn.Focus();
         Thread.Sleep(500);
@@ -67,17 +67,17 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         {
             if (launchBtn.Patterns.Invoke.IsSupported)
             {
-                System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", "[DIAG] Using InvokePattern to launch.\n");
                 launchBtn.Patterns.Invoke.Pattern.Invoke();
             }
             else
             {
-                System.IO.File.AppendAllText("c:\\Users\\ITI202301003_User\\debug_findwindow.log", "[DIAG] Using Click() to launch.\n");
                 launchBtn.Click();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
+            // Ignore click error as it might still have successfully opened the window in some environments
+        }
         // ウィンドウを検索 (堅牢な共通ロジックを使用)
         var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", TimeSpan.FromSeconds(30));
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
