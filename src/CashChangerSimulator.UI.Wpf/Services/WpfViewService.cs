@@ -11,11 +11,13 @@ namespace CashChangerSimulator.UI.Wpf.Services;
 /// <summary>
 /// WPF implementation of IViewService.
 /// </summary>
-public class WpfViewService : IViewService
+public class WpfViewService(IDispatcherService dispatcher) : IViewService
 {
+    private Window? GetOwner() => dispatcher.GetActiveWindow() as Window;
+
     public void ShowSettingsWindow()
     {
-        var window = new SettingsWindow { Owner = Application.Current?.MainWindow };
+        var window = new SettingsWindow { Owner = GetOwner() };
         window.ShowDialog();
     }
 
@@ -23,7 +25,7 @@ public class WpfViewService : IViewService
     {
         var window = new DepositWindow(dataContext, getDenominations)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = GetOwner()
         };
         window.Show();
     }
@@ -32,19 +34,17 @@ public class WpfViewService : IViewService
     {
         var window = new DispenseWindow(dataContext, getDenominations)
         {
-            Owner = Application.Current?.MainWindow
+            Owner = GetOwner()
         };
         window.Show();
     }
 
     public void ShowAdvancedSimulationWindow(AdvancedSimulationViewModel dataContext)
     {
-        var window = new AdvancedSimulationWindow(dataContext);
-        
-        // [STABILITY] Window ownership is disabled in automated environments to prevent 
-        // potential UI thread deadlocks during layout and theme synchronization.
-        // window.Owner = Application.Current.MainWindow;
-        
+        var window = new AdvancedSimulationWindow(dataContext)
+        {
+            Owner = GetOwner()
+        };
         window.Show();
     }
 

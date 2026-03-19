@@ -15,7 +15,7 @@ public interface IDispatcherService
     void SafeInvoke(Action action);
 
     /// <summary>
-    /// UI スレッドで非同期にアクションを実行します。
+    /// 現在のメインウィンドウまたはアクティブなウィンドウを取得します。
     /// </summary>
-    Task InvokeAsync(Action action);
+    object? GetActiveWindow();
 }

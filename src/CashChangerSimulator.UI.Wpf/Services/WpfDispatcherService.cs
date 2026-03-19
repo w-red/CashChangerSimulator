@@ -34,4 +34,9 @@ public class WpfDispatcherService : IDispatcherService
         action();
         return Task.CompletedTask;
     }
+
+    public object? GetActiveWindow()
+    {
+        return Application.Current?.MainWindow;
+    }
 }
