@@ -28,7 +28,12 @@ internal partial class App : Application
             WpfProviderInitializer.SetDefaultObservableSystem(ex =>
             {
                 logger.ZLogError(ex, $"R3 Unhandled Exception");
+                HandleFatalException(ex);
             });
+
+            // Global Unhandled Exception Handlers
+            AppDomain.CurrentDomain.UnhandledException += (s, ev) => HandleFatalException(ev.ExceptionObject as Exception);
+            DispatcherUnhandledException += (s, ev) => { HandleFatalException(ev.Exception); ev.Handled = false; };
 
             DIContainer.Initialize();
 
@@ -102,12 +107,9 @@ internal partial class App : Application
             try
             {
                 var cashChanger = DIContainer.Resolve<SimulatorCashChanger>();
-                if (cashChanger.State != Microsoft.PointOfService.ControlState.Closed)
-                {
-                    cashChanger.Close();
-                }
+                HandleDeviceCleanup(cashChanger);
             }
-            catch { /* Ignore if device was not initialized or failure during close */ }
+            catch { /* Ignore if device was not initialized or failure during resolve */ }
         }
         catch (Exception)
         {
@@ -277,6 +279,45 @@ internal partial class App : Application
         catch (Exception ex)
         {
             LogProvider.CreateLogger<App>().LogError(ex, "Failed to update theme to {Theme}", themeName);
+        }
+    }
+
+    /// <summary>致命的な例外発生時にデバイスのクリーンアップを試みます。</summary>
+    private void HandleFatalException(Exception? ex)
+    {
+        if (ex == null) return;
+        
+        try
+        {
+            var cashChanger = DIContainer.Resolve<SimulatorCashChanger>();
+            if (cashChanger != null)
+            {
+                HandleDeviceCleanup(cashChanger);
+            }
+        }
+        catch { }
+    }
+
+    /// <summary>デバイスの安全な終了シーケンス（Disable -> Release -> Close）を実行します。</summary>
+    private void HandleDeviceCleanup(SimulatorCashChanger cashChanger)
+    {
+        try
+        {
+            if (cashChanger.State == Microsoft.PointOfService.ControlState.Closed) return;
+
+            // [SAFE SEQUENCE] Ensure the device follows Disable -> Release -> Close.
+            // These calls use the internal hardening we added to StandardLifecycleHandler.
+            if (cashChanger.DeviceEnabled) cashChanger.DeviceEnabled = false;
+            // Claimed/Release/Close are handled inside Close() via our hardened StandardLifecycleHandler.
+            cashChanger.Close();
+            
+            var logger = LogProvider.CreateLogger<App>();
+            logger.LogInformation("Device cleanup successful during shutdown.");
+        }
+        catch (Exception ex)
+        {
+            var logger = LogProvider.CreateLogger<App>();
+            logger.LogWarning(ex, "Device cleanup failed during shutdown.");
         }
     }
 }
