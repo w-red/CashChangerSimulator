@@ -211,6 +211,8 @@ public class InventoryViewModel : IDisposable
 
     private void InitializeDenominations()
     {
+        foreach (var vm in BillDenominations) vm.Dispose();
+        foreach (var vm in CoinDenominations) vm.Dispose();
         BillDenominations.Clear();
         CoinDenominations.Clear();
 
