@@ -117,7 +117,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         _app.Launch();
         var window = _app.MainWindow;
-        var depositWindow = OpenDepositTerminal(window);
+        window.ShouldNotBeNull();
+        var depositWindow = OpenDepositTerminal(window!);
 
         // 1. Start Deposit
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
@@ -185,7 +186,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         _app.Launch();
         var window = _app.MainWindow;
-        var depositWindow = OpenDepositTerminal(window);
+        window.ShouldNotBeNull();
+        var depositWindow = OpenDepositTerminal(window!);
 
         // Verify initial state
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "")?.AsButton();
@@ -271,8 +273,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldBeNull();
     }
 
-    private Window OpenDepositTerminal(Window mainWindow)
+    private Window OpenDepositTerminal(Window? mainWindow)
     {
+        mainWindow.ShouldNotBeNull();
         var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
         launchButton.SmartClick();
 

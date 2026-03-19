@@ -31,7 +31,7 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         decimal initialAmount = ParseAmount(totalAmountLabel.Text);
 
         // 2. Open Dispense Terminal
-        var dispenseWindow = OpenDispenseTerminal(window);
+        var dispenseWindow = OpenDispenseTerminal(window!);
 
         // 3. Open Bulk Dispense Window
         var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", "BULK")?.AsButton();
@@ -131,8 +131,10 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
-        var licenseCloseBtn = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
-        licenseCloseBtn.SmartClick();
+        mainWindow.ShouldNotBeNull();
+        var launchButton = UiTestRetry.Find(() => mainWindow!.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
+        launchButton.ShouldNotBeNull();
+        launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
         var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", UITestTimings.RetryLongTimeout);

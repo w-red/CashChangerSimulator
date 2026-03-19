@@ -15,4 +15,9 @@ public class ImmediateDispatcherService : IDispatcherService
         action();
         return Task.CompletedTask;
     }
+
+    public object? GetActiveWindow()
+    {
+        return null;
+    }
 }

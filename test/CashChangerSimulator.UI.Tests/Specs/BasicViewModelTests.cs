@@ -31,6 +31,10 @@ public class BasicViewModelTests
         var mockFacade = new Mock<IDeviceFacade>();
         mockFacade.Setup(f => f.Inventory).Returns(inventory);
         mockFacade.Setup(f => f.Deposit).Returns(deposit);
+
+        var mockDispatcher = new Mock<IDispatcherService>();
+        mockDispatcher.Setup(d => d.SafeInvoke(It.IsAny<Action>())).Callback<Action>(a => a());
+        mockFacade.Setup(f => f.Dispatcher).Returns(mockDispatcher.Object);
         
         var metadata = new CurrencyMetadataProvider(config);
         var monitor = new CashStatusMonitor(inventory, key, 5, 50, 100);
@@ -57,6 +61,10 @@ public class BasicViewModelTests
         var mockFacade = new Mock<IDeviceFacade>();
         mockFacade.Setup(f => f.Inventory).Returns(inventory);
         mockFacade.Setup(f => f.Deposit).Returns(deposit);
+
+        var mockDispatcher = new Mock<IDispatcherService>();
+        mockDispatcher.Setup(d => d.SafeInvoke(It.IsAny<Action>())).Callback<Action>(a => a());
+        mockFacade.Setup(f => f.Dispatcher).Returns(mockDispatcher.Object);
         
         var metadata = new CurrencyMetadataProvider(config);
         var monitor = new CashStatusMonitor(inventory, key, 5, 50, 100);
@@ -100,6 +108,10 @@ public class BasicViewModelTests
         var mockFacade = new Mock<IDeviceFacade>();
         mockFacade.Setup(f => f.Deposit).Returns(controller);
         mockFacade.Setup(f => f.Status).Returns(status);
+
+        var mockDispatcher = new Mock<IDispatcherService>();
+        mockDispatcher.Setup(d => d.SafeInvoke(It.IsAny<Action>())).Callback<Action>(a => a());
+        mockFacade.Setup(f => f.Dispatcher).Returns(mockDispatcher.Object);
 
         var metadata = new CurrencyMetadataProvider(config);
 
