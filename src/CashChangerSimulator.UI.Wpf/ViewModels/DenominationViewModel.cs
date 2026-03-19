@@ -13,6 +13,7 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// <summary>個別の金種（1000円、100円等）の表示状態と操作を管理する ViewModel。</summary>
 public class DenominationViewModel : IDisposable
 {
+    private readonly IDispatcherService _dispatcher;
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>金種のキー情報。</summary>
@@ -69,7 +70,8 @@ public class DenominationViewModel : IDisposable
         ArgumentNullException.ThrowIfNull(metadataProvider);
         ArgumentNullException.ThrowIfNull(monitor);
         ArgumentNullException.ThrowIfNull(configProvider);
-
+        
+        _dispatcher = facade.Dispatcher;
         Key = key;
 
         var cultureCode = configProvider.Config.System.CultureCode ?? "en-US";
@@ -131,15 +133,7 @@ public class DenominationViewModel : IDisposable
 
     private void SafeInvoke(Action action)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher != null && !dispatcher.CheckAccess())
-        {
-            dispatcher.Invoke(action);
-        }
-        else
-        {
-            action();
-        }
+        _dispatcher.SafeInvoke(action);
     }
 
     /// <inheritdoc/>
