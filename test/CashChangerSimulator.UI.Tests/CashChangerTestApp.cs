@@ -177,7 +177,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             // Settlement period for UI Automation state
             System.Threading.Thread.Sleep(500);
 
-            if (!isCi)
+            if (!isCi && MainWindow != null)
             {
                 try
                 {
@@ -190,7 +190,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             }
 
             // Skip clickable wait in CI as it often hangs
-            if (!isCi)
+            if (!isCi && MainWindow != null)
             {
                 var timeout = TimeSpan.FromSeconds(10);
                 try
@@ -210,7 +210,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
                     {
                         Console.WriteLine("[INFO] IsOffscreen property access failed/not supported.");
                     }
-
+                    
                     if (isOffscreen)
                     {
                         throw new Exception("Main window is offscreen and could not be made clickable.");
@@ -219,7 +219,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             }
             else
             {
-                Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment.");
+                Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment or if MainWindow is null.");
             }
         }
         catch (Exception)

@@ -68,8 +68,8 @@ HotStart = true
         }
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
-        var simWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "Advanced Simulation Controls", UITestTimings.RetryLongTimeout);
-        simWindow.ShouldNotBeNull();
+        var simWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", UITestTimings.RetryLongTimeout);
+        simWindow.ShouldNotBeNull("AdvancedSimulationWindow not found");
         simWindow.SetForeground();
 
         // 2. 大量のログを発生させるスクリプト（200回のReadCashCounts呼び出しなど）を生成

@@ -86,17 +86,21 @@ public static class UiTestRetry
 
         if (result == null)
         {
-            // Debug: List all windows if not found (will show in test output if assertions follow)
-            Console.WriteLine($"Failed to find window '{title}' for PID {processId}. Available windows for this PID:");
+            Console.WriteLine($"[ERROR] Window '{title}' NOT FOUND for ProcessId {processId} after {timeout.TotalSeconds}s.");
+            Console.WriteLine("Dumping ALL windows on Desktop for context:");
             try
             {
-                var all = automation.GetDesktop().FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
-                foreach (var w in all.Where(x => x.Properties.ProcessId == processId))
+                var desktop = automation.GetDesktop();
+                var all = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
+                foreach (var w in all)
                 {
-                    Console.WriteLine($"- Name: '{w.Name ?? "(null)"}', Id: '{w.AutomationId ?? "(null)"}'");
+                    Console.WriteLine($"- Window: Name='{w.Name ?? "(null)"}', ID='{w.AutomationId ?? "(null)"}', PID={w.Properties.ProcessId}");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Failed to dump windows: {ex.Message}");
+            }
         }
 
         return result;
