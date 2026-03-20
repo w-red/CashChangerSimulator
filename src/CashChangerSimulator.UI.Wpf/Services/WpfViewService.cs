@@ -41,10 +41,7 @@ public class WpfViewService(IDispatcherService dispatcher) : IViewService
 
     public void ShowAdvancedSimulationWindow(AdvancedSimulationViewModel dataContext)
     {
-        var window = new AdvancedSimulationWindow(dataContext)
-        {
-            Owner = GetOwner()
-        };
+        var window = new AdvancedSimulationWindow(dataContext);
         window.Show();
     }
 

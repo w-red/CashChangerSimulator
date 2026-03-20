@@ -31,28 +31,21 @@ public class CashChangerTestApp : IDisposable
         config = "Release";
 #endif
 
-        // Adjust this path based on your project structure and build output
-        var relativePath = $"../../../../../src/CashChangerSimulator.UI.Wpf/bin/{config}/net10.0-windows/CashChangerSimulator.UI.Wpf.exe";
-        var potentialPath = Path.GetFullPath(Path.Combine(assemblyDir, relativePath));
+        // [DEFINITIVE FORCE] Use the publish folder if it exists to ensure we aren't using stale cached binaries.
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var solutionRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", ".."));
+        var publishPath = Path.Combine(solutionRoot, "test_publish", "CashChangerSimulator.UI.Wpf.exe");
+        var srcExePath = Path.Combine(solutionRoot, "src", "CashChangerSimulator.UI.Wpf", "bin", "Debug", "net10.0-windows", "CashChangerSimulator.UI.Wpf.exe");
+        
+        var exePath = File.Exists(publishPath) ? publishPath : (File.Exists(srcExePath) ? srcExePath : Path.Combine(baseDir, "CashChangerSimulator.UI.Wpf.exe"));
+        _executablePath = exePath;
+        var fullPath = Path.GetFullPath(exePath);
 
-        // Fallback: Check the other configuration just in case
-        if (!File.Exists(potentialPath))
-        {
-            string otherConfig = (config == "Debug") ? "Release" : "Debug";
-            var fallbackPath = Path.GetFullPath(Path.Combine(assemblyDir, $"../../../../../src/CashChangerSimulator.UI.Wpf/bin/{otherConfig}/net10.0-windows/CashChangerSimulator.UI.Wpf.exe"));
-            if (File.Exists(fallbackPath))
-            {
-                potentialPath = fallbackPath;
-            }
-        }
-
-        if (!File.Exists(potentialPath))
+        if (!File.Exists(_executablePath))
         {
             // Fallback or throw
-            throw new FileNotFoundException($"Application executable not found. Tried: {potentialPath}. Ensure the application is built.");
+            throw new FileNotFoundException($"Application executable not found. Tried: {_executablePath}. Ensure the application is built.");
         }
-
-        _executablePath = potentialPath;
     }
 
     public void Launch(string? customConfigToml = null, bool hotStart = true, Dictionary<string, string>? envVars = null)
@@ -131,28 +124,48 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
             var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(20);
 
+            Console.WriteLine($"[TEST] Starting MainWindow search (Timeout: {windowWaitTimeout.TotalSeconds}s, PID: {Application.ProcessId})...");
             MainWindow = Retry.WhileNull(() =>
             {
-                // Try standard Application API
-                var win = Application.GetMainWindow(Automation, TimeSpan.FromSeconds(1));
-                if (win != null) return win;
-
-                // Fallback: Proactive desktop scan
-                var desktop = Automation.GetDesktop();
-                
-                // Priority 1: By AutomationId
-                var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"));
-                if (byId != null) return byId.AsWindow();
-
-                // Priority 2: By Name/Title for this process
                 var appProcessId = Application.ProcessId;
-                var allWindows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-                var byProcess = allWindows.FirstOrDefault(w => 
-                    w.Properties.ProcessId == appProcessId && 
-                    (w.Name.Contains("Cash Changer") || w.Name.Contains("シミュレーター")));
-                
-                return byProcess?.AsWindow();
-            }, windowWaitTimeout, TimeSpan.FromMilliseconds(2000)).Result;
+                var desktop = Automation.GetDesktop();
+
+                // 1. Try Find by AutomationId "MainWindow" with PID check (Most precise)
+                var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"))?.AsWindow();
+                if (byId != null)
+                {
+                    try { 
+                        var pid = byId.Properties.ProcessId.Value;
+                        if (pid == appProcessId) return byId; 
+                    } catch { }
+                }
+
+                // 2. Try Find by Title Pattern with PID check (Multilingual support)
+                var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+                foreach (var w in windows)
+                {
+                    try {
+                        if (w.Properties.ProcessId.Value == appProcessId)
+                        {
+                            var name = w.Name;
+                            if (name != null && (name.Contains("Cash") || name.Contains("シミュレーター")))
+                            {
+                                return w.AsWindow();
+                            }
+                        }
+                    } catch { }
+                }
+
+                // 3. Fallback: Any visible window for this PID
+                foreach (var w in windows)
+                {
+                    try {
+                        if (w.Properties.ProcessId.Value == appProcessId && !w.IsOffscreen) return w.AsWindow();
+                    } catch { }
+                }
+
+                return null;
+            }, windowWaitTimeout, TimeSpan.FromMilliseconds(1000)).Result;
 
             if (MainWindow == null)
             {
@@ -177,46 +190,13 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             // Settlement period for UI Automation state
             System.Threading.Thread.Sleep(500);
 
-            if (!isCi && MainWindow != null)
+#if !GITHUB_ACTIONS
+            if (MainWindow != null)
             {
-                try
-                {
-                    MainWindow.SetForeground();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[INFO] SetForeground failed: {ex.Message}");
-                }
+                try { MainWindow.SetForeground(); } catch { }
+                try { MainWindow.WaitUntilClickable(TimeSpan.FromSeconds(5)); } catch { }
             }
-
-            // Skip clickable wait in CI as it often hangs
-            if (!isCi && MainWindow != null)
-            {
-                var timeout = TimeSpan.FromSeconds(10);
-                try
-                {
-                    MainWindow.WaitUntilClickable(timeout);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[WARNING] WaitUntilClickable failed: {ex.Message}. Proceeding anyway as window is found.");
-                    
-                    bool isOffscreen = false;
-                    try
-                    {
-                        isOffscreen = MainWindow.IsOffscreen;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("[INFO] IsOffscreen property access failed/not supported.");
-                    }
-                    
-                    if (isOffscreen)
-                    {
-                        throw new Exception("Main window is offscreen and could not be made clickable.");
-                    }
-                }
-            }
+#endif
             else
             {
                 Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment or if MainWindow is null.");

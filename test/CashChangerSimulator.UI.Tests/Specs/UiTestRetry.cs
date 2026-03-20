@@ -86,21 +86,7 @@ public static class UiTestRetry
 
         if (result == null)
         {
-            Console.WriteLine($"[ERROR] Window '{title}' NOT FOUND for ProcessId {processId} after {timeout.TotalSeconds}s.");
-            Console.WriteLine("Dumping ALL windows on Desktop for context:");
-            try
-            {
-                var desktop = automation.GetDesktop();
-                var all = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
-                foreach (var w in all)
-                {
-                    Console.WriteLine($"- Window: Name='{w.Name ?? "(null)"}', ID='{w.AutomationId ?? "(null)"}', PID={w.Properties.ProcessId}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DEBUG] Failed to dump windows: {ex.Message}");
-            }
+            // [DEBUG] You can add logging here if needed.
         }
 
         return result;
