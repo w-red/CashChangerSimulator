@@ -17,6 +17,7 @@
     <system:String x:Key="StatusOverlap">重なり</system:String>
     <system:String x:Key="StatusDeviceError">デバイスエラー</system:String>
     
+    
     <system:String x:Key="Bills">紙幣</system:String>
     <system:String x:Key="Coins">硬貨</system:String>
     <system:String x:Key="Recyclable">還流庫</system:String>
@@ -90,6 +91,7 @@
     <system:String x:Key="QuickDeposit">クイック入金</system:String>
     <system:String x:Key="AutoCalcDenoms">枚数を自動計算して投入します</system:String>
     <system:String x:Key="Bulk">一括</system:String>
+    <system:String x:Key="Jam">ジャム</system:String>
     <system:String x:Key="Overlap">重なり</system:String>
     <system:String x:Key="FinishCounting">計数終了</system:String>
     <system:String x:Key="Pause">一時停止</system:String>
@@ -118,6 +120,7 @@
     <system:String x:Key="BulkInputDefaultSubtitle">金種ごとの数量を入力してください。</system:String>
     <system:String x:Key="BulkDepositSubtitle">投入する数量を入力してください。</system:String>
     <system:String x:Key="BulkDispenseSubtitle">出金する数量を入力してください。</system:String>
+    <system:String x:Key="ErrorCannotOpenTerminalInError">デバイスがエラー状態のためターミナルを開けません。先にエラーを解除してください。</system:String>
     <system:String x:Key="ErrorCodeCannotReset">エラー状態をリセットできません。</system:String>
     <system:String x:Key="AdvancedSimulation">高度なシミュレーション操作</system:String>
     <system:String x:Key="Execute">実行</system:String>
@@ -129,6 +132,7 @@
 
     <system:String x:Key="SimulateOverlap">重なりシミュレート</system:String>
     <system:String x:Key="SimulateJam">ジャムシミュレート</system:String>
+    <system:String x:Key="SimulateDeviceError">デバイスエラーシミュレート</system:String>
     <system:String x:Key="LabelInput">投入額: </system:String>
     <system:String x:Key="LabelTarget">目標額: </system:String>
     <system:String x:Key="BulkOperations">一括操作</system:String>
