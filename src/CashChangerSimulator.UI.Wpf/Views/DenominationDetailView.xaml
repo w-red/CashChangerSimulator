@@ -13,8 +13,10 @@
              d:DataContext="{d:DesignInstance Type=vm:DenominationViewModel}">
     <Border AutomationProperties.AutomationId="DenominationDetailDialogViewContent" Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}" CornerRadius="12" Padding="24" BorderThickness="1" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}">
         <StackPanel>
-            <!-- 診断用の隠しマーカー -->
-            <TextBlock AutomationProperties.AutomationId="DenominationDetailDialogMark" Visibility="Collapsed" />
+            <!-- 診断用の隠しマーカー (UI Automation 検出用) -->
+            <Button AutomationProperties.AutomationId="DenominationDetailDialogMark" 
+                    Opacity="0.01" Width="1" Height="1" 
+                    IsHitTestVisible="False" Focusable="False" />
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{StaticResource SymbolInfo}" Width="20" Height="20" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" TextAlignment="Center"/>

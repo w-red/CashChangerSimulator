@@ -86,42 +86,55 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Button x:Name="BulkInsertButton"
                         Grid.Column="0" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding ShowBulkInsertCommand}"
                         Margin="4" Height="40"
-                        IsEnabled="{Binding IsDepositPaused.Value, Converter={StaticResource InverseBoolConverter}}"
                         AutomationProperties.AutomationId="BulkInsertButton">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="PlaylistPlus" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource Bulk}" FontSize="12" FontWeight="Bold"/>
+                        <materialDesign:PackIcon Kind="Plus" Margin="0,0,4,0" />
+                        <TextBlock Text="{StaticResource Bulk}" FontSize="10" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="SimulateJamButton"
+                        Grid.Column="1" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateJamCommand}"
+                        Margin="4" Height="40"
+                        ToolTip="{StaticResource ToolTipSimulateJam}"
+                        AutomationProperties.AutomationId="SimulateJamButton">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AlertCircleOutline"
+                                                 Margin="0,0,4,0" />
+                        <TextBlock Text="{StaticResource Jam}"
+                                   FontSize="10" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 <Button x:Name="SimulateOverlapButton"
-                        Grid.Column="1" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Grid.Column="2" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateOverlapCommand}"
                         Margin="4" Height="40"
                         ToolTip="{StaticResource ToolTipSimulateOverlap}"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline"
-                                                 Margin="0,0,8,0" />
+                                                 Margin="0,0,4,0" />
                         <TextBlock Text="{StaticResource Overlap}"
-                                   FontSize="12" FontWeight="Bold"/>
+                                   FontSize="10" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 <Button x:Name="SimulateRejectButton"
-                        Grid.Column="2" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Grid.Column="3" Style="{StaticResource SimulationErrorButtonStyle}" 
                         Command="{Binding SimulateRejectCommand}"
                         Margin="4" Height="40"
                         ToolTip="{StaticResource ToolTipSimulateReject}"
                         AutomationProperties.AutomationId="SimulateRejectButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CashRemove"
-                                                 Margin="0,0,8,0" />
+                                                 Margin="0,0,4,0" />
                         <TextBlock Text="{StaticResource Reject}"
-                                   FontSize="12" FontWeight="Bold"/>
+                                   FontSize="10" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>
