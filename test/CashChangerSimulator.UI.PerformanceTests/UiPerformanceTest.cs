@@ -32,6 +32,10 @@ public class UiPerformanceTest : IDisposable
     {
         // 高速で実行させるため、ハードウェア遅延をシミュレーション設定でゼロに近づける
         var customConfig = """
+[System]
+CurrencyCode = 'JPY'
+CultureCode = 'ja-JP'
+
 [Thresholds]
 NearEmpty = 10
 NearFull = 90
@@ -47,28 +51,49 @@ Full = 100
 DispenseDelayMs = 0
 HotStart = true
 """;
+        Console.WriteLine("[TEST] Launching app...");
         _app.Launch(customConfig);
+        Console.WriteLine("[TEST] App launched. Searching for MainWindow...");
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
+        var titlePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "test_title.txt");
+        System.IO.File.WriteAllText(titlePath, $"Title: {window.Name}");
+        Console.WriteLine($"[TEST] MainWindow found. Title: {window.Name}");
         window.SetForeground();
-        // 1. Advanced Simulation ウィンドウを開く
-        var terminalButton = Retry.WhileNull(() => {
-            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchAdvancedSimulationButton"))?.AsButton();
-            return (btn != null && btn.IsEnabled && !btn.IsOffscreen) ? btn : null;
-        }, TimeSpan.FromSeconds(20)).Result;
+        // 1. Ensure Device is Open if not already (Handling Cold Start)
+        var openBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton();
+        if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
+        {
+            openBtn.Click();
+            // Wait for connection to stabilize
+            Console.WriteLine($"[TEST] Waiting for device to open...");
+            Retry.WhileFalse(() => {
+                Console.WriteLine("[DEBUG] Checking if DeviceCloseButton is enabled...");
+                var closeBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton"));
+                return closeBtn != null && closeBtn.IsEnabled;
+            }, TimeSpan.FromSeconds(15));
+            Console.WriteLine("[TEST] Device is open.");
+        }
+
+        Console.WriteLine("[TEST] Searching for LaunchAdvancedSimulationButton...");
+        // 2. Advanced Simulation ウィンドウを開く
+        var terminalButton = Retry
+            .WhileNull(() => {
+                var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchAdvancedSimulationButton"))?.AsButton();
+                return (btn != null && btn.IsEnabled && !btn.IsOffscreen) ? btn : null;
+            }, TimeSpan.FromSeconds(20)).Result;
 
         terminalButton.ShouldNotBeNull("LaunchAdvancedSimulationButton not found or not ready");
-        if (terminalButton.Patterns.Invoke.IsSupported)
-        {
-            terminalButton.Patterns.Invoke.Pattern.Invoke();
-        }
-        else
-        {
-            terminalButton.Click();
-        }
+        Console.WriteLine("[TEST] LaunchAdvancedSimulationButton found and enabled. Invoking...");
+        terminalButton.SmartClick();
+        Console.WriteLine("[TEST] LaunchAdvancedSimulationButton invoked. Waiting for popup...");
 
-        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
-        var simWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", UITestTimings.RetryLongTimeout);
+        Thread.Sleep(5000);
+        
+        // Robust simulation window search
+        var simWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", UITestTimings.RetryLongTimeout)
+                        ?? _app.Application.GetAllTopLevelWindows(_app.Automation).FirstOrDefault(w => w.Title.Contains("Advanced Simulation"));
+        
         simWindow.ShouldNotBeNull("AdvancedSimulationWindow not found");
         simWindow.SetForeground();
 
