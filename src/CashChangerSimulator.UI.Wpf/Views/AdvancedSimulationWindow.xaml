@@ -9,8 +9,8 @@
     xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
     xmlns:conv="clr-namespace:CashChangerSimulator.UI.Wpf.Converters"
     mc:Ignorable="d"
-    Background="#121212"
-    Foreground="White"
+    Background="{DynamicResource MaterialDesign.Brush.SurfaceContainer}"
+    Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"
     TextElement.FontWeight="Regular"
     TextElement.FontSize="13"
     TextOptions.TextFormattingMode="Ideal" 
@@ -18,9 +18,10 @@
     FontFamily="{materialDesign:MaterialDesignFont}"
     Title="Advanced Simulation (Debug Mode)" 
     Height="800" Width="600"
+    Topmost="True"
     AutomationProperties.AutomationId="AdvancedSimulationWindow"
     WindowStartupLocation="CenterScreen">
-    <materialDesign:Card Margin="16" materialDesign:ElevationAssist.Elevation="Dp8" Background="#121212" Foreground="White">
+    <materialDesign:Card Margin="16">
         <Grid Margin="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -31,24 +32,25 @@
             <!-- Header -->
             <StackPanel Grid.Row="0" Margin="0,0,0,24">
                 <TextBlock Text="アドバンスド・シミュレーション" 
-                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                           FontWeight="Bold" Foreground="#BB86FC"/>
+                           Style="{StaticResource MaterialDesignHeadlineSmallTextBlock}"
+                           FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                 <TextBlock Text="各デバイスのエラー状態を個別にシミュレートします" 
-                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                           Opacity="0.7" Foreground="White"/>
+                           Style="{StaticResource MaterialDesignBodySmallTextBlock}"
+                           Opacity="0.7"/>
             </StackPanel>
 
             <!-- Content -->
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Simulation Controls -->
+                    <RowDefinition Height="Auto"/> <!-- Scripting -->
                     <RowDefinition Height="*"/>    <!-- Status lists -->
                 </Grid.RowDefinitions>
                 
                 <!-- Simulation Controls -->
-                <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16" Background="#1E1E1E">
+                <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                     <StackPanel>
-                        <TextBlock Text="エラー・シミュレーション" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,16" Foreground="White"/>
+                        <TextBlock Text="エラー・シミュレーション" Style="{StaticResource MaterialDesignTitleLargeTextBlock}" Margin="0,0,0,16"/>
                         
                         <WrapPanel Orientation="Horizontal">
                             <Button Content="ジャム発生" 
@@ -72,63 +74,83 @@
                             <Button Content="リセット" 
                                     Command="{Binding ResetErrorCommand}"
                                     AutomationProperties.AutomationId="ResetErrorButton"
-                                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
                                     Margin="0,0,8,8"/>
                         </WrapPanel>
 
                         <!-- Status Display -->
                         <StackPanel Margin="0,16,0,0">
-                            <materialDesign:Chip Content="ジャム検出中" 
-                                               AutomationProperties.AutomationId="JamIndicatorText"
-                                               Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
+                            <materialDesign:Chip Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
                                                Background="#D62828" Foreground="White" Margin="0,4">
                                 <materialDesign:Chip.Icon>
                                     <materialDesign:PackIcon Kind="AlertCircle"/>
                                 </materialDesign:Chip.Icon>
+                                <TextBlock Text="ジャム検出中" AutomationProperties.AutomationId="JamIndicatorText"/>
                             </materialDesign:Chip>
                             
-                            <materialDesign:Chip Content="重なり検出中" 
-                                               Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="#F77F00" Foreground="White" Margin="0,4"/>
+                            <materialDesign:Chip Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
+                                               Background="#F77F00" Foreground="White" Margin="0,4">
+                                <TextBlock Text="重なり検出中" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                            </materialDesign:Chip>
 
-                            <materialDesign:Chip Content="デバイスエラー" 
-                                               Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="#FCBF49" Foreground="Black" Margin="0,4"/>
+                            <materialDesign:Chip Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
+                                               Background="#FCBF49" Foreground="Black" Margin="0,4">
+                                <TextBlock Text="デバイスエラー" AutomationProperties.AutomationId="DeviceErrorIndicatorText"/>
+                            </materialDesign:Chip>
                         </StackPanel>
                     </StackPanel>
                 </materialDesign:Card>
 
+                <!-- Scripting Area -->
+                <materialDesign:Card Grid.Row="1" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
+                    <StackPanel>
+                        <TextBlock Text="スクリプト実行 (テスト用)" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,8"/>
+                        <TextBox x:Name="ScriptInputTextBox" 
+                                 AutomationProperties.AutomationId="ScriptInputTextBox"
+                                 Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,0,8"/>
+                        <Button x:Name="ExecuteScriptButton"
+                                AutomationProperties.AutomationId="ExecuteScriptButton"
+                                Content="スクリプト実行"
+                                Command="{Binding ExecuteScriptCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
                 <!-- Lists -->
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     
-                    <materialDesign:Card Grid.Column="0" Margin="0,0,8,0" Padding="12" Background="#1E1E1E">
+                    <materialDesign:Card Grid.Column="0" Margin="0,0,8,0" Padding="12" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                        <StackPanel>
-                           <TextBlock Text="紙幣ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="#03DAC6"/>
+                           <TextBlock Text="紙幣ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                            <ItemsControl ItemsSource="{Binding Bills}">
                                <ItemsControl.ItemTemplate>
                                    <DataTemplate>
                                        <ToggleButton Content="{Binding Name}" Margin="2" 
                                                      IsChecked="{Binding IsInError}" 
-                                                     Style="{StaticResource MaterialDesignActionLightToggleButton}"/>
+                                                     Style="{StaticResource MaterialDesignActionToggleButton}"/>
                                    </DataTemplate>
                                </ItemsControl.ItemTemplate>
                            </ItemsControl>
                        </StackPanel>
                     </materialDesign:Card>
 
-                    <materialDesign:Card Grid.Column="1" Margin="8,0,0,0" Padding="12" Background="#1E1E1E">
+                    <materialDesign:Card Grid.Column="1" Margin="8,0,0,0" Padding="12" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                         <StackPanel>
-                            <TextBlock Text="硬貨ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="#03DAC6"/>
+                            <TextBlock Text="硬貨ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                             <ItemsControl ItemsSource="{Binding Coins}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <ToggleButton Content="{Binding Name}" Margin="2" 
                                                       IsChecked="{Binding IsInError}" 
-                                                      Style="{StaticResource MaterialDesignActionLightToggleButton}"/>
+                                                      Style="{StaticResource MaterialDesignActionToggleButton}"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -143,7 +165,7 @@
                         IsCancel="True"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         Command="{Binding CloseCommand}"
-                        Foreground="#BB86FC"/>
+                        Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
             </StackPanel>
         </Grid>
     </materialDesign:Card>
