@@ -39,7 +39,7 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Find the new dialog window
-        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", UITestTimings.RetryLongTimeout);
+        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
         dialog.ShouldNotBeNull();
 
         // 4. Enter quantities
@@ -137,7 +137,7 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
-        var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", UITestTimings.RetryLongTimeout);
+        var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", timeout: UITestTimings.RetryLongTimeout);
         dispenseWindow.ShouldNotBeNull();
         dispenseWindow.SetForeground();
         return dispenseWindow;

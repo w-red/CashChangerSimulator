@@ -33,34 +33,37 @@ public class DenominationDetailUITests : IClassFixture<CashChangerTestApp>
         var window = _app.MainWindow ?? throw new Exception("MainWindow is null");
         window.SetForeground();
 
-        // 接続完了まで待機 (HotStartの場合でもUI更新を待つ)
-        var closeBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton")), TimeSpan.FromSeconds(15)).Result;
-        closeBtn.ShouldNotBeNull("Device is not connected (DeviceCloseButton not found).");
+        // Wait for connection
+        var closeBtn = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton")), TimeSpan.FromSeconds(15));
+        closeBtn.ShouldNotBeNull("Device is not connected.");
 
-        // 金種タイルの出現と有効化を待機
-        var inventoryTile = Retry.WhileNull(() =>
+        // Wait for inventory tile
+        var inventoryTile = UiTestRetry.Find(() =>
         {
             var tiles = window.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
             var target = tiles.FirstOrDefault()?.AsButton();
             return (target != null && target.IsEnabled && !target.IsOffscreen) ? target : null;
-        }, TimeSpan.FromSeconds(15)).Result;
+        }, TimeSpan.FromSeconds(15)) as Button;
 
         inventoryTile.ShouldNotBeNull("InventoryTile not found or not ready.");
-        
-        // ダイアログを開く
         inventoryTile.SmartClick();
 
-        // ダイアログの出現を待機
-        _dialog = Retry.WhileNull(() => 
+        // Wait for dialog using marker
+        _dialog = UiTestRetry.Find(() => 
         {
-            // 複数の ID で確実に見つける
-            return window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogMark"))?.Parent ??
-                   window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogViewContent")) ??
-                   window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView")) ??
-                   UiTestRetry.FindWindow(_app.Application, _app.Automation, "DenominationDetailDialogView", TimeSpan.FromMilliseconds(500));
-        }, TimeSpan.FromSeconds(20)).Result;
+            var marker = window.FindAllDescendants().FirstOrDefault(cf => cf.Properties.AutomationId.ValueOrDefault == "DenominationDetailDialogMark");
+            if (marker != null) return marker.Parent; // Root border of the view
 
-        _dialog.ShouldNotBeNull("DenominationDetailDialogView not found.");
+            return window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogViewContent")) ??
+                   window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+        }, TimeSpan.FromSeconds(20));
+
+        if (_dialog == null)
+        {
+            UiTestRetry.DumpAutomationTree(window, "DenominationDetailDialog_Fail");
+            throw new Exception("DenominationDetailDialogView not found.");
+        }
+
         return _dialog;
     }
 
@@ -87,12 +90,13 @@ public class DenominationDetailUITests : IClassFixture<CashChangerTestApp>
         closeButton.ShouldNotBeNull();
         closeButton.SmartClick();
 
-        Retry.WhileTrue(() =>
+        var disappeared = Retry.WhileTrue(() =>
         {
-            var remaining = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
+            var remaining = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogMark"));
             return remaining != null && !remaining.IsOffscreen;
-        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Dialog should be dismissed");
+        }, TimeSpan.FromSeconds(10)).Success;
         
-        _dialog = null; // 使い終わったのでリセット
+        disappeared.ShouldBeTrue("Dialog should be dismissed");
+        _dialog = null;
     }
 }

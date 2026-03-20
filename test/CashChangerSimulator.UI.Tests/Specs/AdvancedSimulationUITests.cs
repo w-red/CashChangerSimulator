@@ -80,7 +80,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             // Ignore click error as it might still have successfully opened the window in some environments
         }
         // ウィンドウを検索 (堅牢な共通ロジックを使用)
-        var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", TimeSpan.FromSeconds(30));
+        var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", timeout: UITestTimings.RetryLongTimeout);
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
         advWindow.SetForeground();
 

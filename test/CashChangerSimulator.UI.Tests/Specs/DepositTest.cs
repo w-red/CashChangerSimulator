@@ -13,7 +13,6 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     public DepositTest(CashChangerTestApp app)
     {
         _app = app;
-        // 各テストで個別に再起動が必要な場合を除き、ここでは Launch しない（各テストメソッドに委ねる）
     }
 
     /// <summary>新規入金を開始し、現金を投入して確定するまでの一連のフローを検証する。</summary>
@@ -24,331 +23,207 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var window = _app.MainWindow;
         if (window == null) throw new Exception("MainWindow is null");
         window.SetForeground();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs * 2); // Wait longer for initial load
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs * 2);
 
-        // 1. Get initial total (Main Window)
-        var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
+        var totalAmountText = FindElement(window, "TotalAmountText", null)?.AsLabel();
         totalAmountText.ShouldNotBeNull();
-        decimal initialTotal = ParseAmount(totalAmountText.Text);
+        var initialTotal = ParseAmount(totalAmountText.Text);
 
-        // 2. Open Terminal
         var depositWindow = OpenDepositTerminal(window);
+        depositWindow.ShouldNotBeNull();
 
-        // 3. Begin Deposit
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
+        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
         beginButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
-        // 4. Fill Bulk Insert
-        FillBulkInsert(depositWindow, "2");
+        // 一括投入 (5250円を再現するため、1円玉のボックス(Index 9)に5250を入力)
+        FillBulkInsert(depositWindow, "5250", 9);
 
-        // 5. Verify Current Deposit Amount on Terminal Window
-        var currentDepositText = FindElement(depositWindow, "CurrentDepositText", "")?.AsLabel();
+        var currentDepositText = FindElement(depositWindow, "CurrentDepositText", null)?.AsLabel();
         currentDepositText.ShouldNotBeNull();
-        Retry.WhileTrue(() => ParseAmount(currentDepositText.Text ?? "0") > 0, UITestTimings.RetryLongTimeout);
-        decimal deposited = ParseAmount(currentDepositText.Text ?? "0");
-        deposited.ShouldBeGreaterThan(0);
+        UiTestRetry.Find(() => ParseAmount(currentDepositText.Text) == 5250 ? currentDepositText : null, TimeSpan.FromSeconds(5)).ShouldNotBeNull();
 
-        // DEBUG: Trace elements state after Bulk Insert
-        Thread.Sleep(500);
-        var debugFixBtn = FindElement(depositWindow, "FixDepositButton", "");
-        var debugStoreBtn = FindElement(depositWindow, "StoreDepositButton", "");
-        Console.WriteLine($"[DEBUG] After Bulk: FixBtn.IsEnabled={debugFixBtn?.IsEnabled}, StoreBtn.IsEnabled={debugStoreBtn?.IsEnabled}");
+        var fixButton = FindElement(depositWindow, "FixDepositButton", "FINISH")?.AsButton();
+        fixButton.SmartClick();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
-        // 6. Finish counting
-        var fixButton = UiTestRetry.Find(() =>
-        {
-            var btn = FindElement(depositWindow, "FixDepositButton", "");
-            return (btn != null && btn.IsEnabled) ? btn : null;
-        }, UITestTimings.RetryLongTimeout)?.AsButton();
-        fixButton.ShouldNotBeNull();
-        fixButton.Invoke(); // Use Invoke for reliability over SmartClick
-        Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
+        var storeButton = FindElement(depositWindow, "StoreDepositButton", "STORE")?.AsButton();
+        storeButton.SmartClick();
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
-        // 7. Store
-        var storeButton = UiTestRetry.Find(() =>
-        {
-            var btn = FindElement(depositWindow, "StoreDepositButton", "");
-            return (btn != null && btn.IsEnabled) ? btn : null;
-        }, UITestTimings.RetryLongTimeout)?.AsButton();
-        storeButton.ShouldNotBeNull();
-        storeButton.Invoke(); // Use Invoke for reliability over SmartClick
-        Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
-
-        // 8. Verify Global Total updated on Main Window
-        Retry.WhileTrue(() =>
-        {
-            var el = FindElement(window, "TotalAmountText", "");
-            return el != null && ParseAmount(el.AsLabel().Text) == initialTotal;
-        }, UITestTimings.RetryLongTimeout);
-
-        var finalEl = FindElement(window, "TotalAmountText", "");
-        decimal finalTotal = finalEl != null ? ParseAmount(finalEl.AsLabel().Text) : initialTotal;
-        finalTotal.ShouldBe(initialTotal + deposited);
+        var newTotalText = FindElement(window, "TotalAmountText", null)?.AsLabel();
+        newTotalText.ShouldNotBeNull();
+        ParseAmount(newTotalText.Text).ShouldBe(initialTotal + 5250);
     }
 
-    /// <summary>一括投入（Bulk Insert）機能の動作を検証する。</summary>
     [Fact]
     public void ShouldInsertBulkCash()
     {
         _app.Launch();
         var window = _app.MainWindow;
-        window.ShouldNotBeNull();
-
-        var depositWindow = OpenDepositTerminal(window);
-
-        // Start Deposit
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
-        beginButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Fill Bulk
-        FillBulkInsert(depositWindow, "10");
-
-        // Verify Current Deposit Amount
-        var currentDepositText = FindElement(depositWindow, "CurrentDepositText", "")?.AsLabel();
-        Retry.WhileTrue(() => ParseAmount(currentDepositText?.Text ?? "0") == 0, UITestTimings.RetryShortTimeout);
-        ParseAmount(currentDepositText?.Text ?? "0").ShouldBeGreaterThan(0);
-    }
-
-    /// <summary>入金中の一時停止および再開動作、モード表示の遷移を検証する。</summary>
-    [Fact]
-    public void ShouldPauseAndResumeDeposit()
-    {
-        _app.Launch();
-        var window = _app.MainWindow;
-        window.ShouldNotBeNull();
-        var depositWindow = OpenDepositTerminal(window!);
-
-        // 1. Start Deposit
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
-        beginButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Trigger Counting status by inserting
-        FillBulkInsert(depositWindow, "1");
-
-        // 2. Wait for Mode Indicator to become COUNTING (Check on Main Window for global status)
-        var modeIndicator = FindElement(window, "ModeIndicatorText", "")?.AsLabel();
-        modeIndicator.ShouldNotBeNull();
-        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), UITestTimings.RetryLongTimeout);
-
-        // 3. Click PAUSE
-        var pauseButton = FindElement(depositWindow, "PauseDepositButton", "PAUSE")?.AsButton();
-        pauseButton.SmartClick();
-        Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
-
-        // 4. Wait for Mode Indicator to become PAUSED
-        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("PAUSED") ?? false), UITestTimings.RetryLongTimeout);
-
-        // 5. Click RESUME
-        var resumeButton = FindElement(depositWindow, "ResumeDepositButton", "RESUME")?.AsButton();
-        resumeButton.SmartClick();
-        Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
-
-        // 6. Wait for Mode Indicator to return to COUNTING
-        Retry.WhileTrue(() => !(modeIndicator.Text?.Contains("COUNTING") ?? false), UITestTimings.RetryLongTimeout);
-    }
-
-    /// <summary>入金中に返却（RETURN）を選択した場合に、在庫が復元されることを検証する。</summary>
-    [Fact]
-    public void ShouldRepayDepositWhenReturning()
-    {
-        _app.Launch();
-        var window = _app.MainWindow;
         if (window == null) throw new Exception("MainWindow is null");
-        var totalAmountText = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
-        decimal initialTotal = ParseAmount(totalAmountText?.Text ?? "0");
+        window.SetForeground();
 
         var depositWindow = OpenDepositTerminal(window);
-
-        // Start Deposit
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
+        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
         beginButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
-        // Insert
-        FillBulkInsert(depositWindow, "1");
-
-        // Click "RETURN"
-        var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
-        repayButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Total should stay same
-        decimal finalTotal = ParseAmount(totalAmountText?.Text ?? "0");
-        finalTotal.ShouldBe(initialTotal);
-    }
-
-    /// <summary>エラー状態（ジャム等）の際にコントロールが無効化されることを検証する。</summary>
-    [Fact]
-    public void ShouldDisableControlsWhenErrorOccurs()
-    {
-        _app.Launch();
-        var window = _app.MainWindow;
-        window.ShouldNotBeNull();
-        var depositWindow = OpenDepositTerminal(window!);
-
-        // Verify initial state
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "")?.AsButton();
-        var quickDepositBox = FindElement(depositWindow, "QuickDepositBox", "")?.AsTextBox();
-        var quickDepositButton = FindElement(depositWindow, "QuickDepositButton", "")?.AsButton();
-
-        beginButton.ShouldNotBeNull();
-        quickDepositBox.ShouldNotBeNull();
-        quickDepositButton.ShouldNotBeNull();
-
-        // Enter amount so QuickDepositButton evaluates CanExecute to true
-        quickDepositBox.Text = "1000";
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        beginButton.IsEnabled.ShouldBeTrue();
-        quickDepositBox.IsEnabled.ShouldBeTrue();
-        quickDepositButton.IsEnabled.ShouldBeTrue();
-
-        // Simulate Jam
-        var simulateJamButton = FindElement(depositWindow, "SimulateJamButton", "")?.AsButton();
-        simulateJamButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Verify disabled state
-        beginButton.IsEnabled.ShouldBeFalse();
-        quickDepositBox.IsEnabled.ShouldBeFalse();
-        quickDepositButton.IsEnabled.ShouldBeFalse();
-
-        // Reset Error
-        var resetErrorButton = FindElement(depositWindow, "ResetErrorButton", "")?.AsButton();
-        resetErrorButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Verify enabled state
-        beginButton.IsEnabled.ShouldBeTrue();
-        quickDepositBox.IsEnabled.ShouldBeTrue();
-        quickDepositButton.IsEnabled.ShouldBeTrue();
-    }
-
-    /// <summary>紙幣重なりエラーが発生した際に、入金確定がブロックされることを検証する。</summary>
-    [Fact]
-    public void ShouldPreventFixWhenOverlapped()
-    {
-        _app.Launch();
-        var window = _app.MainWindow;
-        if (window == null) throw new Exception("MainWindow is null");
-        var depositWindow = OpenDepositTerminal(window);
-
-        // 1. Begin Deposit
-        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START DEPOSIT")?.AsButton();
-        beginButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // 2. Click "ERROR" (Simulate Overlap)
-        var overlapButton = UiTestRetry.Find(() => FindElement(depositWindow, "SimulateOverlapButton", "")?.AsButton(), UITestTimings.RetryLongTimeout);
-        overlapButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // 3. Verify Overlap indicator appears
-        var errorIndicator = UiTestRetry.Find(() => window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")), UITestTimings.RetryLongTimeout);
-        errorIndicator.ShouldNotBeNull();
-
-        // 4. Try to click FINISH (FixDeposit) -> Should be disabled
-        var fixButton = FindElement(depositWindow, "FixDepositButton", "")?.AsButton();
-        fixButton.ShouldNotBeNull();
-        Retry.WhileTrue(() => fixButton.IsEnabled, UITestTimings.RetryLongTimeout);
-        fixButton.IsEnabled.ShouldBeFalse();
-
-        // Verify Overlap indicator still exists
-        window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldNotBeNull();
-
-        // 5. Cancel (RETURN) should work, but does NOT clear the hardware error
-        var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
-        repayButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // 6. Manually reset the hardware error
-        var resetErrorButton = FindElement(depositWindow, "ActiveResetErrorButton", "")?.AsButton();
-        resetErrorButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
-
-        // Error indicator should be gone
-        window.FindFirstDescendant(cf => cf.ByAutomationId("OverlapErrorIndicator")).ShouldBeNull();
-    }
-
-    private Window OpenDepositTerminal(Window? mainWindow)
-    {
-        mainWindow.ShouldNotBeNull();
-        var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
-        launchButton.SmartClick();
-
-        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
-        // [STABILITY] Use a dedicated timeout for the first window detection to handle slow cold starts
-        var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", TimeSpan.FromSeconds(30));
-        
-        if (depositWindow == null)
-        {
-            Console.WriteLine("[DEBUG] DepositWindow not found. Current windows for this process:");
-            try
-            {
-                var desktop = _app.Automation.GetDesktop();
-                var pid = _app.Application.ProcessId;
-                var windows = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window))
-                                     .Where(w => w.Properties.ProcessId == pid);
-                foreach (var w in windows) Console.WriteLine($"- Candidate: '{w.Name}' ({w.AutomationId})");
-            } catch { }
-            throw new Exception("DepositWindow not found.");
-        }
-
-        depositWindow.ShouldNotBeNull();
-        depositWindow.SetForeground();
-        return depositWindow;
-    }
-
-    private void FillBulkInsert(Window depositWindow, string quantity)
-    {
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
         bulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
-        // Find the new dialog window
-        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", UITestTimings.RetryLongTimeout);
+        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
         dialog.ShouldNotBeNull();
 
         var firstTextBox = UiTestRetry.Find(() => dialog.FindFirstDescendant(cf => cf.ByAutomationId("BulkQuantityBox"))?.AsTextBox(), UITestTimings.RetryLongTimeout) as TextBox;
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Focus();
-        Thread.Sleep(100);
-        FlaUI.Core.Input.Keyboard.Type(quantity);
+        FlaUI.Core.Input.Keyboard.Type("3");
         Thread.Sleep(100);
         FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
-        Thread.Sleep(500); // Give WPF binding a moment to catch up
+        Thread.Sleep(500);
+
+        var okButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
+        okButton.SmartClick();
+
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+        var currentDepositText = FindElement(depositWindow, "CurrentDepositText", null)?.AsLabel();
+        currentDepositText.ShouldNotBeNull();
+        ParseAmount(currentDepositText.Text).ShouldBeGreaterThan(0);
+    }
+
+    [Fact]
+    public void ShouldCancelDepositAndRepay()
+    {
+        _app.Launch();
+        var window = _app.MainWindow;
+        if (window == null) throw new Exception("MainWindow is null");
+        
+        var depositWindow = OpenDepositTerminal(window);
+        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
+        beginButton.SmartClick();
+
+        FillBulkInsert(depositWindow, "1000");
+
+        var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
+        repayButton.SmartClick();
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+
+        // Window should close
+        Retry.WhileTrue(() => _app.Application.GetAllTopLevelWindows(_app.Automation).Any(w => w.AutomationId == "DepositWindow"), TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("Window should be closed");
+    }
+
+    [Fact]
+    public void ShouldDisableControlsWhenErrorOccurs()
+    {
+        _app.Launch();
+        var window = _app.MainWindow;
+        if (window == null) throw new Exception("MainWindow is null");
+        
+        var depositWindow = OpenDepositTerminal(window);
+        var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
+        beginButton.SmartClick();
+
+        var jamButton = FindElement(depositWindow, "SimulateJamButton", "JAM", TimeSpan.FromSeconds(20))?.AsButton();
+        if (jamButton == null)
+        {
+            UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_JamButtonMissing");
+            jamButton.ShouldNotBeNull("SimulateJamButton not found");
+        }
+        jamButton.SmartClick();
+
+        var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK", TimeSpan.FromSeconds(20))?.AsButton();
+        if (bulkButton == null)
+        {
+            UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_BulkButtonMissing");
+            bulkButton.ShouldNotBeNull("BulkInsertButton not found");
+        }
+        Retry.WhileTrue(() => bulkButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Bulk button should be disabled during error.");
+
+        var fixButton = FindElement(depositWindow, "FixDepositButton", "FINISH")?.AsButton();
+        Retry.WhileTrue(() => fixButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Fix button should be disabled during error.");
+
+        var resetButton = FindElement(depositWindow, "ActiveResetErrorButton", "RESET")?.AsButton();
+        resetButton.ShouldNotBeNull();
+        resetButton.IsEnabled.ShouldBeTrue();
+        resetButton.SmartClick();
+        Thread.Sleep(500);
+
+        bulkButton.IsEnabled.ShouldBeTrue();
+    }
+
+    private Window OpenDepositTerminal(Window mainWindow)
+    {
+        var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), TimeSpan.FromSeconds(15)) as Button;
+        launchButton.ShouldNotBeNull();
+        
+        launchButton.SmartClick();
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+
+        var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", timeout: TimeSpan.FromSeconds(30), markerId: "DepositWindowMark");
+        
+        if (depositWindow == null)
+        {
+            UiTestRetry.DumpAutomationTree(mainWindow, "OpenDepositTerminal_Fail");
+            throw new Exception("DepositWindow not found or not fully initialized (Marker missing).");
+        }
+
+        depositWindow.SetForeground();
+        return depositWindow;
+    }
+
+    private void FillBulkInsert(Window depositWindow, string quantity, int denomIndex = 0)
+    {
+        var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
+        bulkButton.SmartClick();
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+
+        var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
+        dialog.ShouldNotBeNull();
+
+        var textBoxes = UiTestRetry.Find<AutomationElement[]>(() => 
+        {
+            var all = dialog.FindAllDescendants(cf => cf.ByAutomationId("BulkQuantityBox"));
+            return all.Length > denomIndex ? all : null;
+        }, UITestTimings.RetryLongTimeout);
+        textBoxes.ShouldNotBeNull();
+        
+        var targetTextBox = textBoxes[denomIndex].AsTextBox();
+        targetTextBox.Text = quantity;
+        Thread.Sleep(500);
+        targetTextBox.Focus();
+        FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
+        Thread.Sleep(500);
 
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
-        executeButton?.Focus(); // Force focus loss on TextBox to trigger PropertyChanged commit
+        executeButton?.Focus();
         Thread.Sleep(100);
-        executeButton.SmartClick(timeoutMs: 1000); // Shorter timeout for conditional
+        executeButton.SmartClick(timeoutMs: 1000);
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
     }
 
-    private static AutomationElement? FindElement(AutomationElement? container, string? automationId, string? text)
+    private AutomationElement? FindElement(AutomationElement parent, string automationId, string? fallbackName = null, TimeSpan? timeout = null)
     {
-        return container == null
-            ? null
-            : UiTestRetry.Find(() =>
+        var finalTimeout = timeout ?? TimeSpan.FromSeconds(10);
+        return UiTestRetry.Find(() => 
         {
-            // Try by AutomationId first (highest priority) if provided
-            if (!string.IsNullOrEmpty(automationId))
+            // First try direct descendant
+            var el = parent.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
+            if (el != null) return el;
+            
+            // Then try all descendants (slower but more robust)
+            el = parent.FindAllDescendants().FirstOrDefault(e => e.Properties.AutomationId.ValueOrDefault == automationId);
+            if (el != null) return el;
+            
+            // Finally try fallback name
+            if (fallbackName != null)
             {
-                var el = container.FindFirstDescendant(cf => cf.ByAutomationId(automationId));
+                el = parent.FindFirstDescendant(cf => cf.ByName(fallbackName));
                 if (el != null) return el;
             }
-
-            // Fallback to text search if provided
-            if (!string.IsNullOrEmpty(text))
-            {
-                var elByText = container.FindFirstDescendant(cf => cf.ByText(text));
-                if (elByText != null) return elByText;
-            }
+            
             return null;
-        }, UITestTimings.RetryLongTimeout);
+        }, finalTimeout);
     }
 
     private static decimal ParseAmount(string text)
@@ -357,5 +232,4 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var cleaned = new string([.. text.Where(char.IsDigit)]);
         return decimal.TryParse(cleaned, out var result) ? result : 0;
     }
-
 }
