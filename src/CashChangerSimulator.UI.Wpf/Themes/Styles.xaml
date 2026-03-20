@@ -159,12 +159,12 @@
         <Setter Property="Margin" Value="0,8,0,8"/>
     </Style>
 
-    <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionLightToggleButton}">
+    <Style x:Key="PrimaryToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
     </Style>
 
-    <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionLightCheckBox}">
+    <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignActionCheckBox}">
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
     </Style>
 

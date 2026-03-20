@@ -12,7 +12,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel, IsDesignTimeCreatable=False}"
-    Title="{StaticResource TitleMainWindow}" 
+    Title="CashChanger Simulator [LIVE]" 
     AutomationProperties.AutomationId="MainWindow"
     MinWidth="800" MinHeight="600"
     d:DesignWidth="1240" d:DesignHeight="820"

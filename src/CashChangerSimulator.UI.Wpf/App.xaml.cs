@@ -282,10 +282,17 @@ internal partial class App : Application
         }
     }
 
-    /// <summary>致命的な例外発生時にデバイスのクリーンアップを試みます。</summary>
     private void HandleFatalException(Exception? ex)
     {
         if (ex == null) return;
+
+        try
+        {
+            Console.Error.WriteLine($"[FATAL_APP_CRASH] {ex}");
+            var logPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FATAL_CRASH.txt");
+            System.IO.File.WriteAllText(logPath, $"[FATAL] [{DateTime.Now}] {ex}");
+        }
+        catch { }
         
         try
         {
