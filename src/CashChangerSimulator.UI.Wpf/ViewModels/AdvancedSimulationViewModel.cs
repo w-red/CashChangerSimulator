@@ -73,6 +73,9 @@ public class AdvancedSimulationViewModel : IDisposable
     /// <summary>スクリプト入力をクリアするコマンド。</summary>
     public ReactiveCommand<Unit> ClearScriptInputCommand { get; }
 
+    /// <summary>ウィンドウを閉じるためのイベント通知。</summary>
+    public ReactiveCommand<Unit> CloseCommand { get; }
+
     /// <summary>依存関係を注入して <see cref="AdvancedSimulationViewModel"/> を初期化します。</summary>
     /// <param name="facade">デバイスとコア機能の Facade。</param>
     /// <param name="scriptExecutionService">スクリプト実行を担う <see cref="IScriptExecutionService"/>。</param>
@@ -89,7 +92,6 @@ public class AdvancedSimulationViewModel : IDisposable
         _facade = facade;
         _scriptExecutionService = scriptExecutionService;
 
-        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(facade.Changer.RealTimeDataEnabled).AddTo(_disposables);
         ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
         ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
 
@@ -120,8 +122,14 @@ public class AdvancedSimulationViewModel : IDisposable
         SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ClearScriptInputCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
 
+        IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(facade.Changer.RealTimeDataEnabled).AddTo(_disposables);
+        
         IsRealTimeDataEnabled
-            .Subscribe(enabled => _facade.Changer.RealTimeDataEnabled = enabled)
+            .Skip(1) // Skip initial sync during construction
+            .Subscribe(enabled => {
+                try { _facade.Changer.RealTimeDataEnabled = enabled; }
+                catch (Exception ex) { ScriptError.Value = $"RTD Error: {ex.Message}"; }
+            })
             .AddTo(_disposables);
 
         ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
@@ -129,6 +137,7 @@ public class AdvancedSimulationViewModel : IDisposable
         SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
         SimulateDeviceErrorCommand.Subscribe(_ => _facade.Status.SetDeviceError(999, 0));
         ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
+        CloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
 
         // Enables command only if JSON is basically valid list
         var canExecute = ScriptInput.Select(input =>
