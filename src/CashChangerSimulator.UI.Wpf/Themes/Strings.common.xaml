@@ -12,5 +12,6 @@
     <system:String x:Key="SymbolRecycle">↻</system:String>
     <system:String x:Key="SymbolCollect">⬇</system:String>
     <system:String x:Key="SymbolWarning">⚠</system:String>
+    <system:String x:Key="SymbolHistory">⏳</system:String>
     
 </ResourceDictionary>
