@@ -3,6 +3,7 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>アプリケーションの起動と基本表示を検証するスモークテスト。</summary>
+[Collection("SequentialTests")]
 public class SmokeTest : IDisposable
 {
     private readonly CashChangerTestApp _app;

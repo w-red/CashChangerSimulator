@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
+using FlaUI.Core.Capturing;
+using FlaUI.Core.Input;
 using Shouldly;
 using Xunit;
 using CashChangerSimulator.UI.Tests.Helpers;
@@ -13,85 +15,75 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 /// 金種詳細ダイアログの表示・内容・閉じる動作を検証する UI テスト。
 /// </summary>
 [Collection("SequentialTests")]
-public class DenominationDetailUITests : IDisposable
+public class DenominationDetailUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
-    private readonly AutomationElement _dialog;
+    private AutomationElement? _dialog;
 
-    public DenominationDetailUITests()
+    public DenominationDetailUITests(CashChangerTestApp app)
     {
-        _app = new CashChangerTestApp();
-        _app.Launch();
+        _app = app;
+    }
 
+    private AutomationElement EnsureDialogOpen()
+    {
+        if (_dialog != null && !_dialog.IsOffscreen) return _dialog;
+
+        _app.Launch(hotStart: true);
+        var window = _app.MainWindow ?? throw new Exception("MainWindow is null");
+        window.SetForeground();
+
+        // 接続完了まで待機 (HotStartの場合でもUI更新を待つ)
+        var closeBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceCloseButton")), TimeSpan.FromSeconds(15)).Result;
+        closeBtn.ShouldNotBeNull("Device is not connected (DeviceCloseButton not found).");
+
+        // 金種タイルの出現と有効化を待機
         var inventoryTile = Retry.WhileNull(() =>
         {
-            if (_app.MainWindow == null) return null;
-            
-            // CI環境では要素が深い階層にある場合があるため、Descendants全検索を試みる
-            var tiles = _app.MainWindow.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
-            return tiles.FirstOrDefault()?.AsButton();
-        }, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(2)).Result;
+            var tiles = window.FindAllDescendants(cf => cf.ByAutomationId("InventoryTile"));
+            var target = tiles.FirstOrDefault()?.AsButton();
+            return (target != null && target.IsEnabled && !target.IsOffscreen) ? target : null;
+        }, TimeSpan.FromSeconds(15)).Result;
 
-        if (inventoryTile == null)
-        {
-            Console.WriteLine("[ERROR] InventoryTile not found. Tree dump:");
-            var sbDump = new System.Text.StringBuilder();
-            _app.MainWindow?.CaptureElements(0, sbDump);
-            Console.WriteLine(sbDump.ToString());
-            throw new Exception("InventoryTile が見つかりません。");
-        }
-
-        // Act: 金種タイルをクリックして詳細ダイアログを開く
+        inventoryTile.ShouldNotBeNull("InventoryTile not found or not ready.");
+        
+        // ダイアログを開く
         inventoryTile.SmartClick();
 
-        // [STABILITY] ダイアログの出現を待機
-        var dialog = UiTestRetry.Find(() => 
+        // ダイアログの出現を待機
+        _dialog = Retry.WhileNull(() => 
         {
-            // Try MainWindow children (DialogHost standard)
-            var found = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
-            if (found != null) return found;
+            // 複数の ID で確実に見つける
+            return window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogMark"))?.Parent ??
+                   window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogViewContent")) ??
+                   window.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView")) ??
+                   UiTestRetry.FindWindow(_app.Application, _app.Automation, "DenominationDetailDialogView", TimeSpan.FromMilliseconds(500));
+        }, TimeSpan.FromSeconds(20)).Result;
 
-            // Try Desktop fallback (in case it behaves like a popup window in CI)
-            var win = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DenominationDetailDialogView", TimeSpan.FromSeconds(1));
-            return win;
-        }, TimeSpan.FromSeconds(20));
-
-        if (dialog == null)
-        {
-            Console.WriteLine("[ERROR] DenominationDetailDialogView not found. Dumping MainWindow tree:");
-            var sb = new System.Text.StringBuilder();
-            _app.MainWindow?.CaptureElements(0, sb);
-            Console.WriteLine(sb.ToString());
-            throw new Exception("ダイアログ 'DenominationDetailDialogView' が制限時間内に見つかりませんでした。");
-        }
-
-        _dialog = dialog;
+        _dialog.ShouldNotBeNull("DenominationDetailDialogView not found.");
+        return _dialog;
     }
 
     [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_ShouldBeVisible()
     {
-        _dialog.ShouldNotBeNull("ダイアログが表示されていません。");
+        var dialog = EnsureDialogOpen();
+        dialog.ShouldNotBeNull();
     }
 
     [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_ShouldContainCountFields()
     {
-        _dialog.ShouldNotBeNull();
-        var textBlocks = _dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
+        var dialog = EnsureDialogOpen();
+        var textBlocks = dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
         textBlocks.Length.ShouldBeGreaterThanOrEqualTo(3);
     }
 
     [Fact(Timeout = 60000)]
     public void DenominationDetailDialog_CloseButton_ShouldDismissDialog()
     {
-        _dialog.ShouldNotBeNull();
-        Thread.Sleep(1000);
-
-        var closeButton = _dialog.FindFirstDescendant(cf => cf.ByAutomationId("CloseButton"))?.AsButton();
-        if (closeButton == null)
-            closeButton = _dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)).FirstOrDefault()?.AsButton();
-
+        var dialog = EnsureDialogOpen();
+        var closeButton = dialog.FindFirstDescendant(cf => cf.ByAutomationId("CloseButton"))?.AsButton();
         closeButton.ShouldNotBeNull();
         closeButton.SmartClick();
 
@@ -99,12 +91,8 @@ public class DenominationDetailUITests : IDisposable
         {
             var remaining = _app.MainWindow?.FindFirstDescendant(cf => cf.ByAutomationId("DenominationDetailDialogView"));
             return remaining != null && !remaining.IsOffscreen;
-        }, TimeSpan.FromSeconds(10));
-    }
-
-    public void Dispose()
-    {
-        _app.Dispose();
-        GC.SuppressFinalize(this);
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Dialog should be dismissed");
+        
+        _dialog = null; // 使い終わったのでリセット
     }
 }

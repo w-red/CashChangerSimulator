@@ -6,6 +6,7 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>エラー状態の解消（リセット）機能が、各 UI 要素から正しく動作することを検証する FlaUI テスト。</summary>
+[Collection("SequentialTests")]
 public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;

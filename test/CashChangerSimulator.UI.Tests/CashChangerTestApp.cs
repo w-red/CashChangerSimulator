@@ -248,59 +248,46 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             }
             catch { }
 
-            try
+            if (Application != null)
             {
-                if (MainWindow != null)
+                int pid = Application.ProcessId;
+                try
                 {
-                    MainWindow.Close();
-                    Thread.Sleep(200); // Short wait
-                }
-            }
-            catch { }
-
-            // Dispose Automation BEFORE closing the Application to avoid COM issues
-            try { Automation?.Dispose(); } catch { }
-
-            try
-            {
-                if (Application != null)
-                {
-                    int pid = Application.ProcessId;
                     if (!Application.HasExited)
                     {
+                        // 1. Try closing main window
+                        if (MainWindow != null)
+                        {
+                            try { MainWindow.Close(); } catch { }
+                        }
+                        
+                        // 2. Try closing Application
                         try { Application.Close(); } catch { }
                         
-                        // Wait up to 1 seconds for clean exit
-                        for (int i = 0; i < 5; i++)
-                        {
-                            if (Application.HasExited) break;
-                            Thread.Sleep(200);
-                        }
+                        // 3. Short wait for clean exit
+                        Thread.Sleep(500);
                     }
-
-                    // If still running, kill it forcefully along with its children
-                    if (!Application.HasExited)
-                    {
-                        try
-                        {
-                            // Use a safer way to get the process to avoid masking the original exception
-                            var process = System.Diagnostics.Process.GetProcesses().FirstOrDefault(p => p.Id == pid);
-                            if (process != null && !process.HasExited)
-                            {
-                                process.Kill(true); // Kill entire process tree
-                                process.WaitForExit(1000);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"[INFO] Failed to kill process {pid}: {ex.Message}");
-                        }
-                    }
-                    
-            try { Application.Dispose(); } catch { }
                 }
+                catch { }
+
+                // 4. Forceful kill if still alive
+                try
+                {
+                    var process = System.Diagnostics.Process.GetProcessById(pid);
+                    if (!process.HasExited)
+                    {
+                        process.Kill(true); // Kill entire process tree
+                        process.WaitForExit(2000);
+                    }
+                }
+                catch (ArgumentException) { /* Already exited */ }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[INFO] Failed to kill process {pid}: {ex.Message}");
+                }
+                
+                try { Application.Dispose(); } catch { }
             }
-            catch { }
 
             // Final pause to let the OS/UIA clean up traces
             Thread.Sleep(UITestTimings.AppCleanupDelayMs);

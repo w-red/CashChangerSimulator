@@ -5,6 +5,7 @@ using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+[Collection("SequentialTests")]
 public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;

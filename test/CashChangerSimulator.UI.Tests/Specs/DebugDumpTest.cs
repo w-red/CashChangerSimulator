@@ -5,6 +5,7 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>UI 要素のデバッグダンプを取得するテスト。</summary>
+[Collection("SequentialTests")]
 public class DebugDumpTest : IDisposable
 {
     private readonly CashChangerTestApp _app;
