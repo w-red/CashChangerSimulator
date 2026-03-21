@@ -104,11 +104,34 @@ public static class UiTestRetry
             {
                 if (element.IsEnabled)
                 {
+                    // 1. Try Invoke Pattern (Most reliable in CI)
+                    if (element.Patterns.Invoke.IsSupported)
+                    {
+                        try { element.Patterns.Invoke.Pattern.Invoke(); return; }
+                        catch (Exception ex) { lastException = ex; }
+                    }
+
+                    // 2. Try Click WITHOUT mouse move (Supported by some elements)
+                    try 
+                    { 
+                        element.Click(false); 
+                        return; 
+                    }
+                    catch (Exception ex) { lastException = ex; }
+
+                    // 3. Try standard Click (May fail in CI with "Access is denied" if it tries to move mouse)
                     try
                     {
-                        var btn = element.AsButton();
-                        try { btn.Invoke(); return; }
-                        catch { btn.Click(); return; }
+                        element.Click(true);
+                        return;
+                    }
+                    catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 5) // Access is denied
+                    {
+                        lastException = ex;
+                        // If standard click fails due to mouse move restriction, 
+                        // and invoke wasn't supported, we are in trouble, but let's try one last thing: Focus + Enter
+                        try { element.Focus(); FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN); return; }
+                        catch { }
                     }
                     catch (Exception ex) { lastException = ex; }
                 }
@@ -118,7 +141,6 @@ public static class UiTestRetry
         }
 
         Console.WriteLine($"SmartClick timeout ({timeoutMs}ms). Last exception: {lastException?.Message}");
-        try { element.Click(); } catch { }
     }
 
     public static void DumpAutomationTree(AutomationElement root, string fileNamePrefix)
