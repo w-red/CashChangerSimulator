@@ -40,7 +40,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant("DeviceOpenButton");
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.AsButton().Click();
+            openBtn.AsButton().SmartClick();
         }
 
         // 接続完了まで待機
@@ -64,21 +64,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Thread.Sleep(500);
         
         // Ensure it's clicked. Try multiple ways if needed.
-        try
-        {
-            if (launchBtn.Patterns.Invoke.IsSupported)
-            {
-                launchBtn.Patterns.Invoke.Pattern.Invoke();
-            }
-            else
-            {
-                launchBtn.Click();
-            }
-        }
-        catch (Exception)
-        {
-            // Ignore click error as it might still have successfully opened the window in some environments
-        }
+        launchBtn.SmartClick();
         // ウィンドウを検索 (堅牢な共通ロジックを使用)
         var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", timeout: UITestTimings.RetryLongTimeout);
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
@@ -130,8 +116,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("ResetErrorButton should enable after jam");
 
         // Act: Reset
-        if (resetBtn.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
-        else resetBtn.Click();
+        resetBtn.SmartClick();
 
         // Assert: Jam indicator should disappear (Visibility=Collapsed)
         Retry.WhileFalse(() => {

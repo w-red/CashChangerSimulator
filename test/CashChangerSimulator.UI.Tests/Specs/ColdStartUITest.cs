@@ -63,7 +63,7 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         // Act - Click Open
         var openButton = FindElement(window, "DeviceOpenButton")?.AsButton();
         openButton.ShouldNotBeNull();
-        openButton.Click();
+        openButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Assert - Terminal buttons should become enabled
@@ -122,13 +122,13 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
 
         // Open it first
         var openButton = FindElement(window, "DeviceOpenButton")?.AsButton();
-        openButton?.Click();
+        openButton?.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Act - Click Close
         var closeButton = FindElement(window, "DeviceCloseButton")?.AsButton();
         closeButton.ShouldNotBeNull();
-        closeButton.Click();
+        closeButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Assert - UI should be restricted again

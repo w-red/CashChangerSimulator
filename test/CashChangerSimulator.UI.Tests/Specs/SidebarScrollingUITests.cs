@@ -33,7 +33,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("DeviceOpenButton"))?.AsButton();
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.Click();
+            openBtn.SmartClick();
         }
 
         // Wait for buttons to be enabled (IDLE state equivalent)
@@ -56,7 +56,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
                 return (btn != null && btn.IsEnabled) ? btn : null;
             }, TimeSpan.FromSeconds(15)).Result;
             closeBtn.ShouldNotBeNull($"DeviceCloseButton not found or not enabled during iteration {i}");
-            closeBtn.Click();
+            closeBtn.SmartClick();
             Thread.Sleep(1000); // Increased from 400
             
             var openBtnIteration = Retry.WhileNull(() => {
@@ -64,7 +64,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
                 return (btn != null && btn.IsEnabled) ? btn : null;
             }, TimeSpan.FromSeconds(15)).Result;
             openBtnIteration.ShouldNotBeNull($"DeviceOpenButton not found or not enabled during iteration {i}");
-            openBtnIteration.Click();
+            openBtnIteration.SmartClick();
             Thread.Sleep(1000); // Increased from 400
         }
 

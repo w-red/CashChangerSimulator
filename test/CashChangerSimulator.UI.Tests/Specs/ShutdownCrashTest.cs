@@ -28,7 +28,7 @@ public class ShutdownCrashTest : IDisposable
         // Act - Open Dispense Window (as a sub-window)
         var dispenseButton = FindElement(window, "LaunchDispenseButton")?.AsButton();
         dispenseButton.ShouldNotBeNull();
-        dispenseButton.Click();
+        dispenseButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // Verify sub-window exists (optional, but good for stability)

@@ -27,7 +27,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant("DeviceOpenButton");
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.AsButton().Click();
+            openBtn.AsButton().SmartClick();
         }
 
         // ステータスが IDLE になるまで待機 (HotStart時も含む)
@@ -41,7 +41,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         sidebarJamBtn.ShouldNotBeNull("Sidebar SimulateJamButton not found");
 
         // Act: Sidebar の Jam ボタン（またはヘッダーのシミュレーションボタン）を押してエラー状態にする
-        sidebarJamBtn.Click();
+        sidebarJamBtn.SmartClick();
 
         // ヘッダーの Reset ボタンはエラー発生時にのみ Visible になり UI ツリーに出現する
         // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
@@ -55,7 +55,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         jamIndicator.ShouldNotBeNull("JamErrorIndicator should be visible in status header");
 
         // Act: Reset ボタンをクリック
-        resetBtn.Click();
+        resetBtn.SmartClick();
 
         // Assert: エラー状態が解消されたことを確認
         Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
@@ -73,7 +73,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant("DeviceOpenButton");
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.AsButton().Click();
+            openBtn.AsButton().SmartClick();
         }
 
         // ステータスが IDLE になるまで待機
@@ -86,7 +86,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         sidebarJamBtn.ShouldNotBeNull();
 
         // Act: Simulate Jam
-        sidebarJamBtn.Click();
+        sidebarJamBtn.SmartClick();
 
         // Global Reset ボタン（ヘッダー部分）はエラー発生時にのみ Visible になり UI ツリーに出現する
         // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
@@ -96,7 +96,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Act: Click Global Reset
-        globalResetBtn.Click();
+        globalResetBtn.SmartClick();
 
         // Assert
         Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
@@ -115,7 +115,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant("DeviceOpenButton");
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.AsButton().Click();
+            openBtn.AsButton().SmartClick();
         }
 
         // ステータスが IDLE になるまで待機
@@ -132,7 +132,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => launchDispenseBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("LaunchDispenseButton was not enabled");
         
         if (launchDispenseBtn.Patterns.Invoke.IsSupported) launchDispenseBtn.Patterns.Invoke.Pattern.Invoke();
-        else launchDispenseBtn.Click();
+        else launchDispenseBtn.SmartClick();
 
         // 出金ウィンドウを待機 (デスクトップおよびメインウィンドウの直系から検索)
         var desktop = _app.Automation.GetDesktop();
@@ -176,7 +176,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         sidebarJamBtn.ShouldNotBeNull("SimulateJamButton not found in dispense window");
         
         if (sidebarJamBtn.Patterns.Invoke.IsSupported) sidebarJamBtn.Patterns.Invoke.Pattern.Invoke();
-        else sidebarJamBtn.Click();
+        else sidebarJamBtn.SmartClick();
 
         // エラー解消ボタンを探す (オーバーレイまたは通常ビュー内のリセットボタン)
         var overlayResetBtn = Retry.WhileNull(() => 
@@ -186,7 +186,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         overlayResetBtn.ShouldNotBeNull("Dispense reset button not found (DispenseErrorResetButton or ResetErrorButton)");
 
         // Act: Overlay の Reset をクリック
-        overlayResetBtn.Click();
+        overlayResetBtn.SmartClick();
 
         // Assert: エラー表示が消えたことを確認（オーバーレイのボタンがDisabledになる）
         Retry.WhileFalse(() => !overlayResetBtn.IsEnabled, TimeSpan.FromSeconds(5))
