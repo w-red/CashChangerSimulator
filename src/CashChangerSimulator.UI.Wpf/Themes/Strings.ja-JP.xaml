@@ -87,6 +87,7 @@
     <system:String x:Key="WarnDepositDuringDispense">出金処理中のため、入金は開始できません。</system:String>
 
     <system:String x:Key="CurrentDeposit">現在の投入金額</system:String>
+    <system:String x:Key="LabelPendingItems">投入内訳 (保留中)</system:String>
     <system:String x:Key="StartDeposit">入金開始</system:String>
     <system:String x:Key="QuickDeposit">クイック入金</system:String>
     <system:String x:Key="AutoCalcDenoms">枚数を自動計算して投入します</system:String>

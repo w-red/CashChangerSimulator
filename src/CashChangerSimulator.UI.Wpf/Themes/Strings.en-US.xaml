@@ -87,6 +87,7 @@
     <system:String x:Key="WarnDepositDuringDispense">Cannot start deposit while a dispense is in progress.</system:String>
 
     <system:String x:Key="CurrentDeposit">CURRENT DEPOSIT</system:String>
+    <system:String x:Key="LabelPendingItems">PENDING ITEMS (ESCROW)</system:String>
     <system:String x:Key="StartDeposit">START DEPOSIT</system:String>
     <system:String x:Key="QuickDeposit">QUICK DEPOSIT</system:String>
     <system:String x:Key="AutoCalcDenoms">Calculates denominations automatically</system:String>
