@@ -25,8 +25,12 @@ public class DepositViewModel : IDisposable
     private readonly BindableReactiveProperty<bool> _isDispenseBusy;
     private readonly INotifyService _notifyService;
     private readonly CurrencyMetadataProvider _metadataProvider;
+    private readonly IEnumerable<DenominationViewModel> _allDenominations;
 
     // --- State Properties ---
+    
+    /// <summary>エスクローにある金種のリスト（枚数 > 0 のもののみ）。</summary>
+    public ReadOnlyReactiveProperty<IEnumerable<DenominationViewModel>> EscrowDenominations { get; }
 
     /// <summary>入金モード中かどうか。</summary>
     public BindableReactiveProperty<bool> IsInDepositMode { get; }
@@ -152,6 +156,7 @@ public class DepositViewModel : IDisposable
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
         _metadataProvider = metadataProvider;
+        _allDenominations = getDenominations().ToList();
 
         // UI Metadata
         CurrencyPrefix = _metadataProvider.SymbolPrefix.ToReadOnlyReactiveProperty().AddTo(_disposables);
@@ -207,6 +212,11 @@ public class DepositViewModel : IDisposable
 
         HasReject = RejectAmount.Select(a => a > 0)
             .ToReadOnlyReactiveProperty()
+            .AddTo(_disposables);
+
+        EscrowDenominations = _facade.Deposit.Changed
+            .Select(_ => _allDenominations.Where(d => d.EscrowCount.Value > 0).ToList().AsEnumerable())
+            .ToReadOnlyReactiveProperty(_allDenominations.Where(d => d.EscrowCount.Value > 0).ToList().AsEnumerable())
             .AddTo(_disposables);
 
         CurrentModeName = _facade.Deposit.Changed

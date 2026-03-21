@@ -40,6 +40,9 @@ public class DenominationViewModel : IDisposable
     public bool IsRecyclable { get; }
     /// <summary>入金可能かどうか。</summary>
     public bool IsDepositable { get; }
+    /// <summary>エスクローがあるかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> HasEscrow { get; }
+
     /// <summary>詳細情報を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDetailCommand { get; }
 
@@ -101,6 +104,7 @@ public class DenominationViewModel : IDisposable
         CollectionCount = new BindableReactiveProperty<int>(facade.Inventory.CollectionCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
         RejectCount = new BindableReactiveProperty<int>(facade.Inventory.RejectCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
         EscrowCount = new BindableReactiveProperty<int>(facade.Inventory.EscrowCounts.FirstOrDefault(x => x.Key.Value == key.Value && x.Key.Type == key.Type).Value);
+        HasEscrow = EscrowCount.Select(x => x > 0).ToReadOnlyReactiveProperty().AddTo(_disposables);
 
         // ローカライズ文字列の初期化
         LabelInventoryDetail = isJapanese ? "在庫内訳" : "INVENTORY DETAIL";
