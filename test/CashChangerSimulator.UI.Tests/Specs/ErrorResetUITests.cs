@@ -16,6 +16,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         _app = app;
     }
 
+    /// <summary>サイドバーのリセットボタンによりエラー状態が解消されることを検証する。</summary>
     [Fact]
     public void SidebarResetButtonShouldClearErrorState()
     {
@@ -62,6 +63,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
              .Success.ShouldBeTrue("JamErrorIndicator should disappear after reset");
     }
 
+    /// <summary>グローバルリセットボタンによりエラー状態が解消されることを検証する。</summary>
     [Fact]
     public void GlobalResetButtonShouldClearErrorState()
     {
@@ -103,6 +105,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
              .Success.ShouldBeTrue("JamErrorIndicator should disappear after global reset");
     }
 
+    /// <summary>出金エラー時のオーバーレイリセットボタンによりエラー状態が解消されることを検証する。</summary>
     [Fact]
     public void DispenseErrorOverlayResetButtonShouldClearErrorState()
     {

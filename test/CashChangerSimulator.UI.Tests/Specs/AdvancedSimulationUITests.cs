@@ -5,16 +5,26 @@ using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+/// <summary>高度なシミュレーション機能（エラー発生と解消など）を検証する UI テスト。</summary>
 [Collection("SequentialTests")]
 public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
+    /// <summary>テストアプリのフィクスチャを受け取り、初期状態をセットアップする。</summary>
     public AdvancedSimulationUITests(CashChangerTestApp app)
     {
         _app = app;
     }
 
+    /// <summary>エラーインジケータがエラー発生時に表示され、リセット後に消えることを検証する。</summary>
+    /// <remarks>
+    /// 以下のステップを実行します：
+    /// 1. 高度なシミュレーションウィンドウを開く
+    /// 2. ジャム（エラー）をシミュレートする
+    /// 3. エラー表示を確認する
+    /// 4. エラーをリセットして表示が消えることを確認する
+    /// </remarks>
     [Fact]
     public void ErrorIndicatorsShouldBeVisibleWhenErrorExists()
     {
@@ -128,6 +138,10 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         advWindow.Close();
     }
 
+    /// <summary>指定された要素の子要素を再帰的にキャプチャして文字列ビルダに格納する。</summary>
+    /// <param name="element">探索を開始するオートメーション要素。</param>
+    /// <param name="depth">現在の探索の深さ。</param>
+    /// <param name="sb">結果を格納する StringBuilder。</param>
     private void CaptureElements(AutomationElement element, int depth, System.Text.StringBuilder sb)
     {
         if (depth > 8) return;

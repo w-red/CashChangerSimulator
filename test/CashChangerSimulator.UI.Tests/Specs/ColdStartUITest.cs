@@ -10,6 +10,7 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
+    /// <summary>テストアプリのフィクスチャを受け取り、初期状態をセットアップする。</summary>
     public ColdStartUITest(CashChangerTestApp app)
     {
         _app = app;
@@ -153,6 +154,10 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         openBtnAgain.IsOffscreen.ShouldBeFalse();
     }
 
+    /// <summary>指定されたオートメーションIDを持つ要素を探索する。</summary>
+    /// <param name="container">親要素。</param>
+    /// <param name="automationId">探索するオートメーションID。</param>
+    /// <returns>見つかった要素、または null。</returns>
     private static FlaUI.Core.AutomationElements.AutomationElement? FindElement(FlaUI.Core.AutomationElements.AutomationElement? container, string automationId)
     {
         return container == null

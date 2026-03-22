@@ -129,6 +129,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         showBulkButton.IsEnabled.ShouldBeTrue();
     }
 
+    /// <summary>メインウィンドウから出金ウィンドウを探して開く。</summary>
+    /// <param name="mainWindow">メインウィンドウのオートメーション要素。</param>
+    /// <returns>開かれた出金ウィンドウ。</returns>
     private Window OpenDispenseTerminal(Window? mainWindow)
     {
         mainWindow.ShouldNotBeNull();
@@ -143,6 +146,11 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         return dispenseWindow;
     }
 
+    /// <summary>オートメーションIDまたは表示名を使用して要素を探索する。</summary>
+    /// <param name="container">親要素。</param>
+    /// <param name="automationId">探索するオートメーションID。</param>
+    /// <param name="text">探索する表示名。</param>
+    /// <returns>見つかった要素、または null。</returns>
     private static AutomationElement? FindElement(AutomationElement? container, string automationId, string? text)
     {
         return container == null
@@ -163,6 +171,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         }, UITestTimings.RetryLongTimeout);
     }
 
+    /// <summary>数値以外の文字を含む文字列から金額をパースする。</summary>
+    /// <param name="text">パース対象の文字列。</param>
+    /// <returns>パースされた金額。</returns>
     private static decimal ParseAmount(string text)
     {
         if (string.IsNullOrEmpty(text)) return 0;

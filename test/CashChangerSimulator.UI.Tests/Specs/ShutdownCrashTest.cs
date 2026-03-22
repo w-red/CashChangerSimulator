@@ -10,12 +10,17 @@ public class ShutdownCrashTest : IDisposable
 {
     private readonly CashChangerTestApp _app;
 
+    /// <summary>テストクラスの新しいインスタンスを初期化する。</summary>
     public ShutdownCrashTest()
     {
         _app = new CashChangerTestApp();
     }
 
-    /// <summary>デバイスがオープンされ、サブウィンドウが開いている状態でメインウィンドウを閉じた際に、クラッシュせずに正常終了することを検証する。</summary>
+    /// <summary>サブウィンドウが開いている状態でメインウィンドウを閉じてもクラッシュしないことを検証する。</summary>
+    /// <remarks>
+    /// デバイスがオープンされ、サブウィンドウが開いている状態でメインウィンドウを閉じ、
+    /// クラッシュせずに正常終了することを確認します。
+    /// </remarks>
     [Fact]
     public void ShouldExitCleanlyWhenClosingWithOpenSubWindows()
     {
@@ -64,6 +69,10 @@ public class ShutdownCrashTest : IDisposable
         }
     }
 
+    /// <summary>指定されたオートメーションIDを持つ要素を探索する。</summary>
+    /// <param name="container">親要素。</param>
+    /// <param name="automationId">探索するオートメーションID。</param>
+    /// <returns>見つかった要素、または null。</returns>
     private static AutomationElement? FindElement(AutomationElement? container, string automationId)
     {
         return container == null
@@ -71,6 +80,7 @@ public class ShutdownCrashTest : IDisposable
             : UiTestRetry.Find(() => container.FindFirstDescendant(cf => cf.ByAutomationId(automationId)), UITestTimings.RetryLongTimeout);
     }
 
+    /// <summary>テストアプリを破棄する。</summary>
     public void Dispose()
     {
         // If the process is still running, _app.Dispose will try to close/kill it.

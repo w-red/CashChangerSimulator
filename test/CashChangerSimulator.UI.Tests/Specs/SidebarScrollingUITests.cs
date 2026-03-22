@@ -5,16 +5,19 @@ using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+/// <summary>サイドバーのスクロール動作と、要素の固定表示を検証する UI テスト。</summary>
 [Collection("SequentialTests")]
 public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
 {
     private readonly CashChangerTestApp _app;
 
+    /// <summary>テストアプリのフィクスチャを受け取り、初期状態をセットアップする。</summary>
     public SidebarScrollingUITests(CashChangerTestApp app)
     {
         _app = app;
     }
 
+    /// <summary>履歴が増えてスクロールが発生しても、端末操作ボタンが正しい位置に留まることを検証する。</summary>
     [Fact]
     public void TerminalAccessShouldStayVisibleWhenHistoryGrows()
     {

@@ -15,7 +15,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         _app = app;
     }
 
-    /// <summary>新規入金を開始し、現金を投入して確定するまでの一連のフローを検証する。</summary>
+    /// <summary>一連の入金フロー（開始、投入、確定、収納）を検証する。</summary>
     [Fact]
     public void ShouldCompleteDepositFlow()
     {
@@ -56,6 +56,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         ParseAmount(newTotalText.Text).ShouldBe(initialTotal + 5250);
     }
 
+    /// <summary>一括投入ダイアログを使用して現金を投入できることを検証する。</summary>
     [Fact]
     public void ShouldInsertBulkCash()
     {
@@ -92,6 +93,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         ParseAmount(currentDepositText.Text).ShouldBeGreaterThan(0);
     }
 
+    /// <summary>入金をキャンセルして投入済みの現金を返却できることを検証する。</summary>
     [Fact]
     public void ShouldCancelDepositAndRepay()
     {
@@ -113,6 +115,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Retry.WhileTrue(() => _app.Application.GetAllTopLevelWindows(_app.Automation).Any(w => w.AutomationId == "DepositWindow"), TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("Window should be closed");
     }
 
+    /// <summary>エラー（ジャム）発生時にコントロールが適切に無効化されることを検証する。</summary>
     [Fact]
     public void ShouldDisableControlsWhenErrorOccurs()
     {
@@ -152,6 +155,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         bulkButton.IsEnabled.ShouldBeTrue();
     }
 
+    /// <summary>メインウィンドウから入金ウィンドウを探して開く。</summary>
+    /// <param name="mainWindow">メインウィンドウのオートメーション要素。</param>
+    /// <returns>開かれた入金ウィンドウ。</returns>
     private Window OpenDepositTerminal(Window mainWindow)
     {
         var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), TimeSpan.FromSeconds(15)) as Button;
@@ -172,6 +178,10 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         return depositWindow;
     }
 
+    /// <summary>一括投入ダイアログを開いて指定された数量を入力する。</summary>
+    /// <param name="depositWindow">入金ウィンドウ。</param>
+    /// <param name="quantity">入力する数量文字列。</param>
+    /// <param name="denomIndex">入力対象の金種インデックス。</param>
     private void FillBulkInsert(Window depositWindow, string quantity, int denomIndex = 0)
     {
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
@@ -202,6 +212,12 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
     }
 
+    /// <summary>オートメーションIDまたは表示名を使用して要素を探索する。</summary>
+    /// <param name="parent">親要素。</param>
+    /// <param name="automationId">探索するオートメーションID。</param>
+    /// <param name="fallbackName">IDで見つからない場合の代替表示名。</param>
+    /// <param name="timeout">タイムアウト時間。</param>
+    /// <returns>見つかった要素、または null。</returns>
     private AutomationElement? FindElement(AutomationElement parent, string automationId, string? fallbackName = null, TimeSpan? timeout = null)
     {
         var finalTimeout = timeout ?? TimeSpan.FromSeconds(10);
@@ -226,6 +242,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         }, finalTimeout);
     }
 
+    /// <summary>数値以外の文字を含む文字列から金額をパースする。</summary>
+    /// <param name="text">パース対象の文字列。</param>
+    /// <returns>パースされた金額。</returns>
     private static decimal ParseAmount(string text)
     {
         if (string.IsNullOrEmpty(text)) return 0;
