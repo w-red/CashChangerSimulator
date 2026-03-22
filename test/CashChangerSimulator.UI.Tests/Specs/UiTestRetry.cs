@@ -30,9 +30,13 @@ public static class UiTestRetry
         return result;
     }
 
-    /// <summary>
-    /// アプリケーションからウィンドウを検索し、特定のマーカー要素が存在することを確認して完全に初期化された状態で返します。
-    /// </summary>
+    /// <summary>アプリケーションからウィンドウを検索し、初期化が完了した状態で返す。</summary>
+    /// <param name="app">アプリケーションインスタンス。</param>
+    /// <param name="automation">オートメーションインスタンス。</param>
+    /// <param name="automationId">検索するウィンドウのオートメーションID。</param>
+    /// <param name="timeout">タイムアウト時間。</param>
+    /// <param name="markerId">初期化完了を確認するためのマーカー要素のID。</param>
+    /// <returns>見つかったウィンドウ、または null。</returns>
     public static Window? FindWindow(Application app, UIA3Automation automation, string automationId, TimeSpan? timeout = null, string? markerId = null)
     {
         var actualTimeout = timeout ?? DefaultTimeout;
@@ -88,9 +92,9 @@ public static class UiTestRetry
         return result;
     }
 
-    /// <summary>
-    /// 要素が有効になるのを安全に待ち、クリック（または Invoke）を実行する。
-    /// </summary>
+    /// <summary>要素が有効になるのを待ち、最適な方法（Invoke または Click）でクリックを実行する。</summary>
+    /// <param name="element">対象のオートメーション要素。</param>
+    /// <param name="timeoutMs">タイムアウト（ミリ秒）。</param>
     public static void SmartClick(this AutomationElement? element, int timeoutMs = 2000)
     {
         if (element == null) return;
@@ -143,6 +147,9 @@ public static class UiTestRetry
         Console.WriteLine($"SmartClick timeout ({timeoutMs}ms). Last exception: {lastException?.Message}");
     }
 
+    /// <summary>指定された要素以下のオートメーションツリーをファイルに出力する。</summary>
+    /// <param name="root">ルート要素。</param>
+    /// <param name="fileNamePrefix">ファイル名のプレフィックス。</param>
     public static void DumpAutomationTree(AutomationElement root, string fileNamePrefix)
     {
         try
@@ -163,6 +170,10 @@ public static class UiTestRetry
         }
     }
 
+    /// <summary>オートメーション要素を再帰的に探索し、詳細情報をストリームに書き込む。</summary>
+    /// <param name="element">現在の要素。</param>
+    /// <param name="sw">書き込み先のストリーム。</param>
+    /// <param name="indent">インデントレベル。</param>
     private static void DumpElementRecursive(AutomationElement element, StreamWriter sw, int indent)
     {
         var prefix = new string(' ', indent * 2);

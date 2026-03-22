@@ -13,11 +13,17 @@ namespace CashChangerSimulator.UI.Tests;
 /// <summary>UI テスト用のヘルパークラス。App インスタンスの管理や画面操作の抽象化を担当する。</summary>
 public class CashChangerTestApp : IDisposable
 {
+    /// <summary>テスト対象のアプリケーションインスタンス。</summary>
     public Application Application { get; private set; } = null!;
+
+    /// <summary>UI Automation オートメーションクラス。</summary>
     public UIA3Automation Automation { get; private set; } = null!;
+
+    /// <summary>アプリケーションのメインウィンドウ。</summary>
     public Window? MainWindow { get; private set; }
     private readonly string _executablePath;
 
+    /// <summary>クラスの新しいインスタンスを初期化し、実行ファイルのパスを特定する。</summary>
     public CashChangerTestApp()
     {
         // Calculate path to the executable relative to the test assembly
@@ -48,6 +54,10 @@ public class CashChangerTestApp : IDisposable
         }
     }
 
+    /// <summary>テスト対象のアプリケーションを起動し、初期化を行う。</summary>
+    /// <param name="customConfigToml">カスタム設定の TOML 文字列。</param>
+    /// <param name="hotStart">デバイスをオープン状態で開始するかどうか。</param>
+    /// <param name="envVars">追加の環境変数。</param>
     public void Launch(string? customConfigToml = null, bool hotStart = true, Dictionary<string, string>? envVars = null)
     {
         // [STABILITY] Ensure previous session is cleaned up
@@ -210,6 +220,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
         }
     }
 
+    /// <summary>アプリケーションとオートメーションリソースを安全に解放し、プロセスをクリーンアップする。</summary>
     public void Dispose()
     {
         try
@@ -303,6 +314,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>残存している可能性のあるアプリケーションプロセスを強制終了する。</summary>
     private void KillOrphanedProcesses()
     {
         try
