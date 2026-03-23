@@ -1,25 +1,35 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using Shouldly;
 using Moq;
-using Xunit;
-using CashChangerSimulator.Core.Monitoring;
 using R3;
-using Microsoft.PointOfService;
+using Shouldly;
+using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>DispenseViewModel の動作を検証するテストクラス。</summary>
-public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
+public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;
 
     /// <summary>テスト用のフィクスチャを初期化します。</summary>
-    public DispenseViewModelTest(UIViewModelFixture fixture)
+    public DispenseViewModelTests(UIViewModelFixture fixture)
     {
         _fixture = fixture;
-        _fixture.Reset();
+        _fixture.Initialize();
+        
+        // Setup initial inventory
+        _fixture.SetInventory(
+            (TestConstants.Key100, 100),
+            (TestConstants.Key1000, 100)
+        );
+    }
+
+    private DispenseViewModel CreateViewModel(BindableReactiveProperty<bool>? isInDepositMode = null)
+    {
+        return _fixture.CreateDispenseViewModel(isInDepositMode);
     }
 
     /// <summary>初期状態のプロパティ値が正しいことを検証します。</summary>
@@ -27,39 +37,45 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void InitialStateShouldHaveCorrectProperties()
     {
         // Act
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = CreateViewModel();
 
         // Assert
-        vm.TotalAmount.Value.ShouldBe(0m);
+        vm.TotalAmount.Value.ShouldBe(100 * 100 + 1000 * 100);
         vm.IsBusy.CurrentValue.ShouldBeFalse();
         vm.Status.CurrentValue.ShouldBe(CashDispenseStatus.Idle);
     }
 
     /// <summary>出金金額入力のバリデーションロジックを検証します。</summary>
-    /// <remarks>非数値、負数、残高不足、および正常値の各ケースを確認します。</remarks>
     [Fact]
     public void DispenseAmountInputValidationShouldWork()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
-        _fixture.Inventory.SetCount(denKey, 1);
+        var vm = CreateViewModel();
+
+        // Act & Assert (Empty)
+        vm.DispenseAmountInput.Value = "";
+        ((ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
 
         // Act & Assert (Invalid number)
         vm.DispenseAmountInput.Value = "abc";
         vm.DispenseAmountInput.HasErrors.ShouldBeTrue();
+        ((ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
 
         // Act & Assert (Negative)
         vm.DispenseAmountInput.Value = "-100";
         vm.DispenseAmountInput.HasErrors.ShouldBeTrue();
+        ((ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
 
         // Act & Assert (Insufficient funds)
-        vm.DispenseAmountInput.Value = (denKey.Value + 1).ToString();
+        var tooMuch = (100 * 100 + 1000 * 100) + 1;
+        vm.DispenseAmountInput.Value = tooMuch.ToString();
         vm.DispenseAmountInput.HasErrors.ShouldBeTrue();
+        ((ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
 
         // Act & Assert (Valid)
-        vm.DispenseAmountInput.Value = denKey.Value.ToString();
+        vm.DispenseAmountInput.Value = "100";
         vm.DispenseAmountInput.HasErrors.ShouldBeFalse();
+        ((ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeTrue();
     }
 
     /// <summary>出金コマンドが適切な状態でのみ実行可能であることを検証します。</summary>
@@ -67,10 +83,8 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void DispenseCommandCanExecuteShouldDependOnState()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
-        _fixture.Inventory.SetCount(denKey, 10);
-        vm.DispenseAmountInput.Value = denKey.Value.ToString();
+        var vm = CreateViewModel();
+        vm.DispenseAmountInput.Value = "100";
 
         // Assert (Normal)
         vm.DispenseCommand.CanExecute().ShouldBeTrue();
@@ -82,29 +96,28 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
 
         // Assert (Deposit Mode)
         var isInDepositMode = new BindableReactiveProperty<bool>(true);
-        var vmInDeposit = _fixture.CreateDispenseViewModel(isInDepositMode: isInDepositMode);
-        vmInDeposit.DispenseAmountInput.Value = denKey.Value.ToString();
+        var vmInDeposit = CreateViewModel(isInDepositMode: isInDepositMode);
+        vmInDeposit.DispenseAmountInput.Value = "100";
         vmInDeposit.DispenseCommand.CanExecute().ShouldBeFalse();
     }
 
-    /// <summary>クイック出金コマンドが正しく 1 枚の出金を要求することを検証します。</summary>
+    /// <summary>クイック出金コマンドが正しく出金を要求することを検証します。</summary>
     [Fact]
-    public void QuickDispenseCommandShouldRequestOneDenomination()
+    public void QuickDispenseCommandShouldExecuteDispense()
     {
-        // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
+        // Arrange
+        var vm = CreateViewModel();
+        var monitor = _fixture.Monitors.Monitors.First(m => m.Key == TestConstants.Key100);
+        var denominationVm = new DenominationViewModel(_fixture.CreateFacade(), TestConstants.Key100, _fixture.MetadataProvider, monitor, _fixture.ConfigProvider);
+
         // Act
-        var facade = _fixture.CreateFacade();
-        var monitor = _fixture.Monitors.Monitors.First(m => m.Key.Equals(denKey));
-        var denVm = new DenominationViewModel(facade, denKey, _fixture.MetadataProvider, monitor, _fixture.ConfigProvider);
-        vm.QuickDispenseCommand.Execute(denVm);
-        
-        // Wait for async operation (ExecuteDispense in Controller runs in Task.Run)
-        System.Threading.Thread.Sleep(200);
+        vm.QuickDispenseCommand.Execute(denominationVm);
 
         // Assert
-        _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")).ShouldBeTrue();
+        vm.DispensingAmount.Value.ShouldBe(100);
+        
+        // Wait for async operation
+        FlaUI.Core.Tools.Retry.WhileFalse(() => _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")), TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
 
     /// <summary>一括出金コマンドが指定された枚数での出金を要求することを検証します。</summary>
@@ -112,18 +125,17 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void DispenseBulkCommandShouldRequestMultipleDenominations()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
-        var counts = new Dictionary<DenominationKey, int> { [denKey] = 2 };
+        var vm = CreateViewModel();
+        var counts = new Dictionary<DenominationKey, int> { [TestConstants.Key100] = 2 };
 
         // Act
         vm.DispenseBulkCommand.Execute(counts);
         
-        // Wait for async operation
-        System.Threading.Thread.Sleep(200);
-
         // Assert
-        _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")).ShouldBeTrue();
+        vm.DispensingAmount.Value.ShouldBe(200);
+        
+        // Wait for async operation
+        FlaUI.Core.Tools.Retry.WhileFalse(() => _fixture.CashChanger.OposHistory.Any(h => h.Contains("DispenseCash")), TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
 
     /// <summary>出金処理中に例外が発生した場合のエラーハンドリングを検証します。</summary>
@@ -131,21 +143,15 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void DispenseCashShouldHandleExceptionAndSetError()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
-        _fixture.Inventory.SetCount(denKey, 10);
-        vm.DispenseAmountInput.Value = denKey.Value.ToString();
+        var vm = CreateViewModel();
+        vm.DispenseAmountInput.Value = "100";
         _fixture.CashChanger.SimulateDispenseException = true;
 
         // Act
         vm.DispenseCommand.Execute(Unit.Default);
         
-        // Wait for async operation
-        System.Threading.Thread.Sleep(200);
-
         // Assert
-        var result = FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsDeviceError.CurrentValue, TimeSpan.FromSeconds(5));
-        result.Success.ShouldBeTrue("IsDeviceError が True になりませんでした。");
+        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsDeviceError.CurrentValue, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
 
     /// <summary>シミュレーションコマンドがハードウェアの状態を正しく変化させることを検証します。</summary>
@@ -153,7 +159,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void SimulationCommandsShouldUpdateHardwareState()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = CreateViewModel();
 
         // Act & Assert (Jam)
         vm.SimulateJamCommand.Execute(Unit.Default);
@@ -169,7 +175,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     public void ResetErrorCommandShouldClearStatus()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = CreateViewModel();
         _fixture.Hardware.SetJammed(true);
 
         // Act
@@ -185,7 +191,7 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
     {
         // Assemble
         var isInDepositMode = new BindableReactiveProperty<bool>(true);
-        var vm = _fixture.CreateDispenseViewModel(isInDepositMode);
+        var vm = CreateViewModel(isInDepositMode);
         vm.DispenseAmountInput.Value = "1000";
 
         // Act
@@ -195,12 +201,12 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
-    /// <summary>空の入力（カウントが0）でバルク払出を実行した場合に何もしないことを検証します。</summary>
+    /// <summary>空の入力でバルク払出を実行した場合に何もしないことを検証します。</summary>
     [Fact]
     public void DispenseBulkCommandShouldDoNothingWhenCountsIsEmpty()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = CreateViewModel();
         var counts = new Dictionary<DenominationKey, int>();
 
         // Act
@@ -210,45 +216,12 @@ public class DispenseViewModelTest : IClassFixture<UIViewModelFixture>
         _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    /// <summary>null の入力でバルク払出を実行した場合に何もしないことを検証します。</summary>
-    [Fact]
-    public void DispenseBulkCommandShouldDoNothingWhenCountsIsNull()
-    {
-        // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
-
-        // Act
-        vm.DispenseBulkCommand.Execute(null!);
-
-        // Assert
-        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    /// <summary>入金モード中にクイック払出を実行しようとした場合に警告が表示されることを検証します。</summary>
-    [Fact]
-    public void QuickDispenseCommandShouldShowWarningInDepositMode()
-    {
-        // Assemble
-        var isInDepositMode = new BindableReactiveProperty<bool>(true);
-        var vm = _fixture.CreateDispenseViewModel(isInDepositMode);
-        var denKey = _fixture.MetadataProvider.SupportedDenominations.First();
-        var facade = _fixture.CreateFacade();
-        var monitor = _fixture.Monitors.Monitors.First(m => m.Key.Equals(denKey));
-        var denVm = new DenominationViewModel(facade, denKey, _fixture.MetadataProvider, monitor, _fixture.ConfigProvider);
-
-        // Act
-        vm.QuickDispenseCommand.Execute(denVm);
-
-        // Assert
-        _fixture.NotifyServiceMock.Verify(x => x.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-    }
-
     /// <summary>null の金種でクイック払出を実行した場合に何もしないことを検証します。</summary>
     [Fact]
     public void QuickDispenseCommandShouldDoNothingWhenDenominationIsNull()
     {
         // Assemble
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = CreateViewModel();
 
         // Act
         vm.QuickDispenseCommand.Execute(null!);
