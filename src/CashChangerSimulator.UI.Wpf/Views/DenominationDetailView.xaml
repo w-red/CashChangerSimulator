@@ -88,6 +88,22 @@
                     </StackPanel>
                 </Grid>
             </Border>
+
+            <!-- Non-recyclable Tip -->
+            <materialDesign:Card Padding="12" Margin="0,16,0,0"
+                                Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}"
+                                Visibility="{Binding IsRecyclable, Converter={StaticResource InverseBoolToVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="InformationOutline" Width="18" Height="18" Margin="0,0,8,0" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                    <TextBlock Text="{Binding LabelNoteNonRecyclable}" 
+                               TextWrapping="Wrap" FontSize="12" Opacity="0.8" VerticalAlignment="Center"/>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- Actions Section -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                <!-- Placeholder for action buttons -->
+            </StackPanel>
         </StackPanel>
     </Border>
 </UserControl>

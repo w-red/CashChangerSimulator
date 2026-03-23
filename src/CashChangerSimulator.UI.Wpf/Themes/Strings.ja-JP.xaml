@@ -163,6 +163,17 @@
     <system:String x:Key="Text.ExportSuccess">履歴をエクスポートしました。</system:String>
     <system:String x:Key="Text.ExportFailed">履歴のエクスポートに失敗しました。</system:String>
     <system:String x:Key="ToolTipExportHistory">取引履歴を CSV にエクスポート</system:String>
+    <system:String x:Key="ToolTipShowRecoveryHelp">リカバリヘルプを表示</system:String>
+
+    <!-- Recovery Help -->
+    <system:String x:Key="RecoveryHelpTitle">リカバリヘルプ</system:String>
+    <system:String x:Key="CaseA_Title">Jam / Jam (ジャム) が発生している場合</system:String>
+    <system:String x:Key="CaseA_Msg">サイドバーの「エラー解除」ボタンをクリックし、シミュレータ内部の論理エラー状態をリセットしてください。</system:String>
+    <system:String x:Key="CaseB_Title">Near Empty or Empty / ニアエンプティ・空 の場合</system:String>
+    <system:String x:Key="CaseB_Msg">メイン画面の金種一覧を確認し、特定箇所の在庫数が少なくなっていないか確認してください。必要に応じて補充（ActionFill）を行ってください。</system:String>
+    <system:String x:Key="CaseC_Title">Near Full or Full / ニアフル・満杯 の場合</system:String>
+    <system:String x:Key="CaseC_Msg">在庫がいっぱいになっています。必要に応じて回収（ActionEmpty）を行ってください。</system:String>
+    <system:String x:Key="NoteNonRecyclable">この金種はリサイクル対象外（回収庫へ直行）のため、払出用在庫は常に0となります。</system:String>
 
     <!-- Window Titles -->
     <system:String x:Key="TitleMainWindow">自動釣銭機シミュレーター</system:String>

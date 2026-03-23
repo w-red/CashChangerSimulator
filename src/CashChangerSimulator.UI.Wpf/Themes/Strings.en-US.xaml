@@ -169,6 +169,17 @@
     <sys:String x:Key="Text.ExportSuccess">History exported successfully.</sys:String>
     <sys:String x:Key="Text.ExportFailed">Failed to export history.</sys:String>
     <sys:String x:Key="ToolTipExportHistory">Export Transaction History to CSV</sys:String>
+    <sys:String x:Key="ToolTipShowRecoveryHelp">Show Recovery Help</sys:String>
+
+    <!-- Recovery Help -->
+    <sys:String x:Key="RecoveryHelpTitle">RECOVERY HELP</sys:String>
+    <sys:String x:Key="CaseA_Title">In case of Jam (Bill/Coin Jam)</sys:String>
+    <sys:String x:Key="CaseA_Msg">Click the "Reset Error" button in the sidebar to reset the logical error state inside the simulator.</sys:String>
+    <sys:String x:Key="CaseB_Title">In case of Near Empty or Empty</sys:String>
+    <sys:String x:Key="CaseB_Msg">Check the denomination list. If any inventory counts are low, please replenish them using the "Fill" action.</sys:String>
+    <sys:String x:Key="CaseC_Title">In case of Near Full or Full</sys:String>
+    <sys:String x:Key="CaseC_Msg">The inventory is almost full or full. Please perform the "Empty" action to collect the cash if necessary.</sys:String>
+    <sys:String x:Key="NoteNonRecyclable">This denomination is non-recyclable (sent directly to the collection box), so the recyclable inventory is always 0.</sys:String>
 
     <!-- Window Titles -->
     <sys:String x:Key="TitleMainWindow">Cash Changer Simulator</sys:String>

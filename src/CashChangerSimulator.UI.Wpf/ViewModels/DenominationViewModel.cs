@@ -54,6 +54,7 @@ public class DenominationViewModel : IDisposable
     public string LabelEscrow { get; }
     public string LabelTotalCount { get; }
     public string SuffixCount { get; }
+    public string LabelNoteNonRecyclable { get; }
 
     /// <summary>依存関係を注入して DenominationViewModel を初期化します。</summary>
     /// <param name="facade">デバイスとコア機能の Facade。</param>
@@ -114,6 +115,7 @@ public class DenominationViewModel : IDisposable
         LabelEscrow = ResourceHelper.GetAsString("LabelPendingItems", "ESCROW");
         LabelTotalCount = ResourceHelper.GetAsString("TotalCountLabel", "TOTAL COUNT");
         SuffixCount = ResourceHelper.GetAsString("CountSuffix", "");
+        LabelNoteNonRecyclable = ResourceHelper.GetAsString("NoteNonRecyclable", "This denomination is non-recyclable...");
 
         facade.Inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)
