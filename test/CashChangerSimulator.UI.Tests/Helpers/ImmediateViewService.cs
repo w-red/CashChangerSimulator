@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 
-namespace CashChangerSimulator.Tests.Mocks;
+namespace CashChangerSimulator.UI.Tests.Helpers;
 
 /// <summary>
 /// A mock implementation of IViewService that does nothing but satisfies dependencies.

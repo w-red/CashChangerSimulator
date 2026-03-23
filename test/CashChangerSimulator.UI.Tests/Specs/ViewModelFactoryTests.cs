@@ -7,7 +7,7 @@ using R3;
 using Shouldly;
 using Xunit;
 
-namespace CashChangerSimulator.Tests.UI.Wpf.Services;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class ViewModelFactoryTests
 {

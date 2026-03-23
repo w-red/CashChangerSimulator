@@ -8,16 +8,16 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using CashChangerSimulator.Tests.Mocks;
+using CashChangerSimulator.UI.Tests.Helpers;
 using Moq;
 using R3;
 using Shouldly;
 using Xunit;
 using System.Linq;
 
-namespace CashChangerSimulator.Tests.UI;
+namespace CashChangerSimulator.UI.Tests.Specs;
 
-public class HotReloadTest
+public class HotReloadTests
 {
     private (InventoryViewModel vm, ConfigurationProvider config, MonitorsProvider monitorsProvider) CreateSetup(string initialCurrency = "JPY")
     {

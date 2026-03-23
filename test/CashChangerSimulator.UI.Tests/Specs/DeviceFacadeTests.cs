@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 using Moq;
 using Shouldly;
 using Xunit;
-using CashChangerSimulator.Tests.Mocks;
 
-namespace CashChangerSimulator.Tests.UI.Wpf.Services;
+
+namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class DeviceFacadeTests
 {
