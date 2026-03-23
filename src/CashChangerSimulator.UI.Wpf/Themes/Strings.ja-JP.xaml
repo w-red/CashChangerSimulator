@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
 
     <!-- Common Strings -->
     <system:String x:Key="Cancel">キャンセル</system:String>
@@ -17,7 +17,13 @@
     <system:String x:Key="StatusOverlap">重なり</system:String>
     <system:String x:Key="StatusDeviceError">デバイスエラー</system:String>
     
-    
+    <!-- Operational Statuses -->
+    <system:String x:Key="StatusIdle">待機中</system:String>
+    <system:String x:Key="StatusStarting">開始中</system:String>
+    <system:String x:Key="StatusCounting">計数中</system:String>
+    <system:String x:Key="StatusPaused">停止中</system:String>
+    <system:String x:Key="StatusFixed">確定</system:String>
+    <system:String x:Key="StatusUnknown">不明</system:String>
     <system:String x:Key="Bills">紙幣</system:String>
     <system:String x:Key="Coins">硬貨</system:String>
     <system:String x:Key="Recyclable">還流庫</system:String>
@@ -67,7 +73,7 @@
     <system:String x:Key="OposDeviceLog">OPOS デバイスログ</system:String>
     <system:String x:Key="StartSimulation">シミュレーション開始</system:String>
     <system:String x:Key="ReadyForTransaction">取引可能</system:String>
-    <system:String x:Key="TargetAmountHint">目標金額</system:String>
+    <system:String x:Key="TargetAmountHint">要求金額</system:String>
     <system:String x:Key="InsertCashToContinue">現金を投入してください</system:String>
     <system:String x:Key="TransactionFinished">取引終了</system:String>
 
@@ -135,7 +141,9 @@
     <system:String x:Key="SimulateJam">ジャムシミュレート</system:String>
     <system:String x:Key="SimulateDeviceError">デバイスエラーシミュレート</system:String>
     <system:String x:Key="LabelInput">投入額: </system:String>
-    <system:String x:Key="LabelTarget">目標額: </system:String>
+    <system:String x:Key="LabelTarget">要求額: </system:String>
+    <system:String x:Key="RequiredAmountLabel">要求額</system:String>
+    <system:String x:Key="RemainingAmountLabel">不足額</system:String>
     <system:String x:Key="BulkOperations">一括操作</system:String>
     <system:String x:Key="ActionFill">満杯補充</system:String>
     <system:String x:Key="ActionEmpty">全回収</system:String>
