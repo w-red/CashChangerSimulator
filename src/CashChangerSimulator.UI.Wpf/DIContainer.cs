@@ -30,72 +30,10 @@ public static class DIContainer
     {
         var services = new ServiceCollection();
 
-        // 1. Providers (Singleton)
-        services.AddSingleton<IDispatcherService, WpfDispatcherService>();
-        services.AddSingleton<ConfigurationProvider>();
-        services.AddSingleton<ICurrencyMetadataProvider, CurrencyMetadataProvider>();
-        services.AddSingleton<CurrencyMetadataProvider>();
-        services.AddSingleton<MonitorsProvider>();
-        services.AddSingleton<OverallStatusAggregatorProvider>();
-        services.AddSingleton<INotifyService, Services.WpfNotifyService>();
-        services.AddSingleton<IViewService, WpfViewService>();
-
-        // 2. Core Services (Singleton)
-        services.AddSingleton<Inventory>();
-        services.AddSingleton<TransactionHistory>();
-        services.AddSingleton<HistoryPersistenceService>();
-        services.AddSingleton<ChangeCalculator>();
-        services.AddSingleton<CashChangerManager>();
-        services.AddSingleton<HardwareStatusManager>();
-        services.AddSingleton<DiagnosticController>();
-
-        // 3. Simulator / Devices (Singleton)
-        services.AddSingleton<IDeviceSimulator, HardwareSimulator>();
-        services.AddSingleton<DepositController>();
-        services.AddSingleton<DispenseController>();
-
-        services.AddSingleton<InternalSimulatorCashChanger>(sp => {
-            var deps = new SimulatorDependencies(
-                ConfigProvider: sp.GetRequiredService<ConfigurationProvider>(),
-                Inventory: sp.GetRequiredService<Inventory>(),
-                History: sp.GetRequiredService<TransactionHistory>(),
-                Manager: sp.GetRequiredService<CashChangerManager>(),
-                DepositController: sp.GetRequiredService<DepositController>(),
-                DispenseController: sp.GetRequiredService<DispenseController>(),
-                AggregatorProvider: sp.GetRequiredService<OverallStatusAggregatorProvider>(),
-                HardwareStatusManager: sp.GetRequiredService<HardwareStatusManager>(),
-                DiagnosticController: sp.GetRequiredService<DiagnosticController>()
-            );
-            return new InternalSimulatorCashChanger(deps);
-        });
-
-        services.AddSingleton<SimulatorCashChanger>(sp => sp.GetRequiredService<InternalSimulatorCashChanger>());
-        services.AddSingleton<DeviceEventHistoryObserver>();
-        services.AddSingleton<IScriptExecutionService, ScriptExecutionService>();
-
-        services.AddSingleton<IUposConfigurationManager>(sp => {
-            var so = sp.GetRequiredService<SimulatorCashChanger>();
-            var config = sp.GetRequiredService<ConfigurationProvider>();
-            var inventory = sp.GetRequiredService<Inventory>();
-            return new UposConfigurationManager(config, inventory, (IDeviceStateProvider)so);
-        });
-
-        services.AddSingleton<IUposEventNotifier>(sp => {
-            var so = sp.GetRequiredService<SimulatorCashChanger>();
-            return new UposEventNotifier((IUposEventSink)so);
-        });
-
-        services.AddSingleton<IUposMediator>(sp => {
-            var so = sp.GetRequiredService<SimulatorCashChanger>();
-            return new UposMediator(so);
-        });
-
-        // 4. ViewModels (Singleton - to ensure consistency between UI and Logic)
-        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
-        services.AddSingleton<IDeviceFacade, DeviceFacade>();
-        services.AddSingleton<MainViewModel>();
-        services.AddSingleton<InventoryViewModel>();
-        services.AddSingleton<AdvancedSimulationViewModel>();
+        // Use modular registration extensions
+        services.AddCoreServices();
+        services.AddDeviceServices();
+        services.AddWpfUiServices();
 
         // Build the ServiceProvider
         _serviceProvider = services.BuildServiceProvider();
