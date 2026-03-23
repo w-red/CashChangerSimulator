@@ -8,6 +8,7 @@ using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
+using CashChangerSimulator.UI.Wpf.Controls;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
@@ -79,6 +80,11 @@ public class InventoryViewModel : IDisposable
     public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
     /// <summary>取引履歴をエクスポートするコマンド。</summary>
     public ReactiveCommand ExportHistoryCommand { get; }
+    /// <summary>リカバリヘルプを表示するコマンド。</summary>
+    public ReactiveCommand ShowRecoveryHelpCommand { get; }
+
+    /// <summary>リカバリヘルプが状況的に推奨されるかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsRecoveryHelpAvailable { get; }
 
 
     /// <summary>最近の取引履歴。</summary>
@@ -121,7 +127,31 @@ public class InventoryViewModel : IDisposable
         CoinGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
         IsEmpty = new BindableReactiveProperty<bool>(RecentTransactions.Count == 0).AddTo(_disposables);
 
-        SafeInvoke(InitializeDenominations);
+        OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenSettingsCommand.Subscribe(_ =>
+        {
+            _facade.View.ShowSettingsWindow();
+        });
+
+        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
+
+        ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
+        ExportHistoryCommand.Subscribe(_ => ExportHistory());
+
+        IsRecoveryHelpAvailable = Observable.CombineLatest(
+            IsJammed,
+            IsOverlapped,
+            OverallStatus,
+            FullStatus,
+            (jammed, overlapped, status, full) => jammed || overlapped || (status != CashStatus.Normal && status != CashStatus.Unknown) || full != CashStatus.Normal
+        ).ToReadOnlyReactiveProperty().AddTo(_disposables);
+
+        ShowRecoveryHelpCommand = new ReactiveCommand().AddTo(_disposables);
+        ShowRecoveryHelpCommand.Subscribe(_ =>
+        {
+            SafeInvoke(() => _facade.View.ShowRecoveryHelpDialogAsync(this));
+        });
 
         _facade.Monitors.Changed
             .Subscribe(_ => SafeInvoke(InitializeDenominations))
@@ -136,17 +166,7 @@ public class InventoryViewModel : IDisposable
             }))
             .AddTo(_disposables);
 
-        OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
-        OpenSettingsCommand.Subscribe(_ =>
-        {
-            _facade.View.ShowSettingsWindow();
-        });
-
-        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
-
-        ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
-        ExportHistoryCommand.Subscribe(_ => ExportHistory());
+        SafeInvoke(InitializeDenominations);
 
         OpenCommand = new ReactiveCommand().AddTo(_disposables);
         OpenCommand.Subscribe(_ =>
@@ -204,11 +224,7 @@ public class InventoryViewModel : IDisposable
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
             if (vm == null) return;
-            SafeInvoke(() =>
-            {
-                var view = new DenominationDetailView { DataContext = vm };
-                _ = _facade.View.ShowDialogAsync(view, "RootDialog");
-            });
+            SafeInvoke(() => _facade.View.ShowDenominationDetailDialogAsync(vm));
         });
 
     }

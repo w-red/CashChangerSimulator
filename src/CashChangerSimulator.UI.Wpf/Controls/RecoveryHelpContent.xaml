@@ -1,0 +1,134 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Controls.RecoveryHelpContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:CashChangerSimulator.UI.Wpf.Controls"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400"
+             d:DataContext="{d:DesignInstance Type=vm:InventoryViewModel}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="{DynamicResource RecoveryHelpTitle}" 
+                       Style="{StaticResource MaterialDesignHeadlineSmallTextBlock}"
+                       FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+            <Separator Margin="0,8,0,0" Background="{DynamicResource MaterialDesign.Brush.OutlineVariant}"/>
+        </StackPanel>
+
+        <!-- Content (Scrollable) -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Case A: Jam -->
+                <materialDesign:Card Margin="0,0,0,12" Padding="12" 
+                                    Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
+                                    Background="{DynamicResource MaterialDesign.Brush.ErrorContainer}"
+                                    Foreground="{DynamicResource MaterialDesign.Brush.OnErrorContainer}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="AlertCircle" Width="20" Height="20" Margin="0,0,8,0"/>
+                            <TextBlock Text="{DynamicResource CaseA_Title}" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource CaseA_Msg}" TextWrapping="Wrap" Opacity="0.9"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Case B: Near Empty / Empty -->
+                <materialDesign:Card Margin="0,0,0,12" Padding="12" 
+                                    Background="{DynamicResource MaterialDesign.Brush.SecondaryContainer}"
+                                    Foreground="{DynamicResource MaterialDesign.Brush.OnSecondaryContainer}">
+                    <materialDesign:Card.Style>
+                        <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding OverallStatus.CurrentValue}" Value="Empty">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding OverallStatus.CurrentValue}" Value="NearEmpty">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:Card.Style>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="TrayAlert" Width="20" Height="20" Margin="0,0,8,0"/>
+                            <TextBlock Text="{DynamicResource CaseB_Title}" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource CaseB_Msg}" TextWrapping="Wrap" Opacity="0.9"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Case C: Near Full / Full -->
+                <materialDesign:Card Margin="0,0,0,12" Padding="12" 
+                                    Background="{DynamicResource MaterialDesign.Brush.TertiaryContainer}"
+                                    Foreground="{DynamicResource MaterialDesign.Brush.OnTertiaryContainer}">
+                    <materialDesign:Card.Style>
+                        <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding FullStatus.CurrentValue}" Value="Full">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding FullStatus.CurrentValue}" Value="NearFull">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:Card.Style>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="TrayFull" Width="20" Height="20" Margin="0,0,8,0"/>
+                            <TextBlock Text="{DynamicResource CaseC_Title}" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource CaseC_Msg}" TextWrapping="Wrap" Opacity="0.9"/>
+                    </StackPanel>
+                </materialDesign:Card>
+                
+                <!-- Fallback (If nothing special is happening, show a general tip) -->
+                <materialDesign:Card Margin="0,0,0,12" Padding="12" 
+                                    Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
+                    <materialDesign:Card.Style>
+                        <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsJammed.Value}" Value="False"/>
+                                        <Condition Binding="{Binding IsOverlapped.Value}" Value="False"/>
+                                        <Condition Binding="{Binding OverallStatus.CurrentValue}" Value="Normal"/>
+                                        <Condition Binding="{Binding FullStatus.CurrentValue}" Value="Normal"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:Card.Style>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="CheckCircle" Width="20" Height="20" Margin="0,0,8,0" Foreground="Green"/>
+                            <TextBlock Text="現在、デバイスは正常です" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="特別なリカバリ操作は必要ありません。エラーが発生すると、ここに最適な解決手順が表示されます。" TextWrapping="Wrap" Opacity="0.7"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="{DynamicResource Ok}" 
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    IsDefault="True"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

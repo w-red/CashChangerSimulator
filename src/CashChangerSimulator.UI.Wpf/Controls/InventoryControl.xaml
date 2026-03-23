@@ -104,6 +104,20 @@
                                 BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}">
                             <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                         </Button>
+
+                        <!-- Recovery Help Button -->
+                        <Button Command="{Binding ShowRecoveryHelpCommand}"
+                                Visibility="{Binding IsRecoveryHelpAvailable.CurrentValue, Converter={StaticResource BoolToVis}}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                Padding="8,4" Margin="8,0,0,0"
+                                ToolTip="{DynamicResource ToolTipShowRecoveryHelp}"
+                                AutomationProperties.AutomationId="ShowRecoveryHelpButton">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" Width="18" Height="18" Margin="0,0,4,0"/>
+                                <TextBlock Text="{DynamicResource RecoveryHelpTitle}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </Border>
