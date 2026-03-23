@@ -15,16 +15,25 @@
         <Border Background="#0DFFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,20">
             <StackPanel>
                 <Grid>
-                    <StackPanel HorizontalAlignment="Left">
-                        <TextBlock Text="REQUIRED" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="12" VerticalAlignment="Center" Opacity="0.7"/>
-                            <TextBlock Text="{Binding RequiredAmount.Value, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold"/>
-                        </StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Width="140">
+                        <TextBlock Text="{StaticResource RequiredAmountLabel}" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="12" VerticalAlignment="Center" Opacity="0.7" Margin="0,0,4,0"/>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding RequiredAmountInput.Value, UpdateSourceTrigger=PropertyChanged}" 
+                                     FontSize="16" FontWeight="Bold"
+                                     Style="{StaticResource ModernTextBoxStyle}"
+                                     Padding="0" MinWidth="60"
+                                     AutomationProperties.AutomationId="EditableRequiredAmountBox"/>
+                        </Grid>
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Right">
-                        <TextBlock Text="REMAINING" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2" HorizontalAlignment="Right"/>
+                        <TextBlock Text="{StaticResource RemainingAmountLabel}" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2" HorizontalAlignment="Right"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="12" VerticalAlignment="Center" Opacity="0.7" Foreground="IndianRed"/>
                             <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}{0:N0}}" FontSize="16" FontWeight="Bold" Foreground="IndianRed"/>

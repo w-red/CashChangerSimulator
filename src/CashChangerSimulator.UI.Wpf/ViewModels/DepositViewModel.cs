@@ -82,6 +82,9 @@ public class DepositViewModel : IDisposable
     /// <summary>クイック入金用の金額入力値。</summary>
     public BindableReactiveProperty<string> QuickDepositAmountInput { get; }
 
+    /// <summary>要求額の入力値。</summary>
+    public BindableReactiveProperty<string> RequiredAmountInput { get; }
+
     /// <summary>通貨記号。</summary>
     public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
 
@@ -169,6 +172,7 @@ public class DepositViewModel : IDisposable
         IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
         IsDeviceError = _facade.Status.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
+        RequiredAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         // Deposit State Observables
         IsInDepositMode = _facade.Deposit.Changed
@@ -228,6 +232,35 @@ public class DepositViewModel : IDisposable
             .Select(_ => _facade.Changer is SimulatorCashChanger scc ? scc.RequiredAmount : 0)
             .ToBindableReactiveProperty(_facade.Changer is SimulatorCashChanger s ? s.RequiredAmount : 0)
             .AddTo(_disposables);
+
+        // Sync RequiredAmount (from device) to RequiredAmountInput
+        RequiredAmount.Subscribe(val =>
+        {
+            if (!decimal.TryParse(RequiredAmountInput.Value, out var current) || current != val)
+            {
+                RequiredAmountInput.Value = val > 0 ? val.ToString("G29") : "";
+            }
+        }).AddTo(_disposables);
+
+        // Sync RequiredAmountInput to RequiredAmount (to device)
+        RequiredAmountInput.Subscribe(input =>
+        {
+            if (_facade.Changer is not SimulatorCashChanger scc) return;
+
+            if (decimal.TryParse(input, out var val) && val >= 0)
+            {
+                if (scc.RequiredAmount != val)
+                {
+                    scc.RequiredAmount = val;
+                    // Trigger manual change notification if needed, 
+                    // though SimulatorCashChanger should fire events when RequiredAmount is set.
+                }
+            }
+            else if (string.IsNullOrWhiteSpace(input))
+            {
+                if (scc.RequiredAmount != 0) scc.RequiredAmount = 0;
+            }
+        }).AddTo(_disposables);
 
         RemainingAmount = CurrentDepositAmount.CombineLatest(RequiredAmount, (current, required) => Math.Max(0, required - current))
             .ToReadOnlyReactiveProperty()
@@ -359,17 +392,17 @@ public class DepositViewModel : IDisposable
     private string GetModeName()
     {
         return !_facade.Deposit.IsDepositInProgress && _facade.Deposit.DepositStatus != CashDepositStatus.End
-            ? "IDLE"
+            ? ResourceHelper.GetAsString("StatusIdle", "IDLE")
             : _facade.Deposit.IsPaused
-                ? "PAUSED"
+                ? ResourceHelper.GetAsString("StatusPaused", "PAUSED")
                 : _facade.Deposit.IsFixed
-                    ? "FIXED"
+                    ? ResourceHelper.GetAsString("StatusFixed", "FIXED")
                     : _facade.Deposit.DepositStatus switch
                     {
-                        CashDepositStatus.Start => "STARTING",
-                        CashDepositStatus.Count => "COUNTING",
-                        CashDepositStatus.End => "IDLE",
-                        _ => "UNKNOWN"
+                        CashDepositStatus.Start => ResourceHelper.GetAsString("StatusStarting", "STARTING"),
+                        CashDepositStatus.Count => ResourceHelper.GetAsString("StatusCounting", "COUNTING"),
+                        CashDepositStatus.End => ResourceHelper.GetAsString("StatusIdle", "IDLE"),
+                        _ => ResourceHelper.GetAsString("StatusUnknown", "UNKNOWN")
                     };
     }
 

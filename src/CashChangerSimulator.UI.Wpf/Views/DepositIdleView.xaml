@@ -14,6 +14,24 @@
         <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
     </UserControl.Resources>
     <StackPanel>
+        <!-- Target Amount Input -->
+        <Border Background="#0DFFFFFF" CornerRadius="8" Padding="12" Margin="32,8,32,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox materialDesign:HintAssist.Hint="{StaticResource LabelTarget}"
+                         materialDesign:TextFieldAssist.PrefixText="{Binding CurrencyPrefix.Value}"
+                         Text="{Binding RequiredAmountInput.Value, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding CanOperate.Value}"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         FontSize="14"
+                         AutomationProperties.AutomationId="RequiredAmountInputBox"/>
+                <TextBlock Grid.Column="1" Text="{Binding CurrencySuffix.Value}" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.5"/>
+            </Grid>
+        </Border>
+
         <Button x:Name="BeginDepositButton"
                 Style="{StaticResource PrimaryButtonStyle}" 
                 Command="{Binding BeginDepositCommand}"
