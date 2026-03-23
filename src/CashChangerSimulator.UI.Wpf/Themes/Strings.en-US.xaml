@@ -164,11 +164,6 @@
     <sys:String x:Key="ToolTipReplenishAll">Replenish All (Set to Initial Counts)</sys:String>
     <sys:String x:Key="ToolTipCollectAll">Collect All (Set to Zero)</sys:String>
     <sys:String x:Key="ToolTipResetHardwareError">Reset Hardware Error</sys:String>
-    <sys:String x:Key="ToolTipSystemSettings">System Settings</sys:String>
-    <sys:String x:Key="Text.CsvFilter">CSV files (*.csv)|*.csv</sys:String>
-    <sys:String x:Key="Text.ExportSuccess">History exported successfully.</sys:String>
-    <sys:String x:Key="Text.ExportFailed">Failed to export history.</sys:String>
-    <sys:String x:Key="ToolTipExportHistory">Export Transaction History to CSV</sys:String>
     <sys:String x:Key="ToolTipShowRecoveryHelp">Show Recovery Help</sys:String>
 
     <!-- Recovery Help -->
