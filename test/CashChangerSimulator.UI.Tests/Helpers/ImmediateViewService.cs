@@ -23,4 +23,8 @@ public class ImmediateViewService : IViewService
     public string? ShowSaveFileDialog(string defaultExt, string filter, string fileName) => null;
 
     public Task ShowDialogAsync(object content, string identifier = "RootDialog") => Task.CompletedTask;
+
+    public Task ShowRecoveryHelpDialogAsync(InventoryViewModel dataContext) => Task.CompletedTask;
+
+    public Task ShowDenominationDetailDialogAsync(DenominationViewModel dataContext) => Task.CompletedTask;
 }

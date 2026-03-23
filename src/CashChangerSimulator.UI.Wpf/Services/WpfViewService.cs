@@ -7,6 +7,7 @@ using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.Device.Services;
 using System.IO;
 using MaterialDesignThemes.Wpf;
+using CashChangerSimulator.UI.Wpf.Controls;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
@@ -50,6 +51,18 @@ public class WpfViewService(IDispatcherService dispatcher) : IViewService
     public async Task ShowDialogAsync(object content, string identifier = "RootDialog")
     {
         await DialogHost.Show(content, identifier);
+    }
+
+    public Task ShowRecoveryHelpDialogAsync(InventoryViewModel dataContext)
+    {
+        var view = new RecoveryHelpContent { DataContext = dataContext };
+        return ShowDialogAsync(view, "RootDialog");
+    }
+
+    public Task ShowDenominationDetailDialogAsync(DenominationViewModel dataContext)
+    {
+        var view = new DenominationDetailView { DataContext = dataContext };
+        return ShowDialogAsync(view, "RootDialog");
     }
 
     public string? ShowSaveFileDialog(string defaultExt, string filter, string fileName)

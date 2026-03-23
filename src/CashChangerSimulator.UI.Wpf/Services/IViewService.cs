@@ -25,6 +25,12 @@ public interface IViewService
     /// <summary>Shows a dialog with the specified content.</summary>
     Task ShowDialogAsync(object content, string identifier = "RootDialog");
 
+    /// <summary>Shows the recovery help dialog.</summary>
+    Task ShowRecoveryHelpDialogAsync(InventoryViewModel dataContext);
+
+    /// <summary>Shows the denomination detail dialog.</summary>
+    Task ShowDenominationDetailDialogAsync(DenominationViewModel dataContext);
+
     /// <summary>Shows a save file dialog.</summary>
     /// <param name="defaultExt">Default file extension.</param>
     /// <param name="filter">File filter string (e.g., "CSV files (*.csv)|*.csv").</param>
