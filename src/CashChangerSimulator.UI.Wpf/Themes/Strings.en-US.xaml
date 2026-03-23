@@ -47,6 +47,11 @@
     <sys:String x:Key="ErrorAmountPositive">Amount must be positive</sys:String>
     <sys:String x:Key="ErrorInsufficientFunds">Insufficient funds</sys:String>
     <sys:String x:Key="AmountHint">Amount</sys:String>
+    <sys:String x:Key="ToolTipSystemSettings">System Settings</sys:String>
+    <sys:String x:Key="Text.CsvFilter">CSV files (*.csv)|*.csv</sys:String>
+    <sys:String x:Key="Text.ExportSuccess">History exported successfully.</sys:String>
+    <sys:String x:Key="Text.ExportFailed">Failed to export history.</sys:String>
+    <sys:String x:Key="ToolTipExportHistory">Export Transaction History to CSV</sys:String>
 
     <!-- Main Window / Settings -->
     <sys:String x:Key="SystemSettings">SYSTEM SETTINGS</sys:String>
@@ -160,6 +165,10 @@
     <sys:String x:Key="ToolTipCollectAll">Collect All (Set to Zero)</sys:String>
     <sys:String x:Key="ToolTipResetHardwareError">Reset Hardware Error</sys:String>
     <sys:String x:Key="ToolTipSystemSettings">System Settings</sys:String>
+    <sys:String x:Key="Text.CsvFilter">CSV files (*.csv)|*.csv</sys:String>
+    <sys:String x:Key="Text.ExportSuccess">History exported successfully.</sys:String>
+    <sys:String x:Key="Text.ExportFailed">Failed to export history.</sys:String>
+    <sys:String x:Key="ToolTipExportHistory">Export Transaction History to CSV</sys:String>
 
     <!-- Window Titles -->
     <sys:String x:Key="TitleMainWindow">Cash Changer Simulator</sys:String>

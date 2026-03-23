@@ -13,6 +13,7 @@ using CashChangerSimulator.UI.Wpf.Views;
 using Microsoft.PointOfService;
 using R3;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
@@ -24,6 +25,7 @@ public class InventoryViewModel : IDisposable
     private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
+    private readonly IHistoryExportService _exportService;
     private readonly INotifyService _notifyService;
     private readonly CompositeDisposable _disposables = [];
 
@@ -75,6 +77,8 @@ public class InventoryViewModel : IDisposable
     public ReactiveCommand ReplenishAllCommand { get; }
     /// <summary>金種詳細を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
+    /// <summary>取引履歴をエクスポートするコマンド。</summary>
+    public ReactiveCommand ExportHistoryCommand { get; }
 
 
     /// <summary>最近の取引履歴。</summary>
@@ -89,6 +93,7 @@ public class InventoryViewModel : IDisposable
         IDeviceFacade facade,
         ConfigurationProvider configProvider,
         CurrencyMetadataProvider metadataProvider,
+        IHistoryExportService exportService,
         INotifyService notifyService)
     {
         ArgumentNullException.ThrowIfNull(facade);
@@ -99,6 +104,7 @@ public class InventoryViewModel : IDisposable
         _facade = facade;
         _configProvider = configProvider;
         _metadataProvider = metadataProvider;
+        _exportService = exportService;
         _notifyService = notifyService;
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix;
@@ -138,6 +144,9 @@ public class InventoryViewModel : IDisposable
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
+
+        ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
+        ExportHistoryCommand.Subscribe(_ => ExportHistory());
 
         OpenCommand = new ReactiveCommand().AddTo(_disposables);
         OpenCommand.Subscribe(_ =>
@@ -242,6 +251,27 @@ public class InventoryViewModel : IDisposable
         _logger.ZLogDebug($"InitializeDenominations: Finished. Bills: {BillDenominations.Count}, Coins: {CoinDenominations.Count}");
 
         UpdateGridRatios();
+    }
+
+    private void ExportHistory()
+    {
+        var filter = ResourceHelper.GetAsString("Text.CsvFilter", "CSV files (*.csv)|*.csv");
+        var fileName = $"History_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+        
+        var path = _facade.View.ShowSaveFileDialog(".csv", filter, fileName);
+        if (string.IsNullOrEmpty(path)) return;
+
+        try
+        {
+            var csv = _exportService.Export(_facade.History.Entries);
+            File.WriteAllText(path, csv);
+            _notifyService.ShowInfo(ResourceHelper.GetAsString("Text.ExportSuccess", "History exported successfully."), "Export");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex, $"Failed to export history to {path}");
+            _notifyService.ShowWarning(ResourceHelper.GetAsString("Text.ExportFailed", "Failed to export history.") + $": {ex.Message}", "Export");
+        }
     }
 
     private void UpdateGridRatios()

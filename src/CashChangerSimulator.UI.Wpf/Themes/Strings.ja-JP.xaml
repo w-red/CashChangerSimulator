@@ -159,6 +159,10 @@
     <system:String x:Key="ToolTipCollectAll">全回収 (ゼロに設定)</system:String>
     <system:String x:Key="ToolTipResetHardwareError">ハードウェアエラーを解除</system:String>
     <system:String x:Key="ToolTipSystemSettings">システム設定</system:String>
+    <system:String x:Key="Text.CsvFilter">CSV ファイル (*.csv)|*.csv</system:String>
+    <system:String x:Key="Text.ExportSuccess">履歴をエクスポートしました。</system:String>
+    <system:String x:Key="Text.ExportFailed">履歴のエクスポートに失敗しました。</system:String>
+    <system:String x:Key="ToolTipExportHistory">取引履歴を CSV にエクスポート</system:String>
 
     <!-- Window Titles -->
     <system:String x:Key="TitleMainWindow">自動釣銭機シミュレーター</system:String>

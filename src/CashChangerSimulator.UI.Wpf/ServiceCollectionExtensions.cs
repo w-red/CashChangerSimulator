@@ -35,6 +35,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<CashChangerManager>();
         services.AddSingleton<HardwareStatusManager>();
         services.AddSingleton<DiagnosticController>();
+        services.AddSingleton<IHistoryExportService, CsvHistoryExportService>();
 
         return services;
     }
