@@ -50,7 +50,9 @@ public class StateConflictTestFixture : IDisposable
 
     public void Dispose()
     {
-        DispenseChanged.Dispose();
+        try { ConfigProvider?.Dispose(); } catch { }
+        try { (MonitorsProvider as IDisposable)?.Dispose(); } catch { }
+        DispenseChanged?.Dispose();
         GC.SuppressFinalize(this);
     }
 }

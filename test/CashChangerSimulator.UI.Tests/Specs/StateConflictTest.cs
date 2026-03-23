@@ -51,6 +51,7 @@ public class StateConflictTest : IAsyncLifetime
         services.AddSingleton<IDeviceFacade>(facade);
         services.AddSingleton<IViewModelFactory, ViewModelFactory>();
         services.AddSingleton(new Mock<IScriptExecutionService>().Object);
+        services.AddSingleton(new Mock<IHistoryExportService>().Object);
         services.AddSingleton(facade.Notify);
         services.AddSingleton<InventoryViewModel>();
         services.AddSingleton<AdvancedSimulationViewModel>();
