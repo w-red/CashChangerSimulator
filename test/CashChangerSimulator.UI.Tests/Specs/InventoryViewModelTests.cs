@@ -244,6 +244,25 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
         _fixture.NotifyServiceMock.Verify(n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
+    /// <summary>ExportHistoryCommand が保存ダイアログを表示し、エクスポートを実行することを検証します。</summary>
+    [Fact]
+    public void ExportHistoryCommandShouldShowDialogAndExport()
+    {
+        // Assemble
+        var vm = CreateViewModel();
+        var path = "export.csv";
+        _fixture.ViewServiceMock.Setup(v => v.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(path);
+        
+        // Act
+        vm.ExportHistoryCommand.Execute(Unit.Default);
+
+        // Assert
+        _fixture.ViewServiceMock.Verify(v => v.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        _fixture.ExportServiceMock.Verify(s => s.Export(It.IsAny<IEnumerable<TransactionEntry>>()), Times.Once);
+        _fixture.NotifyServiceMock.Verify(n => n.ShowInfo(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
     /// <summary>Dispose 呼び出しが例外を発生させないことを検証します。</summary>
     [Fact]
     public void DisposeShouldNotThrow()

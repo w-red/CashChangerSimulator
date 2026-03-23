@@ -20,5 +20,7 @@ public class ImmediateViewService : IViewService
 
     public void ShowAdvancedSimulationWindow(AdvancedSimulationViewModel dataContext) { }
 
+    public string? ShowSaveFileDialog(string defaultExt, string filter, string fileName) => null;
+
     public Task ShowDialogAsync(object content, string identifier = "RootDialog") => Task.CompletedTask;
 }

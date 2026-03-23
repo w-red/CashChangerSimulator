@@ -32,6 +32,7 @@ public class UIViewModelFixture : IDisposable
     public IDispatcherService DispatcherService { get; private set; } = null!;
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
     public Mock<IViewService> ViewServiceMock { get; private set; } = null!;
+    public Mock<IHistoryExportService> ExportServiceMock { get; private set; } = null!;
 
     public UIViewModelFixture()
     {
@@ -64,6 +65,7 @@ public class UIViewModelFixture : IDisposable
 
         NotifyServiceMock = new Mock<INotifyService>();
         ViewServiceMock = new Mock<IViewService>();
+        ExportServiceMock = new Mock<IHistoryExportService>();
 
         if (useRealScriptService)
         {
@@ -167,6 +169,7 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(ConfigProvider);
         services.AddSingleton(MetadataProvider);
         services.AddSingleton(NotifyServiceMock.Object);
+        services.AddSingleton(ExportServiceMock.Object);
         services.AddSingleton(ScriptExecutionService);
         services.AddSingleton(DispatcherService);
         
@@ -190,7 +193,7 @@ public class UIViewModelFixture : IDisposable
     /// <summary>検証用の InventoryViewModel を生成します。</summary>
     internal InventoryViewModel CreateInventoryViewModel()
     {
-        return new InventoryViewModel(CreateFacade(), ConfigProvider, MetadataProvider, NotifyServiceMock.Object);
+        return new InventoryViewModel(CreateFacade(), ConfigProvider, MetadataProvider, ExportServiceMock.Object, NotifyServiceMock.Object);
     }
 
     /// <summary>検証用の DepositViewModel を生成します。</summary>

@@ -123,6 +123,7 @@ public class UISmokeTests
                     facade,
                     config,
                     metadata,
+                    new Mock<IHistoryExportService>().Object,
                     mockNotify.Object);
 
                 // Test ActivityFeedControl
@@ -138,6 +139,7 @@ public class UISmokeTests
                 services.AddSingleton(config);
                 services.AddSingleton(metadata);
                 services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+                services.AddSingleton(new Mock<IHistoryExportService>().Object);
                 services.AddSingleton(new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
                 services.AddSingleton(facade.Notify);
                 services.AddSingleton<InventoryViewModel>();
