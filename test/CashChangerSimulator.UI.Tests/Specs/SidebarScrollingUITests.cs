@@ -48,7 +48,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
         depositBtn.ShouldNotBeNull("LaunchDepositButton not found or not ready");
         
         // Record initial position
-        var initialY = depositBtn.BoundingRectangle.Y;
+        var initialY = depositBtn!.BoundingRectangle.Y;
 
         // Act: Generate some transactions to trigger scrolling in the sidebar
         // 5 iterations are sufficient to fill the sidebar and trigger scrolling at height 600
@@ -89,7 +89,7 @@ public class SidebarScrollingUITests : IClassFixture<CashChangerTestApp>
         depositBtn = window.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton();
         depositBtn.ShouldNotBeNull();
         
-        var finalY = depositBtn.BoundingRectangle.Y;
+        var finalY = depositBtn!.BoundingRectangle.Y;
         
         // Expected to fail here in the Red phase
         finalY.ShouldBe(initialY, $"LaunchDepositButton moved from {initialY} to {finalY}! It should stay at a fixed position.");

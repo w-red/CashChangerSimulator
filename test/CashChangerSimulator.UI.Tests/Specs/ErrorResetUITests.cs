@@ -49,10 +49,10 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
         var resetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
         resetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
-        Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
+        Retry.WhileFalse(() => resetBtn != null && resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Assert: Jam インジケータ（ステータスタブなど）を確認
-        var jamIndicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator"));
+        var jamIndicator = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")), TimeSpan.FromSeconds(10)).Result;
         jamIndicator.ShouldNotBeNull("JamErrorIndicator should be visible in status header");
 
         // Act: Reset ボタンをクリック
@@ -95,7 +95,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
         var globalResetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
         globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
-        Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
+        Retry.WhileFalse(() => globalResetBtn != null && globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Act: Click Global Reset
         globalResetBtn.SmartClick();
@@ -132,7 +132,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         launchDispenseBtn.ShouldNotBeNull("LaunchDispenseButton not found");
         
         // 有効になるまで待機
-        Retry.WhileFalse(() => launchDispenseBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("LaunchDispenseButton was not enabled");
+        Retry.WhileFalse(() => launchDispenseBtn != null && launchDispenseBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("LaunchDispenseButton was not enabled");
         
         if (launchDispenseBtn.Patterns.Invoke.IsSupported) launchDispenseBtn.Patterns.Invoke.Pattern.Invoke();
         else launchDispenseBtn.SmartClick();
@@ -192,7 +192,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         overlayResetBtn.SmartClick();
 
         // Assert: エラー表示が消えたことを確認（オーバーレイのボタンがDisabledになる）
-        Retry.WhileFalse(() => !overlayResetBtn.IsEnabled, TimeSpan.FromSeconds(5))
+        Retry.WhileFalse(() => overlayResetBtn != null && !overlayResetBtn.IsEnabled, TimeSpan.FromSeconds(5))
              .Success.ShouldBeTrue("DispenseErrorResetButton should be disabled after reset");
 
         dispenseWindow.Close();

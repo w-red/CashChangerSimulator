@@ -144,7 +144,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Retry.WhileTrue(() => bulkButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Bulk button should be disabled during error.");
 
         var fixButton = FindElement(depositWindow, "FixDepositButton", "FINISH")?.AsButton();
-        Retry.WhileTrue(() => fixButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Fix button should be disabled during error.");
+        Retry.WhileTrue(() => fixButton != null && fixButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Fix button should be disabled during error.");
 
         var resetButton = FindElement(depositWindow, "ActiveResetErrorButton", "RESET")?.AsButton();
         resetButton.ShouldNotBeNull();

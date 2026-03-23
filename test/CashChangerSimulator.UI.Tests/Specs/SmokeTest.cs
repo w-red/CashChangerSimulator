@@ -22,7 +22,7 @@ public class SmokeTest : IDisposable
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
         // Allow English, Japanese, and LIVE mode titles
-        window.Title.ShouldBeOneOf("Cash Changer Simulator", "自動釣銭機シミュレーター", "CashChanger Simulator [LIVE]");
+        window!.Title.ShouldBeOneOf("Cash Changer Simulator", "自動釣銭機シミュレーター", "CashChanger Simulator [LIVE]");
     }
 
     /// <summary>合計金額のラベルが表示されていることを検証する。</summary>

@@ -28,7 +28,7 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         // 1. Get initial total (Main Window)
         var totalAmountLabel = FindElement(window, "TotalAmountText", "\\")?.AsLabel();
         totalAmountLabel.ShouldNotBeNull();
-        decimal initialAmount = ParseAmount(totalAmountLabel.Text);
+        decimal initialAmount = ParseAmount(totalAmountLabel!.Text);
 
         // 2. Open Dispense Terminal
         var dispenseWindow = OpenDispenseTerminal(window!);
@@ -53,8 +53,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 6. Verify total decreased (Check on Main Window)
-        Retry.WhileTrue(() => ParseAmount(totalAmountLabel.Text) == initialAmount, UITestTimings.RetryLongTimeout);
-        decimal finalAmount = ParseAmount(totalAmountLabel.Text);
+        Retry.WhileTrue(() => totalAmountLabel != null && ParseAmount(totalAmountLabel.Text) == initialAmount, UITestTimings.RetryLongTimeout);
+        decimal finalAmount = ParseAmount(totalAmountLabel!.Text);
         finalAmount.ShouldBeLessThan(initialAmount);
     }
 
@@ -104,9 +104,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         dispenseBox.Text = "1000";
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
-        dispenseBox.IsEnabled.ShouldBeTrue();
-        dispenseButton.IsEnabled.ShouldBeTrue();
-        showBulkButton.IsEnabled.ShouldBeTrue();
+        dispenseBox!.IsEnabled.ShouldBeTrue();
+        dispenseButton!.IsEnabled.ShouldBeTrue();
+        showBulkButton!.IsEnabled.ShouldBeTrue();
 
         // Simulate Jam
         var simulateJamButton = FindElement(dispenseWindow, "SimulateJamButton", null)?.AsButton();
@@ -114,9 +114,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Verify disabled state
-        dispenseBox.IsEnabled.ShouldBeFalse();
-        dispenseButton.IsEnabled.ShouldBeFalse();
-        showBulkButton.IsEnabled.ShouldBeFalse();
+        dispenseBox!.IsEnabled.ShouldBeFalse();
+        dispenseButton!.IsEnabled.ShouldBeFalse();
+        showBulkButton!.IsEnabled.ShouldBeFalse();
 
         // Reset Error
         var resetErrorButton = FindElement(dispenseWindow, "ResetErrorButton", null)?.AsButton();
@@ -124,9 +124,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Verify enabled state
-        dispenseBox.IsEnabled.ShouldBeTrue();
-        dispenseButton.IsEnabled.ShouldBeTrue();
-        showBulkButton.IsEnabled.ShouldBeTrue();
+        dispenseBox!.IsEnabled.ShouldBeTrue();
+        dispenseButton!.IsEnabled.ShouldBeTrue();
+        showBulkButton!.IsEnabled.ShouldBeTrue();
     }
 
     /// <summary>メインウィンドウから出金ウィンドウを探して開く。</summary>
