@@ -25,7 +25,7 @@ $Repo = "CashChangerSimulator"
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    Write-Host "[1/6] Fetching Registration Token from GitHub API..." -ForegroundColor Green
+    Write-Host "[1/7] Fetching Registration Token from GitHub API..." -ForegroundColor Green
     $Uri = "https://api.github.com/repos/$Owner/$Repo/actions/runners/registration-token"
     $Headers = @{
         "Authorization" = "token $PAT"
@@ -40,7 +40,7 @@ try {
     }
     Write-Host "Successfully fetched new registration token." -ForegroundColor Cyan
 
-    Write-Host "[2/6] Getting Python (Portable ZIP)..." -ForegroundColor Green
+    Write-Host "[2/7] Getting Python (Portable ZIP)..." -ForegroundColor Green
     $PythonZip = "C:\python-portable.zip"
     $PythonDir = "C:\python"
     # 埋め込み用(embeddable)パッケージをダウンロード（超軽量・インストール不要）
