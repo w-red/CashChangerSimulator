@@ -38,7 +38,8 @@ public class UIViewModelFixture : IDisposable
         Initialize();
     }
 
-    public void Initialize(string currencyCode = "JPY")
+    /// <summary>共通のセットアップを初期化します。必要に応じて実体のスクリプトサービスを使用可能です。</summary>
+    public void Initialize(string currencyCode = "JPY", bool useRealScriptService = false)
     {
         // 既存のインスタンスがあれば破棄してリソースリークを防ぐ
         try { CashChanger?.Close(); } catch { }
@@ -63,7 +64,16 @@ public class UIViewModelFixture : IDisposable
 
         NotifyServiceMock = new Mock<INotifyService>();
         ViewServiceMock = new Mock<IViewService>();
-        ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
+
+        if (useRealScriptService)
+        {
+            ScriptExecutionService = new ScriptExecutionService(DepositController, DispenseController, Inventory, Hardware);
+        }
+        else
+        {
+            ScriptExecutionService = new Mock<IScriptExecutionService>().Object;
+        }
+
         DispatcherService = new ImmediateDispatcherService();
 
         Monitors = new MonitorsProvider(Inventory, ConfigProvider, MetadataProvider);
@@ -91,6 +101,35 @@ public class UIViewModelFixture : IDisposable
         CashChanger.Open();
         CashChanger.Claim(100);
         CashChanger.DeviceEnabled = true;
+    }
+
+    /// <summary>テスト用の在庫データを一括設定します。</summary>
+    public void SetInventory(params (DenominationKey key, int count)[] items)
+    {
+        Inventory.Clear();
+        foreach (var (key, count) in items)
+        {
+            Inventory.SetCount(key, count);
+        }
+    }
+
+    /// <summary>設定上の初期在庫（Config.InitialCount）を設定します。</summary>
+    public void SetConfigInitialCounts(params (string key, int count)[] items)
+    {
+        var currency = ConfigProvider.Config.System.CurrencyCode;
+        if (!ConfigProvider.Config.Inventory.ContainsKey(currency))
+        {
+            ConfigProvider.Config.Inventory[currency] = new InventorySettings();
+        }
+
+        foreach (var (key, count) in items)
+        {
+            if (!ConfigProvider.Config.Inventory[currency].Denominations.ContainsKey(key))
+            {
+                ConfigProvider.Config.Inventory[currency].Denominations[key] = new DenominationSettings();
+            }
+            ConfigProvider.Config.Inventory[currency].Denominations[key].InitialCount = count;
+        }
     }
 
     /// <summary>リセットします。</summary>
@@ -182,6 +221,12 @@ public class UIViewModelFixture : IDisposable
     {
         var scriptService = scriptServiceMock?.Object ?? ScriptExecutionService;
         return new AdvancedSimulationViewModel(CreateFacade(), scriptService, MetadataProvider);
+    }
+
+    /// <summary>検証用の SettingsViewModel を生成します。</summary>
+    internal SettingsViewModel CreateSettingsViewModel()
+    {
+        return new SettingsViewModel(ConfigProvider, Monitors, MetadataProvider);
     }
 
     public void Dispose()
