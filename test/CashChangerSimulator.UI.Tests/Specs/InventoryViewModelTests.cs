@@ -9,6 +9,8 @@ using Moq;
 using Xunit;
 using R3;
 using Microsoft.PointOfService;
+using CashChangerSimulator.UI.Wpf.Controls;
+using CashChangerSimulator.Core.Monitoring;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -261,6 +263,111 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
         _fixture.ViewServiceMock.Verify(v => v.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         _fixture.ExportServiceMock.Verify(s => s.Export(It.IsAny<IEnumerable<TransactionEntry>>()), Times.Once);
         _fixture.NotifyServiceMock.Verify(n => n.ShowInfo(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    /// <summary>ジャム発生時にリカバリヘルプが利用可能になることを検証します。</summary>
+    [Fact]
+    public void IsRecoveryHelpAvailableShouldBeTrueWhenJammed()
+    {
+        // Arrange
+        var vm = CreateViewModel();
+        // すべての金種を補充して正常状態にする
+        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
+        {
+            _fixture.Inventory.SetCount(key, 10);
+        }
+        
+        _fixture.Hardware.SetJammed(false);
+        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeFalse();
+
+        // Act
+        _fixture.Hardware.SetJammed(true);
+
+        // Assert
+        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeTrue();
+    }
+
+    /// <summary>在庫が空の時にリカバリヘルプが利用可能になることを検証します。</summary>
+    [Fact]
+    public void IsRecoveryHelpAvailableShouldBeTrueWhenEmpty()
+    {
+        // Arrange
+        var vm = CreateViewModel();
+        // すべての金種を補充して正常状態にする
+        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
+        {
+            _fixture.Inventory.SetCount(key, 10);
+        }
+        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeFalse();
+
+        // Act
+        _fixture.Inventory.SetCount(TestConstants.Key100, 0);
+
+        // Assert
+        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeTrue();
+    }
+
+    /// <summary>リカバリヘルプ表示コマンドがダイアログを表示することを検証します。</summary>
+    [Fact]
+    public void ShowRecoveryHelpCommandShouldShowDialog()
+    {
+        // Arrange
+        var vm = CreateViewModel();
+        bool called = false;
+        _fixture.ViewServiceMock.Setup(v => v.ShowRecoveryHelpDialogAsync(vm))
+            .Returns(() => { called = true; return Task.CompletedTask; });
+
+        // Act
+        vm.ShowRecoveryHelpCommand.Execute(Unit.Default);
+
+        // Assert
+        called.ShouldBeTrue();
+    }
+
+    /// <summary>金種詳細表示コマンドがダイアログを表示することを検証します。</summary>
+    [Fact]
+    public void ShowDenominationDetailCommandShouldShowDialog()
+    {
+        // Arrange
+        var vm = CreateViewModel();
+        var denVm = vm.Denominations.First();
+        bool called = false;
+        _fixture.ViewServiceMock.Setup(v => v.ShowDenominationDetailDialogAsync(denVm))
+            .Returns(() => { called = true; return Task.CompletedTask; });
+
+        // Act
+        vm.ShowDenominationDetailCommand.Execute(denVm);
+
+        // Assert
+        called.ShouldBeTrue();
+    }
+
+    /// <summary>非リサイクル金種が在庫ステータス集計から除外されることを検証します（2000円札問題の解決確認）。</summary>
+    [Fact]
+    public void RecoveryHelpShouldIgnoreNonRecyclableItemsForStatus()
+    {
+        // Arrange
+        // すべての金種を一度補充
+        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
+        {
+            _fixture.Inventory.SetCount(key, 10);
+        }
+
+        var key2000 = new DenominationKey(2000, CurrencyCashType.Bill, "JPY");
+        _fixture.SetConfigInitialCounts(("B2000", 0));
+        // 2000円を非リサイクルに設定
+        _fixture.ConfigProvider.Config.Inventory["JPY"].Denominations["B2000"].IsRecyclable = false;
+
+        // モニターを再生成して設定を反映させる
+        _fixture.Monitors.RefreshMonitors();
+
+        var vm = CreateViewModel();
+        _fixture.Inventory.SetCount(TestConstants.Key100, 10);
+        _fixture.Inventory.SetCount(key2000, 0); // 2000円を0枚にする
+
+        // Assert: 2000円が0枚でも、非リサイクルなので OverallStatus は Normal のまま
+        vm.OverallStatus.CurrentValue.ShouldBe(CashStatus.Normal);
+        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeFalse();
     }
 
     /// <summary>Dispose 呼び出しが例外を発生させないことを検証します。</summary>
