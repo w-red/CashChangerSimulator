@@ -1,22 +1,32 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using Shouldly;
 using Moq;
 using R3;
-using Xunit;
+using Shouldly;
 using System.Windows.Input;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>BulkAmountInputViewModel の動作を検証するテストクラス。</summary>
-public class BulkInputViewModelTest
+public class BulkInputViewModelTests : IClassFixture<UIViewModelFixture>
 {
+    private readonly UIViewModelFixture _fixture;
+
+    /// <summary>テスト用のフィクスチャを初期化します。</summary>
+    public BulkInputViewModelTests(UIViewModelFixture fixture)
+    {
+        _fixture = fixture;
+        _fixture.Initialize();
+    }
+
     /// <summary>プロパティがコンストラクタ引数と一致することを検証します。</summary>
     [Fact]
     public void PropertiesShouldMatchConstructorArguments()
     {
         // Assemble
-        var key = new DenominationKey(1000, CurrencyCashType.Bill, "JPY");
+        var key = TestConstants.Key1000;
         var items = new List<BulkAmountInputItemViewModel>
         {
             new(key, "1000円札")
@@ -50,7 +60,7 @@ public class BulkInputViewModelTest
     public void ItemQuantityShouldBeObservable()
     {
         // Assemble
-        var key = new DenominationKey(500, CurrencyCashType.Coin, "JPY");
+        var key = TestConstants.Key500;
         var item = new BulkAmountInputItemViewModel(key, "500円玉");
 
         // Act

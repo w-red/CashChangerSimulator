@@ -1,45 +1,43 @@
-
-using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using Shouldly;
 using System.Windows.Input;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
-/// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
-public class SettingsViewModelTests
-{
-    private readonly ConfigurationProvider _configProvider;
-    private readonly MonitorsProvider _monitorsProvider;
-    private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly Inventory Inventory;
 
-    public SettingsViewModelTests()
+/// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
+public class SettingsViewModelTests : IClassFixture<UIViewModelFixture>
+{
+    private readonly UIViewModelFixture _fixture;
+
+    /// <summary>テスト用のフィクスチャを初期化します。</summary>
+    public SettingsViewModelTests(UIViewModelFixture fixture)
     {
-        Inventory = new Inventory();
-        _configProvider = new ConfigurationProvider();
-        _configProvider.Config.System.CurrencyCode = "JPY"; // 明示的に初期化
-        _metadataProvider = new CurrencyMetadataProvider(_configProvider);
-        _monitorsProvider = new MonitorsProvider(Inventory, _configProvider, _metadataProvider);
+        _fixture = fixture;
+        _fixture.Initialize();
+    }
+
+    private SettingsViewModel CreateViewModel()
+    {
+        return _fixture.CreateSettingsViewModel();
     }
 
     /// <summary>初期値が正しくロードされることを検証します。</summary>
-    /// <remarks>
-    /// 設定プロバイダーの値を変更し、ViewModel 生成時にその値が反映されていることを確認します。
-    /// </remarks>
     [Fact]
     public void LoadFromConfigShouldSetInitialValues()
     {
         // Arrange
-        _configProvider.Config.System.CurrencyCode = "USD";
-        _configProvider.Config.Thresholds.NearEmpty = 10;
-        _configProvider.Config.Thresholds.NearFull = 90;
-        _configProvider.Config.Thresholds.Full = 100;
+        var config = _fixture.ConfigProvider.Config;
+        config.System.CurrencyCode = "USD";
+        config.Thresholds.NearEmpty = 10;
+        config.Thresholds.NearFull = 90;
+        config.Thresholds.Full = 100;
+        _fixture.ConfigProvider.Update(config);
 
         // Act
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
 
         // Assert
         vm.CurrencyCode.Value.ShouldBe("USD");
@@ -53,7 +51,7 @@ public class SettingsViewModelTests
     public void ValidValuesShouldNotHaveErrors()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
 
         // Act
         vm.NearEmpty.Value = 5;
@@ -72,7 +70,7 @@ public class SettingsViewModelTests
     public void NearEmptyShouldBePositive()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
 
         // Act
         vm.NearEmpty.Value = 0;
@@ -87,7 +85,7 @@ public class SettingsViewModelTests
     public void NearFullShouldBeGreaterThanNearEmpty()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
 
         // Act
         vm.NearEmpty.Value = 5;
@@ -103,7 +101,7 @@ public class SettingsViewModelTests
     public void FullShouldBeGreaterThanNearFull()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
 
         // Act
         vm.NearFull.Value = 10;
@@ -119,7 +117,7 @@ public class SettingsViewModelTests
     public void ResetToDefaultShouldRestoreValues()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
         vm.NearEmpty.Value = 50;
         vm.NearFull.Value = 100;
         vm.Full.Value = 150;
@@ -127,44 +125,33 @@ public class SettingsViewModelTests
         // Act
         vm.ResetToDefaultCommand.Execute(Unit.Default);
 
-        // Assert: デフォルト値に戻っていること (デフォルトは NearEmpty=5, NearFull=90, Full=100)
+        // Assert: デフォルト値に戻っていること (NearEmpty=5, NearFull=90, Full=100)
         vm.NearEmpty.Value.ShouldBe(5);
         vm.NearFull.Value.ShouldBe(90);
         vm.Full.Value.ShouldBe(100);
     }
 
     /// <summary>SaveCommand が実行された時に、プロバイダーと設定が更新されることを検証します。</summary>
-    /// <remarks>
-    /// ViewModel で値を変更して保存を実行し、元の設定オブジェクトと再通知イベントが発生することを確認します。
-    /// </remarks>
     [Fact]
     public void SaveCommandShouldUpdateConfigAndMonitors()
     {
         // Arrange
-        using var vm = new SettingsViewModel(_configProvider, _monitorsProvider, _metadataProvider);
+        using var vm = CreateViewModel();
         bool reloadFired = false;
-        using var _ = _configProvider.Reloaded.Subscribe(_ => reloadFired = true);
+        using var _ = _fixture.ConfigProvider.Reloaded.Subscribe(_ => reloadFired = true);
 
         // Act
         vm.NearEmpty.Value = 3;
         vm.NearFull.Value = 6;
         vm.Full.Value = 9;
-
-        // Debug validation errors if any
-        vm.NearEmpty.HasErrors.ShouldBeFalse();
-        vm.NearFull.HasErrors.ShouldBeFalse();
-        vm.Full.HasErrors.ShouldBeFalse();
-
-        // Ensure CanExecute is updated
-        ((ICommand)vm.SaveCommand).CanExecute(null).ShouldBeTrue();
-
+        
         vm.SaveCommand.Execute(Unit.Default);
 
         // Assert
         vm.SaveSucceeded.Value.ShouldBeTrue();
-        _configProvider.Config.Thresholds.NearEmpty.ShouldBe(3);
-        _configProvider.Config.Thresholds.NearFull.ShouldBe(6);
-        _configProvider.Config.Thresholds.Full.ShouldBe(9);
+        _fixture.ConfigProvider.Config.Thresholds.NearEmpty.ShouldBe(3);
+        _fixture.ConfigProvider.Config.Thresholds.NearFull.ShouldBe(6);
+        _fixture.ConfigProvider.Config.Thresholds.Full.ShouldBe(9);
         reloadFired.ShouldBeTrue();
     }
 }

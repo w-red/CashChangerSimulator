@@ -1,26 +1,17 @@
-using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Managers;
-using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Transactions;
-using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Coordination;
-using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Tests.Fixtures;
-using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using R3;
 using Shouldly;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
-public class ViewModelTest : IDisposable
+/// <summary>MainViewModel の初期化と基本的な動作を検証するテストクラス。</summary>
+public class MainViewModelTests : IDisposable
 {
     private readonly UIViewModelFixture _fixture;
 
-    public ViewModelTest()
+    /// <summary>テスト用のフィクスチャを初期化します。</summary>
+    public MainViewModelTests()
     {
         _fixture = new UIViewModelFixture();
         _fixture.Initialize();
@@ -45,8 +36,10 @@ public class ViewModelTest : IDisposable
         vm.Dispense.DispenseAmountInput.Value.ShouldBe("");
     }
 
+    /// <summary>リソースを解放します。</summary>
     public void Dispose()
     {
         _fixture.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

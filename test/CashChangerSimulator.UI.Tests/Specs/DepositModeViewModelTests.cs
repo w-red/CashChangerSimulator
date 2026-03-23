@@ -1,31 +1,25 @@
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
+using Microsoft.PointOfService;
 using CashChangerSimulator.Core.Monitoring;
-using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Core.Transactions;
-using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Coordination;
-using CashChangerSimulator.Device.Services;
-using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Tests.Fixtures;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.PointOfService;
-using Moq;
+using CashChangerSimulator.UI.Wpf;
 using R3;
 using Shouldly;
+using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金モードの ViewModel 動作をシミュレートして検証するテストクラス。</summary>
-public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
+public class DepositModeViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;
     private readonly MainViewModel _mainViewModel;
     private readonly DenominationKey _testKey = new(1000, CurrencyCashType.Bill);
 
-    public DepositModeViewModelTest(UIViewModelFixture fixture)
+    /// <summary>テスト用のフィクスチャを初期化します。</summary>
+    public DepositModeViewModelTests(UIViewModelFixture fixture)
     {
         _fixture = fixture;
         _fixture.Initialize();
@@ -34,17 +28,13 @@ public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
     }
 
     /// <summary>DenominationViewModel の IsAcceptingCash プロパティが中断状態を正しく反映することを検証します。</summary>
-    /// <remarks>
-    /// 入金開始、中断、再開の各ステータスにおいて、IsAcceptingCash が期待通りに変化することを確認します。
-    /// </remarks>
     [Fact]
     public void DenominationViewModelIsAcceptingCashShouldReflectPausedState()
     {
         // Arrange
         var config = new DenominationSettings();
         var monitor = new CashStatusMonitor(_fixture.Inventory, _testKey, config.NearEmpty, config.NearFull, config.Full);
-        var configProvider = _mainViewModel.ConfigProvider;
-        var denVm = new DenominationViewModel(_fixture.CreateMainViewModel().Facade, _testKey, _fixture.MetadataProvider, monitor, configProvider);
+        var denVm = new DenominationViewModel(_mainViewModel.Facade, _testKey, _fixture.MetadataProvider, monitor, _mainViewModel.ConfigProvider);
         _fixture.DepositController.BeginDeposit();
 
         // Assert: Running
@@ -64,9 +54,6 @@ public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
     }
 
     /// <summary>MainViewModel の CurrentModeName が状態遷移を正しく反映することを検証します。</summary>
-    /// <remarks>
-    /// IDLE, COUNTING, PAUSED, FIXED の各状態遷移後の表示文字列を確認します。
-    /// </remarks>
     [Fact]
     public void MainViewModelCurrentModeNameShouldReflectTransitions()
     {
@@ -94,7 +81,7 @@ public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
         _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusIdle", "IDLE"));
     }
 
-    /// <summary>RequiredAmountInput が要求額に正しく反映され、連動することを検証します。</summary>
+    /// <summary>要求額入力が正しく反映され、連動することを検証します。</summary>
     [Fact]
     public void RequiredAmountInputShouldSyncWithRequiredAmount()
     {
