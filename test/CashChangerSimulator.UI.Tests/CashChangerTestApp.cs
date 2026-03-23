@@ -41,7 +41,7 @@ public class CashChangerTestApp : IDisposable
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var solutionRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", ".."));
         var publishPath = Path.Combine(solutionRoot, "test_publish", "CashChangerSimulator.UI.Wpf.exe");
-        var srcExePath = Path.Combine(solutionRoot, "src", "CashChangerSimulator.UI.Wpf", "bin", "Debug", "net10.0-windows", "CashChangerSimulator.UI.Wpf.exe");
+        var srcExePath = Path.Combine(solutionRoot, "src", "CashChangerSimulator.UI.Wpf", "bin", config, "net10.0-windows", "CashChangerSimulator.UI.Wpf.exe");
         
         var exePath = File.Exists(publishPath) ? publishPath : (File.Exists(srcExePath) ? srcExePath : Path.Combine(baseDir, "CashChangerSimulator.UI.Wpf.exe"));
         _executablePath = exePath;
