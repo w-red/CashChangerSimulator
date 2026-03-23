@@ -7,7 +7,7 @@ using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.Device.Services;
-using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.UI.Wpf;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,26 +71,44 @@ public class DepositModeViewModelTest : IClassFixture<UIViewModelFixture>
     public void MainViewModelCurrentModeNameShouldReflectTransitions()
     {
         // Initial
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("IDLE");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusIdle", "IDLE"));
 
         // Start
         _fixture.DepositController.BeginDeposit();
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("COUNTING");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusCounting", "COUNTING"));
 
         // Pause
         _mainViewModel.Deposit.PauseDepositCommand.Execute(Unit.Default);
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("PAUSED");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusPaused", "PAUSED"));
 
         // Resume
         _mainViewModel.Deposit.ResumeDepositCommand.Execute(Unit.Default);
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("COUNTING");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusCounting", "COUNTING"));
 
         // Fix
         _mainViewModel.Deposit.FixDepositCommand.Execute(Unit.Default);
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("FIXED");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusFixed", "FIXED"));
 
         // End
         _mainViewModel.Deposit.StoreDepositCommand.Execute(Unit.Default);
-        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain("IDLE");
+        _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusIdle", "IDLE"));
+    }
+
+    /// <summary>RequiredAmountInput が要求額に正しく反映され、連動することを検証します。</summary>
+    [Fact]
+    public void RequiredAmountInputShouldSyncWithRequiredAmount()
+    {
+        // Act: Set required amount from UI
+        _mainViewModel.Deposit.RequiredAmountInput.Value = "5000";
+
+        // Assert: Device RequiredAmount should be updated
+        _fixture.DepositController.RequiredAmount.ShouldBe(5000m);
+        _mainViewModel.Deposit.RequiredAmount.Value.ShouldBe(5000m);
+
+        // Act: Change RequiredAmount from Device
+        _fixture.DepositController.RequiredAmount = 10000m;
+
+        _mainViewModel.Deposit.RequiredAmountInput.Value.ShouldBe("10000");
+        _mainViewModel.Deposit.RemainingAmount.CurrentValue.ShouldBe(10000m);
     }
 }
