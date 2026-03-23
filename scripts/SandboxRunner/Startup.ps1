@@ -49,24 +49,33 @@ try {
     $env:PATH += ";$PythonDir"
     [Environment]::SetEnvironmentVariable("PATH", $env:PATH, "Machine")
 
-    Write-Host "[3/6] Installing .NET 10.0 SDK (Silent)..." -ForegroundColor Green
+    Write-Host "[3/7] Installing Git (MinGit Portable)..." -ForegroundColor Green
+    $GitZip = "C:\mingit.zip"
+    $GitDir = "C:\git"
+    # Download MinGit (Smallest footprint for CI)
+    Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.44.0.windows.1/MinGit-2.44.0-64-bit.zip" -OutFile $GitZip
+    Expand-Archive -Path $GitZip -DestinationPath $GitDir -Force
+    $env:PATH += ";$GitDir\cmd"
+    [Environment]::SetEnvironmentVariable("PATH", $env:PATH, "Machine")
+
+    Write-Host "[4/7] Installing .NET 10.0 SDK (Silent)..." -ForegroundColor Green
     $DotNetInstallScript = "C:\dotnet-install.ps1"
     Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile $DotNetInstallScript
     & $DotNetInstallScript -Channel 10.0 -InstallDir "C:\dotnet" -NoPath
     $env:PATH += ";C:\dotnet"
     [Environment]::SetEnvironmentVariable("PATH", $env:PATH, "Machine")
 
-    Write-Host "[4/6] Downloading GitHub Actions Runner..." -ForegroundColor Green
+    Write-Host "[5/7] Downloading GitHub Actions Runner..." -ForegroundColor Green
     $RunnerZip = "C:\actions-runner.zip"
     $RunnerDir = "C:\actions-runner"
     Invoke-WebRequest -Uri "https://github.com/actions/runner/releases/download/v2.322.0/actions-runner-win-x64-2.322.0.zip" -OutFile $RunnerZip
     Expand-Archive -Path $RunnerZip -DestinationPath $RunnerDir -Force
     Set-Location $RunnerDir
 
-    Write-Host "[5/6] Configuring Runner (Continuous Mode)..." -ForegroundColor Green
+    Write-Host "[6/7] Configuring Runner (Continuous Mode)..." -ForegroundColor Green
     .\config.cmd --url "https://github.com/$Owner/$Repo" --token $RunnerToken --name "Sandbox-UI-Runner" --labels "windows,ui-test" --unattended --replace
 
-    Write-Host "[6/6] Listening for Jobs and running cleanup loop..." -ForegroundColor Green
+    Write-Host "[7/7] Listening for Jobs and running cleanup loop..." -ForegroundColor Green
     
     # run.cmd をバックグラウンド（別プロセス）で起動
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\run.cmd" -NoNewWindow
