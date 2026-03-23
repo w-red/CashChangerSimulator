@@ -31,7 +31,16 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             
-            <TextBlock Grid.Row="0" x:Name="FeedTitle" Text="{StaticResource ActivityFeed}" Style="{StaticResource SectionHeaderStyle}" AutomationProperties.AutomationId="ActivityFeedTitle" />
+            <Grid Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock x:Name="FeedTitle" Text="{StaticResource ActivityFeed}" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" AutomationProperties.AutomationId="ActivityFeedTitle" />
+                <Button HorizontalAlignment="Right"
+                        Command="{Binding ExportHistoryCommand}"
+                        ToolTip="{StaticResource ToolTipExportHistory}"
+                        Style="{StaticResource HeaderIconButtonStyle}"
+                        AutomationProperties.AutomationId="ExportHistoryButton">
+                    <materialDesign:PackIcon Kind="FileExportOutline" Width="18" Height="18" Opacity="0.8" />
+                </Button>
+            </Grid>
             
             <Grid Grid.Row="1" MinHeight="100">
                 <!-- Empty State Message -->
