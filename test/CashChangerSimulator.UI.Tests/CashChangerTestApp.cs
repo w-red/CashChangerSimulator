@@ -62,7 +62,7 @@ public class CashChangerTestApp : IDisposable
     {
         // [STABILITY] Ensure previous session is cleaned up
         Dispose();
-        TestProcessCleanup.KillAllRunningProcesses();
+        KillZombieProcesses();
 
         try
         {
@@ -212,8 +212,9 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
                 Console.WriteLine("[INFO] Skipping WaitUntilClickable in CI environment or if MainWindow is null.");
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[FATAL] Launch failed: {ex.Message}");
             // 起動中に失敗した場合、中途半端に起動したプロセスを掃除してから例外を投げ直す
             Dispose();
             throw;
@@ -314,23 +315,32 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>残存している可能性のあるアプリケーションプロセスを強制終了する。</summary>
-    private void KillOrphanedProcesses()
+    /// <summary>残存している可能性のあるアプリケーションプロセス（ゾンビプロセス）を強制終了する。</summary>
+    private void KillZombieProcesses()
     {
         try
         {
-            var appName = Path.GetFileNameWithoutExtension(_executablePath);
-            var processes = System.Diagnostics.Process.GetProcessesByName(appName);
-            foreach (var p in processes)
+            // 1. Use the shared cleanup helper for standard app processes
+            TestProcessCleanup.KillAllRunningProcesses();
+
+            // 2. [CI RESILIENCE] Ensure no stale automation hosts are hanging
+            // Use taskkill to ensure it's gone.
+            var searchNames = new[] { "CashChangerSimulator.UI.Wpf" };
+            foreach (var name in searchNames)
             {
-                try
+                using var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    p.Kill(true);
-                    p.WaitForExit(1000);
-                }
-                catch { }
+                    FileName = "taskkill",
+                    Arguments = $"/F /IM {name}.exe /T",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                });
+                proc?.WaitForExit(2000);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[INFO] KillZombieProcesses encountered an error (ignoring): {ex.Message}");
+        }
     }
 }
