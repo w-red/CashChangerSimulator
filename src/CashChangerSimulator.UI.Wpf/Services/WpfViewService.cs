@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Wpf.Views;
+using CashChangerSimulator.Device.Services;
+using System.IO;
 using MaterialDesignThemes.Wpf;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
@@ -48,5 +50,17 @@ public class WpfViewService(IDispatcherService dispatcher) : IViewService
     public async Task ShowDialogAsync(object content, string identifier = "RootDialog")
     {
         await DialogHost.Show(content, identifier);
+    }
+
+    public string? ShowSaveFileDialog(string defaultExt, string filter, string fileName)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            DefaultExt = defaultExt,
+            Filter = filter,
+            FileName = fileName
+        };
+
+        return dialog.ShowDialog(GetOwner()) == true ? dialog.FileName : null;
     }
 }
