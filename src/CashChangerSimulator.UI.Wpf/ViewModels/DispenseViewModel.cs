@@ -136,8 +136,8 @@ public class DispenseViewModel : IDisposable
             .AddTo(_disposables);
 
         StatusName = Status
-            .Select(s => s.ToString())
-            .ToBindableReactiveProperty("Idle")
+            .Select(s => ResourceHelper.GetAsString("Status" + s.ToString(), s.ToString()))
+            .ToBindableReactiveProperty(ResourceHelper.GetAsString("StatusIdle", "Idle"))
             .AddTo(_disposables);
 
         IsJammed = _facade.Status.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
@@ -298,12 +298,12 @@ public class DispenseViewModel : IDisposable
         {
             _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
             _logger.ZLogError(pcEx, $"Failed to dispense cash (bulk).");
-            _notifyService.ShowError(pcEx.Message, "Dispense Error");
+            _notifyService.ShowError(pcEx.Message, ResourceHelper.GetAsString("DispenseError", "Dispense Error"));
         }
         catch (Exception ex)
         {
             _logger.ZLogError(ex, $"Failed to dispense cash (bulk).");
-            _notifyService.ShowError(ex.Message, "Dispense Error");
+            _notifyService.ShowError(ex.Message, ResourceHelper.GetAsString("DispenseError", "Dispense Error"));
         }
     }
 

@@ -107,13 +107,13 @@ public class DenominationViewModel : IDisposable
         HasEscrow = EscrowCount.Select(x => x > 0).ToReadOnlyReactiveProperty().AddTo(_disposables);
 
         // ローカライズ文字列の初期化
-        LabelInventoryDetail = isJapanese ? "在庫内訳" : "INVENTORY DETAIL";
-        LabelRecyclable = isJapanese ? "還流庫" : "RECYCLABLE";
-        LabelCollection = isJapanese ? "回収庫" : "COLLECTION";
-        LabelReject = isJapanese ? "リジェクト" : "REJECT";
-        LabelEscrow = isJapanese ? "入金トレイ" : "ESCROW";
-        LabelTotalCount = isJapanese ? "総枚数" : "TOTAL COUNT";
-        SuffixCount = isJapanese ? "枚" : "";
+        LabelInventoryDetail = ResourceHelper.GetAsString("InventoryDetail", "INVENTORY DETAIL");
+        LabelRecyclable = ResourceHelper.GetAsString("Recyclable", "RECYCLABLE");
+        LabelCollection = ResourceHelper.GetAsString("Collection", "COLLECTION");
+        LabelReject = ResourceHelper.GetAsString("Reject", "REJECT");
+        LabelEscrow = ResourceHelper.GetAsString("LabelPendingItems", "ESCROW");
+        LabelTotalCount = ResourceHelper.GetAsString("TotalCountLabel", "TOTAL COUNT");
+        SuffixCount = ResourceHelper.GetAsString("CountSuffix", "");
 
         facade.Inventory.Changed
             .Where(k => k.Value == key.Value && k.Type == key.Type && k.CurrencyCode == key.CurrencyCode)

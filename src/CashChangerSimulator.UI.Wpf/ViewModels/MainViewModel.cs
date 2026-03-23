@@ -134,13 +134,16 @@ public class MainViewModel : IDisposable
         GlobalModeName = _facade.Status.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
+                var idleStr = ResourceHelper.GetAsString("StatusIdle", "IDLE");
+                var busyStr = ResourceHelper.GetAsString("StatusBusy", "Busy"); // Localized key for "Busy" exists as "Busy"
+                
                 return !isConnected
                     ? ResourceHelper.GetAsString("DeviceClosed", "CLOSED")
-                    : dispenseMode == "Busy"
-                    ? "DISPENSING" : depositMode;
+                    : (dispenseMode == busyStr || dispenseMode == "Busy") // Support both for safety
+                    ? ResourceHelper.GetAsString("Dispensing", "DISPENSING") : depositMode;
             })
             .ToBindableReactiveProperty(_facade.Status.IsConnected.Value
-                ? "IDLE"
+                ? ResourceHelper.GetAsString("StatusIdle", "IDLE")
                 : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 

@@ -9,5 +9,16 @@ public static class ResourceHelper
     /// <param name="key">リソースキー。</param>
     /// <param name="fallback">リソースが見つからない場合や null の場合のフォールバック文字列。</param>
     /// <returns>取得された文字列、またはフォールバック値。</returns>
-    public static string GetAsString(string key, string fallback = "") => Application.Current?.Resources[key] as string ?? fallback;
+    public static string GetAsString(string key, string fallback = "")
+    {
+        try
+        {
+            return Application.Current?.Resources?[key] as string ?? fallback;
+        }
+        catch
+        {
+            // Unit tests might fail to access Application.Current.Resources in certain environments
+            return fallback;
+        }
+    }
 }
