@@ -13,12 +13,14 @@ public class CliViewService : CliServiceBase
     private readonly Inventory _inventory;
     private readonly ICurrencyMetadataProvider _metadata;
     private readonly TransactionHistory _history;
+    private readonly IHistoryExportService _exportService;
 
     public CliViewService(
         SimulatorCashChanger changer,
         Inventory inventory,
         ICurrencyMetadataProvider metadata,
         TransactionHistory history,
+        IHistoryExportService exportService,
         IAnsiConsole console,
         IStringLocalizer localizer) : base(console, localizer)
     {
@@ -26,6 +28,7 @@ public class CliViewService : CliServiceBase
         _inventory = inventory;
         _metadata = metadata;
         _history = history;
+        _exportService = exportService;
     }
 
     public virtual void Status()
@@ -77,5 +80,21 @@ public class CliViewService : CliServiceBase
         }
 
         _console.Write(table);
+    }
+
+    /// <summary>取引履歴を CSV 形式でエクスポートします。</summary>
+    /// <param name="path">出力先のファイル名またはパス。</param>
+    public virtual void ExportHistory(string path)
+    {
+        try
+        {
+            var csv = _exportService.Export(_history.Entries);
+            File.WriteAllText(path, csv);
+            _console.MarkupLine($"[green][[{_L["messages.success_label"]}]][/] {_L["messages.export_success", path]}");
+        }
+        catch (Exception ex)
+        {
+            _console.MarkupLine($"[red][[{_L["messages.error_label"]}]][/] {_L["messages.export_failed", path]}: {ex.Message}");
+        }
     }
 }

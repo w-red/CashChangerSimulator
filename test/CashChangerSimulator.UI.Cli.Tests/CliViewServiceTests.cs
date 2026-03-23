@@ -23,6 +23,7 @@ public class CliViewServiceTests
     private readonly IAnsiConsole _console;
     private readonly StringWriter _consoleOutput;
     private readonly Mock<IStringLocalizer> _mockLocalizer;
+    private readonly Mock<IHistoryExportService> _mockExportService;
     private readonly CliViewService _service;
 
     public CliViewServiceTests()
@@ -51,7 +52,8 @@ public class CliViewServiceTests
         _mockMetadata.Setup(m => m.SymbolPrefix).Returns(Observable.Return("YEN_PREFIX").ToReadOnlyReactiveProperty<string>());
         _mockMetadata.Setup(m => m.SymbolSuffix).Returns(Observable.Return("YEN_SUFFIX").ToReadOnlyReactiveProperty<string>());
 
-        _service = new CliViewService(_mockChanger.Object, _inventory, _mockMetadata.Object, _history, _console, _mockLocalizer.Object);
+        _mockExportService = new Mock<IHistoryExportService>();
+        _service = new CliViewService(_mockChanger.Object, _inventory, _mockMetadata.Object, _history, _mockExportService.Object, _console, _mockLocalizer.Object);
     }
 
     /// <summary>Status 操作でデバイスの状態と在庫情報が表示されることを検証します。</summary>
@@ -92,5 +94,27 @@ public class CliViewServiceTests
         output.ShouldContain("Deposit");
         output.ShouldContain("1,000");
         output.ShouldContain("JPY");
+    }
+
+    /// <summary>ExportHistory 操作がエクスポートサービスを呼び出し、成功メッセージを表示することを検証します。</summary>
+    [Fact]
+    public void ExportHistoryShouldCallServiceAndPrintSuccess()
+    {
+        // Arrange
+        var path = "test.csv";
+        _mockExportService.Setup(s => s.Export(It.IsAny<IEnumerable<TransactionEntry>>())).Returns("csv content");
+
+        // Act
+        _service.ExportHistory(path);
+
+        // Assert
+        _mockExportService.Verify(s => s.Export(It.IsAny<IEnumerable<TransactionEntry>>()), Times.Once);
+        var output = _consoleOutput.ToString();
+        output.ShouldContain("messages.export_success(test.csv)");
+        File.Exists(path).ShouldBeTrue();
+        File.ReadAllText(path).ShouldBe("csv content");
+
+        // Cleanup
+        if (File.Exists(path)) File.Delete(path);
     }
 }

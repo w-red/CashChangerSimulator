@@ -62,6 +62,7 @@ public static class CliDIContainer
         services.AddSingleton<CashChangerManager>();
         services.AddSingleton<HardwareStatusManager>();
         services.AddSingleton<DiagnosticController>();
+        services.AddSingleton<IHistoryExportService, CsvHistoryExportService>();
 
         // Simulator / Devices
         services.AddSingleton<SimulatorCashChanger>(sp =>

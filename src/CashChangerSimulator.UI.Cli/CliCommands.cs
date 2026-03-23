@@ -149,6 +149,11 @@ public partial class CliCommands(
     [Command("adjust-counts")]
     public virtual void AdjustCashCounts(string counts) => _cashService.AdjustCashCounts(counts);
 
+    /// <summary>取引履歴を CSV 形式でエクスポートします。</summary>
+    /// <param name="path">出力先のパス。</param>
+    [Command("export-history")]
+    public virtual void ExportHistory([Argument(Description = "出力先パス")] string path) => _viewService.ExportHistory(path);
+
     /// <summary>ログの詳細度を変更します。</summary>
     [Command("log-level")]
     public virtual void LogLevel(string level)

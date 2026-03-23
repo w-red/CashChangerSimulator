@@ -33,7 +33,7 @@ public class CliCommandsTests
         _mockDeviceService = new Mock<CliDeviceService>(null!, null!, null!);
         _mockCashService = new Mock<CliCashService>(null!, null!, null!, null!, null!, null!);
         _mockConfigService = new Mock<CliConfigService>(null!, null!, null!);
-        _mockViewService = new Mock<CliViewService>(null!, null!, null!, null!, null!, null!);
+        _mockViewService = new Mock<CliViewService>(null!, null!, null!, null!, null!, null!, null!);
         _mockScriptService = new Mock<CliScriptService>(null!, null!, null!);
 
         _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s));
@@ -200,6 +200,14 @@ public class CliCommandsTests
     {
         _commands.History(10);
         _mockViewService.Verify(s => s.History(10), Times.Once);
+    }
+
+    /// <summary>ExportHistory コマンドが ViewService.ExportHistory を呼び出すことを検証します。</summary>
+    [Fact]
+    public void ExportHistoryShouldCallViewService()
+    {
+        _commands.ExportHistory("test.csv");
+        _mockViewService.Verify(s => s.ExportHistory("test.csv"), Times.Once);
     }
 
     /// <summary>Run Script コマンドが ScriptService.RunScriptAsync を呼び出すことを検証します。</summary>
