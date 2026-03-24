@@ -10,6 +10,8 @@ using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -34,6 +36,10 @@ public static class DIContainer
         services.AddCoreServices();
         services.AddDeviceServices();
         services.AddWpfUiServices();
+
+        // Register Logging from the shared LogProvider
+        services.AddSingleton<ILoggerFactory>(LogProvider.Factory);
+        services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
         // Build the ServiceProvider
         _serviceProvider = services.BuildServiceProvider();
