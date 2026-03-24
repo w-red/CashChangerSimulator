@@ -18,6 +18,7 @@ namespace CashChangerSimulator.UI.DocumentationTests;
 /// FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。
 /// </summary>
 [Collection("SequentialTests")]
+[Trait("Category", "ManualOnly")] // CIや一括テスト実行時には除外するためのカテゴリ
 public class DocumentationScreenshotGenerator : IDisposable
 {
     private readonly CashChangerTestApp _app;

@@ -60,6 +60,8 @@ jobs:
       - name: Test UI Modules (Requires Desktop session)
         # self-hosted環境で実行されるため、UIAutomation(FlaUI)が正常に動作します。
         # 競合を防ぐため .runsettings を明示的に指定します。
+        # [Note] DocumentationTests はCI環境での画面キャプチャ等に起因するFlakyな失敗を防ぐため、
+        # Category=ManualOnly として意図的にCIから除外し、このUI.Testsのみを実行しています。
         run: dotnet test test/CashChangerSimulator.UI.Tests/CashChangerSimulator.UI.Tests.csproj --configuration Release --settings local.runsettings --verbosity normal --logger "trx;LogFileName=test_results_ui.trx"
 
       - name: Upload UI Test Results
