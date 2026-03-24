@@ -128,7 +128,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             Application = Application.Launch(startInfo);
             
             // [STABILITY] Wait for process and UI to settle
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
 
             // Use a more robust wait for the window
             var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
