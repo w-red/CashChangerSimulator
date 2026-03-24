@@ -22,7 +22,7 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
     public void BeginDepositCommand_ShouldCallService()
     {
         // Arrange
-        var vm = _fixture.CreateDepositViewModel();
+        var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
         _fixture.DepositServiceMock.Reset();
 
         // Act
@@ -36,7 +36,7 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
     public void FixDepositCommand_ShouldCallService()
     {
         // Arrange
-        var vm = _fixture.CreateDepositViewModel();
+        var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
         _fixture.DepositServiceMock.Reset();
         // Force state to allow Fix
         vm.IsInDepositMode.Value = true;
@@ -52,7 +52,7 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
     public void StoreDepositCommand_ShouldCallService()
     {
         // Arrange
-        var vm = _fixture.CreateDepositViewModel();
+        var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
         _fixture.DepositServiceMock.Reset();
         // Force state to allow Store
         vm.IsDepositFixed.Value = true;

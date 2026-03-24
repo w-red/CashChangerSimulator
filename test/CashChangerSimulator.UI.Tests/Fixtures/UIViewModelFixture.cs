@@ -124,6 +124,10 @@ public class UIViewModelFixture : IDisposable
             .Callback<decimal>(amount => DispenseController.DispenseChangeAsync(amount, true, (c, e) => { }, "JPY"));
         DispenseServiceMock.Setup(x => x.ExecuteBulkDispense(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>()))
             .Callback<IReadOnlyDictionary<DenominationKey, int>>(counts => DispenseController.DispenseCashAsync(counts, true, (c, e) => { }));
+
+        InventoryServiceMock.Setup(x => x.ResetError()).Callback(() => Hardware.ResetError());
+        InventoryServiceMock.Setup(x => x.SimulateJam()).Callback(() => Hardware.SetJammed(true));
+        InventoryServiceMock.Setup(x => x.SimulateOverlap()).Callback(() => Hardware.SetOverlapped(true));
     }
 
     /// <summary>テスト用の在庫データを一括設定します。</summary>
@@ -224,27 +228,52 @@ public class UIViewModelFixture : IDisposable
     }
 
     /// <summary>検証用の DepositViewModel を生成します。</summary>
-    internal DepositViewModel CreateDepositViewModel(Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null, BindableReactiveProperty<bool>? isDispenseBusy = null)
+    internal DepositViewModel CreateDepositViewModel(
+        Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null, 
+        BindableReactiveProperty<bool>? isDispenseBusy = null,
+        IDepositOperationService? depositService = null,
+        IInventoryOperationService? inventoryService = null)
     {
+        var facade = CreateFacade();
+        var actualDepositService = depositService ?? new DepositOperationService(
+            facade,
+            NotifyServiceMock.Object,
+            new Mock<Microsoft.Extensions.Logging.ILogger<DepositOperationService>>().Object);
+
+        var actualInventoryService = inventoryService ?? InventoryServiceMock.Object;
+
         return new DepositViewModel(
-            CreateFacade(),
+            facade,
             denominationsFactory ?? (() => []),
             isDispenseBusy ?? new BindableReactiveProperty<bool>(false),
-            NotifyServiceMock.Object,
-            DepositServiceMock.Object,
+            actualDepositService,
+            actualInventoryService,
             MetadataProvider);
     }
 
     /// <summary>検証用の DispenseViewModel を生成します。</summary>
-    internal DispenseViewModel CreateDispenseViewModel(BindableReactiveProperty<bool>? isInDepositMode = null, Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null)
+    internal DispenseViewModel CreateDispenseViewModel(
+        BindableReactiveProperty<bool>? isInDepositMode = null, 
+        Func<IEnumerable<DenominationViewModel>>? denominationsFactory = null,
+        IDispenseOperationService? dispenseService = null,
+        IInventoryOperationService? inventoryService = null)
     {
+        var facade = CreateFacade();
+        var actualDispenseService = dispenseService ?? new DispenseOperationService(
+            facade,
+            NotifyServiceMock.Object,
+            new Mock<Microsoft.Extensions.Logging.ILogger<DispenseOperationService>>().Object,
+            ConfigProvider);
+
+        var actualInventoryService = inventoryService ?? InventoryServiceMock.Object;
+
         return new DispenseViewModel(
-            CreateFacade(),
+            facade,
             ConfigProvider,
             isInDepositMode ?? new BindableReactiveProperty<bool>(false),
             denominationsFactory ?? (() => []),
-            NotifyServiceMock.Object,
-            DispenseServiceMock.Object,
+            actualDispenseService,
+            actualInventoryService,
             MetadataProvider);
     }
 

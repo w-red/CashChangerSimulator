@@ -2,6 +2,7 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
@@ -27,8 +28,10 @@ public class DepositOperationServiceTests
         
         var inventory = new Inventory();
         var hardware = new HardwareStatusManager();
-        var mockDeposit = new Mock<DepositController>(inventory, hardware, (CashChangerManager)null!, (ConfigurationProvider)null!);
+        var mockDeposit = new Mock<DepositController>(inventory, hardware, new Mock<CashChangerManager>(inventory, new Mock<TransactionHistory>().Object, new Mock<ChangeCalculator>().Object, new ConfigurationProvider()).Object, new ConfigurationProvider());
+        var mockDispense = new Mock<DispenseController>(new Mock<CashChangerManager>(inventory, new Mock<TransactionHistory>().Object, new Mock<ChangeCalculator>().Object, new ConfigurationProvider()).Object, hardware, new Mock<IDeviceSimulator>().Object);
         _mockFacade.Setup(f => f.Deposit).Returns(mockDeposit.Object);
+        _mockFacade.Setup(f => f.Dispense).Returns(mockDispense.Object);
         _mockFacade.Setup(f => f.Status).Returns(hardware);
 
         _service = new DepositOperationService(_mockFacade.Object, _mockNotify.Object, _mockLogger.Object);

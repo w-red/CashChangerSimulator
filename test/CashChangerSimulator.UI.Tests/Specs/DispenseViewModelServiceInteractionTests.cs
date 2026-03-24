@@ -21,7 +21,7 @@ public class DispenseViewModelServiceInteractionTests : IClassFixture<UIViewMode
     public void DispenseCommand_ShouldCallService()
     {
         // Arrange
-        var vm = _fixture.CreateDispenseViewModel();
+        var vm = _fixture.CreateDispenseViewModel(dispenseService: _fixture.DispenseServiceMock.Object);
         vm.DispenseAmountInput.Value = "100";
         _fixture.DispenseServiceMock.Reset();
 

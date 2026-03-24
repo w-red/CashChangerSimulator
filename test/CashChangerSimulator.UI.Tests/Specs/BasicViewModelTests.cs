@@ -119,8 +119,8 @@ public class BasicViewModelTests
             mockFacade.Object, 
             () => Enumerable.Empty<DenominationViewModel>(),
             new BindableReactiveProperty<bool>(false),
-            new Mock<INotifyService>().Object,
             new Mock<IDepositOperationService>().Object,
+            new Mock<IInventoryOperationService>().Object,
             metadata);
 
         // Act & Assert

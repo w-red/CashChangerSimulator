@@ -25,25 +25,8 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
             (TestConstants.Key100, 100),
             (TestConstants.Key1000, 100)
         );
-
-        // Setup mock service behavior to simulate hardware interaction
-        _fixture.DispenseServiceMock.Setup(x => x.DispenseCash(It.IsAny<decimal>()))
-            .Callback<decimal>(amount =>
-            {
-                if (_fixture.CashChanger.SimulateDispenseException)
-                {
-                    _fixture.Hardware.SetDeviceError(1, 0);
-                    return;
-                }
-                _fixture.DispenseController.DispenseChangeAsync(amount, true, (c, e) => { }, "JPY");
-            });
-
-        _fixture.DispenseServiceMock.Setup(x => x.ExecuteBulkDispense(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>()))
-            .Callback<IReadOnlyDictionary<DenominationKey, int>>(counts =>
-            {
-                _fixture.DispenseController.DispenseCashAsync(counts, true, (c, e) => { });
-            });
     }
+
 
     private DispenseViewModel CreateViewModel(BindableReactiveProperty<bool>? isInDepositMode = null)
     {
@@ -208,9 +191,11 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
     public void DispenseCommandShouldShowWarningInDepositMode()
     {
         // Assemble
-        var isInDepositMode = new BindableReactiveProperty<bool>(true);
-        var vm = CreateViewModel(isInDepositMode);
+        var vm = CreateViewModel();
         vm.DispenseAmountInput.Value = "1000";
+        
+        // Trigger the service's check for IsDepositInProgress
+        _fixture.DepositController.BeginDeposit();
 
         // Act
         vm.DispenseCommand.Execute(Unit.Default);
