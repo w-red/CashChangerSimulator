@@ -1,7 +1,5 @@
-using CashChangerSimulator.UI.Cli;
 using Shouldly;
 using Spectre.Console.Testing;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 

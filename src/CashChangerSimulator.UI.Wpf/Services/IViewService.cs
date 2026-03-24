@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 
 namespace CashChangerSimulator.UI.Wpf.Services;

@@ -1,5 +1,3 @@
-using CashChangerSimulator.Core.Models;
-
 namespace CashChangerSimulator.UI.Wpf.Services;
 
 /// <summary>在庫操作およびデバイスの基本操作の実行ロジックを担当するサービスのインターフェース。</summary>

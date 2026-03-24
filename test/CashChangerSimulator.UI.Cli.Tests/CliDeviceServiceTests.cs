@@ -5,7 +5,6 @@ using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Core.Opos;
-using Xunit;
 using Microsoft.PointOfService;
 
 namespace CashChangerSimulator.UI.Cli.Tests;

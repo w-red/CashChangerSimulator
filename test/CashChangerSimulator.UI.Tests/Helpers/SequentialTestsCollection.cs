@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace CashChangerSimulator.UI.Tests.Helpers;
 
 [CollectionDefinition("SequentialTests", DisableParallelization = true)]

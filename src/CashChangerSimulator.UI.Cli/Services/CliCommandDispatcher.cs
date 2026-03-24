@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace CashChangerSimulator.UI.Cli.Services;
 
 /// <summary><see cref="ICliCommandDispatcher"/> の実装クラス。</summary>

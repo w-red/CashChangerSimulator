@@ -1,17 +1,10 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
-using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
-using CashChangerSimulator.Device.Services;
-using CashChangerSimulator.Device.Coordination;
-using CashChangerSimulator.UI.Wpf.Services;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf;
 

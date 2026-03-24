@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Wpf.Views;
-using CashChangerSimulator.Device.Services;
-using System.IO;
 using MaterialDesignThemes.Wpf;
 using CashChangerSimulator.UI.Wpf.Controls;
 

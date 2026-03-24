@@ -1,9 +1,5 @@
-using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
-using CashChangerSimulator.Core.Managers;
-using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Device;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using ZLogger;

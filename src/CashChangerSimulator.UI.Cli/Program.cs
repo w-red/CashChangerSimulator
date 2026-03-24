@@ -1,9 +1,6 @@
 using System.Globalization;
 using Cocona;
-using Spectre.Console;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
-using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Cli.Services;
 
 namespace CashChangerSimulator.UI.Cli;

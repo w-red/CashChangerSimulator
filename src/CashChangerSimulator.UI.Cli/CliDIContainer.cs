@@ -1,4 +1,3 @@
-using System.Linq;
 using Spectre.Console;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;

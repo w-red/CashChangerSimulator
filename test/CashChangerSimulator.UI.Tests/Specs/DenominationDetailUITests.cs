@@ -1,13 +1,6 @@
-using System.IO;
-using System.Linq;
-using System.Threading;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
-using FlaUI.Core.Capturing;
-using FlaUI.Core.Input;
 using Shouldly;
-using Xunit;
-using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 

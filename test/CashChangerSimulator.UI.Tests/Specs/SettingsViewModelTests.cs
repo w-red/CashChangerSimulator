@@ -3,7 +3,6 @@ using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using Shouldly;
 using System.Windows.Input;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 

@@ -1,5 +1,4 @@
 using CashChangerSimulator.Core;
-using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device;
@@ -7,7 +6,6 @@ using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
-using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 

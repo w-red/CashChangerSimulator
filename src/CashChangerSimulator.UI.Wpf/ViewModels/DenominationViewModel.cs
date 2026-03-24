@@ -2,11 +2,9 @@ using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Device;
 using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.PointOfService;
 using R3;
-using System.Windows;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 

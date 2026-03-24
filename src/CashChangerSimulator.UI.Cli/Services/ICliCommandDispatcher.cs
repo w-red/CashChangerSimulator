@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace CashChangerSimulator.UI.Cli.Services;
 
 /// <summary>コマンドのディスパッチ（振り分け）を行うインターフェース。</summary>

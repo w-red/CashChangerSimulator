@@ -1,9 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using CashChangerSimulator.UI.Cli;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
-using Xunit;
 using Shouldly;
 
 namespace CashChangerSimulator.UI.Cli.Tests;

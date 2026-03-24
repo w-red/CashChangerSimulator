@@ -1,8 +1,5 @@
 using Moq;
-using Shouldly;
 using CashChangerSimulator.UI.Cli.Services;
-using Xunit;
-using System.Threading.Tasks;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 

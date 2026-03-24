@@ -1,7 +1,5 @@
 using CashChangerSimulator.UI.Tests.Fixtures;
-using CashChangerSimulator.UI.Wpf.ViewModels;
 using Shouldly;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 

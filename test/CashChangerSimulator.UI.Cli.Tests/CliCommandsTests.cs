@@ -1,12 +1,9 @@
 using Moq;
-using Shouldly;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
-using Xunit;
-using System.Threading.Tasks;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 

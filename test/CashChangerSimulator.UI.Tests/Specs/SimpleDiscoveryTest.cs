@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class SimpleDiscoveryTest

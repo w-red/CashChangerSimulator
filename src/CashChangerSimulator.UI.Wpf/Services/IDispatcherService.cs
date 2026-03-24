@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-
 namespace CashChangerSimulator.UI.Wpf.Services;
 
 /// <summary>

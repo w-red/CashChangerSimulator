@@ -1,5 +1,4 @@
 using CashChangerSimulator.Core.Services;
-using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Services;
 using R3;

@@ -1,10 +1,8 @@
-using System.Linq;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace CashChangerSimulator.UI.Tests.Helpers;

@@ -4,7 +4,6 @@ using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
 using Microsoft.PointOfService;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 

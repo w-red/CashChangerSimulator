@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.Device;

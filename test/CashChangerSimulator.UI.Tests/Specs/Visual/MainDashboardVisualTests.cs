@@ -1,8 +1,5 @@
 using CashChangerSimulator.UI.Tests.Helpers;
 using FlaUI.Core.Input;
-using VerifyXunit;
-using Xunit;
-using static VerifyXunit.Verifier;
 
 namespace CashChangerSimulator.UI.Tests.Specs.Visual;
 

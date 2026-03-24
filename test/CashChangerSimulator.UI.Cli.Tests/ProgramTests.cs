@@ -1,6 +1,5 @@
 using Shouldly;
 using System.Globalization;
-using CashChangerSimulator.UI.Cli.Services;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 

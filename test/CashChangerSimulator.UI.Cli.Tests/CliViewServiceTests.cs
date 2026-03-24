@@ -7,7 +7,6 @@ using CashChangerSimulator.Device;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Core.Services;
-using Xunit;
 using R3;
 using Microsoft.PointOfService;
 

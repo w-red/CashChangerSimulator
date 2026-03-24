@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PointOfService;
 using Moq;
 using Shouldly;
-using Xunit;
 using R3;
 
 namespace CashChangerSimulator.UI.Tests.Specs;

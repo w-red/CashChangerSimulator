@@ -1,12 +1,9 @@
-using CashChangerSimulator.UI.Tests.Specs;
-using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Transactions;
-using Xunit;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO;

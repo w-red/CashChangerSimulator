@@ -1,5 +1,4 @@
 using Moq;
-using Shouldly;
 using Spectre.Console;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;

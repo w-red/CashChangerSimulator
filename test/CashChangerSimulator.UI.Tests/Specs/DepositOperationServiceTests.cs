@@ -8,7 +8,6 @@ using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using Moq;
-using Xunit;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
