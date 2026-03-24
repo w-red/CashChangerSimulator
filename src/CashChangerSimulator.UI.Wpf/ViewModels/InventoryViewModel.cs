@@ -26,8 +26,7 @@ public class InventoryViewModel : IDisposable
     private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
-    private readonly IHistoryExportService _exportService;
-    private readonly INotifyService _notifyService;
+    private readonly IInventoryOperationService _operationService;
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨の接頭辞（例: ￥）。</summary>
@@ -99,19 +98,17 @@ public class InventoryViewModel : IDisposable
         IDeviceFacade facade,
         ConfigurationProvider configProvider,
         CurrencyMetadataProvider metadataProvider,
-        IHistoryExportService exportService,
-        INotifyService notifyService)
+        IInventoryOperationService operationService)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(metadataProvider);
-        ArgumentNullException.ThrowIfNull(notifyService);
+        ArgumentNullException.ThrowIfNull(operationService);
 
         _facade = facade;
         _configProvider = configProvider;
         _metadataProvider = metadataProvider;
-        _exportService = exportService;
-        _notifyService = notifyService;
+        _operationService = operationService;
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix;
         CurrencySuffix = _metadataProvider.SymbolSuffix;
@@ -137,7 +134,7 @@ public class InventoryViewModel : IDisposable
         ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
 
         ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
-        ExportHistoryCommand.Subscribe(_ => ExportHistory());
+        ExportHistoryCommand.Subscribe(_ => _operationService.ExportHistory());
 
         IsRecoveryHelpAvailable = Observable.CombineLatest(
             IsJammed,
@@ -169,56 +166,16 @@ public class InventoryViewModel : IDisposable
         SafeInvoke(InitializeDenominations);
 
         OpenCommand = new ReactiveCommand().AddTo(_disposables);
-        OpenCommand.Subscribe(_ =>
-        {
-            try
-            {
-                _facade.Changer.Open();
-                if (_facade.Changer.SkipStateVerification)
-                {
-                    _facade.Changer.Claim(0);
-                    _facade.Changer.DeviceEnabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _facade.Status.SetDeviceError((int)ErrorCode.Failure);
-                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
-            }
-        });
-
+        OpenCommand.Subscribe(_ => _operationService.OpenDevice());
+ 
         CloseCommand = new ReactiveCommand().AddTo(_disposables);
-        CloseCommand.Subscribe(_ =>
-        {
-            try
-            {
-                _facade.Changer.Close();
-            }
-            catch (Exception ex)
-            {
-                _facade.Status.SetDeviceError((int)ErrorCode.Failure);
-                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
-            }
-        });
+        CloseCommand.Subscribe(_ => _operationService.CloseDevice());
 
         CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
-        CollectAllCommand.Subscribe(_ =>
-        {
-            foreach (var monitor in _facade.Monitors.Monitors)
-            {
-                _facade.Inventory.SetCount(monitor.Key, 0);
-            }
-        });
+        CollectAllCommand.Subscribe(_ => _operationService.CollectAll());
 
         ReplenishAllCommand = new ReactiveCommand().AddTo(_disposables);
-        ReplenishAllCommand.Subscribe(_ =>
-        {
-            foreach (var monitor in _facade.Monitors.Monitors)
-            {
-                var setting = _configProvider.Config.GetDenominationSetting(monitor.Key);
-                _facade.Inventory.SetCount(monitor.Key, setting.InitialCount);
-            }
-        });
+        ReplenishAllCommand.Subscribe(_ => _operationService.ReplenishAll());
 
         ShowDenominationDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         ShowDenominationDetailCommand.Subscribe(vm =>
@@ -267,27 +224,6 @@ public class InventoryViewModel : IDisposable
         _logger.ZLogDebug($"InitializeDenominations: Finished. Bills: {BillDenominations.Count}, Coins: {CoinDenominations.Count}");
 
         UpdateGridRatios();
-    }
-
-    private void ExportHistory()
-    {
-        var filter = ResourceHelper.GetAsString("Text.CsvFilter", "CSV files (*.csv)|*.csv");
-        var fileName = $"History_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
-        
-        var path = _facade.View.ShowSaveFileDialog(".csv", filter, fileName);
-        if (string.IsNullOrEmpty(path)) return;
-
-        try
-        {
-            var csv = _exportService.Export(_facade.History.Entries);
-            File.WriteAllText(path, csv);
-            _notifyService.ShowInfo(ResourceHelper.GetAsString("Text.ExportSuccess", "History exported successfully."), "Export");
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to export history to {path}");
-            _notifyService.ShowWarning(ResourceHelper.GetAsString("Text.ExportFailed", "Failed to export history.") + $": {ex.Message}", "Export");
-        }
     }
 
     private void UpdateGridRatios()
