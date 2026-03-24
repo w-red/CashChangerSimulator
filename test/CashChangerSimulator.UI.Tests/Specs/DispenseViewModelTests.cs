@@ -25,6 +25,24 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
             (TestConstants.Key100, 100),
             (TestConstants.Key1000, 100)
         );
+
+        // Setup mock service behavior to simulate hardware interaction
+        _fixture.DispenseServiceMock.Setup(x => x.DispenseCash(It.IsAny<decimal>()))
+            .Callback<decimal>(amount =>
+            {
+                if (_fixture.CashChanger.SimulateDispenseException)
+                {
+                    _fixture.Hardware.SetDeviceError(1, 0);
+                    return;
+                }
+                _fixture.DispenseController.DispenseChangeAsync(amount, true, (c, e) => { }, "JPY");
+            });
+
+        _fixture.DispenseServiceMock.Setup(x => x.ExecuteBulkDispense(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>()))
+            .Callback<IReadOnlyDictionary<DenominationKey, int>>(counts =>
+            {
+                _fixture.DispenseController.DispenseCashAsync(counts, true, (c, e) => { });
+            });
     }
 
     private DispenseViewModel CreateViewModel(BindableReactiveProperty<bool>? isInDepositMode = null)
