@@ -14,6 +14,7 @@ public class DepositOperationService : IDepositOperationService
     private readonly INotifyService _notifyService;
     private readonly ILogger<DepositOperationService> _logger;
 
+    /// <summary>必要な依存コンポーネントを注入してサービスを初期化します。</summary>
     public DepositOperationService(IDeviceFacade facade, INotifyService notifyService, ILogger<DepositOperationService> logger)
     {
         _facade = facade;

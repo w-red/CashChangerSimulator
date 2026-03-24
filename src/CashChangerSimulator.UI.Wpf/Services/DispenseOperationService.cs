@@ -8,7 +8,6 @@ using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
-/// <summary><see cref="IDispenseOperationService"/> の実装クラス（プレースホルダー）。</summary>
 /// <summary>出金操作に関連するデバイス制御とエラーハンドリングを統括するサービス。</summary>
 public class DispenseOperationService : IDispenseOperationService
 {
@@ -17,6 +16,7 @@ public class DispenseOperationService : IDispenseOperationService
     private readonly ILogger<DispenseOperationService> _logger;
     private readonly ConfigurationProvider _configProvider;
 
+    /// <summary>必要な依存コンポーネントを注入してサービスを初期化します。</summary>
     public DispenseOperationService(IDeviceFacade facade, INotifyService notifyService, ILogger<DispenseOperationService> logger, ConfigurationProvider configProvider)
     {
         _facade = facade;
