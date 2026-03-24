@@ -196,6 +196,7 @@ public class DispenseViewModel : IDisposable
 
             if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
             {
+                DispensingAmount.Value = amount;
                 _dispenseService.DispenseCash(amount);
                 DispenseAmountInput.Value = "";
             }
@@ -226,6 +227,7 @@ public class DispenseViewModel : IDisposable
                 return;
             }
 
+            DispensingAmount.Value = d.Key.Value;
             _dispenseService.ExecuteBulkDispense(new Dictionary<DenominationKey, int> { [d.Key] = 1 });
         });
 
@@ -234,6 +236,7 @@ public class DispenseViewModel : IDisposable
         {
             if (counts is { Count: > 0 })
             {
+                DispensingAmount.Value = counts.Sum(kvp => kvp.Key.Value * kvp.Value);
                 _dispenseService.ExecuteBulkDispense(counts);
             }
         });

@@ -33,7 +33,12 @@ public class DispenseOperationService : IDispenseOperationService
             _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode)
                 .ContinueWith(t => {
                     if (t.IsFaulted) {
-                        _logger.ZLogError(t.Exception, $"Background dispense (amount) failed potentially late.");
+                        var ex = t.Exception?.Flatten().InnerException;
+                        if (ex is PosControlException pcEx)
+                        {
+                            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+                        }
+                        _logger.ZLogError(ex, $"Background dispense (amount) failed.");
                     }
                 });
         }
@@ -58,7 +63,12 @@ public class DispenseOperationService : IDispenseOperationService
             _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { })
                 .ContinueWith(t => {
                     if (t.IsFaulted) {
-                        _logger.ZLogError(t.Exception, $"Background dispense (bulk) failed potentially late.");
+                        var ex = t.Exception?.Flatten().InnerException;
+                        if (ex is PosControlException pcEx)
+                        {
+                            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
+                        }
+                        _logger.ZLogError(ex, $"Background dispense (bulk) failed.");
                     }
                 });
         }
