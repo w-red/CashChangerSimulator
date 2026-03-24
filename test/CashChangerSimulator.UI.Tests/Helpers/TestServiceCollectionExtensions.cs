@@ -31,7 +31,9 @@ public static class TestServiceCollectionExtensions
             // extension 内のヘルパーメソッドを呼び出し
             services.AddSingletonIfNotRegistered<IViewModelFactory, ViewModelFactory>();
             services.AddSingletonIfNotRegistered<IDepositOperationService, DepositOperationService>();
+            services.AddSingletonIfNotRegistered<IDispatcherService, WpfDispatcherService>();
             services.AddSingletonIfNotRegistered<IDispenseOperationService, DispenseOperationService>();
+            services.AddSingletonIfNotRegistered<IInventoryOperationService, InventoryOperationService>();
 
             services.AddMockIfNotRegistered<INotifyService>();
             services.AddMockIfNotRegistered<IViewService>();

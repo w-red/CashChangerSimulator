@@ -95,6 +95,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IDeviceFacade, DeviceFacade>();
             services.AddSingleton<IDepositOperationService, DepositOperationService>();
             services.AddSingleton<IDispenseOperationService, DispenseOperationService>();
+            services.AddSingleton<IInventoryOperationService, InventoryOperationService>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<InventoryViewModel>();
             services.AddSingleton<AdvancedSimulationViewModel>();
