@@ -91,6 +91,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IViewModelFactory, ViewModelFactory>();
         services.AddSingleton<IDeviceFacade, DeviceFacade>();
+        services.AddSingleton<IDepositOperationService, DepositOperationService>();
+        services.AddSingleton<IDispenseOperationService, DispenseOperationService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<InventoryViewModel>();
         services.AddSingleton<AdvancedSimulationViewModel>();
