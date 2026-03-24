@@ -281,7 +281,7 @@ public class UIViewModelFixture : IDisposable
     internal AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(Mock<IScriptExecutionService>? scriptServiceMock = null)
     {
         var scriptService = scriptServiceMock?.Object ?? ScriptExecutionService;
-        return new AdvancedSimulationViewModel(CreateFacade(), scriptService, MetadataProvider);
+        return new AdvancedSimulationViewModel(CreateFacade(), scriptService, InventoryServiceMock.Object, MetadataProvider);
     }
 
     /// <summary>検証用の SettingsViewModel を生成します。</summary>

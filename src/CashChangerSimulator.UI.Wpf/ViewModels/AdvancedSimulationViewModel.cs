@@ -16,6 +16,7 @@ public class AdvancedSimulationViewModel : IDisposable
 {
     private readonly IDeviceFacade _facade;
     private readonly IScriptExecutionService _scriptExecutionService;
+    private readonly IInventoryOperationService _inventoryOperationService;
     private readonly CompositeDisposable _disposables = [];
 
     // --- State Properties ---
@@ -83,14 +84,17 @@ public class AdvancedSimulationViewModel : IDisposable
     public AdvancedSimulationViewModel(
         IDeviceFacade facade,
         IScriptExecutionService scriptExecutionService,
+        IInventoryOperationService inventoryOperationService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(scriptExecutionService);
+        ArgumentNullException.ThrowIfNull(inventoryOperationService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
         _facade = facade;
         _scriptExecutionService = scriptExecutionService;
+        _inventoryOperationService = inventoryOperationService;
 
         ScriptInput = new BindableReactiveProperty<string>("[\n  {\n    \"Op\": \"BeginDeposit\"\n  }\n]").AddTo(_disposables);
         ScriptError = new BindableReactiveProperty<string?>(null).AddTo(_disposables);
@@ -132,9 +136,9 @@ public class AdvancedSimulationViewModel : IDisposable
             })
             .AddTo(_disposables);
 
-        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
-        SimulateJamCommand.Subscribe(_ => _facade.Status.SetJammed(true));
-        SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
+        ResetErrorCommand.Subscribe(_ => _inventoryOperationService.ResetError());
+        SimulateJamCommand.Subscribe(_ => _inventoryOperationService.SimulateJam());
+        SimulateOverlapCommand.Subscribe(_ => _inventoryOperationService.SimulateOverlap());
         SimulateDeviceErrorCommand.Subscribe(_ => _facade.Status.SetDeviceError(999, 0));
         ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
         CloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
