@@ -31,4 +31,43 @@ public class CliDIContainerTests
         provider.GetService<CliInteractiveShell>().ShouldNotBeNull();
         provider.GetService<CliCommands>().ShouldNotBeNull();
     }
+
+    [Fact]
+    public void ShouldInitializeSuccessfully()
+    {
+        // Act
+        // This hits Initialize() and PostInitialize() with some args
+        var args = new[] { "--verbose", "--currency", "USD" };
+        CliDIContainer.Initialize(args);
+        CliDIContainer.PostInitialize(CliDIContainer.ServiceProvider, args);
+
+        // Assert
+        CliDIContainer.ServiceProvider.ShouldNotBeNull();
+        
+        var configProvider = CliDIContainer.Resolve<CashChangerSimulator.Core.Configuration.ConfigurationProvider>();
+        configProvider.ShouldNotBeNull();
+        configProvider.Config.System.CurrencyCode.ShouldBe("USD");
+    }
+
+    [Fact]
+    public void ResolverServiceProvider_ShouldResolveDependencies()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        CliDIContainer.ConfigureServices(builder.Services, []);
+        var provider = builder.Services.BuildServiceProvider();
+
+        // This effectively instantiates the internal `CliResolverServiceProvider` indirectly,
+        // but we can explicitly test it by using the SimulatorServices abstraction.
+        CliDIContainer.Initialize([]);
+        
+        // Act
+        var providerCasted = (IServiceProvider)CashChangerSimulator.Core.SimulatorServices.Provider!;
+        var config = CashChangerSimulator.Core.SimulatorServices.Provider!.Resolve<CashChangerSimulator.Core.Configuration.ConfigurationProvider>();
+        var obj = providerCasted.GetService(typeof(CashChangerSimulator.Core.Configuration.ConfigurationProvider));
+
+        // Assert
+        config.ShouldNotBeNull();
+        Assert.NotNull(obj);
+    }
 }

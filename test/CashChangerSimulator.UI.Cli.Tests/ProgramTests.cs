@@ -66,4 +66,45 @@ public class ProgramTests
         options.Language.ShouldBe("en-US");
         options.CurrencyCode.ShouldBe("USD");
     }
+
+    [Fact]
+    public void ExtractGlobalOptions_WithVerbose_ShouldSeparateGlobals()
+    {
+        // Arrange
+        string[] args = ["--verbose", "status"];
+
+        // Act
+        var (globals, commands) = Program.ExtractGlobalOptions(args);
+
+        // Assert
+        globals.ShouldBe(["--verbose"]);
+        commands.ShouldBe(["status"]);
+    }
+
+    [Fact]
+    public void ApplyGlobalOptions_WithVerboseAndInvalidLang_ShouldHandleGracefully()
+    {
+        // Arrange
+        var options = new CliSessionOptions();
+        string[] globals = ["--verbose", "--lang", "invalid-lang-code"];
+
+        // Act
+        Program.ApplyGlobalOptions(globals, options);
+
+        // Assert
+        options.Verbose.ShouldBeTrue();
+        options.Language.ShouldBe("invalid-lang-code");
+        // Invalid language gracefully handled by empty catch blocks
+    }
+
+    [Fact]
+    public void Main_HelpCommand_ShouldExecuteCoconaAndExit()
+    {
+        // Arrange
+        string[] args = ["--help"];
+
+        // Act & Assert
+        // This will successfully print the help message and exit without throwing.
+        Should.NotThrow(() => Program.Main(args));
+    }
 }
