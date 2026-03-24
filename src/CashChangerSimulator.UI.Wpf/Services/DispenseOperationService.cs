@@ -28,6 +28,14 @@ public class DispenseOperationService : IDispenseOperationService
     /// <summary>指定された金額の払い出しを開始します。</summary>
     public void DispenseCash(decimal amount)
     {
+        if (_facade.Deposit.IsDepositInProgress)
+        {
+            var msg = ResourceHelper.GetAsString("WarnDispenseDuringDeposit", "Cannot dispense while deposit is in progress.");
+            var title = ResourceHelper.GetAsString("Warn", "Warning");
+            _notifyService.ShowWarning(msg, title);
+            return;
+        }
+
         try
         {
             _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode)
@@ -58,6 +66,14 @@ public class DispenseOperationService : IDispenseOperationService
     /// <summary>指定された金種内訳での一括払い出しを実行します。</summary>
     public void ExecuteBulkDispense(IReadOnlyDictionary<DenominationKey, int> counts)
     {
+        if (_facade.Deposit.IsDepositInProgress)
+        {
+            _notifyService.ShowWarning(
+                ResourceHelper.GetAsString("WarnDispenseDuringDeposit", "Cannot dispense while deposit is in progress."),
+                ResourceHelper.GetAsString("Warn", "Warning"));
+            return;
+        }
+
         try
         {
             _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { })

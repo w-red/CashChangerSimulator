@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,14 @@ public class DepositOperationService : IDepositOperationService
     /// <summary>入金処理を開始します。</summary>
     public void BeginDeposit()
     {
+        if (_facade.Dispense.Status == CashDispenseStatus.Busy)
+        {
+            var msg = ResourceHelper.GetAsString("WarnDepositDuringDispense", "Cannot begin deposit while dispense is in progress.");
+            var title = ResourceHelper.GetAsString("Warn", "Warning");
+            _notifyService.ShowWarning(msg, title);
+            return;
+        }
+
         try
         {
             _facade.Deposit.BeginDeposit();
@@ -115,6 +124,14 @@ public class DepositOperationService : IDepositOperationService
     /// <summary>目標金額に達するまで自動的に入金を行うクイック入金を実行します。</summary>
     public async Task ExecuteQuickDepositAsync(decimal targetAmount, IEnumerable<DenominationKey> denominations)
     {
+        if (_facade.Dispense.Status == CashDispenseStatus.Busy)
+        {
+            _notifyService.ShowWarning(
+                ResourceHelper.GetAsString("WarnDepositDuringDispense", "Cannot begin deposit while dispense is in progress."),
+                ResourceHelper.GetAsString("Warn", "Warning"));
+            return;
+        }
+
         try
         {
             _facade.Deposit.BeginDeposit();
