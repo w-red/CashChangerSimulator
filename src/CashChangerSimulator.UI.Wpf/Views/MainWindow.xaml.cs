@@ -41,7 +41,7 @@ internal partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _disposables.Dispose();
-        _viewModel.Dispose();
+        _viewModel?.Dispose();
         base.OnClosed(e);
     }
 }
