@@ -12,50 +12,52 @@ namespace CashChangerSimulator.UI.Tests.Helpers;
 /// <summary>テスト用の IServiceCollection 拡張メソッドを提供します。</summary>
 public static class TestServiceCollectionExtensions
 {
-    /// <summary>UI テストに必要な ViewModel とサービス（モックを含む）を登録します。</summary>
-    /// <param name="services">サービスコレクション。</param>
-    /// <returns>登録後のサービスコレクション。</returns>
-    public static IServiceCollection AddTestWpfUiServices(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        // Infrastructure
-        services.AddLogging();
-
-        // ViewModels
-        services.AddTransient<MainViewModel>();
-        services.AddTransient<InventoryViewModel>();
-        services.AddTransient<DepositViewModel>();
-        services.AddTransient<DispenseViewModel>();
-        services.AddTransient<AdvancedSimulationViewModel>();
-
-        // Services (Real implementations for thin wrappers to maintain behavioral consistency in tests)
-        services.AddSingletonIfNotRegistered<IViewModelFactory, ViewModelFactory>();
-        services.AddSingletonIfNotRegistered<IDepositOperationService, DepositOperationService>();
-        services.AddSingletonIfNotRegistered<IDispenseOperationService, DispenseOperationService>();
-
-        // Mocks for other UI services
-        services.AddMockIfNotRegistered<INotifyService>();
-        services.AddMockIfNotRegistered<IViewService>();
-        services.AddMockIfNotRegistered<IHistoryExportService>();
-        services.AddMockIfNotRegistered<IScriptExecutionService>();
-
-        return services;
-    }
-
-    private static void AddMockIfNotRegistered<T>(this IServiceCollection services) where T : class
-    {
-        if (!services.Any(d => d.ServiceType == typeof(T)))
+        /// <summary>UI テストに必要な ViewModel とサービス（モックを含む）を登録します。</summary>
+        /// <returns>登録後のサービスコレクション。</returns>
+        public IServiceCollection AddTestWpfUiServices()
         {
-            services.AddSingleton<T>(new Mock<T>().Object);
+            // 'services' 引数を直接使用
+            services.AddLogging();
+
+            // ViewModels
+            services.AddTransient<MainViewModel>();
+            services.AddTransient<InventoryViewModel>();
+            services.AddTransient<DepositViewModel>();
+            services.AddTransient<DispenseViewModel>();
+            services.AddTransient<AdvancedSimulationViewModel>();
+
+            // extension 内のヘルパーメソッドを呼び出し
+            services.AddSingletonIfNotRegistered<IViewModelFactory, ViewModelFactory>();
+            services.AddSingletonIfNotRegistered<IDepositOperationService, DepositOperationService>();
+            services.AddSingletonIfNotRegistered<IDispenseOperationService, DispenseOperationService>();
+
+            services.AddMockIfNotRegistered<INotifyService>();
+            services.AddMockIfNotRegistered<IViewService>();
+            services.AddMockIfNotRegistered<IHistoryExportService>();
+            services.AddMockIfNotRegistered<IScriptExecutionService>();
+
+            return services;
         }
-    }
 
-    private static void AddSingletonIfNotRegistered<TService, TImplementation>(this IServiceCollection services)
-        where TService : class
-        where TImplementation : class, TService
-    {
-        if (!services.Any(d => d.ServiceType == typeof(TService)))
+        private void AddMockIfNotRegistered<T>()
+            where T : class
         {
-            services.AddSingleton<TService, TImplementation>();
+            if (!services.Any(d => d.ServiceType == typeof(T)))
+            {
+                services.AddSingleton<T>(new Mock<T>().Object);
+            }
+        }
+
+        private void AddSingletonIfNotRegistered<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService
+        {
+            if (!services.Any(d => d.ServiceType == typeof(TService)))
+            {
+                services.AddSingleton<TService, TImplementation>();
+            }
         }
     }
 }
