@@ -225,4 +225,70 @@ public class CliInteractiveShellTests
         _mockDispatcher.Verify(d => d.DispatchAsync("deposit 500"), Times.Once);
         _mockDispatcher.Verify(d => d.DispatchAsync("dispense 1000"), Times.Once);
     }
+
+    [Fact]
+    public async Task RunAsyncSelectionConfigCommandsShouldWork()
+    {
+        // Arrange
+        var inputs = new Queue<string>(new[] { "", "", "exit" });
+        _mockReader.Setup(r => r.Read(It.IsAny<string>())).Returns(() => inputs.Dequeue());
+        _mockChanger.Setup(c => c.State).Returns(ControlState.Closed);
+        
+        // 1. config get
+        for(int i=0; i<13; i++) _console.Input.PushKey(ConsoleKey.DownArrow); // "config" is index 13
+        _console.Input.PushKey(ConsoleKey.Enter);
+        
+        _console.Input.PushKey(ConsoleKey.DownArrow); // "get" is index 1
+        _console.Input.PushKey(ConsoleKey.Enter);
+        
+        _console.Input.PushKey(ConsoleKey.K); _console.Input.PushKey(ConsoleKey.E); _console.Input.PushKey(ConsoleKey.Y);
+        _console.Input.PushKey(ConsoleKey.Enter); // key
+
+        // 2. config set
+        for(int i=0; i<13; i++) _console.Input.PushKey(ConsoleKey.DownArrow);
+        _console.Input.PushKey(ConsoleKey.Enter);
+        
+        for(int i=0; i<2; i++) _console.Input.PushKey(ConsoleKey.DownArrow); // "set" is index 2
+        _console.Input.PushKey(ConsoleKey.Enter);
+        
+        _console.Input.PushKey(ConsoleKey.K);
+        _console.Input.PushKey(ConsoleKey.Enter); // key
+        _console.Input.PushKey(ConsoleKey.V);
+        _console.Input.PushKey(ConsoleKey.Enter); // val
+
+        // Act
+        await _shell.RunAsync();
+
+        // Assert
+        _mockDispatcher.Verify(d => d.DispatchAsync("config get KEY"), Times.Once);
+        _mockDispatcher.Verify(d => d.DispatchAsync("config set K V"), Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsyncSelectionOtherCommandsShouldWork()
+    {
+        // Arrange
+        var inputs = new Queue<string>(new[] { "", "", "exit" });
+        _mockReader.Setup(r => r.Read(It.IsAny<string>())).Returns(() => inputs.Dequeue());
+        _mockChanger.Setup(c => c.State).Returns(ControlState.Closed);
+        
+        // 1. history
+        for(int i=0; i<12; i++) _console.Input.PushKey(ConsoleKey.DownArrow); // "history"
+        _console.Input.PushKey(ConsoleKey.Enter);
+        _console.Input.PushKey(ConsoleKey.D1); _console.Input.PushKey(ConsoleKey.D0); // 10
+        _console.Input.PushKey(ConsoleKey.Enter);
+
+        // 2. log-level
+        for(int i=0; i<14; i++) _console.Input.PushKey(ConsoleKey.DownArrow); // "log-level"
+        _console.Input.PushKey(ConsoleKey.Enter);
+        _console.Input.PushKey(ConsoleKey.DownArrow); // "Debug" is index 1
+        _console.Input.PushKey(ConsoleKey.Enter);
+
+        // Act
+        await _shell.RunAsync();
+
+        // Assert
+        _mockDispatcher.Verify(d => d.DispatchAsync("history 10"), Times.Once);
+        _mockDispatcher.Verify(d => d.DispatchAsync("log-level Debug"), Times.Once);
+    }
 }
