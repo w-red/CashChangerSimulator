@@ -22,9 +22,8 @@ public class DispenseViewModel : IDisposable
 {
     private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
-    private readonly ILogger<DispenseViewModel> _logger;
-    private readonly INotifyService _notifyService;
     private readonly IDispenseOperationService _dispenseService;
+    private readonly IInventoryOperationService _inventoryService;
     private readonly BindableReactiveProperty<bool> _isInDepositMode;
     private readonly CompositeDisposable _disposables = [];
 
@@ -104,23 +103,23 @@ public class DispenseViewModel : IDisposable
         ConfigurationProvider configProvider,
         BindableReactiveProperty<bool> isInDepositMode,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
-        INotifyService notifyService,
         IDispenseOperationService dispenseService,
+        IInventoryOperationService inventoryService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(isInDepositMode);
         ArgumentNullException.ThrowIfNull(getDenominations);
-        ArgumentNullException.ThrowIfNull(notifyService);
+        ArgumentNullException.ThrowIfNull(dispenseService);
+        ArgumentNullException.ThrowIfNull(inventoryService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
         _facade = facade;
         _configProvider = configProvider;
         _isInDepositMode = isInDepositMode;
-        _notifyService = notifyService;
         _dispenseService = dispenseService;
-        _logger = LogProvider.CreateLogger<DispenseViewModel>();
+        _inventoryService = inventoryService;
 
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
@@ -128,19 +127,20 @@ public class DispenseViewModel : IDisposable
 
         // --- State Mapping ---
 
-        Status = _facade.Dispense.Changed
-            .Select(_ => _facade.Dispense.Status)
-            .ToBindableReactiveProperty(_facade.Dispense.Status)
+        Status = new BindableReactiveProperty<CashDispenseStatus>(_facade.Dispense.Status).AddTo(_disposables);
+        StatusName = new BindableReactiveProperty<string>(ResourceHelper.GetAsString("Status" + _facade.Dispense.Status.ToString(), _facade.Dispense.Status.ToString())).AddTo(_disposables);
+
+        _facade.Dispense.Changed
+            .Subscribe(_ =>
+            {
+                Status.Value = _facade.Dispense.Status;
+                StatusName.Value = ResourceHelper.GetAsString("Status" + _facade.Dispense.Status.ToString(), _facade.Dispense.Status.ToString());
+            })
             .AddTo(_disposables);
 
         IsBusy = Status
             .Select(s => s == CashDispenseStatus.Busy)
-            .ToBindableReactiveProperty(false)
-            .AddTo(_disposables);
-
-        StatusName = Status
-            .Select(s => ResourceHelper.GetAsString("Status" + s.ToString(), s.ToString()))
-            .ToBindableReactiveProperty(ResourceHelper.GetAsString("StatusIdle", "Idle"))
+            .ToBindableReactiveProperty(_facade.Dispense.Status == CashDispenseStatus.Busy)
             .AddTo(_disposables);
 
         IsJammed = _facade.Status.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
@@ -186,14 +186,6 @@ public class DispenseViewModel : IDisposable
 
         DispenseCommand.Subscribe(_ =>
         {
-            if (_isInDepositMode.Value)
-            {
-                var msg = ResourceHelper.GetAsString("WarnDispenseDuringDeposit", "Cannot dispense while deposit is in progress.");
-                var title = ResourceHelper.GetAsString("Warn", "Warning");
-                _notifyService.ShowWarning(msg, title);
-                return;
-            }
-
             if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
             {
                 DispensingAmount.Value = amount;
@@ -218,15 +210,6 @@ public class DispenseViewModel : IDisposable
         QuickDispenseCommand.Subscribe(d =>
         {
             if (d == null) return;
-
-            if (_isInDepositMode.Value)
-            {
-                _notifyService.ShowWarning(
-                    ResourceHelper.GetAsString("WarnDispenseDuringDeposit"),
-                    ResourceHelper.GetAsString("Warn"));
-                return;
-            }
-
             DispensingAmount.Value = d.Key.Value;
             _dispenseService.ExecuteBulkDispense(new Dictionary<DenominationKey, int> { [d.Key] = 1 });
         });
@@ -247,19 +230,19 @@ public class DispenseViewModel : IDisposable
             .ToReactiveCommand()
             .AddTo(_disposables);
 
-        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
+        ResetErrorCommand.Subscribe(_ => _inventoryService.ResetError());
 
         SimulateJamCommand = IsJammed
             .Select(jammed => !jammed)
             .ToReactiveCommand()
             .AddTo(_disposables);
-        SimulateJamCommand.Subscribe(_ => _facade.Status.SetJammed(true));
+        SimulateJamCommand.Subscribe(_ => _inventoryService.SimulateJam());
 
         SimulateOverlapCommand = IsOverlapped
             .Select(o => !o)
             .ToReactiveCommand()
             .AddTo(_disposables);
-        SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
+        SimulateOverlapCommand.Subscribe(_ => _inventoryService.SimulateOverlap());
     }
 
     // Private helper methods removed as logic is now in IDispenseOperationService
