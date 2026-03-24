@@ -114,4 +114,16 @@ public class InventoryOperationService : IInventoryOperationService
             _notifyService.ShowWarning(ResourceHelper.GetAsString("Text.ExportFailed", "Failed to export history.") + $": {ex.Message}", "Export");
         }
     }
+
+    /// <inheritdoc/>
+    public void SimulateJam()
+    {
+        _facade.Status.SetJammed(true);
+    }
+
+    /// <inheritdoc/>
+    public void SimulateOverlap()
+    {
+        _facade.Status.SetOverlapped(true);
+    }
 }

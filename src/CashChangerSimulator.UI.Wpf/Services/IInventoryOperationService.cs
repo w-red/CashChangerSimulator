@@ -22,4 +22,10 @@ public interface IInventoryOperationService
 
     /// <summary>取引履歴をエクスポートします。</summary>
     void ExportHistory();
+
+    /// <summary>ジャムエラーの状態をシミュレートします。</summary>
+    void SimulateJam();
+
+    /// <summary>重なりエラーの状態をシミュレートします。</summary>
+    void SimulateOverlap();
 }
