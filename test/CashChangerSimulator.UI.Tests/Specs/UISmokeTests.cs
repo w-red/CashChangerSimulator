@@ -142,6 +142,8 @@ public class UISmokeTests
                 services.AddSingleton(new Mock<IHistoryExportService>().Object);
                 services.AddSingleton(new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
                 services.AddSingleton(facade.Notify);
+                services.AddSingleton<IDepositOperationService>(new Mock<IDepositOperationService>().Object);
+                services.AddSingleton<IDispenseOperationService>(new Mock<IDispenseOperationService>().Object);
                 services.AddSingleton<InventoryViewModel>();
                 services.AddSingleton<AdvancedSimulationViewModel>();
                 services.AddSingleton<MainViewModel>();
