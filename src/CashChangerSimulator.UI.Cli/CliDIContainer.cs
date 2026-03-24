@@ -184,20 +184,22 @@ internal sealed class CliResolverServiceProvider(IServiceProvider provider) : IS
     public object? GetService(Type serviceType) => provider.GetService(serviceType);
 }
 
-public class CliNotifyService : INotifyService
+public class CliNotifyService(IAnsiConsole console) : INotifyService
 {
+    private readonly IAnsiConsole _console = console;
+
     public void ShowWarning(string message, string title = "Warning")
     {
-        AnsiConsole.MarkupLine($"[yellow][[{title}]] {message}[/]");
+        _console.MarkupLine($"[yellow][[{title}]] {message}[/]");
     }
 
     public void ShowError(string message, string title = "Error")
     {
-        AnsiConsole.MarkupLine($"[red][[{title}]] {message}[/]");
+        _console.MarkupLine($"[red][[{title}]] {message}[/]");
     }
 
     public void ShowInfo(string message, string title = "Info")
     {
-        AnsiConsole.MarkupLine($"[blue][[{title}]] {message}[/]");
+        _console.MarkupLine($"[blue][[{title}]] {message}[/]");
     }
 }
