@@ -123,8 +123,7 @@ public class UISmokeTests
                     facade,
                     config,
                     metadata,
-                    new Mock<IHistoryExportService>().Object,
-                    mockNotify.Object);
+                    new Mock<IInventoryOperationService>().Object);
 
                 // Test ActivityFeedControl
                 var activityFeed = new ActivityFeedControl { DataContext = invVM };

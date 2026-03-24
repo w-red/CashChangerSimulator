@@ -62,8 +62,7 @@ public class HotReloadTests
             facade,
             config,
             metadataProvider,
-            new Mock<IHistoryExportService>().Object,
-            notifyService);
+            new Mock<IInventoryOperationService>().Object);
 
         return (vm, config, monitorsProvider);
     }

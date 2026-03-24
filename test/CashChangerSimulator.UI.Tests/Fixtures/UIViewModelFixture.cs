@@ -36,6 +36,7 @@ public class UIViewModelFixture : IDisposable
     public Mock<IHistoryExportService> ExportServiceMock { get; private set; } = null!;
     public Mock<IDepositOperationService> DepositServiceMock { get; private set; } = null!;
     public Mock<IDispenseOperationService> DispenseServiceMock { get; private set; } = null!;
+    public Mock<IInventoryOperationService> InventoryServiceMock { get; private set; } = null!;
 
     public UIViewModelFixture()
     {
@@ -71,6 +72,7 @@ public class UIViewModelFixture : IDisposable
         ExportServiceMock = new Mock<IHistoryExportService>();
         DepositServiceMock = new Mock<IDepositOperationService>();
         DispenseServiceMock = new Mock<IDispenseOperationService>();
+        InventoryServiceMock = new Mock<IInventoryOperationService>();
 
         if (useRealScriptService)
         {
@@ -191,6 +193,7 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(ExportServiceMock.Object);
         services.AddSingleton(DepositServiceMock.Object);
         services.AddSingleton(DispenseServiceMock.Object);
+        services.AddSingleton(InventoryServiceMock.Object);
         services.AddSingleton(ScriptExecutionService);
         services.AddSingleton(DispatcherService);
         
@@ -209,7 +212,15 @@ public class UIViewModelFixture : IDisposable
     /// <summary>検証用の InventoryViewModel を生成します。</summary>
     internal InventoryViewModel CreateInventoryViewModel()
     {
-        return new InventoryViewModel(CreateFacade(), ConfigProvider, MetadataProvider, ExportServiceMock.Object, NotifyServiceMock.Object);
+        var facade = CreateFacade();
+        var operationService = new InventoryOperationService(
+            facade,
+            ConfigProvider,
+            ExportServiceMock.Object,
+            NotifyServiceMock.Object,
+            new Mock<Microsoft.Extensions.Logging.ILogger<InventoryOperationService>>().Object);
+
+        return new InventoryViewModel(facade, ConfigProvider, MetadataProvider, operationService);
     }
 
     /// <summary>検証用の DepositViewModel を生成します。</summary>
