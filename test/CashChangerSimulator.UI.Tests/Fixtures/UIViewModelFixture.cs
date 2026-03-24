@@ -33,6 +33,8 @@ public class UIViewModelFixture : IDisposable
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
     public Mock<IViewService> ViewServiceMock { get; private set; } = null!;
     public Mock<IHistoryExportService> ExportServiceMock { get; private set; } = null!;
+    public Mock<IDepositOperationService> DepositServiceMock { get; private set; } = null!;
+    public Mock<IDispenseOperationService> DispenseServiceMock { get; private set; } = null!;
 
     public UIViewModelFixture()
     {
@@ -66,6 +68,8 @@ public class UIViewModelFixture : IDisposable
         NotifyServiceMock = new Mock<INotifyService>();
         ViewServiceMock = new Mock<IViewService>();
         ExportServiceMock = new Mock<IHistoryExportService>();
+        DepositServiceMock = new Mock<IDepositOperationService>();
+        DispenseServiceMock = new Mock<IDispenseOperationService>();
 
         if (useRealScriptService)
         {
@@ -170,6 +174,8 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(MetadataProvider);
         services.AddSingleton(NotifyServiceMock.Object);
         services.AddSingleton(ExportServiceMock.Object);
+        services.AddSingleton(DepositServiceMock.Object);
+        services.AddSingleton(DispenseServiceMock.Object);
         services.AddSingleton(ScriptExecutionService);
         services.AddSingleton(DispatcherService);
         
@@ -204,6 +210,7 @@ public class UIViewModelFixture : IDisposable
             denominationsFactory ?? (() => []),
             isDispenseBusy ?? new BindableReactiveProperty<bool>(false),
             NotifyServiceMock.Object,
+            DepositServiceMock.Object,
             MetadataProvider);
     }
 
@@ -216,6 +223,7 @@ public class UIViewModelFixture : IDisposable
             isInDepositMode ?? new BindableReactiveProperty<bool>(false),
             denominationsFactory ?? (() => []),
             NotifyServiceMock.Object,
+            DispenseServiceMock.Object,
             MetadataProvider);
     }
 

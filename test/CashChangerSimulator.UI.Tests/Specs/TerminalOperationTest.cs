@@ -94,6 +94,7 @@ public class TerminalOperationTest
             () => [],
             _isBusyShared,
             _facade.Notify,
+            new Mock<IDepositOperationService>().Object,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
 
         // Assert: Initial (Normal)
@@ -134,6 +135,7 @@ public class TerminalOperationTest
             _isBusyShared,
             () => [],
             _facade.Notify,
+            new Mock<IDispenseOperationService>().Object,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
 
@@ -171,6 +173,7 @@ public class TerminalOperationTest
             () => [],
             _isBusyShared,
             _facade.Notify,
+            new Mock<IDepositOperationService>().Object,
             new CurrencyMetadataProvider(new ConfigurationProvider()));
         _hardwareManager.SetConnected(true);
 
@@ -232,6 +235,7 @@ public class TerminalOperationTest
             _isBusyShared,
             () => [],
             _facade.Notify,
+            new Mock<IDispenseOperationService>().Object,
             new CurrencyMetadataProvider(configProvider));
         _hardwareManager.SetConnected(true);
 

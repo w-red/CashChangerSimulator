@@ -120,6 +120,7 @@ public class BasicViewModelTests
             () => Enumerable.Empty<DenominationViewModel>(),
             new BindableReactiveProperty<bool>(false),
             new Mock<INotifyService>().Object,
+            new Mock<IDepositOperationService>().Object,
             metadata);
 
         // Act & Assert
