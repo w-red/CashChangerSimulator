@@ -131,7 +131,7 @@ public class InventoryViewModel : IDisposable
         });
 
         ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
-        ResetErrorCommand.Subscribe(_ => _facade.Status.ResetError());
+        ResetErrorCommand.Subscribe(_ => _operationService.ResetError());
 
         ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
         ExportHistoryCommand.Subscribe(_ => _operationService.ExportHistory());
