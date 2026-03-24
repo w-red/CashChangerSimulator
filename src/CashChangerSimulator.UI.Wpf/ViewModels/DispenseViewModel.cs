@@ -24,6 +24,7 @@ public class DispenseViewModel : IDisposable
     private readonly ConfigurationProvider _configProvider;
     private readonly ILogger<DispenseViewModel> _logger;
     private readonly INotifyService _notifyService;
+    private readonly IDispenseOperationService _dispenseService;
     private readonly BindableReactiveProperty<bool> _isInDepositMode;
     private readonly CompositeDisposable _disposables = [];
 
@@ -104,6 +105,7 @@ public class DispenseViewModel : IDisposable
         BindableReactiveProperty<bool> isInDepositMode,
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         INotifyService notifyService,
+        IDispenseOperationService dispenseService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(facade);
@@ -117,6 +119,7 @@ public class DispenseViewModel : IDisposable
         _configProvider = configProvider;
         _isInDepositMode = isInDepositMode;
         _notifyService = notifyService;
+        _dispenseService = dispenseService;
         _logger = LogProvider.CreateLogger<DispenseViewModel>();
 
         CurrencyPrefix = metadataProvider.SymbolPrefix;
@@ -193,7 +196,7 @@ public class DispenseViewModel : IDisposable
 
             if (decimal.TryParse(DispenseAmountInput.Value, out var amount))
             {
-                DispenseCash(amount);
+                _dispenseService.DispenseCash(amount);
                 DispenseAmountInput.Value = "";
             }
         });
@@ -223,7 +226,7 @@ public class DispenseViewModel : IDisposable
                 return;
             }
 
-            ExecuteBulkDispense(new Dictionary<DenominationKey, int> { [d.Key] = 1 });
+            _dispenseService.ExecuteBulkDispense(new Dictionary<DenominationKey, int> { [d.Key] = 1 });
         });
 
         DispenseBulkCommand = new ReactiveCommand<IReadOnlyDictionary<DenominationKey, int>>().AddTo(_disposables);
@@ -231,7 +234,7 @@ public class DispenseViewModel : IDisposable
         {
             if (counts is { Count: > 0 })
             {
-                ExecuteBulkDispense(counts);
+                _dispenseService.ExecuteBulkDispense(counts);
             }
         });
 
@@ -256,56 +259,7 @@ public class DispenseViewModel : IDisposable
         SimulateOverlapCommand.Subscribe(_ => _facade.Status.SetOverlapped(true));
     }
 
-    private void DispenseCash(decimal amount)
-    {
-        try
-        {
-            DispensingAmount.Value = amount;
-            _facade.Dispense.DispenseChangeAsync(amount, true, (code, ext) => { }, _configProvider.Config.System.CurrencyCode)
-                .ContinueWith(t => {
-                    if (t.IsFaulted) {
-                        _logger.ZLogError(t.Exception, $"Background dispense (amount) failed potentially late.");
-                    }
-                });
-        }
-        catch (PosControlException pcEx)
-        {
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-            _logger.ZLogError(pcEx, $"Failed to dispense {amount}.");
-            _notifyService.ShowError(pcEx.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to dispense {amount}.");
-            _notifyService.ShowError(ex.Message);
-        }
-    }
-
-    private void ExecuteBulkDispense(IReadOnlyDictionary<DenominationKey, int> counts)
-    {
-        try
-        {
-            var total = counts.Sum(x => x.Key.Value * x.Value);
-            DispensingAmount.Value = total;
-            _facade.Dispense.DispenseCashAsync(counts, true, (code, ext) => { })
-                .ContinueWith(t => {
-                    if (t.IsFaulted) {
-                        _logger.ZLogError(t.Exception, $"Background dispense (bulk) failed potentially late.");
-                    }
-                });
-        }
-        catch (PosControlException pcEx)
-        {
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-            _logger.ZLogError(pcEx, $"Failed to dispense cash (bulk).");
-            _notifyService.ShowError(pcEx.Message, ResourceHelper.GetAsString("DispenseError", "Dispense Error"));
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to dispense cash (bulk).");
-            _notifyService.ShowError(ex.Message, ResourceHelper.GetAsString("DispenseError", "Dispense Error"));
-        }
-    }
+    // Private helper methods removed as logic is now in IDispenseOperationService
 
     /// <inheritdoc/>
     public void Dispose()

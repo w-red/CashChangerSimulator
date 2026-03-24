@@ -24,6 +24,7 @@ public class DepositViewModel : IDisposable
     private readonly Func<IEnumerable<DenominationViewModel>> _getDenominations;
     private readonly BindableReactiveProperty<bool> _isDispenseBusy;
     private readonly INotifyService _notifyService;
+    private readonly IDepositOperationService _depositService;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly IEnumerable<DenominationViewModel> _allDenominations;
 
@@ -146,6 +147,7 @@ public class DepositViewModel : IDisposable
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         BindableReactiveProperty<bool> isDispenseBusy,
         INotifyService notifyService,
+        IDepositOperationService depositService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(facade);
@@ -158,6 +160,7 @@ public class DepositViewModel : IDisposable
         _getDenominations = getDenominations;
         _isDispenseBusy = isDispenseBusy;
         _notifyService = notifyService;
+        _depositService = depositService;
         _metadataProvider = metadataProvider;
         _allDenominations = getDenominations().ToList();
 
@@ -284,48 +287,34 @@ public class DepositViewModel : IDisposable
 
             if (IsInDepositMode.Value) return;
 
-            try
-            {
-                _facade.Deposit.BeginDeposit();
-            }
-            catch (PosControlException pcEx)
-            {
-                _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-                _logger.ZLogError(pcEx, $"Failed to begin deposit.");
-                _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error"));
-            }
-            catch (Exception ex)
-            {
-                _logger.ZLogError(ex, $"Failed to begin deposit.");
-                _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error"));
-            }
+            _depositService.BeginDeposit();
         });
 
         PauseDepositCommand = IsInDepositMode
             .CombineLatest(IsDepositPaused, IsDepositFixed, (mode, paused, fixed_) => mode && !paused && !fixed_)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        PauseDepositCommand.Subscribe(_ => _facade.Deposit.PauseDeposit(CashDepositPause.Pause));
+        PauseDepositCommand.Subscribe(_ => _depositService.PauseDeposit(CashDepositPause.Pause));
 
         ResumeDepositCommand = IsDepositPaused.ToReactiveCommand<Unit>().AddTo(_disposables);
-        ResumeDepositCommand.Subscribe(_ => _facade.Deposit.PauseDeposit(CashDepositPause.Restart));
+        ResumeDepositCommand.Subscribe(_ => _depositService.PauseDeposit(CashDepositPause.Restart));
 
         FixDepositCommand = IsInDepositMode
             .CombineLatest(IsDepositFixed, IsJammed, IsOverlapped, (mode, fixed_, jammed, overlapped) => mode && !fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        FixDepositCommand.Subscribe(_ => _facade.Deposit.FixDeposit());
+        FixDepositCommand.Subscribe(_ => _depositService.FixDeposit());
 
         StoreDepositCommand = IsDepositFixed
             .CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        StoreDepositCommand.Subscribe(_ => _facade.Deposit.EndDeposit(CashDepositAction.NoChange));
+        StoreDepositCommand.Subscribe(_ => _depositService.EndDeposit(CashDepositAction.NoChange));
 
         CancelDepositCommand = IsInDepositMode
             .CombineLatest(IsJammed, IsOverlapped, (mode, jammed, overlapped) => mode && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         CancelDepositCommand.Subscribe(_ =>
         {
-            if (!_facade.Deposit.IsFixed) _facade.Deposit.FixDeposit();
-            _facade.Deposit.EndDeposit(CashDepositAction.Repay);
+            if (!_facade.Deposit.IsFixed) _depositService.FixDeposit();
+            _depositService.EndDeposit(CashDepositAction.Repay);
         });
 
         ShowBulkInsertCommand = IsInDepositMode
@@ -337,7 +326,7 @@ public class DepositViewModel : IDisposable
         {
             if (counts is { Count: > 0 })
             {
-                _facade.Deposit.TrackBulkDeposit(counts);
+                _depositService.TrackBulkDeposit(counts);
             }
         });
 
@@ -386,7 +375,7 @@ public class DepositViewModel : IDisposable
             .CombineLatest(IsDepositFixed, (mode, fixed_) => mode && !fixed_)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
-        SimulateRejectCommand.Subscribe(_ => _facade.Deposit.SimulateReject(1000m));
+        SimulateRejectCommand.Subscribe(_ => _depositService.SimulateReject(1000m));
     }
 
     private string GetModeName()
@@ -423,47 +412,8 @@ public class DepositViewModel : IDisposable
 
         if (!decimal.TryParse(QuickDepositAmountInput.Value, out var targetAmount)) return;
 
-        try
-        {
-            _facade.Deposit.BeginDeposit();
-            var breakdown = new Dictionary<DenominationKey, int>();
-            var remaining = targetAmount;
-            var sortedDens = denominations.OrderByDescending(d => d.Key.Value);
-
-            foreach (var den in sortedDens)
-            {
-                if (den.Key.Value <= 0) continue;
-                int count = (int)(remaining / den.Key.Value);
-                if (count > 0)
-                {
-                    breakdown[den.Key] = count;
-                    remaining -= count * den.Key.Value;
-                }
-            }
-
-            if (breakdown.Count > 0)
-            {
-                _facade.Deposit.TrackBulkDeposit(breakdown);
-            }
-
-            await Task.Delay(100);
-            _facade.Deposit.FixDeposit();
-            await Task.Delay(100);
-            _facade.Deposit.EndDeposit(CashDepositAction.NoChange);
-
-            QuickDepositAmountInput.Value = "";
-        }
-        catch (PosControlException pcEx)
-        {
-            _facade.Status.SetDeviceError((int)pcEx.ErrorCode, pcEx.ErrorCodeExtended);
-            _logger.ZLogError(pcEx, $"Failed to execute quick deposit.");
-            _notifyService.ShowWarning(pcEx.Message, ResourceHelper.GetAsString("Error", "Error"));
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex, $"Failed to execute quick deposit.");
-            _notifyService.ShowWarning(ex.Message, ResourceHelper.GetAsString("Error", "Error"));
-        }
+        await _depositService.ExecuteQuickDepositAsync(targetAmount, denominations.Select(d => d.Key));
+        QuickDepositAmountInput.Value = "";
     }
 
     /// <inheritdoc/>
