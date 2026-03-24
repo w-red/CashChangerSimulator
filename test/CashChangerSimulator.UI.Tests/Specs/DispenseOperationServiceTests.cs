@@ -31,7 +31,7 @@ public class DispenseOperationServiceTests
         var inventory = new Inventory();
         var hardware = new HardwareStatusManager();
         var mockManager = new Mock<CashChangerManager>(inventory, new TransactionHistory(), new ChangeCalculator(), _configProvider);
-        var mockDispense = new Mock<DispenseController>(mockManager.Object, hardware, (IDeviceSimulator)null);
+        var mockDispense = new Mock<DispenseController>(mockManager.Object, hardware, (IDeviceSimulator)null!);
         _mockFacade.Setup(f => f.Dispense).Returns(mockDispense.Object);
         _mockFacade.Setup(f => f.Status).Returns(hardware);
 

@@ -27,7 +27,7 @@ public class DepositOperationServiceTests
         
         var inventory = new Inventory();
         var hardware = new HardwareStatusManager();
-        var mockDeposit = new Mock<DepositController>(inventory, hardware, (CashChangerManager)null, (ConfigurationProvider)null);
+        var mockDeposit = new Mock<DepositController>(inventory, hardware, (CashChangerManager)null!, (ConfigurationProvider)null!);
         _mockFacade.Setup(f => f.Deposit).Returns(mockDeposit.Object);
         _mockFacade.Setup(f => f.Status).Returns(hardware);
 
@@ -48,7 +48,7 @@ public class DepositOperationServiceTests
     public void BeginDeposit_ShouldHandlePosControlException()
     {
         // Arrange
-        var mockDeposit = new Mock<DepositController>(new Inventory(), new HardwareStatusManager(), (CashChangerManager)null, (ConfigurationProvider)null);
+        var mockDeposit = new Mock<DepositController>(new Inventory(), new HardwareStatusManager(), (CashChangerManager)null!, (ConfigurationProvider)null!);
         mockDeposit.Setup(d => d.BeginDeposit()).Throws(new PosControlException("Error", ErrorCode.Failure));
         _mockFacade.Setup(f => f.Deposit).Returns(mockDeposit.Object);
 
