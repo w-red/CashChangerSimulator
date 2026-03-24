@@ -10,6 +10,7 @@ using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.PointOfService;
 using Moq;
 using R3;
 
@@ -107,6 +108,20 @@ public class UIViewModelFixture : IDisposable
         CashChanger.Open();
         CashChanger.Claim(100);
         CashChanger.DeviceEnabled = true;
+
+        // --- Default Mock Setups (Delegate to Controller) ---
+        
+        DepositServiceMock.Setup(x => x.BeginDeposit()).Callback(() => DepositController.BeginDeposit());
+        DepositServiceMock.Setup(x => x.PauseDeposit(It.IsAny<CashDepositPause>())).Callback<CashDepositPause>(p => DepositController.PauseDeposit(p));
+        DepositServiceMock.Setup(x => x.FixDeposit()).Callback(() => DepositController.FixDeposit());
+        DepositServiceMock.Setup(x => x.EndDeposit(It.IsAny<CashDepositAction>())).Callback<CashDepositAction>(a => DepositController.EndDeposit(a));
+        DepositServiceMock.Setup(x => x.TrackBulkDeposit(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>())).Callback<IReadOnlyDictionary<DenominationKey, int>>(c => DepositController.TrackBulkDeposit(c));
+        DepositServiceMock.Setup(x => x.SimulateReject(It.IsAny<decimal>())).Callback<decimal>(a => DepositController.SimulateReject(a));
+        
+        DispenseServiceMock.Setup(x => x.DispenseCash(It.IsAny<decimal>()))
+            .Callback<decimal>(amount => DispenseController.DispenseChangeAsync(amount, true, (c, e) => { }, "JPY"));
+        DispenseServiceMock.Setup(x => x.ExecuteBulkDispense(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>()))
+            .Callback<IReadOnlyDictionary<DenominationKey, int>>(counts => DispenseController.DispenseCashAsync(counts, true, (c, e) => { }));
     }
 
     /// <summary>テスト用の在庫データを一括設定します。</summary>
@@ -179,12 +194,7 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(ScriptExecutionService);
         services.AddSingleton(DispatcherService);
         
-        // Register ViewModels for the factory to resolve
-        services.AddTransient<MainViewModel>();
-        services.AddTransient<InventoryViewModel>();
-        services.AddTransient<DepositViewModel>();
-        services.AddTransient<DispenseViewModel>();
-        services.AddTransient<AdvancedSimulationViewModel>();
+        services.AddTestWpfUiServices();
         
         var provider = services.BuildServiceProvider();
         var factory = new ViewModelFactory(provider);

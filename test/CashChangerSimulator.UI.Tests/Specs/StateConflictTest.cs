@@ -46,15 +46,11 @@ public class StateConflictTest : IAsyncLifetime
 
         var services = new ServiceCollection();
         services.AddSingleton(facade);
+        services.AddSingleton<IDeviceFacade>(facade);
         services.AddSingleton(_fixture.ConfigProvider);
         services.AddSingleton(_fixture.MetadataProvider);
-        services.AddSingleton<IDeviceFacade>(facade);
-        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
-        services.AddSingleton(new Mock<IScriptExecutionService>().Object);
-        services.AddSingleton(new Mock<IHistoryExportService>().Object);
-        services.AddSingleton(facade.Notify);
-        services.AddSingleton<InventoryViewModel>();
-        services.AddSingleton<AdvancedSimulationViewModel>();
+        services.AddSingleton(_fixture.MockNotify.Object); // Ensure mock is used
+        services.AddTestWpfUiServices();
 
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<IViewModelFactory>();

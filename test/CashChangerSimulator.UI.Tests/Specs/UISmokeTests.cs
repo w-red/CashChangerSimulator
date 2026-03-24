@@ -18,11 +18,11 @@ using Microsoft.Extensions.DependencyInjection;
 using CashChangerSimulator.Device;
 using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
+using CashChangerSimulator.UI.Tests.Helpers;
 using CashChangerSimulator.UI.Wpf.Views;
 using CashChangerSimulator.UI.Wpf.Converters;
 using System.IO.Packaging;
 using System.Windows.Controls;
-using CashChangerSimulator.UI.Tests.Helpers;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -138,15 +138,9 @@ public class UISmokeTests
                 services.AddSingleton<IDeviceFacade>(facade);
                 services.AddSingleton(config);
                 services.AddSingleton(metadata);
-                services.AddSingleton<IViewModelFactory, ViewModelFactory>();
-                services.AddSingleton(new Mock<IHistoryExportService>().Object);
-                services.AddSingleton(new Mock<CashChangerSimulator.Device.Services.IScriptExecutionService>().Object);
                 services.AddSingleton(facade.Notify);
-                services.AddSingleton<IDepositOperationService>(new Mock<IDepositOperationService>().Object);
-                services.AddSingleton<IDispenseOperationService>(new Mock<IDispenseOperationService>().Object);
-                services.AddSingleton<InventoryViewModel>();
-                services.AddSingleton<AdvancedSimulationViewModel>();
-                services.AddSingleton<MainViewModel>();
+                
+                services.AddTestWpfUiServices();
                 var provider = services.BuildServiceProvider();
                 var factory = provider.GetRequiredService<IViewModelFactory>();
 
