@@ -2,6 +2,7 @@ using Moq;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 using Microsoft.Extensions.Localization;
+using Microsoft.PointOfService;
 using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
 
@@ -34,7 +35,8 @@ public class CliCommandsTests
         _mockScriptService = new Mock<CliScriptService>(null!, null!, null!);
 
         _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s));
-        _mockLocalizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()]).Returns((string s, object[] args) => new LocalizedString(s, s));
+        _mockLocalizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()]).Returns((string s, object[] args) => 
+            new LocalizedString(s, args != null && args.Length > 0 ? $"{s} {string.Join(" ", args)}" : s));
 
         _commands = new CliCommands(
             _mockChanger.Object,
@@ -263,5 +265,41 @@ public class CliCommandsTests
         var args = new Microsoft.PointOfService.DeviceErrorEventArgs(Microsoft.PointOfService.ErrorCode.Failure, 0, Microsoft.PointOfService.ErrorLocus.Output, Microsoft.PointOfService.ErrorResponse.Clear);
         _commands.HandleAsyncError(null!, args);
         _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
+    }
+
+    /// <summary>HandleAsyncError が Illegal エラーかつデバイス無効時に適切なヒントを表示することを検証します。</summary>
+    [Fact]
+    public void HandleAsyncError_Illegal_NotEnabled_ShouldShowSpecificHint()
+    {
+        // Arrange
+        _mockChanger.Setup(c => c.DeviceEnabled).Returns(false);
+        var args = new DeviceErrorEventArgs(ErrorCode.Illegal, 0, ErrorLocus.Output, ErrorResponse.Clear);
+        
+        // Mocking localizer to return specific hint for not enabled
+        _mockLocalizer.Setup(l => l["messages.error_hint_notenabled"]).Returns(new LocalizedString("messages.error_hint_notenabled", "Please enable device first"));
+        _mockLocalizer.Setup(l => l["messages.error_hint_illegal"]).Returns(new LocalizedString("messages.error_hint_illegal", "Illegal operation", true)); // Not found
+
+        // Act
+        _commands.HandleAsyncError(null!, args);
+
+        // Assert
+        _mockLocalizer.Verify(l => l[It.Is<string>(s => s.Contains("hint_notenabled"))], Times.Once);
+        _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
+    }
+
+    /// <summary>HandleAsyncError が未知のエラーコードに対してデフォルトヒントを表示することを検証します。</summary>
+    [Fact]
+    public void HandleAsyncError_UnknownError_ShouldShowGenericHint()
+    {
+        // Arrange
+        var args = new DeviceErrorEventArgs(ErrorCode.Extended, 0, ErrorLocus.Output, ErrorResponse.Clear);
+        _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s, true)); // All not found
+        _mockLocalizer.Setup(l => l["messages.error_hint_generic"]).Returns(new LocalizedString("messages.error_hint_generic", "Generic error hint"));
+
+        // Act
+        _commands.HandleAsyncError(null!, args);
+
+        // Assert
+        _mockLocalizer.Verify(l => l["messages.error_hint_generic"], Times.Once);
     }
 }
