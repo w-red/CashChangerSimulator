@@ -11,29 +11,7 @@
              d:DataContext="{d:DesignInstance vm:DepositViewModel}"
               d:DesignHeight="750" d:DesignWidth="400">
     <UserControl.Resources>
-        <!-- Escrow Item Template -->
-        <DataTemplate x:Key="EscrowItemTemplate">
-            <Grid Margin="4,2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding Name}" FontSize="12" Opacity="0.8" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}"/>
-                <TextBlock Grid.Column="2" FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.OnSurface}">
-                    <Run Text="x " FontSize="10" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}"/>
-                    <Run Text="{Binding EscrowCount.Value}" FontSize="14"/>
-                </TextBlock>
-            </Grid>
-        </DataTemplate>
-
-        <!-- Badge Alert Style (Based on BadgeStyle from Themes/Styles.xaml) -->
-        <Style x:Key="AlertBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgeStyle}">
-            <Setter Property="Margin" Value="0,0,8,0" />
-            <Setter Property="Padding" Value="8,2" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="CornerRadius" Value="10" />
-        </Style>
+        <!-- Logic for visibility and other view-specific resources can go here if needed -->
     </UserControl.Resources>
 
     <StackPanel>
@@ -57,8 +35,8 @@
                     <StackPanel DockPanel.Dock="Right">
                         <TextBlock Text="{StaticResource RemainingAmountLabel}" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2" HorizontalAlignment="Right"/>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Foreground="IndianRed"/>
-                            <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold" Foreground="IndianRed"/>
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Foreground="{DynamicResource App.Brush.AccentError}"/>
+                            <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource App.Brush.AccentError}"/>
                         </StackPanel>
                     </StackPanel>
                 </DockPanel>
@@ -66,7 +44,7 @@
                 <!-- Alerts (Badge style) -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
                     <!-- Hardware Errors (Mirroring Main Window) -->
-                    <Border Background="#D32F2F" Style="{StaticResource AlertBadgeStyle}"
+                    <Border Background="{DynamicResource App.Brush.Error}" Style="{StaticResource AlertBadgeStyle}"
                             Visibility="{Binding IsDeviceError.Value, Converter={StaticResource VisibilityConv}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AlertCircle" Foreground="White" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center"/>
@@ -76,24 +54,24 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="#FF5252" Style="{StaticResource AlertBadgeStyle}"
+                    <Border Background="{DynamicResource App.Brush.Jam}" Style="{StaticResource AlertBadgeStyle}"
                             Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="White" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{StaticResource JamError}" Foreground="White" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{StaticResource StatusJam}" Foreground="White" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Background="OrangeRed" Style="{StaticResource AlertBadgeStyle}"
+                    <Border Background="{DynamicResource App.Brush.Overlap}" Style="{StaticResource AlertBadgeStyle}"
                             Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="LayersTripleOutline" Foreground="White" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{StaticResource ValidationError}" Foreground="White" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{StaticResource StatusOverlap}" Foreground="White" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Transaction Specific -->
-                    <Border Background="Goldenrod" Style="{StaticResource AlertBadgeStyle}"
+                    <Border Background="{DynamicResource App.Brush.Warning}" Style="{StaticResource AlertBadgeStyle}"
                             Visibility="{Binding HasOverflow.Value, Converter={StaticResource VisibilityConv}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="White" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center"/>
@@ -104,7 +82,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Background="OrangeRed" Style="{StaticResource AlertBadgeStyle}"
+                    <Border Background="{DynamicResource App.Brush.Reject}" Style="{StaticResource AlertBadgeStyle}"
                             Visibility="{Binding HasReject.Value, Converter={StaticResource VisibilityConv}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Cancel" Foreground="White" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center"/>
@@ -260,37 +238,70 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Button x:Name="SimulateJamButton"
-                        Grid.Column="0" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Grid.Column="0"
                         Command="{Binding SimulateJamCommand}"
-                        Margin="4" Height="40"
-                        ToolTip="{StaticResource ToolTipSimulateJam}"
-                        AutomationProperties.AutomationId="SimulateJamButton">
+                        AutomationProperties.AutomationId="DepositTerminalSimJamButton">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="AlertCircleOutline" Margin="0,0,4,0" />
-                        <TextBlock Text="{StaticResource Jam}" FontSize="12" FontWeight="Bold"/>
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Jam}" VerticalAlignment="Center"/>
                     </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SimulationErrorButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource App.Brush.Jam}" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Jam}" />
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
+
                 <Button x:Name="SimulateOverlapButton"
-                        Grid.Column="1" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Grid.Column="1"
                         Command="{Binding SimulateOverlapCommand}"
-                        Margin="4" Height="40"
-                        ToolTip="{StaticResource ToolTipSimulateOverlap}"
-                        AutomationProperties.AutomationId="SimulateOverlapButton">
+                        AutomationProperties.AutomationId="DepositTerminalSimOverlapButton">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="LayersTripleOutline" Margin="0,0,4,0" />
-                        <TextBlock Text="{StaticResource Overlap}" FontSize="12" FontWeight="Bold"/>
+                        <materialDesign:PackIcon Kind="LayersTripleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Overlap}" VerticalAlignment="Center"/>
                     </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SimulationErrorButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource App.Brush.Overlap}" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Overlap}" />
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
-                <Button x:Name="SimulateRejectButton"
-                        Grid.Column="2" Style="{StaticResource SimulationErrorButtonStyle}" 
-                        Command="{Binding SimulateRejectCommand}"
-                        Margin="4" Height="40"
-                        ToolTip="{StaticResource ToolTipSimulateReject}"
-                        AutomationProperties.AutomationId="SimulateRejectButton">
+
+                <Button x:Name="SimulateErrorButton"
+                        Grid.Column="2"
+                        Command="{Binding SimulateDeviceErrorCommand}"
+                        ToolTip="{StaticResource ToolTipSimulateError}"
+                        AutomationProperties.AutomationId="DepositTerminalSimErrorButton">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="CashRemove" Margin="0,0,4,0" />
-                        <TextBlock Text="{StaticResource Reject}" FontSize="12" FontWeight="Bold"/>
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="ERR" VerticalAlignment="Center"/>
                     </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SimulationErrorButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource App.Brush.Warning}" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Warning}" />
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
             </Grid>
         </Border>

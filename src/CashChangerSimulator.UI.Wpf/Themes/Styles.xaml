@@ -202,4 +202,29 @@
             </Style>
         </Style.Resources>
     </Style>
+
+    <Style x:Key="AlertBadgeStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="AmountLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="Gray" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <!-- DataGrid Styles -->
+    <Style x:Key="App.Style.DataGridColumnHeader" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Black"/>
+        <Setter Property="Padding" Value="12,8"/>
+    </Style>
+
+    <Style x:Key="App.Style.DataGridCell" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+        <Setter Property="Padding" Value="12,8"/>
+    </Style>
 </ResourceDictionary>

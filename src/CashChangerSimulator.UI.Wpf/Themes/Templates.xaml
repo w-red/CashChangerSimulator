@@ -229,6 +229,17 @@
                 Margin="4" Width="80"/>
     </DataTemplate>
 
+    <!-- Escrow Item Template (Breakdown) -->
+    <DataTemplate x:Key="EscrowItemTemplate">
+        <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Padding="0,8">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" FontWeight="Bold" Width="80"/>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding Count.Value, StringFormat={}{0:N0}}" TextAlignment="Right" Width="60"/>
+                <TextBlock Text="{Binding Value, StringFormat={}{0:C0}}" Foreground="Gray" TextAlignment="Right"/>
+            </DockPanel>
+        </Border>
+    </DataTemplate>
+
     <!-- Transaction Item Template (Activity Feed) -->
     <DataTemplate x:Key="TransactionItemTemplate">
         <Grid x:Name="RootGrid">
