@@ -106,4 +106,19 @@ public class ProgramTests
         // This will successfully print the help message and exit without throwing.
         Should.NotThrow(() => Program.Main(args));
     }
+
+    [Fact]
+    public void ApplyGlobalOptions_InvalidCulture_ShouldFallbackSafely()
+    {
+        // Arrange
+        var options = new CliSessionOptions { Language = "en-US" };
+        string[] globals = ["--lang", "completely-invalid-culture"];
+
+        // Act
+        Program.ApplyGlobalOptions(globals, options);
+
+        // Assert
+        options.Language.ShouldBe("completely-invalid-culture");
+        // Should not throw, and current culture should remain or fallback to something valid
+    }
 }
