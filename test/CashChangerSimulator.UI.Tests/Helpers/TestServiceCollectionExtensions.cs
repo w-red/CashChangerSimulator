@@ -46,7 +46,7 @@ public static class TestServiceCollectionExtensions
         {
             if (!services.Any(d => d.ServiceType == typeof(T)))
             {
-                services.AddSingleton<T>(new Mock<T>().Object);
+                services.AddSingleton(new Mock<T>().Object);
             }
         }
 

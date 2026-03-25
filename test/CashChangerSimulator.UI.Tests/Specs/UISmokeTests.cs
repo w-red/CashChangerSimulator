@@ -133,7 +133,7 @@ public class UISmokeTests
                 var inventoryControl = new InventoryControl { DataContext = invVM };
                 inventoryControl.ShouldNotBeNull();
 
-                var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+                var services = new ServiceCollection();
                 services.AddSingleton<IDeviceFacade>(facade);
                 services.AddSingleton(config);
                 services.AddSingleton(metadata);
@@ -149,7 +149,7 @@ public class UISmokeTests
                     config,
                     metadata,
                     mockNotify.Object,
-                    provider.GetRequiredService<CashChangerSimulator.Device.Services.IScriptExecutionService>()
+                    provider.GetRequiredService<Device.Services.IScriptExecutionService>()
                 );
 
                 // Initialize DIContainer with our mock provider

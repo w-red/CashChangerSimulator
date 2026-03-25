@@ -158,7 +158,7 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
     /// <param name="container">親要素。</param>
     /// <param name="automationId">探索するオートメーションID。</param>
     /// <returns>見つかった要素、または null。</returns>
-    private static FlaUI.Core.AutomationElements.AutomationElement? FindElement(FlaUI.Core.AutomationElements.AutomationElement? container, string automationId)
+    private static AutomationElement? FindElement(AutomationElement? container, string automationId)
     {
         return container == null
             ? null

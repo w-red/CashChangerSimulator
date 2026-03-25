@@ -191,7 +191,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
         dialog.ShouldNotBeNull();
 
-        var textBoxes = UiTestRetry.Find<AutomationElement[]>(() => 
+        var textBoxes = UiTestRetry.Find(() => 
         {
             var all = dialog.FindAllDescendants(cf => cf.ByAutomationId("BulkQuantityBox"));
             return all.Length > denomIndex ? all : null;

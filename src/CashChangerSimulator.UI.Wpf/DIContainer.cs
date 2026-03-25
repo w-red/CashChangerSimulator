@@ -31,7 +31,7 @@ public static class DIContainer
         services.AddWpfUiServices();
 
         // Register Logging from the shared LogProvider
-        services.AddSingleton<ILoggerFactory>(LogProvider.Factory);
+        services.AddSingleton(LogProvider.Factory);
         services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
         // Build the ServiceProvider

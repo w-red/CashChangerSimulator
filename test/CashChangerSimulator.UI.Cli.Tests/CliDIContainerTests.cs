@@ -42,7 +42,7 @@ public class CliDIContainerTests
         // Assert
         CliDIContainer.ServiceProvider.ShouldNotBeNull();
         
-        var configProvider = CliDIContainer.Resolve<CashChangerSimulator.Core.Configuration.ConfigurationProvider>();
+        var configProvider = CliDIContainer.Resolve<Core.Configuration.ConfigurationProvider>();
         configProvider.ShouldNotBeNull();
         configProvider.Config.System.CurrencyCode.ShouldBe("USD");
     }
@@ -61,8 +61,8 @@ public class CliDIContainerTests
         
         // Act
         var providerCasted = (IServiceProvider)CashChangerSimulator.Core.SimulatorServices.Provider!;
-        var config = CashChangerSimulator.Core.SimulatorServices.Provider!.Resolve<CashChangerSimulator.Core.Configuration.ConfigurationProvider>();
-        var obj = providerCasted.GetService(typeof(CashChangerSimulator.Core.Configuration.ConfigurationProvider));
+        var config = CashChangerSimulator.Core.SimulatorServices.Provider!.Resolve<Core.Configuration.ConfigurationProvider>();
+        var obj = providerCasted.GetService(typeof(Core.Configuration.ConfigurationProvider));
 
         // Assert
         config.ShouldNotBeNull();

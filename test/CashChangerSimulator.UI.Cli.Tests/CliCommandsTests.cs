@@ -23,7 +23,7 @@ public class CliCommandsTests
 
     public CliCommandsTests()
     {
-        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
+        _mockChanger = new Mock<SimulatorCashChanger>(new Device.Coordination.SimulatorDependencies());
         _mockConsole = new Mock<IAnsiConsole>();
         _mockLocalizer = new Mock<IStringLocalizer>();
         
@@ -262,7 +262,7 @@ public class CliCommandsTests
     [Fact]
     public void HandleAsyncErrorShouldWriteToConsole()
     {
-        var args = new Microsoft.PointOfService.DeviceErrorEventArgs(Microsoft.PointOfService.ErrorCode.Failure, 0, Microsoft.PointOfService.ErrorLocus.Output, Microsoft.PointOfService.ErrorResponse.Clear);
+        var args = new DeviceErrorEventArgs(Microsoft.PointOfService.ErrorCode.Failure, 0, Microsoft.PointOfService.ErrorLocus.Output, Microsoft.PointOfService.ErrorResponse.Clear);
         _commands.HandleAsyncError(null!, args);
         _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
     }

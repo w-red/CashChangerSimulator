@@ -47,11 +47,11 @@ public static class CliDIContainer
         services.AddSingleton<OverallStatusAggregatorProvider>();
         services.AddSingleton<INotifyService, CliNotifyService>();
         services.AddSingleton<CliSessionOptions>();
-        services.AddSingleton<IAnsiConsole>(AnsiConsole.Console);
+        services.AddSingleton(AnsiConsole.Console);
 
         // Localization
         services.AddSingleton<IStringLocalizerFactory, TomlStringLocalizerFactory>();
-        services.AddTransient<IStringLocalizer>(sp => sp.GetRequiredService<IStringLocalizerFactory>().Create(typeof(CliCommands)));
+        services.AddTransient(sp => sp.GetRequiredService<IStringLocalizerFactory>().Create(typeof(CliCommands)));
 
         // Core Services
         services.AddSingleton<Inventory>();

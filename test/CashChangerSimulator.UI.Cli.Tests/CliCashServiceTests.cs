@@ -21,7 +21,7 @@ public class CliCashServiceTests
 
     public CliCashServiceTests()
     {
-        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
+        _mockChanger = new Mock<SimulatorCashChanger>(new Device.Coordination.SimulatorDependencies());
         _mockConsole = new Mock<IAnsiConsole>();
         _mockLocalizer = new Mock<IStringLocalizer>();
         _mockMetadata = new Mock<ICurrencyMetadataProvider>();

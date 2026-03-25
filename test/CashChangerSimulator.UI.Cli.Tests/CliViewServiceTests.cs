@@ -27,7 +27,7 @@ public class CliViewServiceTests
 
     public CliViewServiceTests()
     {
-        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
+        _mockChanger = new Mock<SimulatorCashChanger>(new Device.Coordination.SimulatorDependencies());
         _inventory = new Inventory();
         _mockMetadata = new Mock<ICurrencyMetadataProvider>();
         _history = new TransactionHistory();

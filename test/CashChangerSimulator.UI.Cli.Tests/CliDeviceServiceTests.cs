@@ -20,7 +20,7 @@ public class CliDeviceServiceTests
 
     public CliDeviceServiceTests()
     {
-        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
+        _mockChanger = new Mock<SimulatorCashChanger>(new Device.Coordination.SimulatorDependencies());
         _consoleOutput = new StringWriter();
         _console = AnsiConsole.Create(new AnsiConsoleSettings
         {

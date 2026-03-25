@@ -22,7 +22,7 @@ public class CliInteractiveShellTests
     public CliInteractiveShellTests()
     {
         _mockDispatcher = new Mock<ICliCommandDispatcher>();
-        _mockChanger = new Mock<SimulatorCashChanger>(new CashChangerSimulator.Device.Coordination.SimulatorDependencies());
+        _mockChanger = new Mock<SimulatorCashChanger>(new Device.Coordination.SimulatorDependencies());
         _console = new TestConsole();
         
         // Ensure interactivity and ANSI support are fully enabled

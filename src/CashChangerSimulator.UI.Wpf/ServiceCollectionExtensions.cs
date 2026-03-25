@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<CurrencyMetadataProvider>();
             services.AddSingleton<MonitorsProvider>();
             services.AddSingleton<OverallStatusAggregatorProvider>();
-            services.AddSingleton<INotifyService, Services.WpfNotifyService>();
+            services.AddSingleton<INotifyService, WpfNotifyService>();
             services.AddSingleton<IViewService, WpfViewService>();
 
             services.AddSingleton<Inventory>();
@@ -48,7 +48,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<DepositController>();
             services.AddSingleton<DispenseController>();
 
-            services.AddSingleton<InternalSimulatorCashChanger>(sp => {
+            services.AddSingleton(sp => {
                 var deps = new SimulatorDependencies(
                     ConfigProvider: sp.GetRequiredService<ConfigurationProvider>(),
                     Inventory: sp.GetRequiredService<Inventory>(),
