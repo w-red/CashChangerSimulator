@@ -132,50 +132,10 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
 
             // Use a more robust wait for the window
             var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(30) : TimeSpan.FromSeconds(20);
+            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(45) : TimeSpan.FromSeconds(20);
 
             Console.WriteLine($"[TEST] Starting MainWindow search (Timeout: {windowWaitTimeout.TotalSeconds}s, PID: {Application.ProcessId})...");
-            MainWindow = Retry.WhileNull(() =>
-            {
-                var appProcessId = Application.ProcessId;
-                var desktop = Automation.GetDesktop();
-
-                // 1. Try Find by AutomationId "MainWindow" with PID check (Most precise)
-                var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"))?.AsWindow();
-                if (byId != null)
-                {
-                    try { 
-                        var pid = byId.Properties.ProcessId.Value;
-                        if (pid == appProcessId) return byId; 
-                    } catch { }
-                }
-
-                // 2. Try Find by Title Pattern with PID check (Multilingual support)
-                var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-                foreach (var w in windows)
-                {
-                    try {
-                        if (w.Properties.ProcessId.Value == appProcessId)
-                        {
-                            var name = w.Name;
-                            if (name != null && (name.Contains("Cash") || name.Contains("シミュレーター")))
-                            {
-                                return w.AsWindow();
-                            }
-                        }
-                    } catch { }
-                }
-
-                // 3. Fallback: Any visible window for this PID
-                foreach (var w in windows)
-                {
-                    try {
-                        if (w.Properties.ProcessId.Value == appProcessId && !w.IsOffscreen) return w.AsWindow();
-                    } catch { }
-                }
-
-                return null;
-            }, windowWaitTimeout, TimeSpan.FromMilliseconds(1000)).Result;
+            MainWindow = SearchMainWindow(windowWaitTimeout);
 
             if (MainWindow == null)
             {
@@ -219,6 +179,67 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             Dispose();
             throw;
         }
+    }
+
+    /// <summary>
+    /// メインウィンドウを検索・取得します。既に取得済みの場合はそれを返しますが、見つからない場合は再検索を試みます。
+    /// </summary>
+    /// <param name="timeout">検索タイムアウト。省略時はデフォルト値を使用します。</param>
+    /// <returns>見つかったウィンドウ、または null。</returns>
+    public Window? GetMainWindow(TimeSpan? timeout = null)
+    {
+        if (MainWindow != null && !MainWindow.IsOffscreen) return MainWindow;
+
+        var searchTimeout = timeout ?? TimeSpan.FromSeconds(15);
+        MainWindow = SearchMainWindow(searchTimeout);
+        return MainWindow;
+    }
+
+    private Window? SearchMainWindow(TimeSpan timeout)
+    {
+        return Retry.WhileNull(() =>
+        {
+            if (Application == null || Automation == null) return null;
+            
+            var appProcessId = Application.ProcessId;
+            var desktop = Automation.GetDesktop();
+
+            // 1. Try Find by AutomationId "MainWindow" with PID check (Most precise)
+            var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"))?.AsWindow();
+            if (byId != null)
+            {
+                try { 
+                    var pid = byId.Properties.ProcessId.Value;
+                    if (pid == appProcessId) return byId; 
+                } catch { }
+            }
+
+            // 2. Try Find by Title Pattern with PID check (Multilingual support)
+            var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
+            foreach (var w in windows)
+            {
+                try {
+                    if (w.Properties.ProcessId.Value == appProcessId)
+                    {
+                        var name = w.Name;
+                        if (name != null && (name.Contains("Cash") || name.Contains("シミュレーター")))
+                        {
+                            return w.AsWindow();
+                        }
+                    }
+                } catch { }
+            }
+
+            // 3. Fallback: Any visible window for this PID
+            foreach (var w in windows)
+            {
+                try {
+                    if (w.Properties.ProcessId.Value == appProcessId && !w.IsOffscreen) return w.AsWindow();
+                } catch { }
+            }
+
+            return null;
+        }, timeout, TimeSpan.FromMilliseconds(1000)).Result;
     }
 
     /// <summary>アプリケーションとオートメーションリソースを安全に解放し、プロセスをクリーンアップする。</summary>
