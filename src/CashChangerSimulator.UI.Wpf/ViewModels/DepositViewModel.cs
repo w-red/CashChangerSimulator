@@ -63,6 +63,9 @@ public class DepositViewModel : IDisposable
     public ReadOnlyReactiveProperty<bool> IsJammed { get; }
     private readonly BindableReactiveProperty<bool> _isJammed;
 
+    /// <summary>現在のエラーコード。</summary>
+    public ReadOnlyReactiveProperty<int?> CurrentErrorCode { get; }
+
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
 
@@ -173,6 +176,7 @@ public class DepositViewModel : IDisposable
         _isOverlapped = _facade.Status.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
         IsOverlapped = _isOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
         IsDeviceError = _facade.Status.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+        CurrentErrorCode = _facade.Status.CurrentErrorCode.ToReadOnlyReactiveProperty().AddTo(_disposables);
         QuickDepositAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
         RequiredAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
