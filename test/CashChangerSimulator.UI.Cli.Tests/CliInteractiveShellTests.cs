@@ -1,4 +1,5 @@
 using Moq;
+using Shouldly;
 using Spectre.Console.Testing;
 using Microsoft.Extensions.Localization;
 using CashChangerSimulator.UI.Cli.Services;
@@ -35,7 +36,8 @@ public class CliInteractiveShellTests
         _options = new CliSessionOptions { IsAsync = false };
 
         _mockLocalizer.Setup(l => l[It.IsAny<string>()]).Returns((string s) => new LocalizedString(s, s));
-        _mockLocalizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()]).Returns((string s, object[] args) => new LocalizedString(s, s));
+        _mockLocalizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()]).Returns((string s, object[] args) => 
+            new LocalizedString(s, args != null && args.Length > 0 ? $"{s} {string.Join(" ", args)}" : s));
 
         _shell = new CliInteractiveShell(
             _mockDispatcher.Object, 
@@ -285,5 +287,51 @@ public class CliInteractiveShellTests
         // Assert
         _mockDispatcher.Verify(d => d.DispatchAsync("history 10"), Times.Once);
         _mockDispatcher.Verify(d => d.DispatchAsync("log-level Debug"), Times.Once);
+    }
+
+    /// <summary>デバイスがオープンな状態で exit した際、確認プロンプトが表示されることを検証します。</summary>
+    [Fact]
+    public async Task RunAsyncExitWhenOpenShouldShowConfirmation()
+    {
+        // Arrange
+        var inputs = new Queue<string>(new[] { "exit", "exit" });
+        _mockReader.Setup(r => r.Read(It.IsAny<string>())).Returns(() => inputs.Dequeue());
+        
+        // Device is NOT closed
+        _mockChanger.Setup(c => c.State).Returns(ControlState.Idle);
+        
+        // First exit: No (Stay in loop)
+        _console.Input.PushKey(ConsoleKey.N);
+        _console.Input.PushKey(ConsoleKey.Enter);
+        
+        // Second exit: Yes (Exit loop)
+        _console.Input.PushKey(ConsoleKey.Y);
+        _console.Input.PushKey(ConsoleKey.Enter);
+
+        // Act
+        await _shell.RunAsync();
+
+        // Assert
+        _console.Output.ShouldContain("messages.exit_warning");
+        _mockChanger.Verify(c => c.Close(), Times.Once);
+    }
+
+    /// <summary>Dispatcher で例外が発生してもループが継続することを検証します。</summary>
+    [Fact]
+    public async Task RunAsync_OnDispatcherException_ShouldShowErrorAndContinue()
+    {
+        // Arrange
+        var inputs = new Queue<string>(new[] { "error-cmd", "exit" });
+        _mockReader.Setup(r => r.Read(It.IsAny<string>())).Returns(() => inputs.Dequeue());
+        _mockChanger.Setup(c => c.State).Returns(ControlState.Closed);
+        
+        _mockDispatcher.Setup(d => d.DispatchAsync("error-cmd")).ThrowsAsync(new Exception("Test Exception"));
+
+        // Act
+        await _shell.RunAsync();
+
+        // Assert
+        _console.Output.ShouldContain("messages.error_prefix");
+        _console.Output.ShouldContain("Test Exception");
     }
 }
