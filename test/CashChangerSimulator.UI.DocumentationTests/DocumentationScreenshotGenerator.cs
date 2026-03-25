@@ -1,4 +1,5 @@
 using CashChangerSimulator.UI.Tests;
+using CashChangerSimulator.UI.Tests.Specs;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Tools;
@@ -63,16 +64,12 @@ public class DocumentationScreenshotGenerator : IDisposable
         if (!Directory.Exists(themeDir)) Directory.CreateDirectory(themeDir);
 
         // 1. メインダッシュボードのキャプチャ
-        Thread.Sleep(5000); // 待機時間を延長 (3s -> 5s)
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs * 2); // 待機時間を定数ベースに調整
         
-        // [STABILITY] Get a fresh reference to the MainWindow if needed
-        var window = Retry.WhileNull(() => {
-            var win = _app.MainWindow;
-            if (win != null && !win.IsOffscreen) return win;
-            return null;
-        }, TimeSpan.FromSeconds(15)).Result;
+        // [STABILITY] Use robust search if property is null (common in slow CI)
+        var window = _app.GetMainWindow(TimeSpan.FromSeconds(20));
 
-        window.ShouldNotBeNull("MainWindow is not available or offscreen.");
+        window.ShouldNotBeNull("MainWindow is not available or offscreen after retry.");
         CaptureElement(window, Path.Combine(theme, "main_dashboard.png"));
 
         // 2. 入金画面のキャプチャ
@@ -107,13 +104,14 @@ public class DocumentationScreenshotGenerator : IDisposable
     {
         Console.WriteLine($"Setting theme to: {theme}");
         File.WriteAllText(Path.GetFullPath("theme.trigger"), theme);
-        Thread.Sleep(5000); // テーマ適用待ち
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs * 3); // テーマ適用待ち
     }
 
     private void CaptureDenominationDetail(string tileId, string dialogId, string fileName)
     {
-        var mainWindow = _app?.MainWindow;
-        if (mainWindow == null) throw new Exception("MainWindow is not available.");
+        // [STABILITY] Use robust search if property is null (common in slow CI)
+        var window = _app.GetMainWindow(TimeSpan.FromSeconds(20));
+        if (window == null) throw new Exception("MainWindow is not available.");
 
         // The View Model will auto-open this dialog when the trigger file is detected.
         Console.WriteLine("Writing open_dialog.trigger to trigger ViewModel hook...");
@@ -124,7 +122,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         // ダイアログが表示されるのを待機 (待機時間を 30 秒に延長)
         dialog = Retry.WhileNull(() =>
         {
-            var win = _app!.MainWindow;
+            var win = _app.GetMainWindow();
             if (win == null) return null;
             
             // A. MainWindow の子孫
@@ -172,7 +170,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         }
         else
         {
-            if (mainWindow != null) mainWindow.Focus();
+            if (window != null) window.Focus();
             FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
             // After RETURN, wait a bit and escape
             Thread.Sleep(500);
@@ -186,7 +184,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         // Use Retry for button because UI might be slow to load fully
         var button = Retry.WhileNull(() =>
         {
-            var win = _app.MainWindow;
+            var win = _app.GetMainWindow();
             if (win == null) return null;
             
             var btn = win.FindFirstDescendant(cf => cf.ByAutomationId(buttonId))?.AsButton();
