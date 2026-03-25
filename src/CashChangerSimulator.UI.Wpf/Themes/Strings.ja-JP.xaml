@@ -177,4 +177,14 @@
 
     <!-- Window Titles -->
     <system:String x:Key="TitleMainWindow">自動釣銭機シミュレーター</system:String>
+
+    <!-- Advanced Simulation -->
+    <system:String x:Key="AdvancedSimulationTitle">アドバンスド・シミュレーション</system:String>
+    <system:String x:Key="AdvancedSimulationSubtitle">各デバイスのエラー状態を個別にシミュレートします</system:String>
+    <system:String x:Key="ErrorSimulationTitle">エラー・シミュレーション</system:String>
+    <system:String x:Key="StatusJamDetected">ジャム検出中</system:String>
+    <system:String x:Key="StatusOverlapDetected">重なり検出中</system:String>
+    <system:String x:Key="ScriptExecutionTitle">スクリプト実行 (テスト用)</system:String>
+    <system:String x:Key="LabelBillsUnit">紙幣ユニット</system:String>
+    <system:String x:Key="LabelCoinsUnit">硬貨ユニット</system:String>
 </ResourceDictionary>

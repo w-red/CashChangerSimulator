@@ -7,175 +7,103 @@
     <sys:String x:Key="Ok">OK</sys:String>
     <sys:String x:Key="Error">ERROR</sys:String>
     <sys:String x:Key="Reset">RESET</sys:String>
-    <sys:String x:Key="Warn">WARNING</sys:String>
-    <sys:String x:Key="Busy">BUSY</sys:String>
-    <sys:String x:Key="DeviceClosed">CLOSED</sys:String>
-    <sys:String x:Key="Connect">CONNECT</sys:String>
-    <sys:String x:Key="Open">OPEN</sys:String>
     <sys:String x:Key="Close">CLOSE</sys:String>
+    <sys:String x:Key="Execute">EXECUTE</sys:String>
+
+    <!-- Navigation -->
+    <sys:String x:Key="NavSimulator">SIMULATOR</sys:String>
+    <sys:String x:Key="NavSettings">SETTINGS</sys:String>
+    <sys:String x:Key="NavInventory">INVENTORY</sys:String>
+    <sys:String x:Key="NavHistory">HISTORY</sys:String>
+
+    <!-- Simulator Pages -->
+    <sys:String x:Key="SimStandard">STANDARD</sys:String>
+    <sys:String x:Key="SimExternal">EXTERNAL</sys:String>
+    <sys:String x:Key="SimAdvanced">ADVANCED</sys:String>
+
+    <!-- Operation Labels -->
+    <sys:String x:Key="OpRequired">REQUIRED</sys:String>
+    <sys:String x:Key="OpRemaining">REMAINING</sys:String>
+    <sys:String x:Key="OpCurrent">CURRENT DEPOSIT</sys:String>
+
+    <!-- Status Badge Strings -->
     <sys:String x:Key="StatusJam">JAM</sys:String>
     <sys:String x:Key="StatusOverlap">OVERLAP</sys:String>
     <sys:String x:Key="StatusDeviceError">DEVICE ERROR</sys:String>
 
-    <!-- Operational Statuses -->
-    <sys:String x:Key="StatusIdle">IDLE</sys:String>
-    <sys:String x:Key="StatusStarting">STARTING</sys:String>
-    <sys:String x:Key="StatusCounting">COUNTING</sys:String>
-    <sys:String x:Key="StatusPaused">PAUSED</sys:String>
-    <sys:String x:Key="StatusFixed">FIXED</sys:String>
-    <sys:String x:Key="StatusUnknown">UNKNOWN</sys:String>
-    
-    <sys:String x:Key="Bills">BILLS</sys:String>
-    <sys:String x:Key="Coins">COINS</sys:String>
-    <sys:String x:Key="Recyclable">RECYCLABLE</sys:String>
-    <sys:String x:Key="Collection">COLLECTION</sys:String>
-    <sys:String x:Key="Overflow">OVERFLOW</sys:String>
-    <sys:String x:Key="Reject">REJECT</sys:String>
-    <sys:String x:Key="BadgeCollection">COLL. ONLY</sys:String>
-    <sys:String x:Key="InventoryDetail">INVENTORY DETAIL</sys:String>
-    <sys:String x:Key="TotalCountLabel">TOTAL COUNT</sys:String>
-    <x:Static x:Key="CountSuffix" Member="sys:String.Empty" />
+    <!-- Tooltips -->
+    <sys:String x:Key="TooltipSimulateJam">Simulate Bill Jam</sys:String>
+    <sys:String x:Key="TooltipSimulateOverlap">Simulate Bill Overlap</sys:String>
+    <sys:String x:Key="TooltipSimulateError">Simulate Hardware Error</sys:String>
+    <sys:String x:Key="TooltipResetError">Reset Error State</sys:String>
 
-    <sys:String x:Key="CashBalance">CASH BALANCE</sys:String>
-    <sys:String x:Key="ActivityFeed">ACTIVITY FEED</sys:String>
-    <sys:String x:Key="NoRecentTransactions">No recent transactions</sys:String>
-    <sys:String x:Key="ValidationError">VAL ERROR</sys:String>
-    <sys:String x:Key="JamError">JAM ERROR</sys:String>
+    <!-- Messages -->
+    <sys:String x:Key="MsgProcessing">Processing...</sys:String>
+    <sys:String x:Key="MsgPleaseInsert">Please insert cash</sys:String>
+    <sys:String x:Key="MsgDepositFixed">Deposit Fixed</sys:String>
+    <sys:String x:Key="MsgOperationFailed">Operation Failed</sys:String>
 
-    <!-- Validation Messages -->
-    <sys:String x:Key="ErrorEnterValidNumber">Enter a valid number</sys:String>
-    <sys:String x:Key="ErrorAmountPositive">Amount must be positive</sys:String>
-    <sys:String x:Key="ErrorInsufficientFunds">Insufficient funds</sys:String>
-    <sys:String x:Key="AmountHint">Amount</sys:String>
-    <sys:String x:Key="ToolTipSystemSettings">System Settings</sys:String>
-    <sys:String x:Key="Text.CsvFilter">CSV files (*.csv)|*.csv</sys:String>
-    <sys:String x:Key="Text.ExportSuccess">History exported successfully.</sys:String>
-    <sys:String x:Key="Text.ExportFailed">Failed to export history.</sys:String>
-    <sys:String x:Key="ToolTipExportHistory">Export Transaction History to CSV</sys:String>
+    <!-- Deposit Terminal Labels -->
+    <sys:String x:Key="LabelRequired">REQUIRED</sys:String>
+    <sys:String x:Key="LabelRemaining">REMAINING</sys:String>
+    <sys:String x:Key="LabelCurrentDeposit">CURRENT DEPOSIT</sys:String>
+    <sys:String x:Key="LabelEscrow">ESCROW</sys:String>
+    <sys:String x:Key="LabelTarget">TARGET AMOUNT</sys:String>
 
-    <!-- Main Window / Settings -->
-    <sys:String x:Key="SystemSettings">SYSTEM SETTINGS</sys:String>
-    <sys:String x:Key="SettingsSubtitle">Configure device behavior and currency parameters</sys:String>
-    <sys:String x:Key="CoreParameters">CORE PARAMETERS</sys:String>
-    <sys:String x:Key="RestartRequired">* Requires restart for inventory recalibration.</sys:String>
-    <sys:String x:Key="UIBehaviorNote">* Change the user interface behavior pattern.</sys:String>
-    <sys:String x:Key="GlobalThresholds">GLOBAL THRESHOLDS</sys:String>
-    <sys:String x:Key="LabelActiveCurrency">Active Currency</sys:String>
-    <sys:String x:Key="LabelUIMode">Operating UI Mode</sys:String>
-    <sys:String x:Key="LabelDisplayLanguage">Display Language</sys:String>
-    <sys:String x:Key="LabelBaseTheme">UI Theme</sys:String>
-    <sys:String x:Key="ThemeDark">Dark</sys:String>
-    <sys:String x:Key="ThemeLight">Light</sys:String>
-    <sys:String x:Key="LabelNearEmpty">Near Empty</sys:String>
-    <sys:String x:Key="LabelNearFull">Near Full</sys:String>
-    <sys:String x:Key="LabelFullLimit">Full Limit</sys:String>
-    <sys:String x:Key="DenomCalibration">DENOMINATION CALIBRATION</sys:String>
-
-    <!-- Simulation Page -->
-    <sys:String x:Key="TerminalAccess">TERMINAL ACCESS</sys:String>
-    <sys:String x:Key="Deposit">DEPOSIT</sys:String>
-    <sys:String x:Key="Dispense">DISPENSE</sys:String>
-    <sys:String x:Key="TransactionStatus">TRANSACTION STATUS</sys:String>
-    <sys:String x:Key="OposDeviceLog">OPOS DEVICE LOG</sys:String>
-    <sys:String x:Key="StartSimulation">START SIMULATION</sys:String>
-    <sys:String x:Key="ReadyForTransaction">Ready for Transaction</sys:String>
-    <sys:String x:Key="TargetAmountHint">Required Amount</sys:String>
-    <sys:String x:Key="InsertCashToContinue">Insert Cash to Continue</sys:String>
-    <sys:String x:Key="TransactionFinished">Transaction Finished</sys:String>
-
-    <!-- Terminals -->
-    <sys:String x:Key="DispenseTerminal">DISPENSE TERMINAL</sys:String>
-    <sys:String x:Key="DepositTerminal">DEPOSIT TERMINAL</sys:String>
-    <sys:String x:Key="BulkDeposit">BULK DEPOSIT</sys:String>
-    <sys:String x:Key="AmountDispense">AMOUNT DISPENSE</sys:String>
-    <sys:String x:Key="QuickDispense">QUICK DISPENSE</sys:String>
-    <sys:String x:Key="BulkDispense">BULK DISPENSE</sys:String>
-    <sys:String x:Key="DispenseError">DISPENSE ERROR</sys:String>
-    <sys:String x:Key="HardwareCheckRequired">Hardware check required.</sys:String>
-    <sys:String x:Key="ClearError">CLEAR ERROR</sys:String>
+    <!-- Simulation Controls -->
+    <sys:String x:Key="SimulateJam">SIM JAM</sys:String>
+    <sys:String x:Key="SimulateOverlap">SIM OVERLAP</sys:String>
+    <sys:String x:Key="SimulateDeviceError">SIM ERROR</sys:String>
     <sys:String x:Key="ResetError">RESET ERROR</sys:String>
-    <sys:String x:Key="Dispensing">DISPENSING...</sys:String>
-    <sys:String x:Key="WarnDispenseDuringDeposit">Cannot dispense while a deposit is in progress.</sys:String>
-    <sys:String x:Key="WarnDepositDuringDispense">Cannot start deposit while a dispense is in progress.</sys:String>
 
-    <sys:String x:Key="CurrentDeposit">CURRENT DEPOSIT</sys:String>
-    <sys:String x:Key="LabelPendingItems">PENDING ITEMS (ESCROW)</sys:String>
-    <sys:String x:Key="StartDeposit">START DEPOSIT</sys:String>
-    <sys:String x:Key="QuickDeposit">QUICK DEPOSIT</sys:String>
-    <sys:String x:Key="AutoCalcDenoms">Calculates denominations automatically</sys:String>
-    <sys:String x:Key="Bulk">BULK</sys:String>
     <sys:String x:Key="Jam">JAM</sys:String>
     <sys:String x:Key="Overlap">OVERLAP</sys:String>
-    <sys:String x:Key="FinishCounting">FINISH COUNTING</sys:String>
-    <sys:String x:Key="Pause">PAUSE</sys:String>
-    <sys:String x:Key="Resume">RESUME</sys:String>
-    <sys:String x:Key="Store">STORE</sys:String>
-    <sys:String x:Key="Return">RETURN</sys:String>
-    
-    <!-- Footer Actions -->
-    <sys:String x:Key="CommitChanges">COMMIT CHANGES</sys:String>
-    <sys:String x:Key="Default">DEFAULT</sys:String>
-    <sys:String x:Key="SimulationSlot">INSERT HERE</sys:String>
+    <sys:String x:Key="DeviceError">DEVICE ERROR</sys:String>
 
-    <!-- Table Headers -->
-    <sys:String x:Key="HeaderIdentifier">IDENTIFIER</sys:String>
-    <sys:String x:Key="HeaderBaseQty">BASE QTY</sys:String>
-    <sys:String x:Key="HeaderNearEmpty">N.EMPTY</sys:String>
-    <sys:String x:Key="HeaderNearFull">N.FULL</sys:String>
-    <sys:String x:Key="HeaderMaxCap">MAX CAP</sys:String>
-    <sys:String x:Key="HeaderNameEn">Name (EN)</sys:String>
-    <sys:String x:Key="HeaderNameJp">Name (JP)</sys:String>
-    <sys:String x:Key="HeaderRecycle">Recycle</sys:String>
-    <sys:String x:Key="HeaderDeposit">Deposit</sys:String>
+    <!-- Dispense Controls -->
+    <sys:String x:Key="AmountDispense">DISPENSE AMOUNT</sys:String>
+    <sys:String x:Key="AmountHint">Enter amount</sys:String>
+    <sys:String x:Key="QuickDispense">QUICK DISPENSE</sys:String>
+    <sys:String x:Key="BulkDispense">BULK DISPENSE</sys:String>
 
-    <!-- Bulk Input Dialog -->
-    <sys:String x:Key="BulkInput">BULK INPUT</sys:String>
-    <sys:String x:Key="BulkInputDefaultSubtitle">Please enter the quantity for each denomination.</sys:String>
-    <sys:String x:Key="BulkDepositSubtitle">Please enter the quantity to deposit.</sys:String>
-    <sys:String x:Key="BulkDispenseSubtitle">Please enter the quantity to dispense.</sys:String>
-    <sys:String x:Key="ErrorCannotOpenTerminalInError">Cannot open terminal while the device is in an error state. Please reset the error first.</sys:String>
+    <!-- Settings Labels -->
+    <sys:String x:Key="SettingsTitle">SETTINGS</sys:String>
+    <sys:String x:Key="GeneralSettings">GENERAL</sys:String>
+    <sys:String x:Key="DenomCalibration">DENOMINATION CALIBRATION</sys:String>
+    <sys:String x:Key="AdvancedSimulation">高度なシミュレーション操作</sys:String>
 
-    <sys:String x:Key="ErrorCodeCannotReset">Cannot reset error state at this time.</sys:String>
-    <sys:String x:Key="AdvancedSimulation">Advanced Simulation Controls</sys:String>
-    <sys:String x:Key="Execute">EXECUTE</sys:String>
-    <sys:String x:Key="UposConfig">UPOS CONFIGURATION</sys:String>
-    <sys:String x:Key="RealTimeData">Enable Real Time Data Events</sys:String>
-    <sys:String x:Key="ScriptInput">JSON TRANSACTION SCRIPT</sys:String>
-    <sys:String x:Key="HotStart">Hot Start (Auto Connect)</sys:String>
-    <sys:String x:Key="HotStartDescription">Automatically opens and connects the device on startup.</sys:String>
-    <sys:String x:Key="SimulateOverlap">SIM OVERLAP</sys:String>
-    <sys:String x:Key="SimulateJam">SIM JAM</sys:String>
-    <sys:String x:Key="SimulateDeviceError">SIM ERROR</sys:String>
-    <sys:String x:Key="LabelInput">Input: </sys:String>
-    <sys:String x:Key="LabelTarget">Required: </sys:String>
-    <sys:String x:Key="RequiredAmountLabel">REQUIRED</sys:String>
-    <sys:String x:Key="RemainingAmountLabel">REMAINING</sys:String>
-    <sys:String x:Key="BulkOperations">BULK OPERATIONS</sys:String>
-    <sys:String x:Key="ActionFill">FILL</sys:String>
-    <sys:String x:Key="ActionEmpty">EMPTY</sys:String>
-    <sys:String x:Key="ErrorDevicePrefix">Device Error [</sys:String>
-    <sys:String x:Key="ErrorDeviceSuffix">]</sys:String>
-    
-    <!-- ToolTips -->
-    <sys:String x:Key="ToolTipSimulateJam">Simulate Mechanical Jam</sys:String>
-    <sys:String x:Key="ToolTipSimulateOverlap">Simulate Overlap Error</sys:String>
-    <sys:String x:Key="ToolTipSimulateReject">Simulate Reject</sys:String>
-    <sys:String x:Key="ToolTipClearInput">Clear Input</sys:String>
-    <sys:String x:Key="ToolTipReplenishAll">Replenish All (Set to Initial Counts)</sys:String>
-    <sys:String x:Key="ToolTipCollectAll">Collect All (Set to Zero)</sys:String>
-    <sys:String x:Key="ToolTipResetHardwareError">Reset Hardware Error</sys:String>
-    <sys:String x:Key="ToolTipShowRecoveryHelp">Show Recovery Help</sys:String>
+    <!-- Inventory Labels -->
+    <sys:String x:Key="InventoryTitle">INVENTORY</sys:String>
+    <sys:String x:Key="InvoicedAmount">INVOICED AMOUNT</sys:String>
+    <sys:String x:Key="CashedAmount">CASHED AMOUNT</sys:String>
 
-    <!-- Recovery Help -->
-    <sys:String x:Key="RecoveryHelpTitle">RECOVERY HELP</sys:String>
-    <sys:String x:Key="CaseA_Title">In case of Jam (Bill/Coin Jam)</sys:String>
-    <sys:String x:Key="CaseA_Msg">Click the "Reset Error" button in the sidebar to reset the logical error state inside the simulator.</sys:String>
-    <sys:String x:Key="CaseB_Title">In case of Near Empty or Empty</sys:String>
-    <sys:String x:Key="CaseB_Msg">Check the denomination list. If any inventory counts are low, please replenish them using the "Fill" action.</sys:String>
-    <sys:String x:Key="CaseC_Title">In case of Near Full or Full</sys:String>
-    <sys:String x:Key="CaseC_Msg">The inventory is almost full or full. Please perform the "Empty" action to collect the cash if necessary.</sys:String>
-    <sys:String x:Key="NoteNonRecyclable">This denomination is non-recyclable (sent directly to the collection box), so the recyclable inventory is always 0.</sys:String>
+    <!-- Deposit Labels -->
+    <sys:String x:Key="StartDeposit">START DEPOSIT</sys:String>
+    <sys:String x:Key="FixDeposit">FIX DEPOSIT</sys:String>
+    <sys:String x:Key="DepositDone">DONE</sys:String>
+    <sys:String x:Key="QuickDeposit">QUICK DEPOSIT</sys:String>
+    <sys:String x:Key="AutoCalcDenoms">AUTO-CALCULATE DENOMINATIONS</sys:String>
+
+    <!-- Denom Table Headers -->
+    <sys:String x:Key="HeaderNameEn">NAME (EN)</sys:String>
+    <sys:String x:Key="HeaderNameJp">NAME (JP)</sys:String>
+    <sys:String x:Key="HeaderBaseQty">QTY</sys:String>
+    <sys:String x:Key="HeaderNearEmpty">NEAR EMPTY</sys:String>
+    <sys:String x:Key="HeaderNearFull">NEAR FULL</sys:String>
+    <sys:String x:Key="HeaderMaxCap">MAX CAPACITY</sys:String>
+    <sys:String x:Key="HeaderRecycle">RECYCLE</sys:String>
+    <sys:String x:Key="HeaderDeposit">DEPOSIT</sys:String>
 
     <!-- Window Titles -->
     <sys:String x:Key="TitleMainWindow">Cash Changer Simulator</sys:String>
+
+    <!-- Advanced Simulation -->
+    <sys:String x:Key="AdvancedSimulationTitle">Advanced Simulation</sys:String>
+    <sys:String x:Key="AdvancedSimulationSubtitle">Simulate error states for each device individually</sys:String>
+    <sys:String x:Key="ErrorSimulationTitle">ERROR SIMULATION</sys:String>
+    <sys:String x:Key="StatusJamDetected">JAM DETECTED</sys:String>
+    <sys:String x:Key="StatusOverlapDetected">OVERLAP DETECTED</sys:String>
+    <sys:String x:Key="ScriptExecutionTitle">SCRIPT EXECUTION (FOR TESTING)</sys:String>
+    <sys:String x:Key="LabelBillsUnit">BILLS UNIT</sys:String>
+    <sys:String x:Key="LabelCoinsUnit">COINS UNIT</sys:String>
 </ResourceDictionary>
