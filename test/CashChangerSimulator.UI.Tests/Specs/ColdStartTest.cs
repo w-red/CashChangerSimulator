@@ -160,8 +160,8 @@ public class ColdStartTest
         cashChanger.Open();
 
         // Act & Assert
-        // Setting enabled when opened but NOT claimed should fail (ErrorCode.Illegal)
-        Should.Throw<PosControlException>(() => cashChanger.DeviceEnabled = true).ErrorCode.ShouldBe(ErrorCode.Illegal);
+        // Setting enabled when opened but NOT claimed should fail (ErrorCode.NotClaimed)
+        Should.Throw<PosControlException>(() => cashChanger.DeviceEnabled = true).ErrorCode.ShouldBe(ErrorCode.NotClaimed);
 
         // Claiming should then allow enabling
         cashChanger.Claim(0);
