@@ -16,7 +16,7 @@
     TextOptions.TextFormattingMode="Ideal" 
     TextOptions.TextRenderingMode="Auto"
     FontFamily="{materialDesign:MaterialDesignFont}"
-    Title="Advanced Simulation (Debug Mode)" 
+    Title="{StaticResource AdvancedSimulationTitle}" 
     Height="800" Width="600"
     Topmost="True"
     AutomationProperties.AutomationId="AdvancedSimulationWindow"
@@ -31,10 +31,10 @@
 
             <!-- Header -->
             <StackPanel Grid.Row="0" Margin="0,0,0,24">
-                <TextBlock Text="アドバンスド・シミュレーション" 
+                <TextBlock Text="{StaticResource AdvancedSimulationTitle}" 
                            Style="{StaticResource MaterialDesignHeadlineSmallTextBlock}"
                            FontWeight="Bold" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                <TextBlock Text="各デバイスのエラー状態を個別にシミュレートします" 
+                <TextBlock Text="{StaticResource AdvancedSimulationSubtitle}" 
                            Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                            Opacity="0.7"/>
             </StackPanel>
@@ -50,28 +50,28 @@
                 <!-- Simulation Controls -->
                 <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                     <StackPanel>
-                        <TextBlock Text="エラー・シミュレーション" Style="{StaticResource MaterialDesignTitleLargeTextBlock}" Margin="0,0,0,16"/>
+                        <TextBlock Text="{StaticResource ErrorSimulationTitle}" Style="{StaticResource MaterialDesignTitleLargeTextBlock}" Margin="0,0,0,16"/>
                         
                         <WrapPanel Orientation="Horizontal">
-                            <Button Content="ジャム発生" 
+                            <Button Content="{StaticResource SimulateJam}" 
                                     Command="{Binding SimulateJamCommand}"
                                     AutomationProperties.AutomationId="SimulateJamButton"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="#D62828" BorderBrush="#D62828"
+                                    Background="{DynamicResource App.Brush.Jam}" BorderBrush="{DynamicResource App.Brush.Jam}"
                                     Margin="0,0,8,8"/>
-                            <Button Content="重なり発生" 
+                            <Button Content="{StaticResource SimulateOverlap}" 
                                     Command="{Binding SimulateOverlapCommand}"
                                     AutomationProperties.AutomationId="SimulateOverlapButton"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="#F77F00" BorderBrush="#F77F00"
+                                    Background="{DynamicResource App.Brush.Overlap}" BorderBrush="{DynamicResource App.Brush.Overlap}"
                                     Margin="0,0,8,8"/>
-                            <Button Content="デバイスエラー" 
+                            <Button Content="{StaticResource SimulateDeviceError}" 
                                     Command="{Binding SimulateDeviceErrorCommand}"
                                     AutomationProperties.AutomationId="SimulateDeviceErrorButton"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="#FCBF49" BorderBrush="#FCBF49" Foreground="Black"
+                                    Background="{DynamicResource App.Brush.Warning}" BorderBrush="{DynamicResource App.Brush.Warning}" Foreground="Black"
                                     Margin="0,0,8,8"/>
-                            <Button Content="リセット" 
+                            <Button Content="{StaticResource Reset}" 
                                     Command="{Binding ResetErrorCommand}"
                                     AutomationProperties.AutomationId="ResetErrorButton"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
@@ -81,21 +81,21 @@
                         <!-- Status Display -->
                         <StackPanel Margin="0,16,0,0">
                             <materialDesign:Chip Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="#D62828" Foreground="White" Margin="0,4">
+                                               Background="{DynamicResource App.Brush.Jam}" Foreground="White" Margin="0,4">
                                 <materialDesign:Chip.Icon>
                                     <materialDesign:PackIcon Kind="AlertCircle"/>
                                 </materialDesign:Chip.Icon>
-                                <TextBlock Text="ジャム検出中" AutomationProperties.AutomationId="JamIndicatorText"/>
+                                <TextBlock Text="{StaticResource StatusJamDetected}" AutomationProperties.AutomationId="JamIndicatorText"/>
                             </materialDesign:Chip>
                             
                             <materialDesign:Chip Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="#F77F00" Foreground="White" Margin="0,4">
-                                <TextBlock Text="重なり検出中" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                                               Background="{DynamicResource App.Brush.Overlap}" Foreground="White" Margin="0,4">
+                                <TextBlock Text="{StaticResource StatusOverlapDetected}" AutomationProperties.AutomationId="OverlapIndicatorText"/>
                             </materialDesign:Chip>
-
+                            
                             <materialDesign:Chip Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="#FCBF49" Foreground="Black" Margin="0,4">
-                                <TextBlock Text="デバイスエラー" AutomationProperties.AutomationId="DeviceErrorIndicatorText"/>
+                                               Background="{DynamicResource App.Brush.Warning}" Foreground="Black" Margin="0,4">
+                                <TextBlock Text="{StaticResource StatusDeviceError}" AutomationProperties.AutomationId="DeviceErrorIndicatorText"/>
                             </materialDesign:Chip>
                         </StackPanel>
                     </StackPanel>
@@ -104,7 +104,7 @@
                 <!-- Scripting Area -->
                 <materialDesign:Card Grid.Row="1" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                     <StackPanel>
-                        <TextBlock Text="スクリプト実行 (テスト用)" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,8"/>
+                        <TextBlock Text="{StaticResource ScriptExecutionTitle}" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,8"/>
                         <TextBox x:Name="ScriptInputTextBox" 
                                  AutomationProperties.AutomationId="ScriptInputTextBox"
                                  Text="{Binding ScriptInput.Value, UpdateSourceTrigger=PropertyChanged}"
@@ -113,7 +113,7 @@
                                  Margin="0,0,0,8"/>
                         <Button x:Name="ExecuteScriptButton"
                                 AutomationProperties.AutomationId="ExecuteScriptButton"
-                                Content="スクリプト実行"
+                                Content="{StaticResource Execute}"
                                 Command="{Binding ExecuteScriptCommand}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 HorizontalAlignment="Right"/>
@@ -129,7 +129,7 @@
                     
                     <materialDesign:Card Grid.Column="0" Margin="0,0,8,0" Padding="12" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                        <StackPanel>
-                           <TextBlock Text="紙幣ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                           <TextBlock Text="{StaticResource LabelBillsUnit}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                            <ItemsControl ItemsSource="{Binding Bills}">
                                <ItemsControl.ItemTemplate>
                                    <DataTemplate>
@@ -161,7 +161,7 @@
 
             <!-- Footer -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
-                <Button Content="閉じる" 
+                <Button Content="{StaticResource Close}" 
                         IsCancel="True"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         Command="{Binding CloseCommand}"

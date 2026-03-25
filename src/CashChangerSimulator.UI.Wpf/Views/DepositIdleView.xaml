@@ -11,7 +11,6 @@
              d:DataContext="{d:DesignInstance vm:DepositViewModel}"
              d:DesignHeight="300" d:DesignWidth="400">
     <UserControl.Resources>
-        <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConv" />
     </UserControl.Resources>
     <StackPanel>
         <!-- Target Amount Input -->

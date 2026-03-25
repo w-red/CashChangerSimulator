@@ -35,16 +35,7 @@
                 <DataGrid.Resources>
                     <Style
                         TargetType="DataGridColumnHeader"
-                        BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                        <Setter
-                            Property="Background"
-                            Value="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"/>
-                        <Setter
-                            Property="FontSize"
-                            Value="10"/>
-                        <Setter
-                            Property="FontWeight"
-                            Value="Black"/>
+                        BasedOn="{StaticResource App.Style.DataGridColumnHeader}">
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
@@ -85,7 +76,7 @@
                         Binding="{Binding NearEmpty.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>
-                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource App.Style.DataGridCell}">
                                 <Setter Property="ToolTip" Value="Set to -1 to disable check" />
                             </Style>
                         </DataGridTextColumn.CellStyle>
@@ -95,7 +86,7 @@
                         Binding="{Binding NearFull.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>
-                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource App.Style.DataGridCell}">
                                 <Setter Property="ToolTip" Value="Set to -1 to disable check" />
                             </Style>
                         </DataGridTextColumn.CellStyle>
@@ -105,7 +96,7 @@
                         Binding="{Binding Full.Value}"
                         Width="80">
                         <DataGridTextColumn.CellStyle>
-                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource App.Style.DataGridCell}">
                                 <Setter Property="ToolTip" Value="Set to -1 to disable check" />
                             </Style>
                         </DataGridTextColumn.CellStyle>
