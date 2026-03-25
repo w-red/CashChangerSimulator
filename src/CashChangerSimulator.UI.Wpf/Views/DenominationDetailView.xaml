@@ -7,6 +7,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              MinWidth="400"
+             MaxWidth="450"
              AutomationProperties.IsOffscreenBehavior="Onscreen"
              AutomationProperties.AutomationId="DenominationDetailDialogView"
              d:DesignHeight="350"
@@ -93,11 +94,18 @@
             <materialDesign:Card Padding="12" Margin="0,16,0,0"
                                 Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}"
                                 Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedVisibilityConv}}">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="InformationOutline" Width="18" Height="18" Margin="0,0,8,0" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <materialDesign:PackIcon Kind="InformationOutline" Width="18" Height="18" Margin="0,0,8,0" 
+                                           Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                           VerticalAlignment="Center" Grid.Column="0"/>
                     <TextBlock Text="{Binding LabelNoteNonRecyclable}" 
-                               TextWrapping="Wrap" FontSize="12" Opacity="0.8" VerticalAlignment="Center"/>
-                </StackPanel>
+                               TextWrapping="Wrap" FontSize="12" Opacity="0.8" 
+                               VerticalAlignment="Center" Grid.Column="1"/>
+                </Grid>
             </materialDesign:Card>
 
             <!-- Actions Section -->
