@@ -209,14 +209,24 @@ internal partial class App : Application
             // XAML から読み込まれたキーを、動的な MaterialDesign ブラシやプロジェクト共通キーにマッピングします。
             var bg = (System.Windows.Media.Color)Current.Resources["BackgroundColor"];
             var fg = (System.Windows.Media.Color)Current.Resources["OnSurfaceColor"];
+            var primary = (System.Windows.Media.Color)Current.Resources["PrimaryColor"];
+            var secondary = (System.Windows.Media.Color)Current.Resources["SecondaryColor"];
             var surface = (System.Windows.Media.Color)Current.Resources["SurfaceColor"];
             var surfaceVariant = (System.Windows.Media.Color)Current.Resources["SurfaceVariantColor"];
+            var surfaceContainerHigh = (System.Windows.Media.Color)Current.Resources["SurfaceContainerHighColor"];
+            var onSurfaceVariant = (System.Windows.Media.Color)Current.Resources["OnSurfaceVariantColor"];
+            var outline = (System.Windows.Media.Color)Current.Resources["OutlineColor"];
             var warningFg = (System.Windows.Media.Color)Current.Resources["WarningForegroundColor"];
 
             var bgBrush = new SolidColorBrush(bg); bgBrush.Freeze();
             var fgBrush = new SolidColorBrush(fg); fgBrush.Freeze();
+            var primaryBrush = new SolidColorBrush(primary); primaryBrush.Freeze();
+            var secondaryBrush = new SolidColorBrush(secondary); secondaryBrush.Freeze();
             var surfaceBrush = new SolidColorBrush(surface); surfaceBrush.Freeze();
             var surfaceVariantBrush = new SolidColorBrush(surfaceVariant); surfaceVariantBrush.Freeze();
+            var surfaceContainerHighBrush = new SolidColorBrush(surfaceContainerHigh); surfaceContainerHighBrush.Freeze();
+            var onSurfaceVariantBrush = new SolidColorBrush(onSurfaceVariant); onSurfaceVariantBrush.Freeze();
+            var outlineBrush = new SolidColorBrush(outline); outlineBrush.Freeze();
             var warningFgBrush = new SolidColorBrush(warningFg); warningFgBrush.Freeze();
 
             Current.Resources["MaterialDesign.Brush.Background"] = bgBrush;
@@ -224,14 +234,26 @@ internal partial class App : Application
             Current.Resources["MaterialDesign.Brush.Surface"] = surfaceBrush;
             Current.Resources["MaterialDesign.Brush.OnSurface"] = fgBrush;
             Current.Resources["MaterialDesign.Brush.SurfaceVariant"] = surfaceVariantBrush;
+            Current.Resources["MaterialDesign.Brush.OnSurfaceVariant"] = onSurfaceVariantBrush;
+            Current.Resources["MaterialDesign.Brush.Primary"] = primaryBrush;
+            Current.Resources["MaterialDesign.Brush.Secondary"] = secondaryBrush;
+            Current.Resources["MaterialDesign.Brush.SurfaceContainerHigh"] = surfaceContainerHighBrush;
+            Current.Resources["MaterialDesign.Brush.Outline"] = outlineBrush;
             
             Current.Resources["MaterialDesignBody"] = fgBrush;
             Current.Resources["MaterialDesignPaper"] = bgBrush;
             Current.Resources["WarningForegroundBrush"] = warningFgBrush;
 
+            // Compat keys for StaticResource/DynamicResource in older/shared templates
+            Current.Resources["PrimaryColor"] = primary;
+            Current.Resources["SecondaryColor"] = secondary;
+            Current.Resources["BackgroundColor"] = bg;
+            Current.Resources["SurfaceColor"] = surface;
+            Current.Resources["OnSurfaceColor"] = fg;
+
             // Semantic Brushes
             Current.Resources["App.Brush.Foreground"] = fgBrush;
-            Current.Resources["App.Brush.Primary"] = new SolidColorBrush(theme.PrimaryMid.Color);
+            Current.Resources["App.Brush.Primary"] = primaryBrush;
         }
         catch (Exception ex)
         {
