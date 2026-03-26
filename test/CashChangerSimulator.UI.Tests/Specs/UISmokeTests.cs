@@ -63,6 +63,7 @@ public class UISmokeTests
 
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Colors.xaml") });
+                resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Strings.common.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Strings.en-US.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Styles.xaml") });
                 resources.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/Templates.xaml") });

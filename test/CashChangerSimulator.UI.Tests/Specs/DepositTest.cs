@@ -127,11 +127,15 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
         beginButton.SmartClick();
 
-        var jamButton = FindElement(depositWindow, "SimulateJamButton", "JAM", TimeSpan.FromSeconds(20))?.AsButton();
+        // Wait for template to switch and UI to settle
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+        
+        var jamButton = UiTestRetry.Find(() => depositWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton(), TimeSpan.FromSeconds(20));
+        
         if (jamButton == null)
         {
             UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_JamButtonMissing");
-            jamButton.ShouldNotBeNull("SimulateJamButton not found");
+            throw new Exception("SimulateJamButton not found in DepositWindow. Check AutomationTree dump.");
         }
         jamButton.SmartClick();
 

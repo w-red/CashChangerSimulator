@@ -229,8 +229,7 @@
         </Grid>
 
         <!-- Simulation Actions (Bottom) -->
-        <Border Margin="0,24,0,0" Padding="0,16,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Opacity="0.5"
-                Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
+        <Border Margin="0,24,0,0" Padding="0,16,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Opacity="0.5">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -240,7 +239,7 @@
                 <Button x:Name="SimulateJamButton"
                         Grid.Column="0"
                         Command="{Binding SimulateJamCommand}"
-                        AutomationProperties.AutomationId="DepositTerminalSimJamButton">
+                        AutomationProperties.AutomationId="SimulateJamButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{StaticResource Jam}" VerticalAlignment="Center"/>
@@ -262,7 +261,7 @@
                 <Button x:Name="SimulateOverlapButton"
                         Grid.Column="1"
                         Command="{Binding SimulateOverlapCommand}"
-                        AutomationProperties.AutomationId="DepositTerminalSimOverlapButton">
+                        AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{StaticResource Overlap}" VerticalAlignment="Center"/>
@@ -285,7 +284,7 @@
                         Grid.Column="2"
                         Command="{Binding SimulateDeviceErrorCommand}"
                         ToolTip="{StaticResource ToolTipSimulateError}"
-                        AutomationProperties.AutomationId="DepositTerminalSimErrorButton">
+                        AutomationProperties.AutomationId="SimulateDeviceErrorButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="ERR" VerticalAlignment="Center"/>

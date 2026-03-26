@@ -69,13 +69,13 @@
             <Button Style="{StaticResource SimulationErrorButtonStyle}" 
                     Command="{Binding SimulateOverlapCommand}"
                     Content="{StaticResource SimulateOverlap}"
-                    AutomationProperties.AutomationId="SimulateOverlapButton"
+                    AutomationProperties.AutomationId="IdleSimulateOverlapButton"
                     FontSize="10" Padding="8,2"
                     Margin="0,0,8,0"/>
             <Button Style="{StaticResource SimulationErrorButtonStyle}" 
                     Command="{Binding SimulateJamCommand}"
                     FontSize="10" Padding="8,2"
-                    AutomationProperties.AutomationId="SimulateJamButton"
+                    AutomationProperties.AutomationId="IdleSimulateJamButton"
                     Content="{StaticResource SimulateJam}"/>
         </StackPanel>
 
