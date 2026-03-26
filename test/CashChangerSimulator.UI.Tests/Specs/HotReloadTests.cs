@@ -58,7 +58,8 @@ public class HotReloadTests
             facade,
             config,
             metadataProvider,
-            new Mock<IInventoryOperationService>().Object);
+            new Mock<IInventoryOperationService>().Object,
+            new Mock<IViewModelFactory>().Object);
 
         return (vm, config, monitorsProvider);
     }

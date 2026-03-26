@@ -224,7 +224,7 @@ public class UIViewModelFixture : IDisposable
             NotifyServiceMock.Object,
             new Mock<Microsoft.Extensions.Logging.ILogger<InventoryOperationService>>().Object);
 
-        return new InventoryViewModel(facade, ConfigProvider, MetadataProvider, operationService);
+        return new InventoryViewModel(facade, ConfigProvider, MetadataProvider, operationService, new Mock<IViewModelFactory>().Object);
     }
 
     /// <summary>検証用の DepositViewModel を生成します。</summary>
