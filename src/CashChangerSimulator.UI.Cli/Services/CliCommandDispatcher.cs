@@ -10,7 +10,7 @@ public class CliCommandDispatcher(CliCommands commands) : ICliCommandDispatcher
     {
         if (string.IsNullOrWhiteSpace(line)) return Task.CompletedTask;
 
-        var parts = line.Trim().Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+        var parts = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0) return Task.CompletedTask;
 
         var command = parts[0].ToLowerInvariant();

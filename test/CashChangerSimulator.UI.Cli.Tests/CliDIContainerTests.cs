@@ -60,8 +60,8 @@ public class CliDIContainerTests
         CliDIContainer.Initialize([]);
         
         // Act
-        var providerCasted = (IServiceProvider)CashChangerSimulator.Core.SimulatorServices.Provider!;
-        var config = CashChangerSimulator.Core.SimulatorServices.Provider!.Resolve<Core.Configuration.ConfigurationProvider>();
+        var providerCasted = (IServiceProvider)Core.SimulatorServices.Provider!;
+        var config = Core.SimulatorServices.Provider!.Resolve<Core.Configuration.ConfigurationProvider>();
         var obj = providerCasted.GetService(typeof(Core.Configuration.ConfigurationProvider));
 
         // Assert

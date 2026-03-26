@@ -158,7 +158,7 @@ public partial class CliCommands(
     [Command("log-level")]
     public virtual void LogLevel(string level)
     {
-        if (System.Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out _))
+        if (Enum.TryParse<Microsoft.Extensions.Logging.LogLevel>(level, true, out _))
         {
             LogProvider.SetLogLevel(level);
             _console.MarkupLine($"[green][[{_L["messages.success_label"]}]][/] {_L["messages.log_level_updated", level]}");

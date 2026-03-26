@@ -262,7 +262,7 @@ public class CliCommandsTests
     [Fact]
     public void HandleAsyncErrorShouldWriteToConsole()
     {
-        var args = new DeviceErrorEventArgs(Microsoft.PointOfService.ErrorCode.Failure, 0, Microsoft.PointOfService.ErrorLocus.Output, Microsoft.PointOfService.ErrorResponse.Clear);
+        var args = new DeviceErrorEventArgs(ErrorCode.Failure, 0, ErrorLocus.Output, ErrorResponse.Clear);
         _commands.HandleAsyncError(null!, args);
         _mockConsole.Verify(c => c.Write(It.IsAny<IRenderable>()), Times.AtLeastOnce);
     }

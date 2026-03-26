@@ -158,7 +158,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             }
 
             // Settlement period for UI Automation state
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(500);
 
 #if !GITHUB_ACTIONS
             if (MainWindow != null)

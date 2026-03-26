@@ -73,12 +73,12 @@ internal partial class App : Application
             while (true)
             {
                 await Task.Delay(1000);
-                if (System.IO.File.Exists(triggerFile))
+                if (File.Exists(triggerFile))
                 {
                     try
                     {
-                        var theme = System.IO.File.ReadAllText(triggerFile).Trim();
-                        System.IO.File.Delete(triggerFile);
+                        var theme = File.ReadAllText(triggerFile).Trim();
+                        File.Delete(triggerFile);
                         
                         Dispatcher.Invoke(() => UpdateTheme(theme));
                     }
@@ -271,8 +271,8 @@ internal partial class App : Application
         try
         {
             Console.Error.WriteLine($"[FATAL_APP_CRASH] {ex}");
-            var logPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FATAL_CRASH.txt");
-            System.IO.File.WriteAllText(logPath, $"[FATAL] [{DateTime.Now}] {ex}");
+            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FATAL_CRASH.txt");
+            File.WriteAllText(logPath, $"[FATAL] [{DateTime.Now}] {ex}");
         }
         catch { }
         

@@ -232,6 +232,6 @@ public class CliConfigServiceTests
         _service.Set("System.UIMode", "Standard");
 
         // Assert
-        _configProvider.Config.System.UIMode.ShouldBe(CashChangerSimulator.Core.Configuration.UIMode.Standard);
+        _configProvider.Config.System.UIMode.ShouldBe(UIMode.Standard);
     }
 }

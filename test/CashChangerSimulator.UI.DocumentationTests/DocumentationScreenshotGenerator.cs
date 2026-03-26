@@ -115,7 +115,7 @@ public class DocumentationScreenshotGenerator : IDisposable
 
         // The View Model will auto-open this dialog when the trigger file is detected.
         Console.WriteLine("Writing open_dialog.trigger to trigger ViewModel hook...");
-        System.IO.File.WriteAllText(Path.GetFullPath("open_dialog.trigger"), "open");
+        File.WriteAllText(Path.GetFullPath("open_dialog.trigger"), "open");
 
         AutomationElement? dialog = null;
 
