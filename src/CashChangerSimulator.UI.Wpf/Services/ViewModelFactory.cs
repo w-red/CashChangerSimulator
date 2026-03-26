@@ -2,6 +2,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using R3;
+using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
@@ -33,5 +34,29 @@ public class ViewModelFactory : IViewModelFactory
     {
         // ActivatorUtilities overrides the `key` parameter during instantiation.
         return ActivatorUtilities.CreateInstance<DenominationViewModel>(_serviceProvider, key);
+    }
+
+    public BulkAmountInputViewModel CreateBulkAmountInputViewModel(
+        IEnumerable<BulkAmountInputItemViewModel> items,
+        ICommand simulateOverlap,
+        ICommand simulateJam,
+        ICommand simulateDeviceError,
+        ICommand resetError,
+        ReadOnlyReactiveProperty<bool> isJammed,
+        ReadOnlyReactiveProperty<bool> isOverlapped,
+        ReadOnlyReactiveProperty<bool> isDeviceError)
+    {
+        return ActivatorUtilities.CreateInstance<BulkAmountInputViewModel>(
+            _serviceProvider, items, simulateOverlap, simulateJam, simulateDeviceError, resetError, isJammed, isOverlapped, isDeviceError);
+    }
+
+    public SettingsViewModel CreateSettingsViewModel()
+    {
+        return ActivatorUtilities.CreateInstance<SettingsViewModel>(_serviceProvider);
+    }
+
+    public BulkAmountInputItemViewModel CreateBulkAmountInputItemViewModel(DenominationKey key, string name)
+    {
+        return ActivatorUtilities.CreateInstance<BulkAmountInputItemViewModel>(_serviceProvider, key, name);
     }
 }

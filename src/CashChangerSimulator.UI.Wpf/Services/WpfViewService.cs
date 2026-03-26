@@ -9,19 +9,19 @@ namespace CashChangerSimulator.UI.Wpf.Services;
 /// <summary>
 /// WPF implementation of IViewService.
 /// </summary>
-public class WpfViewService(IDispatcherService dispatcher) : IViewService
+public class WpfViewService(IDispatcherService dispatcher, IViewModelFactory viewModelFactory) : IViewService
 {
     private Window? GetOwner() => dispatcher.GetActiveWindow() as Window;
 
     public void ShowSettingsWindow()
     {
-        var window = new SettingsWindow { Owner = GetOwner() };
+        var window = new SettingsWindow(viewModelFactory) { Owner = GetOwner() };
         window.ShowDialog();
     }
 
     public void ShowDepositWindow(DepositViewModel dataContext, Func<IEnumerable<DenominationViewModel>> getDenominations)
     {
-        var window = new DepositWindow(dataContext, getDenominations)
+        var window = new DepositWindow(dataContext, getDenominations, viewModelFactory)
         {
             Owner = GetOwner()
         };
@@ -30,7 +30,7 @@ public class WpfViewService(IDispatcherService dispatcher) : IViewService
 
     public void ShowDispenseWindow(DispenseViewModel dataContext, Func<IEnumerable<DenominationViewModel>> getDenominations)
     {
-        var window = new DispenseWindow(dataContext, getDenominations)
+        var window = new DispenseWindow(dataContext, getDenominations, viewModelFactory)
         {
             Owner = GetOwner()
         };

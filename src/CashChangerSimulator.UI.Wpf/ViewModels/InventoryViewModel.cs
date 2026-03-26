@@ -21,6 +21,7 @@ public class InventoryViewModel : IDisposable
     private readonly ConfigurationProvider _configProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly IInventoryOperationService _operationService;
+    private readonly IViewModelFactory _viewModelFactory;
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨の接頭辞（例: ￥）。</summary>
@@ -92,17 +93,20 @@ public class InventoryViewModel : IDisposable
         IDeviceFacade facade,
         ConfigurationProvider configProvider,
         CurrencyMetadataProvider metadataProvider,
-        IInventoryOperationService operationService)
+        IInventoryOperationService operationService,
+        IViewModelFactory viewModelFactory)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(metadataProvider);
         ArgumentNullException.ThrowIfNull(operationService);
+        ArgumentNullException.ThrowIfNull(viewModelFactory);
 
         _facade = facade;
         _configProvider = configProvider;
         _metadataProvider = metadataProvider;
         _operationService = operationService;
+        _viewModelFactory = viewModelFactory;
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix;
         CurrencySuffix = _metadataProvider.SymbolSuffix;
@@ -201,7 +205,7 @@ public class InventoryViewModel : IDisposable
 
             if (setting.IsRecyclable || setting.IsDepositable)
             {
-                var vm = new DenominationViewModel(_facade, key, _metadataProvider, monitor, _configProvider);
+                var vm = _viewModelFactory.CreateDenominationViewModel(key);
                 vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
                 if (key.Type == CurrencyCashType.Bill)
                 {

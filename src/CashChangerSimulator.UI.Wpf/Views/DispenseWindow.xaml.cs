@@ -1,4 +1,5 @@
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Wpf.Services;
 using R3;
 using System.Windows;
 
@@ -12,21 +13,25 @@ internal partial class DispenseWindow : Window
     /// <summary>DispenseWindow の新しいインスタンスを初期化する。</summary>
     /// <param name="viewModel">出金ビューモデル。</param>
     /// <param name="getDenominations">金種リスト取得関数。</param>
-    public DispenseWindow(DispenseViewModel viewModel, Func<IEnumerable<DenominationViewModel>> getDenominations)
+    /// <param name="factory">ViewModel 生成ファクトリ。</param>
+    public DispenseWindow(DispenseViewModel viewModel, Func<IEnumerable<DenominationViewModel>> getDenominations, IViewModelFactory factory)
     {
+        ArgumentNullException.ThrowIfNull(factory);
         InitializeComponent();
         DataContext = viewModel;
 
         viewModel.ShowBulkDispenseCommand.Subscribe(_ =>
         {
-            var items = getDenominations().Select(d => new BulkAmountInputItemViewModel(d.Key, d.Name)).ToList();
-            var bulkVm = new BulkAmountInputViewModel(
+            var items = getDenominations().Select(d => factory.CreateBulkAmountInputItemViewModel(d.Key, d.Name)).ToList();
+            var bulkVm = factory.CreateBulkAmountInputViewModel(
                 items,
                 viewModel.SimulateOverlapCommand,
                 viewModel.SimulateJamCommand,
+                viewModel.SimulateDeviceErrorCommand,
                 viewModel.ResetErrorCommand,
                 viewModel.IsJammed,
-                viewModel.IsOverlapped);
+                viewModel.IsOverlapped,
+                viewModel.IsDeviceError.ToReadOnlyReactiveProperty());
 
             var dialog = new BulkAmountInputWindow(
                 FindResource("BulkDispense").ToString()!,

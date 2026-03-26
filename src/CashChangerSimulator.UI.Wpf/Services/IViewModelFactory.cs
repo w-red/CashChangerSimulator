@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
+using System.Windows.Input;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
@@ -12,4 +13,15 @@ public interface IViewModelFactory
     InventoryViewModel CreateInventoryViewModel();
     AdvancedSimulationViewModel CreateAdvancedSimulationViewModel();
     DenominationViewModel CreateDenominationViewModel(DenominationKey key);
+    BulkAmountInputViewModel CreateBulkAmountInputViewModel(
+        IEnumerable<BulkAmountInputItemViewModel> items,
+        ICommand simulateOverlap,
+        ICommand simulateJam,
+        ICommand simulateDeviceError,
+        ICommand resetError,
+        ReadOnlyReactiveProperty<bool> isJammed,
+        ReadOnlyReactiveProperty<bool> isOverlapped,
+        ReadOnlyReactiveProperty<bool> isDeviceError);
+    SettingsViewModel CreateSettingsViewModel();
+    BulkAmountInputItemViewModel CreateBulkAmountInputItemViewModel(DenominationKey key, string name);
 }

@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using CashChangerSimulator.UI.Wpf.Services;
 using System.Windows;
 using R3;
 
@@ -11,14 +12,12 @@ internal partial class SettingsWindow : Window
 {
     private readonly SettingsViewModel _viewModel;
 
-    /// <summary>DI コンテナからプロバイダーを解決し、ViewModel を初期化して画面を生成する。</summary>
-    public SettingsWindow()
+    /// <summary>ViewModel を初期化して画面を生成する。</summary>
+    public SettingsWindow(IViewModelFactory factory)
     {
+        ArgumentNullException.ThrowIfNull(factory);
         InitializeComponent();
-        _viewModel = new SettingsViewModel(
-            DIContainer.Resolve<ConfigurationProvider>(),
-            DIContainer.Resolve<MonitorsProvider>(),
-            DIContainer.Resolve<CurrencyMetadataProvider>());
+        _viewModel = factory.CreateSettingsViewModel();
         DataContext = _viewModel;
 
         // 保存成功時にウィンドウを閉じる
