@@ -178,9 +178,9 @@ internal partial class App : Application
             if (isActuallyDark)
             {
                 // [RESTORE] Soft Dark primary colors
-                MaterialDesignThemes.Wpf.ThemeExtensions.SetPrimaryColor(theme, System.Windows.Media.Color.FromRgb(0xBB, 0x86, 0xFC));
-                MaterialDesignThemes.Wpf.ThemeExtensions.SetSecondaryColor(theme, System.Windows.Media.Color.FromRgb(0x03, 0xDA, 0xC6));
-                theme.Background = System.Windows.Media.Color.FromRgb(0x12, 0x12, 0x12);
+                MaterialDesignThemes.Wpf.ThemeExtensions.SetPrimaryColor(theme, Color.FromRgb(0xBB, 0x86, 0xFC));
+                MaterialDesignThemes.Wpf.ThemeExtensions.SetSecondaryColor(theme, Color.FromRgb(0x03, 0xDA, 0xC6));
+                theme.Background = Color.FromRgb(0x12, 0x12, 0x12);
             }
             paletteHelper.SetTheme(theme);
 
@@ -207,16 +207,17 @@ internal partial class App : Application
 
             // 3. Map XAML resources to MD3 consistent keys for runtime stability
             // XAML から読み込まれたキーを、動的な MaterialDesign ブラシやプロジェクト共通キーにマッピングします。
-            var bg = (System.Windows.Media.Color)Current.Resources["BackgroundColor"];
-            var fg = (System.Windows.Media.Color)Current.Resources["OnSurfaceColor"];
-            var primary = (System.Windows.Media.Color)Current.Resources["PrimaryColor"];
-            var secondary = (System.Windows.Media.Color)Current.Resources["SecondaryColor"];
-            var surface = (System.Windows.Media.Color)Current.Resources["SurfaceColor"];
-            var surfaceVariant = (System.Windows.Media.Color)Current.Resources["SurfaceVariantColor"];
-            var surfaceContainerHigh = (System.Windows.Media.Color)Current.Resources["SurfaceContainerHighColor"];
-            var onSurfaceVariant = (System.Windows.Media.Color)Current.Resources["OnSurfaceVariantColor"];
-            var outline = (System.Windows.Media.Color)Current.Resources["OutlineColor"];
-            var warningFg = (System.Windows.Media.Color)Current.Resources["WarningForegroundColor"];
+            var bg = (Color)Current.Resources["BackgroundColor"];
+            var fg = (Color)Current.Resources["OnSurfaceColor"];
+            var primary = (Color)Current.Resources["PrimaryColor"];
+            var secondary = (Color)Current.Resources["SecondaryColor"];
+            var surface = (Color)Current.Resources["SurfaceColor"];
+            var surfaceVariant = (Color)Current.Resources["SurfaceVariantColor"];
+            var surfaceContainerHigh = (Color)Current.Resources["SurfaceContainerHighColor"];
+            var onSurfaceVariant = (Color)Current.Resources["OnSurfaceVariantColor"];
+            var outline = (Color)Current.Resources["OutlineColor"];
+            var warningFg = (Color)Current.Resources["WarningForegroundColor"];
+            var inventoryTileBg = (Color)Current.Resources["InventoryTileBackgroundColor"];
 
             var bgBrush = new SolidColorBrush(bg); bgBrush.Freeze();
             var fgBrush = new SolidColorBrush(fg); fgBrush.Freeze();
@@ -228,6 +229,7 @@ internal partial class App : Application
             var onSurfaceVariantBrush = new SolidColorBrush(onSurfaceVariant); onSurfaceVariantBrush.Freeze();
             var outlineBrush = new SolidColorBrush(outline); outlineBrush.Freeze();
             var warningFgBrush = new SolidColorBrush(warningFg); warningFgBrush.Freeze();
+            var inventoryTileBgBrush = new SolidColorBrush(inventoryTileBg); inventoryTileBgBrush.Freeze();
 
             Current.Resources["MaterialDesign.Brush.Background"] = bgBrush;
             Current.Resources["MaterialDesign.Brush.OnBackground"] = fgBrush;
@@ -254,6 +256,7 @@ internal partial class App : Application
             // Semantic Brushes
             Current.Resources["App.Brush.Foreground"] = fgBrush;
             Current.Resources["App.Brush.Primary"] = primaryBrush;
+            Current.Resources["App.Brush.InventoryTile.Background"] = inventoryTileBgBrush;
         }
         catch (Exception ex)
         {

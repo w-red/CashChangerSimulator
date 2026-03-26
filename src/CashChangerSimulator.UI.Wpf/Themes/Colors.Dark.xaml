@@ -10,6 +10,7 @@
     <Color x:Key="OutlineColor">#444444</Color>
     <Color x:Key="SurfaceVariantColor">#2C2C2C</Color>
     <Color x:Key="SurfaceContainerHighColor">#3D3D3D</Color>
+    <Color x:Key="InventoryTileBackgroundColor">#202020</Color> <!-- Darker than container for contrast -->
     <Color x:Key="WarningColor">#FFAB40</Color>
     <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency -->
 

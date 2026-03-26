@@ -10,6 +10,7 @@
     <Color x:Key="OutlineColor">#888888</Color>
     <Color x:Key="SurfaceVariantColor">#E0E0E0</Color>
     <Color x:Key="SurfaceContainerHighColor">#F0F0F0</Color>
+    <Color x:Key="InventoryTileBackgroundColor">#FFFFFF</Color> <!-- Tiles are white on light gray container -->
     <Color x:Key="WarningColor">#FF8C00</Color>
     <Color x:Key="WarningForegroundColor">#000000</Color>
 

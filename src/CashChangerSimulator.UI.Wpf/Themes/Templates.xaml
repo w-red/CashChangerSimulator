@@ -64,6 +64,7 @@
                 <Border.Style>
                     <Style TargetType="Border"
                            BasedOn="{StaticResource CardStyle}">
+                        <Setter Property="Background" Value="{DynamicResource App.Brush.InventoryTile.Background}"/>
                         <Setter Property="Padding" Value="0"/>
                         <Style.Triggers>
                             <DataTrigger
