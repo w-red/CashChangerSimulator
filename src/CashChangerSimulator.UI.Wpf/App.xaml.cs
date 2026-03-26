@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows;
 using Microsoft.Extensions.Logging;
 using ZLogger;
+using System.Windows.Media;
 
 namespace CashChangerSimulator.UI.Wpf;
 
@@ -165,116 +166,72 @@ internal partial class App : Application
         try
         {
             var paletteHelper = new MaterialDesignThemes.Wpf.PaletteHelper();
-            var theme = paletteHelper.GetTheme();
+            var isActuallyDark = themeName.Equals("Dark", StringComparison.OrdinalIgnoreCase);
             
-            var isLight = themeName.Equals("Light", StringComparison.OrdinalIgnoreCase);
-            var baseTheme = isLight 
-                ? MaterialDesignThemes.Wpf.BaseTheme.Light 
-                : MaterialDesignThemes.Wpf.BaseTheme.Dark;
-
+            // 1. Apply Base Material Design Theme
+            var theme = paletteHelper.GetTheme();
+            var baseTheme = isActuallyDark 
+                ? MaterialDesignThemes.Wpf.BaseTheme.Dark 
+                : MaterialDesignThemes.Wpf.BaseTheme.Light;
             MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(theme, baseTheme);
 
-            // Project Standard Colors - Restoring the "Soft Dark" palette as requested
-            // Light Theme: Material Design Standard
-            // Dark Theme: "Soft Dark" (Original Solution)
-            if (themeName.Equals("Dark", StringComparison.OrdinalIgnoreCase))
+            if (isActuallyDark)
             {
-                // [RESTORE] Restore "True Original" colors from commit 1c72d1cc
-                // Background: #121212, Primary: #BB86FC, Secondary: #03DAC6, OnSurface: #E0E0E0
-                var darkTheme = MaterialDesignThemes.Wpf.Theme.Create(MaterialDesignThemes.Wpf.BaseTheme.Dark, 
-                    System.Windows.Media.Color.FromRgb(0xBB, 0x86, 0xFC), 
-                    System.Windows.Media.Color.FromRgb(0x03, 0xDA, 0xC6));
-
-                darkTheme.Background = System.Windows.Media.Color.FromRgb(0x12, 0x12, 0x12);
-                
-                paletteHelper.SetTheme(darkTheme);
+                // [RESTORE] Soft Dark primary colors
+                MaterialDesignThemes.Wpf.ThemeExtensions.SetPrimaryColor(theme, System.Windows.Media.Color.FromRgb(0xBB, 0x86, 0xFC));
+                MaterialDesignThemes.Wpf.ThemeExtensions.SetSecondaryColor(theme, System.Windows.Media.Color.FromRgb(0x03, 0xDA, 0xC6));
+                theme.Background = System.Windows.Media.Color.FromRgb(0x12, 0x12, 0x12);
             }
-            else
+            paletteHelper.SetTheme(theme);
+
+            // 2. Load and Apply Project-Specific Theme Resources (XAML)
+            var resourceName = isActuallyDark ? "Colors.Dark.xaml" : "Colors.Light.xaml";
+            var themeDict = new ResourceDictionary
             {
-                var currentTheme = paletteHelper.GetTheme();
-                MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(currentTheme, MaterialDesignThemes.Wpf.BaseTheme.Light);
-                paletteHelper.SetTheme(currentTheme);
+                Source = new Uri($"pack://application:,,,/CashChangerSimulator.UI.Wpf;component/Themes/{resourceName}")
+            };
+
+            var dictionaries = Current.Resources.MergedDictionaries;
+            bool replaced = false;
+            for (int i = 0; i < dictionaries.Count; i++)
+            {
+                var source = dictionaries[i].Source?.ToString() ?? "";
+                if (source.Contains("Colors.Light.xaml") || source.Contains("Colors.Dark.xaml"))
+                {
+                    dictionaries[i] = themeDict;
+                    replaced = true;
+                    break;
+                }
             }
-            
-            // Define colors based on the current theme state
-            // Use fixed values for stability across library versions when possible
-            bool isActuallyDark = themeName.Equals("Dark", StringComparison.OrdinalIgnoreCase);
-            
-            var bg = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x12, 0x12, 0x12) : System.Windows.Media.Color.FromRgb(0xF5, 0xF5, 0xF5);
-            var fg = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0) : System.Windows.Media.Color.FromRgb(0x00, 0x00, 0x00);
-            var surface = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x2D, 0x2D, 0x2D) : System.Windows.Media.Colors.White;
-            var onSurfaceVariant = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xA0, 0xA0, 0xA0) : System.Windows.Media.Color.FromRgb(0x44, 0x44, 0x44);
+            if (!replaced) dictionaries.Add(themeDict);
 
-            var currentThemeColors = paletteHelper.GetTheme();
-            var primary = currentThemeColors.PrimaryMid.Color;
-            var secondary = currentThemeColors.SecondaryMid.Color;
+            // 3. Map XAML resources to MD3 consistent keys for runtime stability
+            // XAML から読み込まれたキーを、動的な MaterialDesign ブラシやプロジェクト共通キーにマッピングします。
+            var bg = (System.Windows.Media.Color)Current.Resources["BackgroundColor"];
+            var fg = (System.Windows.Media.Color)Current.Resources["OnSurfaceColor"];
+            var surface = (System.Windows.Media.Color)Current.Resources["SurfaceColor"];
+            var surfaceVariant = (System.Windows.Media.Color)Current.Resources["SurfaceVariantColor"];
+            var warningFg = (System.Windows.Media.Color)Current.Resources["WarningForegroundColor"];
 
-            // Force override specific brushes to GUARANTEE visibility and theme consistency
-            var bgBrush = new System.Windows.Media.SolidColorBrush(bg); bgBrush.Freeze();
-            var fgBrush = new System.Windows.Media.SolidColorBrush(fg); fgBrush.Freeze();
-            var primaryBrush = new System.Windows.Media.SolidColorBrush(primary); primaryBrush.Freeze();
-            var secondaryBrush = new System.Windows.Media.SolidColorBrush(secondary); secondaryBrush.Freeze();
-            var variantBrush = new System.Windows.Media.SolidColorBrush(onSurfaceVariant); variantBrush.Freeze();
+            var bgBrush = new SolidColorBrush(bg); bgBrush.Freeze();
+            var fgBrush = new SolidColorBrush(fg); fgBrush.Freeze();
+            var surfaceBrush = new SolidColorBrush(surface); surfaceBrush.Freeze();
+            var surfaceVariantBrush = new SolidColorBrush(surfaceVariant); surfaceVariantBrush.Freeze();
+            var warningFgBrush = new SolidColorBrush(warningFg); warningFgBrush.Freeze();
 
-            // Material Design standard brushes
             Current.Resources["MaterialDesign.Brush.Background"] = bgBrush;
             Current.Resources["MaterialDesign.Brush.OnBackground"] = fgBrush;
-            Current.Resources["MaterialDesign.Brush.Surface"] = new System.Windows.Media.SolidColorBrush(surface);
+            Current.Resources["MaterialDesign.Brush.Surface"] = surfaceBrush;
             Current.Resources["MaterialDesign.Brush.OnSurface"] = fgBrush;
-            Current.Resources["MaterialDesign.Brush.OnSurfaceVariant"] = variantBrush;
-            Current.Resources["MaterialDesign.Brush.Primary"] = primaryBrush;
-            Current.Resources["MaterialDesign.Brush.OnPrimary"] = new System.Windows.Media.SolidColorBrush(isLight ? System.Windows.Media.Colors.White : System.Windows.Media.Color.FromRgb(0x1A, 0x00, 0x33));
-            Current.Resources["MaterialDesign.Brush.Secondary"] = secondaryBrush;
-            Current.Resources["MaterialDesign.Brush.OnSecondary"] = new System.Windows.Media.SolidColorBrush(isLight ? System.Windows.Media.Colors.Black : System.Windows.Media.Color.FromRgb(0x00, 0x33, 0x0E));
-            Current.Resources["MaterialDesign.Brush.OnTertiary"] = new System.Windows.Media.SolidColorBrush(isLight ? System.Windows.Media.Colors.White : System.Windows.Media.Colors.Black);
-
-            // [STABILITY] Force Body/Paper brushes which are often used as default text/bg
+            Current.Resources["MaterialDesign.Brush.SurfaceVariant"] = surfaceVariantBrush;
+            
             Current.Resources["MaterialDesignBody"] = fgBrush;
             Current.Resources["MaterialDesignPaper"] = bgBrush;
-            Current.Resources["MaterialDesignSelection"] = primaryBrush;
-            Current.Resources["MaterialDesignColumnHeader"] = fgBrush;
-            Current.Resources["MaterialDesignDivider"] = variantBrush;
-
-            // Compat and project-specific keys
-            Current.Resources["BackgroundColor"] = bg;
-            Current.Resources["PrimaryColor"] = primary;
-            Current.Resources["SecondaryColor"] = secondary;
-            Current.Resources["SurfaceColor"] = surface;
-            Current.Resources["OnSurfaceColor"] = fg;
-            Current.Resources["CardShadowOpacity"] = isActuallyDark ? 0.4 : 0.05; // Drastically reduce light mode shadow
-
-            // Enhanced grounding colors for light mode
-            Current.Resources["MaterialDesign.Brush.Outline"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0x44, 0x44, 0x44) : System.Windows.Media.Color.FromRgb(0x88, 0x88, 0x88));
-            Current.Resources["MaterialDesign.Brush.SurfaceVariant"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0x22, 0x22, 0x22) : System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0));
-
-            // App specific semantic brushes
-            Current.Resources["App.Brush.Foreground"] = fgBrush;
-            Current.Resources["App.Brush.Primary"] = primaryBrush;
-            
-            var warningColor = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xFF, 0xAB, 0x40) : System.Windows.Media.Color.FromRgb(0xFF, 0x8C, 0x00);
-            var warningBrush = new System.Windows.Media.SolidColorBrush(warningColor); warningBrush.Freeze();
-            Current.Resources["WarningBrush"] = warningBrush;
-
-            // [REFINE] Use white text for badge backgrounds for better consistency.
-            // 全てのバッジで白文字を使用し、視認性と一貫性を向上させます。
-            var warningFg = System.Windows.Media.Colors.White;
-            var warningFgBrush = new System.Windows.Media.SolidColorBrush(warningFg); warningFgBrush.Freeze();
             Current.Resources["WarningForegroundBrush"] = warningFgBrush;
 
-            Current.Resources["TextPrimaryBrush"] = fgBrush;
-            Current.Resources["PrimaryBrush"] = primaryBrush;
-            Current.Resources["SecondaryBrush"] = secondaryBrush;
-            
-            // Explicitly set for Advanced Simulation UI consistency
-            Current.Resources["MaterialDesign.Brush.SurfaceVariant"] = new System.Windows.Media.SolidColorBrush(isActuallyDark ? System.Windows.Media.Color.FromRgb(0x2C, 0x2C, 0x2C) : System.Windows.Media.Color.FromRgb(0xEF, 0xEF, 0xEF));
-
-            // [RESTORE] Dedicated brushes for the "CLOSE" button to ensure visibility
-            // Light: Gray background with Black text
-            // Dark: Dark gray background with White text
-            var closeBg = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x33, 0x33, 0x33) : System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0);
-            var closeFg = isActuallyDark ? System.Windows.Media.Colors.White : System.Windows.Media.Colors.Black;
-            Current.Resources["App.Brush.Close.Background"] = new System.Windows.Media.SolidColorBrush(closeBg);
-            Current.Resources["App.Brush.Close.Foreground"] = new System.Windows.Media.SolidColorBrush(closeFg);
+            // Semantic Brushes
+            Current.Resources["App.Brush.Foreground"] = fgBrush;
+            Current.Resources["App.Brush.Primary"] = new SolidColorBrush(theme.PrimaryMid.Color);
         }
         catch (Exception ex)
         {

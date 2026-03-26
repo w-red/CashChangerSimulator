@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Dark Theme Palette ("Soft Dark") -->
+    <Color x:Key="BackgroundColor">#121212</Color>
+    <Color x:Key="SurfaceColor">#2D2D2D</Color> <!-- [REFINE] Adjusted per user feedback -->
+    <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
+    <Color x:Key="OnSurfaceVariantColor">#A0A0A0</Color>
+    <Color x:Key="OutlineColor">#444444</Color>
+    <Color x:Key="SurfaceVariantColor">#2C2C2C</Color>
+    <Color x:Key="WarningColor">#FFAB40</Color>
+    <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency -->
+
+    <SolidColorBrush x:Key="App.Brush.Close.Background" Color="#333333" />
+    <SolidColorBrush x:Key="App.Brush.Close.Foreground" Color="White" />
+</ResourceDictionary>

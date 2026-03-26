@@ -2,25 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!--
       Cash Changer Simulator - Design System Colors
-      These colors are used as base definitions and fallbacks for StaticResource lookups.
-      Dynamic scaling is handled via MaterialDesign brushes and App.xaml.cs UpdateTheme.
+      These colors are theme-independent shared resources.
+      Theme-specific colors are defined in Colors.Light.xaml and Colors.Dark.xaml.
     -->
- 
-    <!-- Base colors (Default to Light) -->
-    <Color x:Key="BackgroundColor">#F5F5F5</Color>
-    <Color x:Key="SurfaceColor">#FFFFFF</Color>
-    <Color x:Key="PrimaryColor">#6200EE</Color>
-    <Color x:Key="SecondaryColor">#FF8C00</Color>
-    <Color x:Key="OnSurfaceColor">#000000</Color>
-    
-    <!-- Original "Soft Dark" values for reference (applied dynamically via App.xaml.cs)
-    BackgroundColor: #0D0D11
-    SurfaceColor: #161616
-    PrimaryColor: #BB86FC
-    SecondaryColor: #81C784
-    OnSurfaceColor: #E0E0E0
-    -->
- 
+
     <!-- Shared Brushes for Alerts and Errors -->
     <SolidColorBrush x:Key="App.Brush.Error" Color="#D32F2F" />
     <SolidColorBrush x:Key="App.Brush.Jam" Color="#FF5252" />
@@ -31,6 +16,5 @@
 
     <!--
       Standard MaterialDesign Brushes are managed dynamically by PaletteHelper in App.xaml.cs.
-      Avoid hardcoding MaterialDesign.* brushes here.
     -->
 </ResourceDictionary>
