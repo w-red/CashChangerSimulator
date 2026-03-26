@@ -12,7 +12,7 @@
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,60">
         <TextBlock Text="{StaticResource Dispensing}" AutomationProperties.AutomationId="DispensingIndicator" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" Margin="0,0,0,12"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Text="{StaticResource CurrencySymbol}" FontSize="56" FontWeight="Thin"/>
+            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="56" FontWeight="Thin"/>
             <TextBlock Text="{Binding DispensingAmount.Value, StringFormat={}{0:N0}}" FontSize="56" FontWeight="Thin"/>
         </StackPanel>
         <ProgressBar IsIndeterminate="True" Margin="0,24" Width="240" Height="4" Foreground="{DynamicResource MaterialDesign.Brush.Primary}" BorderThickness="0" Background="Transparent"/>
