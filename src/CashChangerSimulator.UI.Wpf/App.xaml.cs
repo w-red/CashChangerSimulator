@@ -202,7 +202,7 @@ internal partial class App : Application
             
             var bg = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x12, 0x12, 0x12) : System.Windows.Media.Color.FromRgb(0xF5, 0xF5, 0xF5);
             var fg = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0) : System.Windows.Media.Color.FromRgb(0x00, 0x00, 0x00);
-            var surface = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x1E) : System.Windows.Media.Colors.White;
+            var surface = isActuallyDark ? System.Windows.Media.Color.FromRgb(0x2D, 0x2D, 0x2D) : System.Windows.Media.Colors.White;
             var onSurfaceVariant = isActuallyDark ? System.Windows.Media.Color.FromRgb(0xA0, 0xA0, 0xA0) : System.Windows.Media.Color.FromRgb(0x44, 0x44, 0x44);
 
             var currentThemeColors = paletteHelper.GetTheme();
@@ -255,9 +255,9 @@ internal partial class App : Application
             var warningBrush = new System.Windows.Media.SolidColorBrush(warningColor); warningBrush.Freeze();
             Current.Resources["WarningBrush"] = warningBrush;
 
-            // [REFINE] Use black text for bright warning backgrounds as requested.
-            // 明るい警告背景にはユーザーのリクエスト通り黒文字を使用します。
-            var warningFg = System.Windows.Media.Colors.Black;
+            // [REFINE] Use white text for badge backgrounds for better consistency.
+            // 全てのバッジで白文字を使用し、視認性と一貫性を向上させます。
+            var warningFg = System.Windows.Media.Colors.White;
             var warningFgBrush = new System.Windows.Media.SolidColorBrush(warningFg); warningFgBrush.Freeze();
             Current.Resources["WarningForegroundBrush"] = warningFgBrush;
 

@@ -21,6 +21,14 @@
     OnSurfaceColor: #E0E0E0
     -->
  
+    <!-- Shared Brushes for Alerts and Errors -->
+    <SolidColorBrush x:Key="App.Brush.Error" Color="#D32F2F" />
+    <SolidColorBrush x:Key="App.Brush.Jam" Color="#FF5252" />
+    <SolidColorBrush x:Key="App.Brush.Overlap" Color="OrangeRed" />
+    <SolidColorBrush x:Key="App.Brush.Warning" Color="Goldenrod" />
+    <SolidColorBrush x:Key="App.Brush.Reject" Color="OrangeRed" />
+    <SolidColorBrush x:Key="App.Brush.AccentError" Color="IndianRed" />
+
     <!--
       Standard MaterialDesign Brushes are managed dynamically by PaletteHelper in App.xaml.cs.
       Avoid hardcoding MaterialDesign.* brushes here.

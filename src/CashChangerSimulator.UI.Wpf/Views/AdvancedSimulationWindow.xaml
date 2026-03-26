@@ -144,7 +144,7 @@
 
                     <materialDesign:Card Grid.Column="1" Margin="8,0,0,0" Padding="12" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                         <StackPanel>
-                            <TextBlock Text="硬貨ユニット" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                            <TextBlock Text="{StaticResource LabelCoinsUnit}" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                             <ItemsControl ItemsSource="{Binding Coins}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
