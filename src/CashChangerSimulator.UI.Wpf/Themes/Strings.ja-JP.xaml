@@ -38,7 +38,7 @@
     <system:String x:Key="CashBalance">在庫合計金額</system:String>
     <system:String x:Key="ActivityFeed">アクティビティフィード</system:String>
     <system:String x:Key="NoRecentTransactions">最近の取引はありません</system:String>
-    <system:String x:Key="ValidationError">入力エラー</system:String>
+    <system:String x:Key="ReadError">読取異常</system:String>
     <system:String x:Key="JamError">ジャム発生</system:String>
 
     <!-- Validation Messages -->

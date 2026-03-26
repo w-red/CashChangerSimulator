@@ -18,23 +18,23 @@
 
     <StackPanel VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
-            <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
+            <Border Background="{DynamicResource App.Brush.Error}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsConnected.Value, Converter={StaticResource InvertedVisibilityConv}}">
                 <TextBlock Text="{StaticResource DeviceClosed}" />
             </Border>
-            <Border Background="#D32F2F" Style="{StaticResource BadgeStyle}"
+            <Border Background="{DynamicResource App.Brush.Error}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsDeviceError.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock>
                     <Run Text="{StaticResource ErrorDevicePrefix}" /><Run Text="{Binding CurrentErrorCode.Value}" /><Run Text="{StaticResource ErrorDeviceSuffix}" />
                 </TextBlock>
             </Border>
-            <Border Background="#FF5252" Style="{StaticResource BadgeStyle}"
+            <Border Background="{DynamicResource App.Brush.Jam}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock Text="{StaticResource JamError}" AutomationProperties.AutomationId="JamErrorIndicator"/>
             </Border>
-            <Border Background="OrangeRed" Style="{StaticResource BadgeStyle}"
+            <Border Background="{DynamicResource App.Brush.Overlap}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="{StaticResource ValidationError}" AutomationProperties.AutomationId="OverlapErrorIndicator"/>
+                <TextBlock Text="{StaticResource ReadError}" AutomationProperties.AutomationId="OverlapErrorIndicator"/>
             </Border>
             <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsConnected.Value, Converter={StaticResource VisibilityConv}}">
