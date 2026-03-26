@@ -26,4 +26,7 @@ public interface IInventoryOperationService
 
     /// <summary>重なりエラーの状態をシミュレートします。</summary>
     void SimulateOverlap();
+
+    /// <summary>デバイスエラーの状態をシミュレートします。</summary>
+    void SimulateDeviceError();
 }

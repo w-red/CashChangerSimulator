@@ -11,16 +11,20 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// <param name="items">金種ごとの入力項目リスト。</param>
 /// <param name="simulateOverlap">重なりエラーをシミュレートするコマンド。</param>
 /// <param name="simulateJam">ジャムエラーをシミュレートするコマンド。</param>
+/// <param name="simulateDeviceError">デバイスエラーをシミュレートするコマンド。</param>
 /// <param name="resetError">エラーをリセットするコマンド。</param>
 /// <param name="isJammed">ジャムが発生しているかどうかを監視するリアクティブプロパティ。</param>
 /// <param name="isOverlapped">重なりが発生しているかどうかを監視するリアクティブプロパティ。</param>
+/// <param name="isDeviceError">デバイスエラーが発生しているかどうかを監視するリアクティブプロパティ。</param>
 public class BulkAmountInputViewModel(
     IEnumerable<BulkAmountInputItemViewModel> items,
     ICommand simulateOverlap,
     ICommand simulateJam,
+    ICommand simulateDeviceError,
     ICommand resetError,
     ReadOnlyReactiveProperty<bool> isJammed,
-    ReadOnlyReactiveProperty<bool> isOverlapped)
+    ReadOnlyReactiveProperty<bool> isOverlapped,
+    ReadOnlyReactiveProperty<bool> isDeviceError)
 {
     private static T EnsureNotNull<T>(T value) where T : class
     {
@@ -37,6 +41,9 @@ public class BulkAmountInputViewModel(
     /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
     public ICommand SimulateJamCommand { get; } = EnsureNotNull(simulateJam);
 
+    /// <summary>デバイスエラーをシミュレートするコマンド。</summary>
+    public ICommand SimulateDeviceErrorCommand { get; } = EnsureNotNull(simulateDeviceError);
+
     /// <summary>エラー状態を解消するコマンド。</summary>
     public ICommand ResetErrorCommand { get; } = EnsureNotNull(resetError);
 
@@ -45,4 +52,7 @@ public class BulkAmountInputViewModel(
 
     /// <summary>重なりエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsOverlapped { get; } = EnsureNotNull(isOverlapped);
+
+    /// <summary>デバイスエラーが発生しているかどうか。</summary>
+    public ReadOnlyReactiveProperty<bool> IsDeviceError { get; } = EnsureNotNull(isDeviceError);
 }

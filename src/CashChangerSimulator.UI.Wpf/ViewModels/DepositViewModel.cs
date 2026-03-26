@@ -125,6 +125,9 @@ public class DepositViewModel : IDisposable
     /// <summary>リジェクトをシミュレートするコマンド。</summary>
     public ReactiveCommand<Unit> SimulateRejectCommand { get; }
 
+    /// <summary>デバイスエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateDeviceErrorCommand { get; }
+
     /// <summary>一括投入画面を表示するコマンド（View側で購読）。</summary>
     public ReactiveCommand<Unit> ShowBulkInsertCommand { get; }
 
@@ -338,7 +341,7 @@ public class DepositViewModel : IDisposable
         SimulateOverlapCommand.Subscribe(_ => _inventoryService.SimulateOverlap());
 
         ResetErrorCommand = IsOverlapped
-            .CombineLatest(_facade.Status.IsJammed, (overlapped, jammed) => overlapped || jammed)
+            .CombineLatest(_facade.Status.IsJammed, IsDeviceError, (overlapped, jammed, devErr) => overlapped || jammed || devErr)
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _inventoryService.ResetError());
@@ -354,6 +357,12 @@ public class DepositViewModel : IDisposable
             .ToReactiveCommand<Unit>()
             .AddTo(_disposables);
         SimulateRejectCommand.Subscribe(_ => _depositService.SimulateReject(1000m));
+
+        SimulateDeviceErrorCommand = IsInDepositMode
+            .CombineLatest(IsDepositFixed, IsDeviceError, (mode, fixed_, devErr) => !devErr)
+            .ToReactiveCommand<Unit>()
+            .AddTo(_disposables);
+        SimulateDeviceErrorCommand.Subscribe(_ => _inventoryService.SimulateDeviceError());
     }
 
     private string GetModeName()

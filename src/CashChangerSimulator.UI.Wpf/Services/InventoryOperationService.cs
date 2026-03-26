@@ -122,4 +122,10 @@ public class InventoryOperationService : IInventoryOperationService
     {
         _facade.Status.SetOverlapped(true);
     }
+
+    /// <inheritdoc/>
+    public void SimulateDeviceError()
+    {
+        _facade.Status.SetDeviceError((int)ErrorCode.Failure);
+    }
 }

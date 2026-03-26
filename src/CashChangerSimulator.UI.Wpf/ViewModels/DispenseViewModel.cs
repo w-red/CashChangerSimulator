@@ -85,6 +85,9 @@ public class DispenseViewModel : IDisposable
     /// <summary>重なりエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand SimulateOverlapCommand { get; }
 
+    /// <summary>デバイスエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand SimulateDeviceErrorCommand { get; }
+
     /// <summary>必要なサービスを注入して <see cref="DispenseViewModel"/> を初期化します。</summary>
     /// <param name="facade">デバイスとコア機能の Facade である <see cref="IDeviceFacade"/>。</param>
     /// <param name="configProvider">アプリケーション設定を提供する <see cref="ConfigurationProvider"/>。</param>
@@ -220,7 +223,7 @@ public class DispenseViewModel : IDisposable
 
         ResetErrorCommand = Status
             .Select(s => s == CashDispenseStatus.Error)
-            .CombineLatest(_facade.Status.IsJammed, _facade.Status.IsOverlapped, (err, jammed, overlapped) => err || jammed || overlapped)
+            .CombineLatest(_facade.Status.IsJammed, _facade.Status.IsOverlapped, IsDeviceError, (err, jammed, overlapped, devErr) => err || jammed || overlapped || devErr)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
@@ -237,6 +240,12 @@ public class DispenseViewModel : IDisposable
             .ToReactiveCommand()
             .AddTo(_disposables);
         SimulateOverlapCommand.Subscribe(_ => _inventoryService.SimulateOverlap());
+
+        SimulateDeviceErrorCommand = IsDeviceError
+            .Select(err => !err)
+            .ToReactiveCommand()
+            .AddTo(_disposables);
+        SimulateDeviceErrorCommand.Subscribe(_ => _inventoryService.SimulateDeviceError());
     }
 
     // Private helper methods removed as logic is now in IDispenseOperationService
