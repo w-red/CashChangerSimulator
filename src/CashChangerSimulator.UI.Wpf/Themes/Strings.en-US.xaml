@@ -154,6 +154,7 @@
     <system:String x:Key="ToolTipSimulateJam">Simulate mechanical jam</system:String>
     <system:String x:Key="ToolTipSimulateOverlap">Simulate overlap error</system:String>
     <system:String x:Key="ToolTipSimulateReject">Simulate reject</system:String>
+    <system:String x:Key="ToolTipSimulateError">Simulate device error</system:String>
     <system:String x:Key="ToolTipClearInput">Clear display</system:String>
     <system:String x:Key="ToolTipReplenishAll">Replenish all (set to default quantities)</system:String>
     <system:String x:Key="ToolTipCollectAll">Collect all (set to zero)</system:String>

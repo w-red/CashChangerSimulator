@@ -12,7 +12,7 @@
     <Color x:Key="SurfaceContainerHighColor">#F0F0F0</Color>
     <Color x:Key="InventoryTileBackgroundColor">#FFFFFF</Color> <!-- Tiles are white on light gray container -->
     <Color x:Key="WarningColor">#FF8C00</Color>
-    <Color x:Key="WarningForegroundColor">#000000</Color>
+    <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency across themes -->
 
     <SolidColorBrush x:Key="App.Brush.Close.Background" Color="#E0E0E0" />
     <SolidColorBrush x:Key="App.Brush.Close.Foreground" Color="Black" />

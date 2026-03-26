@@ -4,13 +4,13 @@
     <Color x:Key="PrimaryColor">#BB86FC</Color>
     <Color x:Key="SecondaryColor">#03DAC6</Color>
     <Color x:Key="BackgroundColor">#121212</Color>
-    <Color x:Key="SurfaceColor">#2D2D2D</Color> <!-- [REFINE] Adjusted per user feedback -->
+    <Color x:Key="SurfaceColor">#343434</Color> <!-- [REFINE] Slightly lighter black for buttons/cards per user request -->
     <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
     <Color x:Key="OnSurfaceVariantColor">#A0A0A0</Color>
     <Color x:Key="OutlineColor">#444444</Color>
     <Color x:Key="SurfaceVariantColor">#2C2C2C</Color>
     <Color x:Key="SurfaceContainerHighColor">#3D3D3D</Color>
-    <Color x:Key="InventoryTileBackgroundColor">#202020</Color> <!-- Darker than container for contrast -->
+    <Color x:Key="InventoryTileBackgroundColor">#1A1A1A</Color> <!-- Even darker for better contrast per user request -->
     <Color x:Key="WarningColor">#FFAB40</Color>
     <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency -->
 

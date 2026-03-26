@@ -154,6 +154,7 @@
     <system:String x:Key="ToolTipSimulateJam">メカジャムをシミュレート</system:String>
     <system:String x:Key="ToolTipSimulateOverlap">重なりエラーをシミュレート</system:String>
     <system:String x:Key="ToolTipSimulateReject">リジェクトをシミュレート</system:String>
+    <system:String x:Key="ToolTipSimulateError">デバイスエラーをシミュレート</system:String>
     <system:String x:Key="ToolTipClearInput">表示をクリア</system:String>
     <system:String x:Key="ToolTipReplenishAll">全補充 (初期枚数に設定)</system:String>
     <system:String x:Key="ToolTipCollectAll">全回収 (ゼロに設定)</system:String>
