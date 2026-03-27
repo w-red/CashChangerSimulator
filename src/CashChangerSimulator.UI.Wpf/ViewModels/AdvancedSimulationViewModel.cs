@@ -1,8 +1,14 @@
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Monitoring;
+using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Device.Services;
 using CashChangerSimulator.UI.Wpf.Services;
 using R3;
 using System.Text.Json;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -53,6 +59,12 @@ public class AdvancedSimulationViewModel : IDisposable
     /// <summary>何らかのエラーが発生しているかどうか。</summary>
     public ReadOnlyReactiveProperty<bool> IsAnyError { get; }
 
+    /// <summary>紙幣金種のステータスリスト。</summary>
+    public ObservableCollection<DenominationStatusViewModel> Bills { get; } = [];
+
+    /// <summary>硬貨金種のステータスリスト。</summary>
+    public ObservableCollection<DenominationStatusViewModel> Coins { get; } = [];
+
     // --- Commands ---
 
     /// <summary>スクリプトを実行するコマンド。</summary>
@@ -82,11 +94,13 @@ public class AdvancedSimulationViewModel : IDisposable
     /// <param name="metadataProvider">通貨情報を表す <see cref="CurrencyMetadataProvider"/>。</param>
     public AdvancedSimulationViewModel(
         IDeviceFacade facade,
+        ConfigurationProvider configProvider,
         IScriptExecutionService scriptExecutionService,
         IInventoryOperationService inventoryOperationService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(facade);
+        ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(scriptExecutionService);
         ArgumentNullException.ThrowIfNull(inventoryOperationService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
@@ -111,15 +125,20 @@ public class AdvancedSimulationViewModel : IDisposable
                 .ToBindableReactiveProperty(facade.Deposit.IsDepositInProgress)
                 .AddTo(_disposables);
 
-        IsJammed = facade.Status.IsJammed.ToBindableReactiveProperty().AddTo(_disposables);
-        IsOverlapped = facade.Status.IsOverlapped.ToBindableReactiveProperty().AddTo(_disposables);
-        IsDeviceError = facade.Status.IsDeviceError.ToBindableReactiveProperty().AddTo(_disposables);
+        // Ensure UI context for reactive updates
+        var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        var syncContext = System.Threading.SynchronizationContext.Current ?? new System.Windows.Threading.DispatcherSynchronizationContext(dispatcher);
+
+        IsJammed = facade.Status.IsJammed.ObserveOn(syncContext).ToBindableReactiveProperty().AddTo(_disposables);
+        IsOverlapped = facade.Status.IsOverlapped.ObserveOn(syncContext).ToBindableReactiveProperty().AddTo(_disposables);
+        IsDeviceError = facade.Status.IsDeviceError.ObserveOn(syncContext).ToBindableReactiveProperty().AddTo(_disposables);
 
         IsAnyError = Observable.CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (j, o, e) => j || o || e)
+                .ObserveOn(syncContext)
                 .ToReadOnlyReactiveProperty()
                 .AddTo(_disposables);
 
-        ResetErrorCommand = IsAnyError.ToReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand = IsAnyError.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
         SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateOverlapCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
@@ -141,6 +160,20 @@ public class AdvancedSimulationViewModel : IDisposable
         SimulateDeviceErrorCommand.Subscribe(_ => _facade.Status.SetDeviceError(999, 0));
         ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
         CloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+
+        InitializeDenominations(configProvider, metadataProvider);
+
+        // 各金種のエラー状態をハードウェア状態と同期させる
+        Observable.Merge(
+            facade.Status.IsJammed,
+            facade.Status.IsOverlapped,
+            facade.Status.IsDeviceError.Select(_ => true)) // Dummy select to match type if needed, but here simple merge
+            .Subscribe(_ => 
+            {
+                foreach (var b in Bills) b.SyncState(facade.Status);
+                foreach (var c in Coins) c.SyncState(facade.Status);
+            })
+            .AddTo(_disposables);
 
         // Enables command only if JSON is basically valid list
         var canExecute = ScriptInput.Select(input =>
@@ -189,6 +222,50 @@ public class AdvancedSimulationViewModel : IDisposable
                 ScriptError.Value = $"Parse Error: {ex.Message}";
             }
         }).AddTo(_disposables);
+    }
+
+    private void InitializeDenominations(ConfigurationProvider configProvider, CurrencyMetadataProvider metadataProvider)
+    {
+        Bills.Clear();
+        Coins.Clear();
+
+        var currencyCode = configProvider.Config.System.CurrencyCode;
+        var inventorySettings = configProvider.Config.Inventory.GetValueOrDefault(currencyCode);
+        if (inventorySettings == null) return;
+
+        foreach (var keyStr in inventorySettings.Denominations.Keys)
+        {
+            if (DenominationKey.TryParse(keyStr, out var key) && key != null)
+            {
+                var name = metadataProvider.GetDenominationName(key);
+                var vm = new DenominationStatusViewModel(key, name, _facade.Status);
+                if (key.Type == CurrencyCashType.Bill) Bills.Add(vm);
+                else if (key.Type == CurrencyCashType.Coin) Coins.Add(vm);
+            }
+        }
+    }
+
+    /// <summary>金種別のエラー状態を管理するサブ ViewModel。</summary>
+    public class DenominationStatusViewModel
+    {
+        private readonly DenominationKey _key;
+
+        public string Name { get; }
+
+        public BindableReactiveProperty<bool> IsInError { get; }
+
+        public DenominationStatusViewModel(DenominationKey key, string name, HardwareStatusManager status)
+        {
+            _key = key;
+            Name = name;
+            IsInError = new BindableReactiveProperty<bool>(false);
+            SyncState(status);
+        }
+
+        public void SyncState(HardwareStatusManager status)
+        {
+            IsInError.Value = status.IsJammed.Value || status.IsOverlapped.Value || status.IsDeviceError.Value;
+        }
     }
 
     /// <inheritdoc/>

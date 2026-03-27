@@ -96,7 +96,8 @@ public class DenominationViewModel : IDisposable
         }
 
         Name = !string.IsNullOrEmpty(name) ? name : metadataProvider.GetDenominationName(key);
-        Status = monitor.Status.ToBindableReactiveProperty();
+        Status = new BindableReactiveProperty<CashStatus>(CashStatus.Unknown);
+        monitor.Status.Subscribe(s => SafeInvoke(() => Status.Value = s)).AddTo(_disposables);
         Count = new BindableReactiveProperty<int>(facade.Inventory.GetTotalCount(key));
 
         RecyclableCount = new BindableReactiveProperty<int>(facade.Inventory.GetCount(key));
@@ -128,9 +129,11 @@ public class DenominationViewModel : IDisposable
             .AddTo(_disposables);
 
         var isAccepting = facade.Deposit.DepositStatus == CashDepositStatus.Count && !facade.Deposit.IsFixed && !facade.Deposit.IsPaused;
-        IsAcceptingCash = facade.Deposit.Changed
-            .Select(_ => facade.Deposit.DepositStatus == CashDepositStatus.Count && !facade.Deposit.IsFixed && !facade.Deposit.IsPaused)
-            .ToBindableReactiveProperty(isAccepting);
+        IsAcceptingCash = new BindableReactiveProperty<bool>(isAccepting);
+        facade.Deposit.Changed
+            .Subscribe(_ => SafeInvoke(() => {
+                IsAcceptingCash.Value = facade.Deposit.DepositStatus == CashDepositStatus.Count && !facade.Deposit.IsFixed && !facade.Deposit.IsPaused;
+            })).AddTo(_disposables);
 
         ShowDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
     }

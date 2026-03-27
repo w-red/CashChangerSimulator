@@ -320,8 +320,9 @@ public class DepositViewModel : IDisposable
         });
 
         CanOperate = _facade.Status.IsConnected
-            .CombineLatest(_isJammed, _isOverlapped, IsInDepositMode, _isDispenseBusy, (connected, jammed, overlapped, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !mode && !dispenseBusyValue)
-            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
+            .CombineLatest(_isJammed, _isOverlapped, IsDeviceError, IsInDepositMode, _isDispenseBusy, 
+                (connected, jammed, overlapped, devErr, mode, dispenseBusyValue) => connected && !jammed && !overlapped && !devErr && !mode && !dispenseBusyValue)
+            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value && !_isJammed.Value && !_isOverlapped.Value && !IsDeviceError.Value && !IsInDepositMode.Value && !_isDispenseBusy.Value)
             .AddTo(_disposables);
 
         QuickDepositCommand = CanOperate.ToReactiveCommand<Unit>().AddTo(_disposables);

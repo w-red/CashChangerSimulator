@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Threading;
 
 namespace CashChangerSimulator.UI.Wpf.Services;
 
@@ -7,12 +8,19 @@ namespace CashChangerSimulator.UI.Wpf.Services;
 /// </summary>
 public class WpfDispatcherService : IDispatcherService
 {
+    private readonly Dispatcher _dispatcher;
+
+    public WpfDispatcherService()
+    {
+        // Capture the dispatcher of the thread creating this service (expected to be the UI thread)
+        _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+    }
+
     public void SafeInvoke(Action action)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher != null && !dispatcher.CheckAccess())
+        if (_dispatcher != null && !_dispatcher.CheckAccess())
         {
-            dispatcher.Invoke(action);
+            _dispatcher.Invoke(action);
         }
         else
         {
@@ -22,10 +30,9 @@ public class WpfDispatcherService : IDispatcherService
 
     public Task InvokeAsync(Action action)
     {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher != null)
+        if (_dispatcher != null)
         {
-            return dispatcher.InvokeAsync(action).Task;
+            return _dispatcher.InvokeAsync(action).Task;
         }
         
         action();

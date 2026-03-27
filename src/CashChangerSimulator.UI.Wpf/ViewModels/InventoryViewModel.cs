@@ -10,24 +10,27 @@ using CashChangerSimulator.UI.Wpf.Services;
 using R3;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
 /// <summary>現金在庫の可視化とデバイスの基本操作（接続・エラー解除）を担当する ViewModel。</summary>
 public class InventoryViewModel : IDisposable
 {
-    private readonly ILogger<InventoryViewModel> _logger = LogProvider.CreateLogger<InventoryViewModel>();
+    private readonly ILogger<InventoryViewModel>? _logger = LogProvider.CreateLogger<InventoryViewModel>();
     private readonly IDeviceFacade _facade;
     private readonly ConfigurationProvider _configProvider;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly IInventoryOperationService _operationService;
     private readonly IViewModelFactory _viewModelFactory;
+    private readonly IDispatcherService _dispatcher;
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨の接頭辞（例: ￥）。</summary>
-    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public BindableReactiveProperty<string> CurrencyPrefix { get; }
     /// <summary>通貨の接尾辞。</summary>
-    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
+    public BindableReactiveProperty<string> CurrencySuffix { get; }
 
     /// <summary>紙幣金種のリスト。</summary>
     public ObservableCollection<DenominationViewModel> BillDenominations { get; } = [];
@@ -37,19 +40,19 @@ public class InventoryViewModel : IDisposable
     public IEnumerable<DenominationViewModel> Denominations => BillDenominations.Concat(CoinDenominations);
 
     /// <summary>デバイス全体の在庫ステータス。</summary>
-    public ReadOnlyReactiveProperty<CashStatus> OverallStatus { get; }
+    public BindableReactiveProperty<CashStatus> OverallStatus { get; }
     /// <summary>フル状態のステータス。</summary>
-    public ReadOnlyReactiveProperty<CashStatus> FullStatus { get; }
+    public BindableReactiveProperty<CashStatus> FullStatus { get; }
     /// <summary>ジャムが発生しているかどうか。</summary>
-    public ReactiveProperty<bool> IsJammed { get; }
+    public BindableReactiveProperty<bool> IsJammed { get; }
     /// <summary>重なりが発生しているかどうか。</summary>
-    public ReactiveProperty<bool> IsOverlapped { get; }
+    public BindableReactiveProperty<bool> IsOverlapped { get; }
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
     /// <summary>現在のエラーコード。</summary>
     public BindableReactiveProperty<int?> CurrentErrorCode { get; }
     /// <summary>デバイスと接続されているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsConnected { get; }
+    public BindableReactiveProperty<bool> IsConnected { get; }
 
     /// <summary>取引履歴が空かどうか。</summary>
     public BindableReactiveProperty<bool> IsEmpty { get; }
@@ -59,80 +62,123 @@ public class InventoryViewModel : IDisposable
     public BindableReactiveProperty<GridLength> CoinGridWidth { get; }
 
     /// <summary>デバイスをオープンするコマンド。</summary>
-    public ReactiveCommand OpenCommand { get; }
+    public ReactiveCommand<Unit> OpenCommand { get; }
     /// <summary>デバイスをクローズするコマンド。</summary>
-    public ReactiveCommand CloseCommand { get; }
+    public ReactiveCommand<Unit> CloseCommand { get; }
     /// <summary>設定画面を表示するコマンド。</summary>
-    public ReactiveCommand OpenSettingsCommand { get; }
+    public ReactiveCommand<Unit> OpenSettingsCommand { get; }
     /// <summary>エラーをリセットするコマンド。</summary>
-    public ReactiveCommand ResetErrorCommand { get; }
+    public ReactiveCommand<Unit> ResetErrorCommand { get; }
     /// <summary>全在庫を回収するコマンド。</summary>
-    public ReactiveCommand CollectAllCommand { get; }
+    public ReactiveCommand<Unit> CollectAllCommand { get; }
     /// <summary>全在庫を補充するコマンド。</summary>
-    public ReactiveCommand ReplenishAllCommand { get; }
+    public ReactiveCommand<Unit> ReplenishAllCommand { get; }
     /// <summary>金種詳細を表示するコマンド。</summary>
     public ReactiveCommand<DenominationViewModel> ShowDenominationDetailCommand { get; }
     /// <summary>取引履歴をエクスポートするコマンド。</summary>
-    public ReactiveCommand ExportHistoryCommand { get; }
+    public ReactiveCommand<Unit> ExportHistoryCommand { get; }
     /// <summary>リカバリヘルプを表示するコマンド。</summary>
-    public ReactiveCommand ShowRecoveryHelpCommand { get; }
+    public ReactiveCommand<Unit> ShowRecoveryHelpCommand { get; }
+
+    /// <summary>ジャムエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateJamCommand { get; }
+    /// <summary>重なりエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateOverlapCommand { get; }
+    /// <summary>デバイスエラーをシミュレートするコマンド。</summary>
+    public ReactiveCommand<Unit> SimulateDeviceErrorCommand { get; }
 
     /// <summary>リカバリヘルプが状況的に推奨されるかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsRecoveryHelpAvailable { get; }
-
+    public BindableReactiveProperty<bool> IsRecoveryHelpAvailable { get; }
 
     /// <summary>最近の取引履歴。</summary>
     public ObservableCollection<TransactionEntry> RecentTransactions { get; } = [];
 
     /// <summary>依存関係を注入して InventoryViewModel を初期化します。</summary>
-    /// <param name="facade">デバイスとコア機能の Facade。</param>
-    /// <param name="configProvider">設定プロバイダー。</param>
-    /// <param name="metadataProvider">通貨メタデータプロバイダー。</param>
-    /// <param name="notifyService">通知サービス。</param>
     public InventoryViewModel(
         IDeviceFacade facade,
         ConfigurationProvider configProvider,
         CurrencyMetadataProvider metadataProvider,
         IInventoryOperationService operationService,
-        IViewModelFactory viewModelFactory)
+        IViewModelFactory viewModelFactory,
+        IDispatcherService dispatcher)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(metadataProvider);
         ArgumentNullException.ThrowIfNull(operationService);
         ArgumentNullException.ThrowIfNull(viewModelFactory);
+        ArgumentNullException.ThrowIfNull(dispatcher);
 
         _facade = facade;
         _configProvider = configProvider;
         _metadataProvider = metadataProvider;
         _operationService = operationService;
         _viewModelFactory = viewModelFactory;
+        _dispatcher = dispatcher;
 
-        CurrencyPrefix = _metadataProvider.SymbolPrefix;
-        CurrencySuffix = _metadataProvider.SymbolSuffix;
-        OverallStatus = _facade.AggregatorProvider.Aggregator.DeviceStatus;
-        FullStatus = _facade.AggregatorProvider.Aggregator.FullStatus;
-        IsJammed = _facade.Status.IsJammed;
-        IsOverlapped = _facade.Status.IsOverlapped;
-        IsDeviceError = _facade.Status.IsDeviceError;
-        CurrentErrorCode = _facade.Status.CurrentErrorCode;
-        IsConnected = _facade.Status.IsConnected;
+        // Ensure UI context for reactive updates ONLY when running in a real WPF application context.
+        var isWpf = System.Windows.Application.Current != null;
+        var dispatcherContext = System.Windows.Application.Current?.Dispatcher;
+        var syncContext = isWpf ? (SynchronizationContext.Current ?? (dispatcherContext != null ? new DispatcherSynchronizationContext(dispatcherContext) : null)) : null;
+
+        Observable<T> Sync<T>(Observable<T> observable) => 
+            (isWpf && syncContext != null) ? observable.ObserveOn(syncContext) : observable;
+
+        CurrencyPrefix = _metadataProvider.SymbolPrefix.ToBindableReactiveProperty("").AddTo(_disposables);
+        CurrencySuffix = _metadataProvider.SymbolSuffix.ToBindableReactiveProperty("").AddTo(_disposables);
+
+        OverallStatus = Sync(_facade.AggregatorProvider.Aggregator.DeviceStatus.AsObservable())
+            .ToBindableReactiveProperty(_facade.AggregatorProvider.Aggregator.DeviceStatus.CurrentValue)
+            .AddTo(_disposables);
+
+        FullStatus = Sync(_facade.AggregatorProvider.Aggregator.FullStatus.AsObservable())
+            .ToBindableReactiveProperty(_facade.AggregatorProvider.Aggregator.FullStatus.CurrentValue)
+            .AddTo(_disposables);
+
+        IsJammed = Sync(_facade.Status.IsJammed.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsJammed.Value)
+            .AddTo(_disposables);
+
+        IsOverlapped = Sync(_facade.Status.IsOverlapped.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsOverlapped.Value)
+            .AddTo(_disposables);
+
+        IsDeviceError = Sync(_facade.Status.IsDeviceError.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsDeviceError.Value)
+            .AddTo(_disposables);
+
+        CurrentErrorCode = Sync(_facade.Status.CurrentErrorCode.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.CurrentErrorCode.Value)
+            .AddTo(_disposables);
+
+        IsConnected = Sync(_facade.Status.IsConnected.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value)
+            .AddTo(_disposables);
 
         BillGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
         CoinGridWidth = new BindableReactiveProperty<GridLength>(new GridLength(1, GridUnitType.Star)).AddTo(_disposables);
         IsEmpty = new BindableReactiveProperty<bool>(RecentTransactions.Count == 0).AddTo(_disposables);
 
-        OpenSettingsCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenSettingsCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         OpenSettingsCommand.Subscribe(_ =>
         {
             _facade.View.ShowSettingsWindow();
         });
 
-        ResetErrorCommand = new ReactiveCommand().AddTo(_disposables);
+        ResetErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ResetErrorCommand.Subscribe(_ => _operationService.ResetError());
 
-        ExportHistoryCommand = new ReactiveCommand().AddTo(_disposables);
+        ExportHistoryCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ExportHistoryCommand.Subscribe(_ => _operationService.ExportHistory());
+
+        SimulateJamCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateJamCommand.Subscribe(_ => _operationService.SimulateJam());
+
+        SimulateOverlapCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateOverlapCommand.Subscribe(_ => _operationService.SimulateOverlap());
+
+        SimulateDeviceErrorCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
+        SimulateDeviceErrorCommand.Subscribe(_ => _operationService.SimulateDeviceError());
 
         IsRecoveryHelpAvailable = Observable.CombineLatest(
             IsJammed,
@@ -140,12 +186,12 @@ public class InventoryViewModel : IDisposable
             OverallStatus,
             FullStatus,
             (jammed, overlapped, status, full) => jammed || overlapped || (status != CashStatus.Normal && status != CashStatus.Unknown) || full != CashStatus.Normal
-        ).ToReadOnlyReactiveProperty().AddTo(_disposables);
+        ).ToBindableReactiveProperty().AddTo(_disposables);
 
-        ShowRecoveryHelpCommand = new ReactiveCommand().AddTo(_disposables);
+        ShowRecoveryHelpCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ShowRecoveryHelpCommand.Subscribe(_ =>
         {
-            SafeInvoke(() => _facade.View.ShowRecoveryHelpDialogAsync(this));
+            _facade.View.ShowRecoveryHelpDialogAsync(this);
         });
 
         _facade.Monitors.Changed
@@ -161,71 +207,79 @@ public class InventoryViewModel : IDisposable
             }))
             .AddTo(_disposables);
 
+        // Field initializers execute before constructor, but let's be super safe.
+        BillDenominations ??= [];
+        CoinDenominations ??= [];
+
         SafeInvoke(InitializeDenominations);
 
-        OpenCommand = new ReactiveCommand().AddTo(_disposables);
+        OpenCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         OpenCommand.Subscribe(_ => _operationService.OpenDevice());
  
-        CloseCommand = new ReactiveCommand().AddTo(_disposables);
+        CloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         CloseCommand.Subscribe(_ => _operationService.CloseDevice());
 
-        CollectAllCommand = new ReactiveCommand().AddTo(_disposables);
+        CollectAllCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         CollectAllCommand.Subscribe(_ => _operationService.CollectAll());
 
-        ReplenishAllCommand = new ReactiveCommand().AddTo(_disposables);
+        ReplenishAllCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
         ReplenishAllCommand.Subscribe(_ => _operationService.ReplenishAll());
 
         ShowDenominationDetailCommand = new ReactiveCommand<DenominationViewModel>().AddTo(_disposables);
         ShowDenominationDetailCommand.Subscribe(vm =>
         {
             if (vm == null) return;
-            SafeInvoke(() => _facade.View.ShowDenominationDetailDialogAsync(vm));
+            _facade.View.ShowDenominationDetailDialogAsync(vm);
         });
-
     }
 
     private void SafeInvoke(Action action)
     {
-        _facade.Dispatcher.SafeInvoke(action);
+        _dispatcher.SafeInvoke(action);
     }
 
-    private void InitializeDenominations()
+    /// <summary>金種の初期化とグリッド幅の更新を行います。</summary>
+    public void InitializeDenominations()
     {
-        foreach (var vm in BillDenominations) vm.Dispose();
-        foreach (var vm in CoinDenominations) vm.Dispose();
+        if (BillDenominations == null || CoinDenominations == null) return;
+
+        foreach (var vm in BillDenominations) vm?.Dispose();
+        foreach (var vm in CoinDenominations) vm?.Dispose();
         BillDenominations.Clear();
         CoinDenominations.Clear();
 
-        _logger.ZLogDebug($"InitializeDenominations: Found {_facade.Monitors.Monitors.Count()} monitors.");
+        if (_facade.Monitors?.Monitors == null) return;
+
+        _logger?.ZLogDebug($"InitializeDenominations: Found {_facade.Monitors.Monitors.Count()} monitors.");
         foreach (var monitor in _facade.Monitors.Monitors)
         {
             var key = monitor.Key;
             var setting = _configProvider.Config.GetDenominationSetting(key);
-            _logger.ZLogDebug($"InitializeDenominations: Denom {key} - IsRecyclable: {setting.IsRecyclable}, IsDepositable: {setting.IsDepositable}");
 
             if (setting.IsRecyclable || setting.IsDepositable)
             {
                 var vm = _viewModelFactory.CreateDenominationViewModel(key);
-                vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
-                if (key.Type == CurrencyCashType.Bill)
+                if (vm != null)
                 {
-                    _logger.ZLogDebug($"InitializeDenominations: Adding Bill {key}");
-                    BillDenominations.Add(vm);
-                }
-                else
-                {
-                    _logger.ZLogDebug($"InitializeDenominations: Adding Coin {key}");
-                    CoinDenominations.Add(vm);
+                    vm.ShowDetailCommand.Subscribe(x => ShowDenominationDetailCommand.Execute(x)).AddTo(_disposables);
+                    if (key.Type == CurrencyCashType.Bill)
+                    {
+                        BillDenominations.Add(vm);
+                    }
+                    else
+                    {
+                        CoinDenominations.Add(vm);
+                    }
                 }
             }
         }
-        _logger.ZLogDebug($"InitializeDenominations: Finished. Bills: {BillDenominations.Count}, Coins: {CoinDenominations.Count}");
-
         UpdateGridRatios();
     }
 
     private void UpdateGridRatios()
     {
+        if (BillDenominations == null || CoinDenominations == null) return;
+
         int billCount = BillDenominations.Count;
         int coinCount = CoinDenominations.Count;
 
@@ -236,13 +290,13 @@ public class InventoryViewModel : IDisposable
         }
         else if (billCount == 0)
         {
-            BillGridWidth.Value = new GridLength(0, GridUnitType.Pixel); // Use Pixel 0 instead of Star 0
+            BillGridWidth.Value = new GridLength(0, GridUnitType.Pixel);
             CoinGridWidth.Value = new GridLength(1, GridUnitType.Star);
         }
         else if (coinCount == 0)
         {
             BillGridWidth.Value = new GridLength(1, GridUnitType.Star);
-            CoinGridWidth.Value = new GridLength(0, GridUnitType.Pixel); // Use Pixel 0 instead of Star 0
+            CoinGridWidth.Value = new GridLength(0, GridUnitType.Pixel);
         }
         else
         {

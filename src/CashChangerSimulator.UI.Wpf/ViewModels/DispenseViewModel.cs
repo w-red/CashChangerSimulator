@@ -120,7 +120,17 @@ public class DispenseViewModel : IDisposable
 
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
-        IsDeviceError = _facade.Status.IsDeviceError;
+
+        // --- Hardware State Observables ---
+        
+        IsJammed = _facade.Status.IsJammed.ObserveOnCurrentSynchronizationContext()
+            .ToReadOnlyReactiveProperty().AddTo(_disposables);
+            
+        IsOverlapped = _facade.Status.IsOverlapped.ObserveOnCurrentSynchronizationContext()
+            .ToReadOnlyReactiveProperty().AddTo(_disposables);
+            
+        IsDeviceError = _facade.Status.IsDeviceError.ObserveOnCurrentSynchronizationContext()
+            .ToBindableReactiveProperty().AddTo(_disposables);
 
         // --- State Mapping ---
 
