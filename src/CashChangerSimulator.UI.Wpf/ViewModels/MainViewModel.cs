@@ -83,7 +83,7 @@ public class MainViewModel : IDisposable
         var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
 
         // Sub-ViewModels
-        Inventory = _viewModelFactory.CreateInventoryViewModel().AddTo(_disposables);
+        Inventory = _viewModelFactory.CreateInventoryViewModel(_configProvider).AddTo(_disposables);
 
         Deposit = _viewModelFactory.CreateDepositViewModel(
             () => Inventory.Denominations,
@@ -97,7 +97,7 @@ public class MainViewModel : IDisposable
 
         Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
 
-        AdvancedSimulation = _viewModelFactory.CreateAdvancedSimulationViewModel().AddTo(_disposables);
+        AdvancedSimulation = _viewModelFactory.CreateAdvancedSimulationViewModel(_configProvider).AddTo(_disposables);
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
 
@@ -105,26 +105,11 @@ public class MainViewModel : IDisposable
             .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.System.UIMode)
             .AddTo(_disposables);
 
-        // Auto-open device ONLY if HotStart is enabled
-        if (configProvider.Config.Simulation.HotStart)
-        {
-            try
-            {
-                _facade.Changer.Open();
-                if (_facade.Changer.SkipStateVerification)
-                {
-                    _facade.Changer.Claim(0);
-                    _facade.Changer.DeviceEnabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogProvider.CreateLogger<MainViewModel>().LogError(ex, "Failed to auto-open device during Hot Start.");
-                var msg = ResourceHelper.GetAsString("ErrorDeviceConnection", "Failed to connect to the cash changer device.");
-                var title = ResourceHelper.GetAsString("Error", "Error");
-                _facade.Notify.ShowWarning(msg, title);
-            }
-        }
+        // [REMOVED] HotStart logic moved to InitializeAsync for startup stability.
+
+        // Ensure UI context even if SynchronizationContext.Current is null (e.g. during DI resolve)
+        var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        var syncContext = System.Threading.SynchronizationContext.Current ?? new System.Windows.Threading.DispatcherSynchronizationContext(dispatcher);
 
         GlobalModeName = _facade.Status.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
@@ -137,12 +122,13 @@ public class MainViewModel : IDisposable
                     : (dispenseMode == busyStr || dispenseMode == "Busy") // Support both for safety
                     ? ResourceHelper.GetAsString("Dispensing", "DISPENSING") : depositMode;
             })
+            .ObserveOn(syncContext)
             .ToBindableReactiveProperty(_facade.Status.IsConnected.Value
                 ? ResourceHelper.GetAsString("StatusIdle", "IDLE")
                 : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 
-        OpenDepositCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenDepositCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
         OpenDepositCommand.Subscribe(_ =>
         {
             if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
@@ -156,7 +142,7 @@ public class MainViewModel : IDisposable
             _facade.View.ShowDepositWindow(Deposit, () => Inventory.Denominations);
         });
 
-        OpenDispenseCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenDispenseCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
         OpenDispenseCommand.Subscribe(_ =>
         {
             if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
@@ -170,7 +156,7 @@ public class MainViewModel : IDisposable
             _facade.View.ShowDispenseWindow(Dispense, () => Inventory.Denominations);
         });
 
-        OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ToReactiveCommand().AddTo(_disposables);
+        OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
             _facade.View.ShowAdvancedSimulationWindow(AdvancedSimulation);
@@ -182,5 +168,26 @@ public class MainViewModel : IDisposable
     {
         _disposables.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>非同期初期化処理（HotStart 等）を実行します。</summary>
+    public async Task InitializeAsync()
+    {
+        // Auto-open device ONLY if HotStart is enabled.
+        // We use the Inventory.OpenCommand to ensure logic is centralized in InventoryOperationService.
+        if (_configProvider.Config.Simulation.HotStart)
+        {
+            try
+            {
+                if (Inventory.OpenCommand.CanExecute())
+                {
+                    Inventory.OpenCommand.Execute(Unit.Default);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogProvider.CreateLogger<MainViewModel>().LogError(ex, "Failed to auto-open device during Hot Start.");
+            }
+        }
     }
 }

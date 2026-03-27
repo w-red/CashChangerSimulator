@@ -34,6 +34,9 @@ public class InventoryOperationService : IInventoryOperationService
     /// <inheritdoc/>
     public void OpenDevice()
     {
+        // [GUARD] If already connected, do nothing to prevent duplicate history entries
+        if (_facade.Status.IsConnected.Value) return;
+
         try
         {
             _facade.Changer.Open();
