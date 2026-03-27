@@ -6,6 +6,8 @@ using Moq;
 using R3;
 using Shouldly;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
+using CashChangerSimulator.UI.Wpf.Services;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -108,8 +110,8 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
     {
         // Arrange
         var vm = CreateViewModel();
-        var monitor = _fixture.Monitors.Monitors.First(m => m.Key == TestConstants.Key100);
-        var denominationVm = new DenominationViewModel(_fixture.CreateFacade(), TestConstants.Key100, _fixture.MetadataProvider, monitor, _fixture.ConfigProvider);
+        var factory = _fixture.ServiceProvider.GetRequiredService<IViewModelFactory>();
+        var denominationVm = factory.CreateDenominationViewModel(TestConstants.Key100);
 
         // Act
         vm.QuickDispenseCommand.Execute(denominationVm);

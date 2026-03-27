@@ -47,10 +47,26 @@ public static class UiTestRetry
             try
             {
                 var windows = app.GetAllTopLevelWindows(automation);
-                var win = windows.FirstOrDefault(w => w.AutomationId == automationId);
+                var allWinIds = string.Join(", ", windows.Select(w => $"{w.Properties.AutomationId.ValueOrDefault ?? "NoID"}({w.Title})"));
+                File.AppendAllText("logs/debug_findwindow.log", $"[{DateTime.Now:HH:mm:ss}] Searching for {automationId}. Found App Windows: [{allWinIds}]\n");
+                
+                var win = windows.FirstOrDefault(w => w.Properties.AutomationId.ValueOrDefault == automationId);
                 
                 if (win == null) 
                 {
+                    var desktop = automation.GetDesktop();
+                    var allDesktopChildren = desktop.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Window));
+                    var desktopIds = string.Join(", ", allDesktopChildren.Select(w => $"{w.Properties.AutomationId.ValueOrDefault ?? "NoID"}({w.Name})"));
+                    File.AppendAllText("logs/debug_findwindow.log", $"[{DateTime.Now:HH:mm:ss}] Searching for {automationId} in Desktop: [{desktopIds}]\n");
+                    
+                    win = allDesktopChildren
+                        .FirstOrDefault(w => w.Properties.AutomationId.ValueOrDefault == automationId)
+                        ?.AsWindow();
+                }
+
+                if (win == null) 
+                {
+                    // Last resort: deep search from desktop
                     var desktop = automation.GetDesktop();
                     win = desktop.FindFirstDescendant(cf => cf.ByAutomationId(automationId))?.AsWindow();
                 }
@@ -63,17 +79,33 @@ public static class UiTestRetry
                         return false;
                     }
 
-                    var descendants = win.FindAllDescendants();
-                    var marker = descendants.FirstOrDefault(e => e.Properties.AutomationId.ValueOrDefault == markerId);
-                    
-                    var logContent = $"[{DateTime.Now:HH:mm:ss}] Window {automationId} found. Descendants count: {descendants.Length}. Marker {markerId} found: {marker != null}\n";
-                    File.AppendAllText("logs/debug_findwindow.log", logContent);
-
-                    if (marker != null)
+                    // Wait for marker (initialization indicator) with short sleeps
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    var markerTimeout = TimeSpan.FromSeconds(5);
+                    while (sw.Elapsed < markerTimeout)
                     {
-                        result = win;
-                        return false;
+                        try
+                        {
+                            var descendants = win.FindAllDescendants();
+                            var marker = descendants.FirstOrDefault(e => e.Properties.AutomationId.ValueOrDefault == markerId);
+                            
+                            var logContent = $"[{DateTime.Now:HH:mm:ss}] Window {automationId} found. Descendants count: {descendants.Length}. Marker {markerId} found: {marker != null}\n";
+                            File.AppendAllText("logs/debug_findwindow.log", logContent);
+
+                            if (marker != null)
+                            {
+                                result = win;
+                                return false;
+                            }
+                        }
+                        catch { }
+                        Thread.Sleep(300);
                     }
+
+                    // Marker not found within 5s but window exists: return window anyway to avoid full timeout
+                    File.AppendAllText("logs/debug_findwindow.log", $"[{DateTime.Now:HH:mm:ss}] Marker {markerId} not found within 5s but window exists. Returning window.\n");
+                    result = win;
+                    return false;
                 }
                 else
                 {

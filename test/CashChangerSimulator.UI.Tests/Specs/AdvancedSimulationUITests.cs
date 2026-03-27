@@ -69,7 +69,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         // Ensure the button is ready
         Retry.WhileFalse(() => launchBtn.IsEnabled, TimeSpan.FromSeconds(10));
 
-        launchBtn.Focus();
+        try { launchBtn.Focus(); } catch { /* focus is optional; proceed if it fails */ }
         Thread.Sleep(500);
         
         // Ensure it's clicked. Try multiple ways if needed.

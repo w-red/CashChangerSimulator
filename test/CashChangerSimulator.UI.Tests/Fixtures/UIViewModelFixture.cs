@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.Device;
@@ -34,13 +35,25 @@ public class UIViewModelFixture : IDisposable
     public Mock<INotifyService> NotifyServiceMock { get; private set; } = null!;
     public Mock<IViewService> ViewServiceMock { get; private set; } = null!;
     public Mock<IHistoryExportService> ExportServiceMock { get; private set; } = null!;
+    public Mock<IScriptExecutionService> ScriptExecutionServiceMock { get; private set; } = null!;
     public Mock<IDepositOperationService> DepositServiceMock { get; private set; } = null!;
     public Mock<IDispenseOperationService> DispenseServiceMock { get; private set; } = null!;
     public Mock<IInventoryOperationService> InventoryServiceMock { get; private set; } = null!;
+    public IServiceProvider ServiceProvider => _serviceProvider ??= CreateServiceProvider();
+    public IViewModelFactory ViewModelFactory => ServiceProvider.GetRequiredService<IViewModelFactory>();
+    private IServiceProvider? _serviceProvider;
 
     public UIViewModelFixture()
     {
+        // Set SynchronizationContext for R3's ObserveOn(SynchronizationContext.Current) in Unit Tests
+        SynchronizationContext.SetSynchronizationContext(new ImmediateSynchronizationContext());
         Initialize();
+    }
+
+    private class ImmediateSynchronizationContext : SynchronizationContext
+    {
+        public override void Post(SendOrPostCallback d, object? state) => d(state);
+        public override void Send(SendOrPostCallback d, object? state) => d(state);
     }
 
     /// <summary>共通のセットアップを初期化します。必要に応じて実体のスクリプトサービスを使用可能です。</summary>
@@ -69,6 +82,8 @@ public class UIViewModelFixture : IDisposable
 
         NotifyServiceMock = new Mock<INotifyService>();
         ViewServiceMock = new Mock<IViewService>();
+        ExportServiceMock = new Mock<IHistoryExportService>();
+        ScriptExecutionServiceMock = new Mock<IScriptExecutionService>();
         ExportServiceMock = new Mock<IHistoryExportService>();
         DepositServiceMock = new Mock<IDepositOperationService>();
         DispenseServiceMock = new Mock<IDispenseOperationService>();
@@ -125,9 +140,19 @@ public class UIViewModelFixture : IDisposable
         DispenseServiceMock.Setup(x => x.ExecuteBulkDispense(It.IsAny<IReadOnlyDictionary<DenominationKey, int>>()))
             .Callback<IReadOnlyDictionary<DenominationKey, int>>(counts => DispenseController.DispenseCashAsync(counts, true, (c, e) => { }));
 
-        InventoryServiceMock.Setup(x => x.ResetError()).Callback(() => Hardware.ResetError());
         InventoryServiceMock.Setup(x => x.SimulateJam()).Callback(() => Hardware.SetJammed(true));
         InventoryServiceMock.Setup(x => x.SimulateOverlap()).Callback(() => Hardware.SetOverlapped(true));
+
+        // [FIX] Initialize ServiceProvider after all dependencies and mocks are ready
+        try
+        {
+            _serviceProvider = CreateServiceProvider();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[FATAL] UIViewModelFixture.Initialize failed to create ServiceProvider: {ex}");
+            throw;
+        }
     }
 
     /// <summary>テスト用の在庫データを一括設定します。</summary>
@@ -187,6 +212,12 @@ public class UIViewModelFixture : IDisposable
     /// <summary>検証用の MainViewModel を生成します。</summary>
     internal MainViewModel CreateMainViewModel()
     {
+        return ServiceProvider.GetRequiredService<MainViewModel>();
+    }
+
+    /// <summary>テスト用のサービスプロバイダーを構築します。</summary>
+    private IServiceProvider CreateServiceProvider(Action<IServiceCollection>? configure = null)
+    {
         var services = new ServiceCollection();
         var facade = CreateFacade();
         
@@ -194,37 +225,45 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton(ConfigProvider);
         services.AddSingleton(MetadataProvider);
         services.AddSingleton(NotifyServiceMock.Object);
+        services.AddSingleton(ViewServiceMock.Object);
         services.AddSingleton(ExportServiceMock.Object);
-        services.AddSingleton(DepositServiceMock.Object);
-        services.AddSingleton(DispenseServiceMock.Object);
-        services.AddSingleton(InventoryServiceMock.Object);
-        services.AddSingleton(ScriptExecutionService);
+        services.AddSingleton(ScriptExecutionServiceMock.Object);
         services.AddSingleton(DispatcherService);
+        if (Monitors != null)
+        {
+            services.AddSingleton(Monitors);
+        }
+        services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger<>), typeof(MockLogger<>));
         
-        services.AddTestWpfUiServices();
+        services.AddSingleton<IDepositOperationService, DepositOperationService>();
+        services.AddSingleton<IDispenseOperationService, DispenseOperationService>();
+        services.AddSingleton<IInventoryOperationService, InventoryOperationService>();
         
-        var provider = services.BuildServiceProvider();
-        var factory = new ViewModelFactory(provider);
-        services.AddSingleton<IViewModelFactory>(factory);
+        services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<InventoryViewModel>();
+        services.AddSingleton<DepositViewModel>();
+        services.AddSingleton<DispenseViewModel>();
+        services.AddSingleton<AdvancedSimulationViewModel>();
+        services.AddSingleton<SettingsViewModel>();
+        
+        configure?.Invoke(services);
+        
+        return services.BuildServiceProvider();
+    }
 
-        // Re-build provider to include the factory
-        var finalProvider = services.BuildServiceProvider();
-        
-        return finalProvider.GetRequiredService<MainViewModel>();
+    /// <summary>テスト用のロガー実装。</summary>
+    private class MockLogger<T> : Microsoft.Extensions.Logging.ILogger<T>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+        public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) { }
     }
 
     /// <summary>検証用の InventoryViewModel を生成します。</summary>
     internal InventoryViewModel CreateInventoryViewModel()
     {
-        var facade = CreateFacade();
-        var operationService = new InventoryOperationService(
-            facade,
-            ConfigProvider,
-            ExportServiceMock.Object,
-            NotifyServiceMock.Object,
-            new Mock<Microsoft.Extensions.Logging.ILogger<InventoryOperationService>>().Object);
-
-        return new InventoryViewModel(facade, ConfigProvider, MetadataProvider, operationService, new Mock<IViewModelFactory>().Object);
+        return ViewModelFactory.CreateInventoryViewModel(ConfigProvider);
     }
 
     /// <summary>検証用の DepositViewModel を生成します。</summary>
@@ -234,21 +273,18 @@ public class UIViewModelFixture : IDisposable
         IDepositOperationService? depositService = null,
         IInventoryOperationService? inventoryService = null)
     {
-        var facade = CreateFacade();
-        var actualDepositService = depositService ?? new DepositOperationService(
-            facade,
-            NotifyServiceMock.Object,
-            new Mock<Microsoft.Extensions.Logging.ILogger<DepositOperationService>>().Object);
+        // If specific mocks are provided, we must create a one-off provider to inject them
+        var provider = (depositService != null || inventoryService != null)
+            ? CreateServiceProvider(services => {
+                if (depositService != null) services.AddSingleton(depositService);
+                if (inventoryService != null) services.AddSingleton(inventoryService);
+              })
+            : ServiceProvider;
 
-        var actualInventoryService = inventoryService ?? InventoryServiceMock.Object;
-
-        return new DepositViewModel(
-            facade,
+        var factory = provider.GetRequiredService<IViewModelFactory>();
+        return factory.CreateDepositViewModel(
             denominationsFactory ?? (() => []),
-            isDispenseBusy ?? new BindableReactiveProperty<bool>(false),
-            actualDepositService,
-            actualInventoryService,
-            MetadataProvider);
+            isDispenseBusy ?? new BindableReactiveProperty<bool>(false));
     }
 
     /// <summary>検証用の DispenseViewModel を生成します。</summary>
@@ -258,30 +294,24 @@ public class UIViewModelFixture : IDisposable
         IDispenseOperationService? dispenseService = null,
         IInventoryOperationService? inventoryService = null)
     {
-        var facade = CreateFacade();
-        var actualDispenseService = dispenseService ?? new DispenseOperationService(
-            facade,
-            NotifyServiceMock.Object,
-            new Mock<Microsoft.Extensions.Logging.ILogger<DispenseOperationService>>().Object,
-            ConfigProvider);
+        var provider = (dispenseService != null || inventoryService != null)
+            ? CreateServiceProvider(services => {
+                if (dispenseService != null) services.AddSingleton(dispenseService);
+                if (inventoryService != null) services.AddSingleton(inventoryService);
+              })
+            : ServiceProvider;
 
-        var actualInventoryService = inventoryService ?? InventoryServiceMock.Object;
-
-        return new DispenseViewModel(
-            facade,
-            ConfigProvider,
+        var factory = provider.GetRequiredService<IViewModelFactory>();
+        return factory.CreateDispenseViewModel(
             isInDepositMode ?? new BindableReactiveProperty<bool>(false),
-            denominationsFactory ?? (() => []),
-            actualDispenseService,
-            actualInventoryService,
-            MetadataProvider);
+            denominationsFactory ?? (() => []));
     }
 
     /// <summary>検証用の AdvancedSimulationViewModel を生成します。</summary>
     internal AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(Mock<IScriptExecutionService>? scriptServiceMock = null)
     {
         var scriptService = scriptServiceMock?.Object ?? ScriptExecutionService;
-        return new AdvancedSimulationViewModel(CreateFacade(), scriptService, InventoryServiceMock.Object, MetadataProvider);
+        return new AdvancedSimulationViewModel(CreateFacade(), ConfigProvider, scriptService, InventoryServiceMock.Object, MetadataProvider);
     }
 
     /// <summary>検証用の SettingsViewModel を生成します。</summary>

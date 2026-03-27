@@ -25,16 +25,28 @@
             <Border Background="{DynamicResource App.Brush.Error}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsDeviceError.Value, Converter={StaticResource VisibilityConv}}">
                 <TextBlock>
-                    <Run Text="{StaticResource ErrorDevicePrefix}" /><Run Text="{Binding CurrentErrorCode.Value}" /><Run Text="{StaticResource ErrorDeviceSuffix}" />
+                    <Run Text="{StaticResource ErrorDevicePrefix}" /><Run Text="{Binding CurrentErrorCode.Value, Mode=OneWay}" /><Run Text="{StaticResource ErrorDeviceSuffix}" />
                 </TextBlock>
             </Border>
-            <Border Background="{DynamicResource App.Brush.Jam}" Style="{StaticResource BadgeStyle}"
-                    Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="{StaticResource JamError}" AutomationProperties.AutomationId="JamErrorIndicator"/>
+            <!-- Test Markers: Always in the UIA tree, but hidden from users -->
+            <Label AutomationProperties.AutomationId="JamErrorIndicator_State" 
+                   Visibility="Visible" Opacity="0" Width="1" Height="1"
+                   IsEnabled="{Binding IsJammed.Value}"/>
+            <Label AutomationProperties.AutomationId="OverlapErrorIndicator_State" 
+                   Visibility="Visible" Opacity="0" Width="1" Height="1"
+                   IsEnabled="{Binding IsOverlapped.Value}"/>
+
+            <!-- Jam Error Indicator: Visible only when jammed -->
+            <Border Background="{DynamicResource App.Brush.Jam}" 
+                    Visibility="{Binding IsJammed.Value, Converter={StaticResource VisibilityConv}}"
+                    Style="{StaticResource BadgeStyle}">
+                <TextBlock Text="{StaticResource JamError}"/>
             </Border>
-            <Border Background="{DynamicResource App.Brush.Overlap}" Style="{StaticResource BadgeStyle}"
-                    Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}">
-                <TextBlock Text="{StaticResource ReadError}" AutomationProperties.AutomationId="OverlapErrorIndicator"/>
+            <!-- Overlap Error Indicator: Visible only when overlapped -->
+            <Border Background="{DynamicResource App.Brush.Overlap}" 
+                    Visibility="{Binding IsOverlapped.Value, Converter={StaticResource VisibilityConv}}"
+                    Style="{StaticResource BadgeStyle}">
+                <TextBlock Text="{StaticResource ReadError}"/>
             </Border>
             <Border Background="{Binding OverallStatus.Value, Converter={StaticResource StatusBrushConv}}" Style="{StaticResource BadgeStyle}"
                     Visibility="{Binding IsConnected.Value, Converter={StaticResource VisibilityConv}}">
@@ -47,37 +59,28 @@
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <!-- Reset Error Button -->
+            <!-- Reset Error Button: always in automation tree (Opacity=0 when hidden) for FlaUI test compatibility -->
             <Button Command="{Binding ResetErrorCommand}"
                     AutomationProperties.AutomationId="GlobalResetErrorButton"
-                    Margin="0,0,8,0"
                     ToolTip="{StaticResource ToolTipResetHardwareError}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
                         <Setter Property="Background" Value="#FF5252"/>
                         <Setter Property="BorderBrush" Value="#FF5252"/>
                         <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Setter Property="Margin" Value="0,0,8,0"/>
                         <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FF8686"/>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
                             </Trigger>
-                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
                 <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
             </Button>
 
-            <ToggleButton IsChecked="{Binding IsJammed.Value}"
+            <ToggleButton IsChecked="{Binding IsJammed.Value, Mode=OneWay}"
+                          Command="{Binding SimulateJamCommand}"
                           AutomationProperties.AutomationId="SimulateJamButton"
                           ToolTip="{StaticResource ToolTipSimulateJam}"
                           Margin="0,0,8,0">

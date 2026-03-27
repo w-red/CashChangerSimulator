@@ -24,6 +24,9 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         _app.Launch(hotStart: false);
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
+        
+        // ページロード完了を待機 (標準的な遷移時間を考慮)
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Assert - Terminal Access buttons should be disabled
         var depositButton = FindElement(window, "LaunchDepositButton")?.AsButton();
@@ -61,6 +64,9 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
 
+        // ページロード完了を待機
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+
         // Act - Click Open
         var openButton = FindElement(window, "DeviceOpenButton")?.AsButton();
         openButton.ShouldNotBeNull();
@@ -77,7 +83,6 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => depositButton.IsEnabled, UITestTimings.RetryLongTimeout);
         Retry.WhileFalse(() => dispenseButton.IsEnabled, UITestTimings.RetryLongTimeout);
 
-        // Final re-fetch and check
         // Final re-fetch and check
         AutomationElement? finalDispenseButton = null;
         Retry.WhileTrue(() =>
@@ -121,6 +126,9 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         var window = _app.MainWindow;
         window.ShouldNotBeNull();
 
+        // ページロード完了を待機
+        Thread.Sleep(UITestTimings.WindowPopupDelayMs);
+
         // Open it first
         var openButton = FindElement(window, "DeviceOpenButton")?.AsButton();
         openButton?.SmartClick();
@@ -132,7 +140,6 @@ public class ColdStartUITest : IClassFixture<CashChangerTestApp>
         closeButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
-        // Assert - UI should be restricted again
         // Assert - UI should be restricted again
         AutomationElement? finalDepositButton = null;
         Retry.WhileTrue(() =>

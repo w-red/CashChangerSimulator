@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.UI.Wpf.Views;
+using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.Device;
 using R3;
 using System.IO;
@@ -14,14 +15,32 @@ namespace CashChangerSimulator.UI.Wpf;
 /// <summary>アプリケーションのエントリーポイントおよびライフサイクルを管理するクラス。</summary>
 internal partial class App : Application
 {
+    private static readonly string _tracePath = Path.Combine(Path.GetTempPath(), "CashChanger_INIT_TRACE.txt");
+
+    public App()
+    {
+        try { File.WriteAllText(_tracePath, $"[INIT] {DateTime.Now} App instance created.\n"); } catch { }
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         try
         {
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} OnStartup begin.\n"); } catch { }
             base.OnStartup(e);
 
+        // Ensure WPF SynchronizationContext is initialized before DI and R3 setup
+        if (System.Threading.SynchronizationContext.Current == null)
+        {
+            System.Threading.SynchronizationContext.SetSynchronizationContext(
+                new System.Windows.Threading.DispatcherSynchronizationContext(this.Dispatcher));
+        }
+
             // Load configuration and initialize logger first
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Loading Configuration.\n"); } catch { }
             var config = ConfigurationLoader.Load();
+            
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Initializing LogProvider.\n"); } catch { }
             LogProvider.Initialize(config.Logging);
             var logger = LogProvider.CreateLogger<App>();
 
@@ -36,6 +55,7 @@ internal partial class App : Application
             AppDomain.CurrentDomain.UnhandledException += (s, ev) => HandleFatalException(ev.ExceptionObject as Exception);
             DispatcherUnhandledException += (s, ev) => { HandleFatalException(ev.Exception); ev.Handled = false; };
 
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Initializing DIContainer.\n"); } catch { }
             DIContainer.Initialize();
 
             // Apply language setting
@@ -46,9 +66,24 @@ internal partial class App : Application
             UpdateTheme(config.System.BaseTheme);
             ObserveThemeTrigger();
 
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Creating MainWindow.\n"); } catch { }
+            
             var mainWindow = new MainWindow();
             this.MainWindow = mainWindow;
-            mainWindow.Show();
+            
+            try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Showing MainWindow (Try).\n"); } catch { }
+            try
+            {
+                mainWindow.Show();
+                try { File.AppendAllText(_tracePath, $"[INIT] {DateTime.Now} Show() completed.\n"); } catch { }
+            }
+            catch (Exception showEx)
+            {
+                try { File.AppendAllText(_tracePath, $"[CRITICAL-UI] {DateTime.Now} Show() failed: {showEx}\n"); } catch { }
+                throw; // Rethrow to reach the outer catch-all
+            }
+
+            // [REMOVED] TEST_AUTO_OPEN_DEVICE logic moved to MainWindow.xaml.cs Loaded event for stability.
         }
         catch (Exception ex)
         {
@@ -119,6 +154,7 @@ internal partial class App : Application
         finally
         {
             DIContainer.Dispose();
+            LogProvider.Dispose();
         }
         base.OnExit(e);
     }
@@ -167,22 +203,35 @@ internal partial class App : Application
         {
             var paletteHelper = new MaterialDesignThemes.Wpf.PaletteHelper();
             var isActuallyDark = themeName.Equals("Dark", StringComparison.OrdinalIgnoreCase);
-            
-            // 1. Apply Base Material Design Theme
-            var theme = paletteHelper.GetTheme();
-            var baseTheme = isActuallyDark 
-                ? MaterialDesignThemes.Wpf.BaseTheme.Dark 
-                : MaterialDesignThemes.Wpf.BaseTheme.Light;
-            MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(theme, baseTheme);
 
-            if (isActuallyDark)
+            // 1. Apply Base Material Design Theme
+            try
             {
-                // [RESTORE] Soft Dark primary colors
-                MaterialDesignThemes.Wpf.ThemeExtensions.SetPrimaryColor(theme, Color.FromRgb(0xBB, 0x86, 0xFC));
-                MaterialDesignThemes.Wpf.ThemeExtensions.SetSecondaryColor(theme, Color.FromRgb(0x03, 0xDA, 0xC6));
-                theme.Background = Color.FromRgb(0x12, 0x12, 0x12);
+                var theme = paletteHelper.GetTheme();
+                var baseTheme = isActuallyDark 
+                    ? MaterialDesignThemes.Wpf.BaseTheme.Dark 
+                    : MaterialDesignThemes.Wpf.BaseTheme.Light;
+                MaterialDesignThemes.Wpf.ThemeExtensions.SetBaseTheme(theme, baseTheme);
+
+                if (isActuallyDark)
+                {
+                    // [RESTORE] Soft Dark primary colors
+                    MaterialDesignThemes.Wpf.ThemeExtensions.SetPrimaryColor(theme, Color.FromRgb(0xBB, 0x86, 0xFC));
+                    MaterialDesignThemes.Wpf.ThemeExtensions.SetSecondaryColor(theme, Color.FromRgb(0x03, 0xDA, 0xC6));
+                    theme.Background = Color.FromRgb(0x12, 0x12, 0x12);
+                }
+                
+                paletteHelper.SetTheme(theme);
             }
-            paletteHelper.SetTheme(theme);
+            catch (Exception ex) when (ex is InvalidCastException || ex is InvalidOperationException)
+            {
+                // Fallback to a default theme if resources are not yet loaded or if cast fails
+                var theme = MaterialDesignThemes.Wpf.Theme.Create(
+                    MaterialDesignThemes.Wpf.BaseTheme.Dark, 
+                    Color.FromRgb(0xBB, 0x86, 0xFC), 
+                    Color.FromRgb(0x03, 0xDA, 0xC6));
+                paletteHelper.SetTheme(theme);
+            }
 
             // 2. Load and Apply Project-Specific Theme Resources (XAML)
             var resourceName = isActuallyDark ? "Colors.Dark.xaml" : "Colors.Light.xaml";
@@ -270,9 +319,16 @@ internal partial class App : Application
 
         try
         {
+            try { File.AppendAllText(_tracePath, $"[FATAL] {DateTime.Now} {ex}\n"); } catch { }
             Console.Error.WriteLine($"[FATAL_APP_CRASH] {ex}");
             var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FATAL_CRASH.txt");
             File.WriteAllText(logPath, $"[FATAL] [{DateTime.Now}] {ex}");
+            
+            LogProvider.CreateLogger<App>().LogCritical(ex, "FATAL UNHANDLED EXCEPTION");
+            LogProvider.Dispose();
+            
+            // Allow time for async logging to flush
+            Thread.Sleep(2000);
         }
         catch { }
         

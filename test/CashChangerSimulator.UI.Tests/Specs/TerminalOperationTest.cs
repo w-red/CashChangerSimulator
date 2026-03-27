@@ -9,6 +9,7 @@ using CashChangerSimulator.Device.Coordination;
 using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using CashChangerSimulator.UI.Tests.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PointOfService;
 using Moq;
 using R3;
@@ -87,26 +88,29 @@ public class TerminalOperationTest
         _mockDepositController.SetupGet(c => c.IsDepositInProgress).Returns(false);
         var changedSubject = new Subject<Unit>();
         _mockDepositController.Setup(c => c.Changed).Returns(changedSubject);
-        _hardwareManager.SetConnected(true);
+        _facade.Status.SetConnected(true);
 
-        var vm = new DepositViewModel(
-            _facade,
-            () => [],
-            _isBusyShared,
-            new Mock<IDepositOperationService>().Object,
-            new Mock<IInventoryOperationService>().Object,
-            new CurrencyMetadataProvider(new ConfigurationProvider()));
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(new CurrencyMetadataProvider(new ConfigurationProvider()));
+        services.AddSingleton(new Mock<IDepositOperationService>().Object);
+        services.AddSingleton(new Mock<IInventoryOperationService>().Object);
+        services.AddSingleton(new Mock<IViewModelFactory>().Object); // Dummy for DenominationViewModels
+        services.AddSingleton(new ImmediateDispatcherService() as IDispatcherService);
+        var provider = services.BuildServiceProvider();
+
+        var vm = ActivatorUtilities.CreateInstance<DepositViewModel>(provider, (Func<IEnumerable<DenominationViewModel>>)(() => []), _isBusyShared);
 
         // Assert: Initial (Normal)
         vm.CanOperate.Value.ShouldBeTrue();
 
         // Act: Simulate Jam
-        _hardwareManager.SetJammed(true);
+        _facade.Status.SetJammed(true);
         // Assert
         vm.CanOperate.Value.ShouldBeFalse();
 
         // Act: Reset Jam
-        _hardwareManager.ResetError();
+        _facade.Status.ResetError();
         // Assert
         vm.CanOperate.Value.ShouldBeTrue();
 
@@ -129,26 +133,30 @@ public class TerminalOperationTest
     {
         // Arrange
         var configProvider = new ConfigurationProvider();
-        var vm = new DispenseViewModel(
-            _facade,
-            configProvider,
-            _isBusyShared,
-            () => [],
-            new Mock<IDispenseOperationService>().Object,
-            new Mock<IInventoryOperationService>().Object,
-            new CurrencyMetadataProvider(configProvider));
-        _hardwareManager.SetConnected(true);
+        _facade.Status.SetConnected(true);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(configProvider);
+        services.AddSingleton(new CurrencyMetadataProvider(configProvider));
+        services.AddSingleton(new Mock<IDispenseOperationService>().Object);
+        services.AddSingleton(new Mock<IInventoryOperationService>().Object);
+        services.AddSingleton(new Mock<IViewModelFactory>().Object);
+        services.AddSingleton(new ImmediateDispatcherService() as IDispatcherService);
+        var provider = services.BuildServiceProvider();
+
+        var vm = ActivatorUtilities.CreateInstance<DispenseViewModel>(provider, _isBusyShared, (Func<IEnumerable<DenominationViewModel>>)(() => []));
 
         // Assert: Initial
         vm.CanOperate.Value.ShouldBeTrue();
 
         // Act: Simulate Overlap
-        _hardwareManager.SetOverlapped(true);
+        _facade.Status.SetOverlapped(true);
         // Assert
         vm.CanOperate.Value.ShouldBeFalse();
 
         // Act: Reset
-        _hardwareManager.ResetError();
+        _facade.Status.ResetError();
         // Assert
         vm.CanOperate.Value.ShouldBeTrue();
 
@@ -167,15 +175,18 @@ public class TerminalOperationTest
         _mockDepositController.SetupGet(c => c.IsFixed).Returns(false);
         var changedSubject = new Subject<Unit>();
         _mockDepositController.Setup(c => c.Changed).Returns(changedSubject);
+        _facade.Status.SetConnected(true);
 
-        var vm = new DepositViewModel(
-            _facade,
-            () => [],
-            _isBusyShared,
-            new Mock<IDepositOperationService>().Object,
-            new Mock<IInventoryOperationService>().Object,
-            new CurrencyMetadataProvider(new ConfigurationProvider()));
-        _hardwareManager.SetConnected(true);
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(new CurrencyMetadataProvider(new ConfigurationProvider()));
+        services.AddSingleton(new Mock<IDepositOperationService>().Object);
+        services.AddSingleton(new Mock<IInventoryOperationService>().Object);
+        services.AddSingleton(new Mock<IViewModelFactory>().Object);
+        services.AddSingleton(new ImmediateDispatcherService() as IDispatcherService);
+        var provider = services.BuildServiceProvider();
+
+        var vm = ActivatorUtilities.CreateInstance<DepositViewModel>(provider, (Func<IEnumerable<DenominationViewModel>>)(() => []), _isBusyShared);
 
         // --- Idle State (Not in Deposit Mode) ---
         // Assert: Begin and Quick are enabled, Bulk is disabled
@@ -184,13 +195,13 @@ public class TerminalOperationTest
         ((System.Windows.Input.ICommand)vm.ShowBulkInsertCommand).CanExecute(null).ShouldBeFalse();
 
         // Act: Simulate Jam
-        _hardwareManager.SetJammed(true);
+        _facade.Status.SetJammed(true);
         // Assert: Disabled due to error
         ((System.Windows.Input.ICommand)vm.BeginDepositCommand).CanExecute(null).ShouldBeFalse();
         ((System.Windows.Input.ICommand)vm.QuickDepositCommand).CanExecute(null).ShouldBeFalse();
 
         // Act: Reset Error
-        _hardwareManager.ResetError();
+        _facade.Status.ResetError();
         // Assert: Re-enabled
         ((System.Windows.Input.ICommand)vm.BeginDepositCommand).CanExecute(null).ShouldBeTrue();
         ((System.Windows.Input.ICommand)vm.QuickDepositCommand).CanExecute(null).ShouldBeTrue();
@@ -205,13 +216,13 @@ public class TerminalOperationTest
         ((System.Windows.Input.ICommand)vm.ShowBulkInsertCommand).CanExecute(null).ShouldBeTrue();
 
         // Act: Simulate Overlap
-        _hardwareManager.SetOverlapped(true);
+        _facade.Status.SetOverlapped(true);
         // Assert: Disabled due to error
         ((System.Windows.Input.ICommand)vm.BeginDepositCommand).CanExecute(null).ShouldBeFalse(); // Disabled by error
         ((System.Windows.Input.ICommand)vm.ShowBulkInsertCommand).CanExecute(null).ShouldBeFalse();
 
         // Act: Reset Error
-        _hardwareManager.ResetError();
+        _facade.Status.ResetError();
         // Assert: Re-enabled
         ((System.Windows.Input.ICommand)vm.BeginDepositCommand).CanExecute(null).ShouldBeTrue();
         ((System.Windows.Input.ICommand)vm.ShowBulkInsertCommand).CanExecute(null).ShouldBeTrue();
@@ -229,15 +240,19 @@ public class TerminalOperationTest
         // Arrange
         _mockInventory.Setup(i => i.CalculateTotal(It.IsAny<string>())).Returns(1000m); // Ensure sufficient funds
         var configProvider = new ConfigurationProvider();
-        var vm = new DispenseViewModel(
-            _facade,
-            configProvider,
-            _isBusyShared,
-            () => [],
-            new Mock<IDispenseOperationService>().Object,
-            new Mock<IInventoryOperationService>().Object,
-            new CurrencyMetadataProvider(configProvider));
-        _hardwareManager.SetConnected(true);
+        _facade.Status.SetConnected(true);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(_facade);
+        services.AddSingleton(configProvider);
+        services.AddSingleton(new CurrencyMetadataProvider(configProvider));
+        services.AddSingleton(new Mock<IDispenseOperationService>().Object);
+        services.AddSingleton(new Mock<IInventoryOperationService>().Object);
+        services.AddSingleton(new Mock<IViewModelFactory>().Object);
+        services.AddSingleton(new ImmediateDispatcherService() as IDispatcherService);
+        var provider = services.BuildServiceProvider();
+
+        var vm = ActivatorUtilities.CreateInstance<DispenseViewModel>(provider, _isBusyShared, (Func<IEnumerable<DenominationViewModel>>)(() => []));
 
         // Setup input to make DispenseCommand valid
         vm.DispenseAmountInput.Value = "100";
@@ -248,21 +263,21 @@ public class TerminalOperationTest
         ((System.Windows.Input.ICommand)vm.QuickDispenseCommand).CanExecute(null).ShouldBeTrue();
 
         // Act: Simulate Jam
-        _hardwareManager.SetJammed(true);
+        _facade.Status.SetJammed(true);
         // Assert
         ((System.Windows.Input.ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
         ((System.Windows.Input.ICommand)vm.ShowBulkDispenseCommand).CanExecute(null).ShouldBeFalse();
         ((System.Windows.Input.ICommand)vm.QuickDispenseCommand).CanExecute(null).ShouldBeFalse();
 
         // Act: Reset Error
-        _hardwareManager.ResetError();
+        _facade.Status.ResetError();
         // Assert
         ((System.Windows.Input.ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeTrue();
         ((System.Windows.Input.ICommand)vm.ShowBulkDispenseCommand).CanExecute(null).ShouldBeTrue();
         ((System.Windows.Input.ICommand)vm.QuickDispenseCommand).CanExecute(null).ShouldBeTrue();
 
         // Act: Simulate Overlap
-        _hardwareManager.SetOverlapped(true);
+        _facade.Status.SetOverlapped(true);
         // Assert
         ((System.Windows.Input.ICommand)vm.DispenseCommand).CanExecute(null).ShouldBeFalse();
         ((System.Windows.Input.ICommand)vm.ShowBulkDispenseCommand).CanExecute(null).ShouldBeFalse();

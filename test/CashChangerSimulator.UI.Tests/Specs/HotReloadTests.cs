@@ -54,12 +54,20 @@ public class HotReloadTests
             new ImmediateDispatcherService(),
             new ImmediateViewService());
 
+        var mockFactory = new Mock<IViewModelFactory>();
+        mockFactory.Setup(f => f.CreateDenominationViewModel(It.IsAny<DenominationKey>()))
+            .Returns((DenominationKey k) => new DenominationViewModel(facade, k, metadataProvider, monitorsProvider.Monitors.First(m => m.Key == k), config));
+
         var vm = new InventoryViewModel(
             facade,
             config,
             metadataProvider,
             new Mock<IInventoryOperationService>().Object,
-            new Mock<IViewModelFactory>().Object);
+            mockFactory.Object,
+            new ImmediateDispatcherService());
+
+        // [FIX] 手動生成時は初期化を明示的に呼ぶ必要がある
+        vm.InitializeDenominations();
 
         return (vm, config, monitorsProvider);
     }
@@ -91,6 +99,9 @@ public class HotReloadTests
         // Act
         config.Config.System.CurrencyCode = "USD";
         config.Update(config.Config);
+        
+        // Wait for asynchronous Refresh (through Dispatcher and event)
+        Thread.Sleep(100); 
 
         // Assert
         vm.BillDenominations.Any(d => d.Key.CurrencyCode == "USD").ShouldBeTrue();

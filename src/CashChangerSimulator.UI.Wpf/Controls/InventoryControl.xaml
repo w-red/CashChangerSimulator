@@ -87,7 +87,8 @@
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <ToggleButton Style="{StaticResource ModernToggleButtonStyle}"
-                                      IsChecked="{Binding IsJammed.Value}"
+                                      IsChecked="{Binding IsJammed.Value, Mode=OneWay}"
+                                      Command="{Binding SimulateJamCommand}"
                                       AutomationProperties.AutomationId="SimulateJamButton"
                                       ToolTip="{StaticResource ToolTipSimulateJam}"
                                       Margin="0,0,8,0">

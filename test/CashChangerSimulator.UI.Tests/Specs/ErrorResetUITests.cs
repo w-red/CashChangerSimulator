@@ -41,26 +41,52 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsButton();
         sidebarJamBtn.ShouldNotBeNull("Sidebar SimulateJamButton not found");
 
-        // Act: Sidebar の Jam ボタン（またはヘッダーのシミュレーションボタン）を押してエラー状態にする
-        sidebarJamBtn.SmartClick();
+        // Act: Sidebar の Jam ボタンを押してエラー状態にする
+        var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
+        jamBtnElement.ShouldNotBeNull("SimulateJamButton found for jamming");
+        jamBtnElement.SmartClick();
 
-        // ヘッダーの Reset ボタンはエラー発生時にのみ Visible になり UI ツリーに出現する
-        // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
-        var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
-        var resetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
-        resetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
-        Retry.WhileFalse(() => resetBtn != null && resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
+        // [STABILITY] 状態がプロパティおよびリセットボタンに反映されるのを待機
+        Retry.WhileFalse(() => {
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator != null && indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State");
 
-        // Assert: Jam インジケータ（ステータスタブなど）を確認
-        var jamIndicator = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")), TimeSpan.FromSeconds(10)).Result;
-        jamIndicator.ShouldNotBeNull("JamErrorIndicator should be visible in status header");
+        // GlobalResetErrorButton はエラー発生時のみ出現する (Visibility Trigger)
+        // 階層が深い可能性があるため、FindFirstDescendant ではなく広範囲を探索。
+        // また、Window が複数ある可能性（DialogHost等）を考慮し、全要素から探索。
+        var resetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(30)).Result?.AsButton();
+        
+        if (resetBtn == null)
+        {
+            // デバッグ情報収集
+            var allButtons = window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button));
+            var buttonIds = string.Join(", ", allButtons.Select(b => b.Properties.AutomationId.ValueOrDefault ?? "NoID"));
+            throw new Exception($"GlobalResetErrorButton not found. Visible Buttons: [{buttonIds}]");
+        }
+        
+        Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
+
+        // Assert: Jam インジケータを確認
+        var jamIndicator = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State")), TimeSpan.FromSeconds(10)).Result;
+        jamIndicator.ShouldNotBeNull("JamErrorIndicator_State should be present in status header");
+        Retry.WhileFalse(() => jamIndicator.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("JamErrorIndicator_State should be enabled when jammed");
 
         // Act: Reset ボタンをクリック
-        resetBtn.SmartClick();
+        resetBtn.Patterns.Invoke.Pattern.Invoke();
+
+        // 状態が自動的に Off になるのを待機する（手動で ToggleButton を操作すると逆に再ジャムする可能性があるため）
+        Retry.WhileFalse(() => {
+            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsToggleButton();
+            return btn == null || btn.ToggleState != ToggleState.On;
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("SimulateJamButton should be unchecked after reset via ViewModel");
 
         // Assert: エラー状態が解消されたことを確認
-        Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
-             .Success.ShouldBeTrue("JamErrorIndicator should disappear after reset");
+        Retry.WhileFalse(() => {
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator == null || !indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(15))
+             .Success.ShouldBeTrue("JamErrorIndicator_State should be disabled after reset");
     }
 
     /// <summary>グローバルリセットボタンによりエラー状態が解消されることを検証する。</summary>
@@ -88,21 +114,36 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         sidebarJamBtn.ShouldNotBeNull();
 
         // Act: Simulate Jam
-        sidebarJamBtn.SmartClick();
+        var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
+        jamBtnElement.ShouldNotBeNull();
+        jamBtnElement.SmartClick();
+
+        // [STABILITY] 状態が反映されるのを待機
+        Retry.WhileFalse(() => {
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator != null && indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State during GlobalReset test");
 
         // Global Reset ボタン（ヘッダー部分）はエラー発生時にのみ Visible になり UI ツリーに出現する
-        // 直系に見つからない場合があるため、StatusHeaderControl の中を明示的に探す
-        var statusHeader = window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalStatusHeader"));
-        var globalResetBtn = Retry.WhileNull(() => statusHeader?.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(20)).Result?.AsButton();
-        globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found within GlobalStatusHeader");
-        Retry.WhileFalse(() => globalResetBtn != null && globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
+        var globalResetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(30)).Result?.AsButton();
+        globalResetBtn.ShouldNotBeNull("GlobalResetErrorButton not found");
+        Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
-        // Act: Click Global Reset
-        globalResetBtn.SmartClick();
+        // Act: Click Global Reset (Using Invoke for stability)
+        globalResetBtn.Patterns.Invoke.Pattern.Invoke();
+
+        // 状態が自動的に Off になるのを待機する
+        Retry.WhileFalse(() => {
+            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsToggleButton();
+            return btn == null || btn.ToggleState != ToggleState.On;
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("SimulateJamButton should be unchecked after global reset via ViewModel");
 
         // Assert
-        Retry.WhileFalse(() => window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator")) == null, TimeSpan.FromSeconds(5))
-             .Success.ShouldBeTrue("JamErrorIndicator should disappear after global reset");
+        Retry.WhileFalse(() => {
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator == null || !indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(15))
+             .Success.ShouldBeTrue("JamErrorIndicator_State should be disabled after global reset");
     }
 
     /// <summary>出金エラー時のオーバーレイリセットボタンによりエラー状態が解消されることを検証する。</summary>

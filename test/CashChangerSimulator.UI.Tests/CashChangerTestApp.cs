@@ -118,6 +118,9 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             Automation = new UIA3Automation();
             var startInfo = new System.Diagnostics.ProcessStartInfo(_executablePath);
             startInfo.EnvironmentVariables["SKIP_STATE_VERIFICATION"] = "true";
+            // [TEST STABILITY] Auto-open device only when hotStart=true to allow ColdStartUITest to verify restricted UI.
+            startInfo.EnvironmentVariables["TEST_AUTO_OPEN_DEVICE"] = hotStart ? "True" : "False";
+
             if (envVars != null)
             {
                 foreach (var kvp in envVars)
@@ -127,19 +130,22 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
             }
             Application = Application.Launch(startInfo);
             
-            // [STABILITY] Wait for process and UI to settle
-            Thread.Sleep(3000);
+            // [STABILITY] Wait for process and UI to settle (increased for environment readiness)
+            Thread.Sleep(7000);
 
             // Use a more robust wait for the window
             var isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-            var windowWaitTimeout = isCi ? TimeSpan.FromSeconds(45) : TimeSpan.FromSeconds(20);
+            var windowWaitTimeout = TimeSpan.FromSeconds(60);
 
             Console.WriteLine($"[TEST] Starting MainWindow search (Timeout: {windowWaitTimeout.TotalSeconds}s, PID: {Application.ProcessId})...");
             MainWindow = SearchMainWindow(windowWaitTimeout);
 
             if (MainWindow == null)
             {
-                Console.WriteLine("[ERROR] Main window not found after retry.");
+                var hasExited = Application.HasExited;
+                var exitCode = hasExited ? Application.ExitCode : (int?)null;
+                Console.WriteLine($"[ERROR] Main window not found. Process Status: HasExited={hasExited}, ExitCode={exitCode}");
+
                 // Dump ALL windows for debugging if it fails
                 try
                 {
@@ -147,14 +153,7 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
                     foreach (var w in all) Console.WriteLine($"- Global Window: Name='{w.Name}', ID='{w.AutomationId}', PID={w.Properties.ProcessId}");
                 } catch { }
 
-                if (isCi)
-                {
-                    Console.WriteLine("[WARNING] Proceeding in CI even if MainWindow is null to see if subsequent steps can recover or provide more logs.");
-                }
-                else
-                {
-                    throw new Exception("Main window 'Cash Changer Simulator' (or ID 'MainWindow') not found.");
-                }
+                throw new Exception($"Main window 'Cash Changer Simulator' (or ID 'MainWindowRoot') not found. App PID: {Application.ProcessId}, HasExited: {hasExited}, ExitCode: {exitCode}");
             }
 
             // Settlement period for UI Automation state
@@ -197,49 +196,85 @@ C1     = {{ InitialCount = 100, DisplayNameJP = '一円玉' }}
 
     private Window? SearchMainWindow(TimeSpan timeout)
     {
+        Console.WriteLine($"[TEST] Polling for MainWindow... (Timeout: {timeout.TotalSeconds}s)");
         return Retry.WhileNull(() =>
         {
-            if (Application == null || Automation == null) return null;
-            
-            var appProcessId = Application.ProcessId;
-            var desktop = Automation.GetDesktop();
-
-            // 1. Try Find by AutomationId "MainWindow" with PID check (Most precise)
-            var byId = desktop.FindFirstChild(cf => cf.ByAutomationId("MainWindow"))?.AsWindow();
-            if (byId != null)
+            try
             {
-                try { 
-                    var pid = byId.Properties.ProcessId.Value;
-                    if (pid == appProcessId) return byId; 
-                } catch { }
-            }
+                if (Application == null || Automation == null) return null;
+                
+                var appProcessId = Application.ProcessId;
+                var desktop = Automation.GetDesktop();
+                var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
 
-            // 2. Try Find by Title Pattern with PID check (Multilingual support)
-            var windows = desktop.FindAllChildren(cf => cf.ByControlType(ControlType.Window));
-            foreach (var w in windows)
-            {
-                try {
-                    if (w.Properties.ProcessId.Value == appProcessId)
-                    {
-                        var name = w.Name;
-                        if (name != null && (name.Contains("Cash") || name.Contains("シミュレーター")))
+                Console.WriteLine($"[DEBUG-UI] Polling... AppPID={appProcessId}, WindowsCount={windows.Length}");
+
+                // 1. Try Find by Name/Title Pattern with PID check (Most robust)
+                foreach (var w in windows)
+                {
+                    try {
+                        if (w.Properties.ProcessId.ValueOrDefault == appProcessId)
                         {
-                            return w.AsWindow();
+                            var name = w.Properties.Name.ValueOrDefault;
+                            if (name != null && (name.Contains("Cash") || name.Contains("Simulator") || name.Contains("シミュレーター")))
+                            {
+                                Console.WriteLine($"[TEST] Found MainWindow by Title: {name} (PID: {appProcessId})");
+                                var win = w.AsWindow();
+                                Thread.Sleep(3000); 
+                                return win;
+                            }
                         }
-                    }
-                } catch { }
-            }
+                    } catch { }
+                }
 
-            // 3. Fallback: Any visible window for this PID
-            foreach (var w in windows)
+                // 2. Try Find by AutomationId "MainWindowRoot" with PID check
+                foreach (var w in windows)
+                {
+                    try {
+                        if (w.Properties.AutomationId.ValueOrDefault == "MainWindowRoot")
+                        {
+                            var pid = w.Properties.ProcessId.ValueOrDefault;
+                            if (pid == appProcessId)
+                            {
+                                Console.WriteLine($"[TEST] Found MainWindow by AutomationId: {w.Name} (PID: {pid})");
+                                var win = w.AsWindow();
+                                Thread.Sleep(3000); 
+                                return win;
+                            }
+                        }
+                    } catch { }
+                }
+
+                // 3. Fallback: Any visible window for this PID
+                foreach (var w in windows)
+                {
+                    try {
+                        if (w.Properties.ProcessId.ValueOrDefault == appProcessId && !w.IsOffscreen)
+                        {
+                            Console.WriteLine($"[TEST] Found fallback window for PID {appProcessId}: {w.Name}");
+                            var win = w.AsWindow();
+                            Thread.Sleep(3000);
+                            return win;
+                        }
+                    } catch { }
+                }
+
+                // 4. Ultimate Fallback: Any window with "MainWindowRoot" globally (Ignore PID)
+                var globalId = desktop.FindFirstDescendant(cf => cf.ByAutomationId("MainWindowRoot"))?.AsWindow();
+                if (globalId != null)
+                {
+                    Console.WriteLine($"[TEST] Found MainWindow globally by AutomationId (PID mismatch ignored): {globalId.Properties.ProcessId.ValueOrDefault}");
+                    Thread.Sleep(3000);
+                    return globalId;
+                }
+            }
+            catch (Exception ex)
             {
-                try {
-                    if (w.Properties.ProcessId.Value == appProcessId && !w.IsOffscreen) return w.AsWindow();
-                } catch { }
+                Console.WriteLine($"[DEBUG-UI] Error during polling: {ex.Message}");
             }
 
             return null;
-        }, timeout, TimeSpan.FromMilliseconds(1000)).Result;
+        }, timeout, TimeSpan.FromMilliseconds(5000)).Result;
     }
 
     /// <summary>アプリケーションとオートメーションリソースを安全に解放し、プロセスをクリーンアップする。</summary>

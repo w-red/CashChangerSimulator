@@ -190,12 +190,12 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Act & Assert (Overlap)
         _fixture.Hardware.SetOverlapped(true);
-        vm.IsOverlapped.Value.ShouldBeTrue();
+        vm.IsOverlapped.CurrentValue.ShouldBeTrue();
 
         // Act & Assert (DeviceError)
         _fixture.Hardware.SetDeviceError(1);
-        vm.IsDeviceError.Value.ShouldBeTrue();
-        vm.CurrentErrorCode.Value.ShouldBe(1);
+        vm.IsDeviceError.CurrentValue.ShouldBeTrue();
+        vm.CurrentErrorCode.CurrentValue.ShouldBe(1);
 
         // Act & Assert (Connected)
         _fixture.Hardware.SetConnected(false);
@@ -232,12 +232,19 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Act
         if (exceptionFlag == nameof(_fixture.CashChanger.SimulateOpenException))
-            vm.OpenCommand.Execute(Unit.Default);
-        else
+        {
+            // [STABILITY] Ensure device is closed first, otherwise OpenCommand will early return 
+            // due to the new duplicate open guard in InventoryOperationService.
             vm.CloseCommand.Execute(Unit.Default);
+            vm.OpenCommand.Execute(Unit.Default);
+        }
+        else
+        {
+            vm.CloseCommand.Execute(Unit.Default);
+        }
 
         // Assert
-        vm.IsDeviceError.Value.ShouldBeTrue();
+        vm.IsDeviceError.CurrentValue.ShouldBeTrue();
         _fixture.NotifyServiceMock.Verify(n => n.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 

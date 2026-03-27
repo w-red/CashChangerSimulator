@@ -17,4 +17,8 @@
     <!--
       Standard MaterialDesign Brushes are managed dynamically by PaletteHelper in App.xaml.cs.
     -->
+
+    <!-- [FALLBACK] Default primary colors for StaticResource references in Templates.xaml animations.
+         These get overridden at runtime by App.xaml.cs UpdateTheme(). -->
+    <Color x:Key="PrimaryColor">#BB86FC</Color>
 </ResourceDictionary>

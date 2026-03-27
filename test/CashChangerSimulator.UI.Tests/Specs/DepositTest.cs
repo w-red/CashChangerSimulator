@@ -78,19 +78,21 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
 
         var firstTextBox = UiTestRetry.Find(() => dialog.FindFirstDescendant(cf => cf.ByAutomationId("BulkQuantityBox"))?.AsTextBox(), UITestTimings.RetryLongTimeout) as TextBox;
         firstTextBox.ShouldNotBeNull();
-        firstTextBox.Focus();
-        FlaUI.Core.Input.Keyboard.Type("3");
+        firstTextBox.Text = "3";
         Thread.Sleep(100);
+        firstTextBox.Focus();
         FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
         Thread.Sleep(500);
 
         var okButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
         okButton.SmartClick();
 
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
         var currentDepositText = FindElement(depositWindow, "CurrentDepositText", null)?.AsLabel();
         currentDepositText.ShouldNotBeNull();
-        ParseAmount(currentDepositText.Text).ShouldBeGreaterThan(0);
+        
+        // Wait for update
+        Retry.WhileFalse(() => ParseAmount(currentDepositText.Text) > 0, UITestTimings.RetryLongTimeout).Success
+            .ShouldBeTrue($"Current deposit should be greater than 0. Actual: {currentDepositText.Text}");
     }
 
     /// <summary>入金をキャンセルして投入済みの現金を返却できることを検証する。</summary>

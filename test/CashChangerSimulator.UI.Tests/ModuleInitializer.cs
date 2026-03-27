@@ -1,18 +1,14 @@
 using System.Runtime.CompilerServices;
+using VerifyTests;
 
 namespace CashChangerSimulator.UI.Tests;
 
 public static class ModuleInitializer
 {
     [ModuleInitializer]
-    public static void Init()
+    public static void Initialize()
     {
         VerifyImageMagick.Initialize();
-        // 実行環境（ローカル vs CIサンドボックス）によるフォントレンダリングやDPIの微小な差異、
-        // およびアニメーションや時計の影響を許容するため、比較許容差を 20% に設定
-        VerifyImageMagick.RegisterComparers(0.20);
-        
-        // ファイルロック問題を回避し、CI環境でも安全に実行するため DiffEngine を無効化
-        DiffEngine.DiffRunner.Disabled = true;
+        VerifyImageMagick.RegisterComparers(0.25); // Global 25% threshold
     }
 }

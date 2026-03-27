@@ -125,7 +125,8 @@ public class UISmokeTests
                     config,
                     metadata,
                     new Mock<IInventoryOperationService>().Object,
-                    new Mock<IViewModelFactory>().Object);
+                    new Mock<IViewModelFactory>().Object,
+                    new ImmediateDispatcherService());
 
                 // Test ActivityFeedControl
                 var activityFeed = new ActivityFeedControl { DataContext = invVM };

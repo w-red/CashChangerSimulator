@@ -134,7 +134,7 @@
                                <ItemsControl.ItemTemplate>
                                    <DataTemplate>
                                        <ToggleButton Content="{Binding Name}" Margin="2" 
-                                                     IsChecked="{Binding IsInError}" 
+                                                     IsChecked="{Binding IsInError.Value, Mode=OneWay}" 
                                                      Style="{StaticResource MaterialDesignActionToggleButton}"/>
                                    </DataTemplate>
                                </ItemsControl.ItemTemplate>
@@ -149,7 +149,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <ToggleButton Content="{Binding Name}" Margin="2" 
-                                                      IsChecked="{Binding IsInError}" 
+                                                      IsChecked="{Binding IsInError.Value, Mode=OneWay}" 
                                                       Style="{StaticResource MaterialDesignActionToggleButton}"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
