@@ -21,26 +21,38 @@ public class WpfViewService(IDispatcherService dispatcher, IViewModelFactory vie
 
     public void ShowDepositWindow(DepositViewModel dataContext, Func<IEnumerable<DenominationViewModel>> getDenominations)
     {
-        var window = new DepositWindow(dataContext, getDenominations, viewModelFactory)
+        dispatcher.SafeInvoke(() =>
         {
-            Owner = GetOwner()
-        };
-        window.Show();
+            var window = new DepositWindow(dataContext, getDenominations, viewModelFactory)
+            {
+                Owner = GetOwner()
+            };
+            window.Show();
+        });
     }
 
     public void ShowDispenseWindow(DispenseViewModel dataContext, Func<IEnumerable<DenominationViewModel>> getDenominations)
     {
-        var window = new DispenseWindow(dataContext, getDenominations, viewModelFactory)
+        dispatcher.SafeInvoke(() =>
         {
-            Owner = GetOwner()
-        };
-        window.Show();
+            var window = new DispenseWindow(dataContext, getDenominations, viewModelFactory)
+            {
+                Owner = GetOwner()
+            };
+            window.Show();
+        });
     }
 
     public void ShowAdvancedSimulationWindow(AdvancedSimulationViewModel dataContext)
     {
-        var window = new AdvancedSimulationWindow(dataContext);
-        window.Show();
+        dispatcher.SafeInvoke(() =>
+        {
+            var window = new AdvancedSimulationWindow(dataContext)
+            {
+                Owner = GetOwner()
+            };
+            window.Show();
+        });
     }
 
     public async Task ShowDialogAsync(object content, string identifier = "RootDialog")
