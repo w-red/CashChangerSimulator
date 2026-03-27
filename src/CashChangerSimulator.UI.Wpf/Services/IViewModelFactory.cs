@@ -1,4 +1,5 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using System.Windows.Input;
@@ -10,8 +11,8 @@ public interface IViewModelFactory
 {
     DepositViewModel CreateDepositViewModel(Func<IEnumerable<DenominationViewModel>> getDenominations, BindableReactiveProperty<bool> isDispenseBusy);
     DispenseViewModel CreateDispenseViewModel(BindableReactiveProperty<bool> isInDepositMode, Func<IEnumerable<DenominationViewModel>> getDenominations);
-    InventoryViewModel CreateInventoryViewModel();
-    AdvancedSimulationViewModel CreateAdvancedSimulationViewModel();
+    InventoryViewModel CreateInventoryViewModel(ConfigurationProvider configProvider);
+    AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(ConfigurationProvider configProvider);
     DenominationViewModel CreateDenominationViewModel(DenominationKey key);
     BulkAmountInputViewModel CreateBulkAmountInputViewModel(
         IEnumerable<BulkAmountInputItemViewModel> items,

@@ -1,6 +1,9 @@
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using R3;
 using System.Windows.Input;
 
@@ -26,14 +29,23 @@ public class ViewModelFactory : IViewModelFactory
         return ActivatorUtilities.CreateInstance<DispenseViewModel>(_serviceProvider, isInDepositMode, getDenominations);
     }
 
-    public InventoryViewModel CreateInventoryViewModel() => _serviceProvider.GetRequiredService<InventoryViewModel>();
+    public InventoryViewModel CreateInventoryViewModel(ConfigurationProvider configProvider)
+    {
+        return ActivatorUtilities.CreateInstance<InventoryViewModel>(_serviceProvider, configProvider);
+    }
 
-    public AdvancedSimulationViewModel CreateAdvancedSimulationViewModel() => _serviceProvider.GetRequiredService<AdvancedSimulationViewModel>();
+    public AdvancedSimulationViewModel CreateAdvancedSimulationViewModel(ConfigurationProvider configProvider)
+    {
+        return ActivatorUtilities.CreateInstance<AdvancedSimulationViewModel>(_serviceProvider, configProvider);
+    }
 
     public DenominationViewModel CreateDenominationViewModel(DenominationKey key)
     {
-        // ActivatorUtilities overrides the `key` parameter during instantiation.
-        return ActivatorUtilities.CreateInstance<DenominationViewModel>(_serviceProvider, key);
+        var facade = _serviceProvider.GetRequiredService<IDeviceFacade>();
+        var monitor = facade.Monitors.Monitors.FirstOrDefault(m => m.Key == key)
+            ?? throw new InvalidOperationException($"Monitor not found for key: {key}");
+        
+        return ActivatorUtilities.CreateInstance<DenominationViewModel>(_serviceProvider, key, monitor);
     }
 
     public BulkAmountInputViewModel CreateBulkAmountInputViewModel(
@@ -47,7 +59,15 @@ public class ViewModelFactory : IViewModelFactory
         ReadOnlyReactiveProperty<bool> isDeviceError)
     {
         return ActivatorUtilities.CreateInstance<BulkAmountInputViewModel>(
-            _serviceProvider, items, simulateOverlap, simulateJam, simulateDeviceError, resetError, isJammed, isOverlapped, isDeviceError);
+            _serviceProvider, 
+            items, 
+            simulateOverlap, 
+            simulateJam, 
+            simulateDeviceError, 
+            resetError, 
+            isJammed, 
+            isOverlapped, 
+            isDeviceError);
     }
 
     public SettingsViewModel CreateSettingsViewModel()

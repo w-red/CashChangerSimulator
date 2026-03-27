@@ -23,68 +23,76 @@ public static class DIContainer
     /// <summary>コンテナを初期化し、各サービスの登録と解決を行います。</summary>
     public static void Initialize()
     {
-        var services = new ServiceCollection();
-
-        // Use modular registration extensions
-        services.AddCoreServices();
-        services.AddDeviceServices();
-        services.AddWpfUiServices();
-
-        // Register Logging from the shared LogProvider
-        services.AddSingleton(LogProvider.Factory);
-        services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-        // Build the ServiceProvider
-        _serviceProvider = services.BuildServiceProvider();
-
-        // Register as SimulatorServices provider for cross-project service sharing
-        SimulatorServices.Provider = new MSIServiceProvider(_serviceProvider);
-
-        // Initialization logic
-        var configProvider = _serviceProvider.GetRequiredService<ConfigurationProvider>();
-        var inventory = _serviceProvider.GetRequiredService<Inventory>();
-
-        // Ensure the event history observer is instantiated and listening
-        _serviceProvider.GetRequiredService<DeviceEventHistoryObserver>();
-
-        if (Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true")
+        try
         {
-            _serviceProvider.GetRequiredService<SimulatorCashChanger>().SkipStateVerification = true;
-        }
+            var services = new ServiceCollection();
 
-        // Load Inventory State
-        var state = ConfigurationLoader.LoadInventoryState();
-        if (state?.Counts != null && state.Counts.Count > 0)
-        {
-            inventory.LoadFromDictionary(state.Counts);
-        }
-        else
-        {
-            foreach (var currencyEntry in configProvider.Config.Inventory)
+            // Use modular registration extensions
+            services.AddCoreServices();
+            services.AddDeviceServices();
+            services.AddWpfUiServices();
+
+            // Register Logging from the shared LogProvider
+            services.AddSingleton(LogProvider.Factory);
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            // Build the ServiceProvider
+            _serviceProvider = services.BuildServiceProvider();
+
+            // Register as SimulatorServices provider for cross-project service sharing
+            SimulatorServices.Provider = new MSIServiceProvider(_serviceProvider);
+
+            // Initialization logic
+            var configProvider = _serviceProvider.GetRequiredService<ConfigurationProvider>();
+            var inventory = _serviceProvider.GetRequiredService<Inventory>();
+
+            // Ensure the event history observer is instantiated and listening
+            _serviceProvider.GetRequiredService<DeviceEventHistoryObserver>();
+
+            if (Environment.GetEnvironmentVariable("SKIP_STATE_VERIFICATION") == "true")
             {
-                var currencyCode = currencyEntry.Key;
-                foreach (var item in currencyEntry.Value.Denominations)
+                _serviceProvider.GetRequiredService<SimulatorCashChanger>().SkipStateVerification = true;
+            }
+
+            // Load Inventory State
+            var state = ConfigurationLoader.LoadInventoryState();
+            if (state?.Counts != null && state.Counts.Count > 0)
+            {
+                inventory.LoadFromDictionary(state.Counts);
+            }
+            else
+            {
+                foreach (var currencyEntry in configProvider.Config.Inventory)
                 {
-                    if (DenominationKey.TryParse(item.Key, currencyCode, out var key) && key != null)
+                    var currencyCode = currencyEntry.Key;
+                    foreach (var item in currencyEntry.Value.Denominations)
                     {
-                        inventory.SetCount(key, item.Value.InitialCount);
+                        if (DenominationKey.TryParse(item.Key, currencyCode, out var key) && key != null)
+                        {
+                            inventory.SetCount(key, item.Value.InitialCount);
+                        }
                     }
                 }
             }
-        }
 
-        // Initialize Transaction History
-        var history = _serviceProvider.GetRequiredService<TransactionHistory>();
-        var persistence = _serviceProvider.GetRequiredService<HistoryPersistenceService>();
-        
-        var historyState = persistence.Load();
-        if (historyState.Entries.Count > 0)
+            // Initialize Transaction History
+            var history = _serviceProvider.GetRequiredService<TransactionHistory>();
+            var persistence = _serviceProvider.GetRequiredService<HistoryPersistenceService>();
+            
+            var historyState = persistence.Load();
+            if (historyState.Entries.Count > 0)
+            {
+                history.FromState(historyState);
+            }
+
+            // Start Auto-Save
+            persistence.StartAutoSave();
+        }
+        catch (Exception ex)
         {
-            history.FromState(historyState);
+            Console.Error.WriteLine($"[DI_INIT_FATAL] {ex}");
+            throw; // Re-throw to let App.OnStartup handle it with its own logging
         }
-
-        // Start Auto-Save
-        persistence.StartAutoSave();
     }
 
     /// <summary>指定された型のインスタンスをコンテナから解決します。</summary>
