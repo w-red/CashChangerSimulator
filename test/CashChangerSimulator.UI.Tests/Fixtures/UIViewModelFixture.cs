@@ -329,6 +329,10 @@ public class UIViewModelFixture : IDisposable
         try { CashChanger?.Dispose(); } catch { }
         try { (Monitors as IDisposable)?.Dispose(); } catch { }
         try { ConfigProvider?.Dispose(); } catch { }
+        
+        // Reset SynchronizationContext to prevent pollution of subsequent tests
+        SynchronizationContext.SetSynchronizationContext(null);
+        
         GC.SuppressFinalize(this);
     }
 }
