@@ -3,10 +3,12 @@ using System.Globalization;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 
+/// <summary>Program クラスのグローバルオプション解析機能を検証するためのテストクラス。</summary>
 public class ProgramTests
 {
+    /// <summary>グローバルオプションとコマンド引数が正しく分離されることを検証します。</summary>
     [Fact]
-    public void ExtractGlobalOptions_ShouldSeparateGlobalsAndCommands()
+    public void ExtractGlobalOptionsShouldSeparateGlobalsAndCommands()
     {
         // Arrange
         string[] args = ["--async", "deposit", "--lang", "en-US", "1000", "--currency", "USD"];
@@ -19,8 +21,9 @@ public class ProgramTests
         commands.ShouldBe(["deposit", "1000"]);
     }
 
+    /// <summary>グローバルオプションが存在しない場合に全ての引数がコマンドとして扱われることを検証します。</summary>
     [Fact]
-    public void ExtractGlobalOptions_NoGlobals_ShouldReturnAllCommands()
+    public void ExtractGlobalOptionsNoGlobalsShouldReturnAllCommands()
     {
         // Arrange
         string[] args = ["deposit", "1000"];
@@ -33,8 +36,9 @@ public class ProgramTests
         commands.ShouldBe(["deposit", "1000"]);
     }
 
+    /// <summary>グローバルオプションがセッション設定に正しく反映されることを検証します。</summary>
     [Fact]
-    public void ApplyGlobalOptions_ShouldUpdateOptions()
+    public void ApplyGlobalOptionsShouldUpdateOptions()
     {
         // Arrange
         var options = new CliSessionOptions();
@@ -50,8 +54,9 @@ public class ProgramTests
         CultureInfo.DefaultThreadCurrentCulture?.Name.ShouldBe("ja-JP");
     }
 
+    /// <summary>一部のグローバルオプションのみが指定された場合に、その他の設定が維持されることを検証します。</summary>
     [Fact]
-    public void ApplyGlobalOptions_PartialOptions_ShouldOnlyUpdateSpecified()
+    public void ApplyGlobalOptionsPartialOptionsShouldOnlyUpdateSpecified()
     {
         // Arrange
         var options = new CliSessionOptions { IsAsync = false, Language = "en-US", CurrencyCode = "USD" };
@@ -66,8 +71,9 @@ public class ProgramTests
         options.CurrencyCode.ShouldBe("USD");
     }
 
+    /// <summary>verbose オプションが正しく分離されることを検証します。</summary>
     [Fact]
-    public void ExtractGlobalOptions_WithVerbose_ShouldSeparateGlobals()
+    public void ExtractGlobalOptionsWithVerboseShouldSeparateGlobals()
     {
         // Arrange
         string[] args = ["--verbose", "status"];
@@ -80,8 +86,9 @@ public class ProgramTests
         commands.ShouldBe(["status"]);
     }
 
+    /// <summary>verbose オプションと無効な言語コードが指定された場合の挙動を検証します。</summary>
     [Fact]
-    public void ApplyGlobalOptions_WithVerboseAndInvalidLang_ShouldHandleGracefully()
+    public void ApplyGlobalOptionsWithVerboseAndInvalidLangShouldHandleGracefully()
     {
         // Arrange
         var options = new CliSessionOptions();
@@ -96,8 +103,9 @@ public class ProgramTests
         // Invalid language gracefully handled by empty catch blocks
     }
 
+    /// <summary>ヘルプコマンドが正常に動作し、例外を投げずに終了することを検証します。</summary>
     [Fact]
-    public void Main_HelpCommand_ShouldExecuteCoconaAndExit()
+    public void MainHelpCommandShouldExecuteCoconaAndExit()
     {
         // Arrange
         string[] args = ["--help"];
@@ -107,8 +115,9 @@ public class ProgramTests
         Should.NotThrow(() => Program.Main(args));
     }
 
+    /// <summary>無効なカルチャが指定された場合に安全にフォールバックされることを検証します。</summary>
     [Fact]
-    public void ApplyGlobalOptions_InvalidCulture_ShouldFallbackSafely()
+    public void ApplyGlobalOptionsInvalidCultureShouldFallbackSafely()
     {
         // Arrange
         var options = new CliSessionOptions { Language = "en-US" };

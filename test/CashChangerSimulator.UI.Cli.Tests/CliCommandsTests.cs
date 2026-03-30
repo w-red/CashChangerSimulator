@@ -268,7 +268,7 @@ public class CliCommandsTests
 
     /// <summary>HandleAsyncError が Illegal エラーかつデバイス無効時に適切なヒントを表示することを検証します。</summary>
     [Fact]
-    public void HandleAsyncError_Illegal_NotEnabled_ShouldShowSpecificHint()
+    public void HandleAsyncErrorIllegalNotEnabledShouldShowSpecificHint()
     {
         // Arrange
         _mockChanger.Setup(c => c.DeviceEnabled).Returns(false);
@@ -288,7 +288,7 @@ public class CliCommandsTests
 
     /// <summary>HandleAsyncError が未知のエラーコードに対してデフォルトヒントを表示することを検証します。</summary>
     [Fact]
-    public void HandleAsyncError_UnknownError_ShouldShowGenericHint()
+    public void HandleAsyncErrorUnknownErrorShouldShowGenericHint()
     {
         // Arrange
         var args = new DeviceErrorEventArgs(ErrorCode.Extended, 0, ErrorLocus.Output, ErrorResponse.Clear);

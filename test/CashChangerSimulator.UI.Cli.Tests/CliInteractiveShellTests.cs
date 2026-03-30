@@ -316,9 +316,9 @@ public class CliInteractiveShellTests
         _mockChanger.Verify(c => c.Close(), Times.Once);
     }
 
-    /// <summary>Dispatcher で例外が発生してもループが継続することを検証します。</summary>
+    /// <summary>ディスパッチャで例外が発生した場合に、エラーメッセージを表示してループを継続することを検証します。</summary>
     [Fact]
-    public async Task RunAsync_OnDispatcherException_ShouldShowErrorAndContinue()
+    public async Task RunAsyncOnDispatcherExceptionShouldShowErrorAndContinue()
     {
         // Arrange
         var inputs = new Queue<string>(new[] { "error-cmd", "exit" });

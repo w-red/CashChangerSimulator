@@ -2,12 +2,14 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Cli.Tests;
 
+/// <summary>CLI のオートコンプリート機能を検証するテストクラス。</summary>
 public class CliAutoCompleteHandlerTests
 {
     private readonly string[] _commands = ["open", "claim", "enable", "deposit", "dispense", "close"];
 
+    /// <summary>空の入力に対して全コマンドを提案することを検証します。</summary>
     [Fact]
-    public void GetSuggestions_WithEmptyText_ShouldReturnAllCommands()
+    public void GetSuggestionsWithEmptyTextShouldReturnAllCommands()
     {
         // Arrange
         var handler = new CliAutoCompleteHandler(_commands);
@@ -19,8 +21,9 @@ public class CliAutoCompleteHandlerTests
         suggestions.ShouldBe(_commands);
     }
 
+    /// <summary>前方一致のプリフィックスに対して一致するコマンドを提案することを検証します。</summary>
     [Fact]
-    public void GetSuggestions_WithPrefix_ShouldReturnMatchingCommands()
+    public void GetSuggestionsWithPrefixShouldReturnMatchingCommands()
     {
         // Arrange
         var handler = new CliAutoCompleteHandler(_commands);
@@ -33,8 +36,9 @@ public class CliAutoCompleteHandlerTests
         suggestions.ShouldContain("close");
     }
 
+    /// <summary>大文字小文字を区別せず、プリフィックスに対して一致するコマンドを提案することを検証します。</summary>
     [Fact]
-    public void GetSuggestions_WithPrefixCaseInsensitive_ShouldReturnMatchingCommands()
+    public void GetSuggestionsWithPrefixCaseInsensitiveShouldReturnMatchingCommands()
     {
         // Arrange
         var handler = new CliAutoCompleteHandler(_commands);
@@ -47,8 +51,9 @@ public class CliAutoCompleteHandlerTests
         suggestions.ShouldContain("close");
     }
 
+    /// <summary>複数のコマンドがマッチする場合に全候補を提案することを検証します。</summary>
     [Fact]
-    public void GetSuggestions_WithMultipleMatches_ShouldReturnAll()
+    public void GetSuggestionsWithMultipleMatchesShouldReturnAll()
     {
         // Arrange
         var handler = new CliAutoCompleteHandler(["test1", "test2", "other"]);
@@ -62,8 +67,9 @@ public class CliAutoCompleteHandlerTests
         suggestions.ShouldContain("test2");
     }
 
+    /// <summary>マッチするコマンドがない場合に空のリストを返すことを検証します。</summary>
     [Fact]
-    public void GetSuggestions_WithNoMatches_ShouldReturnEmpty()
+    public void GetSuggestionsWithNoMatchesShouldReturnEmpty()
     {
         // Arrange
         var handler = new CliAutoCompleteHandler(_commands);

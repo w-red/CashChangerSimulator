@@ -30,6 +30,7 @@ public class CliDIContainerTests
         provider.GetService<CliCommands>().ShouldNotBeNull();
     }
 
+    /// <summary>指定された引数を用いて DI コンテナが正常に初期化されることを検証します。</summary>
     [Fact]
     public void ShouldInitializeSuccessfully()
     {
@@ -47,8 +48,9 @@ public class CliDIContainerTests
         configProvider.Config.System.CurrencyCode.ShouldBe("USD");
     }
 
+    /// <summary>リゾルバサービスプロバイダを通じて依存関係を解決できることを検証します。</summary>
     [Fact]
-    public void ResolverServiceProvider_ShouldResolveDependencies()
+    public void ResolverServiceProviderShouldResolveDependencies()
     {
         // Arrange
         var builder = Host.CreateApplicationBuilder();

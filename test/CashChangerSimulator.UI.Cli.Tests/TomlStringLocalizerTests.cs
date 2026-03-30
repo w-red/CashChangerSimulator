@@ -38,7 +38,7 @@ greet = ""こんにちは、{0}さん！""
         }
     }
 
-    /// <summary>英語（デフォルト）の文字列が正しく取得されることを検証します。</summary>
+    /// <summary>デフォルト（英語）のカルチャで文字列が取得できることを検証します。</summary>
     [Fact]
     public void ShouldGetEnglishStringByDefault()
     {
@@ -54,7 +54,7 @@ greet = ""こんにちは、{0}さん！""
         result.ResourceNotFound.ShouldBeFalse();
     }
 
-    /// <summary>日本語の文字列が正しく取得されることを検証します。</summary>
+    /// <summary>日本語のカルチャで文字列が取得できることを検証します。</summary>
     [Fact]
     public void ShouldGetJapaneseString()
     {
@@ -69,7 +69,7 @@ greet = ""こんにちは、{0}さん！""
         result.Value.ShouldBe("シミュレータへようこそ");
     }
 
-    /// <summary>引数を持つ文字列が正しくフォーマットされることを検証します。</summary>
+    /// <summary>引数を含むメッセージが正しくフォーマットされることを検証します。</summary>
     [Fact]
     public void ShouldFormatArguments()
     {
@@ -84,7 +84,7 @@ greet = ""こんにちは、{0}さん！""
         result.Value.ShouldBe("Hello, Alice!");
     }
 
-    /// <summary>キーが見つからない場合にキー名が返されることを検証します。</summary>
+    /// <summary>リソースが見つからない場合にキー名そのものが返されることを検証します。</summary>
     [Fact]
     public void ShouldReturnKeyNameIfNotFound()
     {
@@ -100,7 +100,7 @@ greet = ""こんにちは、{0}さん！""
         result.ResourceNotFound.ShouldBeTrue();
     }
 
-    /// <summary>全ての文字列を取得できることを検証します。</summary>
+    /// <summary>GetAllStrings で全てのリソースエントリが取得できることを検証します。</summary>
     [Fact]
     public void ShouldGetAllStrings()
     {
@@ -116,7 +116,7 @@ greet = ""こんにちは、{0}さん！""
         all.ShouldContain(s => s.Name == "errors.failed" && s.Value == "Operation failed");
     }
 
-    /// <summary>言語のみの指定（ja-JP -> ja）でフォールバックされることを検証します。</summary>
+    /// <summary>言語コードのみが一致する場合（例: ja-JP -> ja）でもフォールバックされることを検証します。</summary>
     [Fact]
     public void ShouldFallbackToLanguageOnly()
     {
@@ -131,7 +131,7 @@ greet = ""こんにちは、{0}さん！""
         result.Value.ShouldBe("シミュレータへようこそ");
     }
 
-    /// <summary>指定された言語が見つからない場合に en にフォールバックされることを検証します。</summary>
+    /// <summary>指定された言語のリソースが存在しない場合に英語にフォールバックされることを検証します。</summary>
     [Fact]
     public void ShouldFallbackToEnglishIfNotFound()
     {
@@ -146,7 +146,7 @@ greet = ""こんにちは、{0}さん！""
         result.Value.ShouldBe("Welcome to Simulator");
     }
 
-    /// <summary>TOML の解析に失敗した場合に null が返され、結果としてキー名が返ることを検証します。</summary>
+    /// <summary>TOML ファイルの形式が不正な場合に適切にフォールバックされることを検証します。</summary>
     [Fact]
     public void ShouldReturnKeyIfTomlIsInvalid()
     {
@@ -166,7 +166,7 @@ greet = ""こんにちは、{0}さん！""
         result.ResourceNotFound.ShouldBeTrue();
     }
 
-    /// <summary>ファイルが全く存在しない場合にキー名が返ることを検証します。</summary>
+    /// <summary>リソースファイルが一つも存在しない場合にキー名が返されることを検証します。</summary>
     [Fact]
     public void ShouldReturnKeyIfNoFilesExist()
     {
