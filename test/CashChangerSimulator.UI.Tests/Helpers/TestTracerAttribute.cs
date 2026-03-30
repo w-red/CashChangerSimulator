@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using Xunit.v3;
 
@@ -9,7 +10,7 @@ namespace CashChangerSimulator.UI.Tests.Helpers;
 /// 各テストの開始時に実行中のテスト名を C:\Logs\current_test.txt に書き出すトレーサー。
 /// サンドボックス内からホスト側の監視スクリプトへの干渉を避けるため FileShare.ReadWrite を使用します。
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public class TestTracerAttribute : BeforeAfterTestAttribute
 {
     private const string LogPath = @"C:\Logs\current_test.txt";
