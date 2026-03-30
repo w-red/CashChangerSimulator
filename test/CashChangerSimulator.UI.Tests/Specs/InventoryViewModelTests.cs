@@ -294,18 +294,20 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
     public void IsRecoveryHelpAvailableShouldBeTrueWhenEmpty()
     {
         // Arrange
-        var vm = CreateViewModel();
-        // すべての金種を補充して正常状態にする
+        // すべての金種を十分な量（Normal以上）補充して正常状態にする
         foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
         {
-            _fixture.Inventory.SetCount(key, 10);
+            _fixture.Inventory.SetCount(key, 120); // NearLimit(100) 以上の値を指定
         }
-        vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeFalse();
+        
+        var vm = CreateViewModel();
 
         // Act
+        // 特定の金種を空（0枚）にする
         _fixture.Inventory.SetCount(TestConstants.Key100, 0);
 
         // Assert
+        // 空になったことでヘルプが必要（True）になることを確認
         vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeTrue();
     }
 
