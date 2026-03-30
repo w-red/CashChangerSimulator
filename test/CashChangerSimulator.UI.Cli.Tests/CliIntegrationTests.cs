@@ -65,7 +65,7 @@ public class CliIntegrationTests
 
     /// <summary>入金の開始から確定、終了までの一連のフローをテストし、在庫が増加することを確認します。</summary>
     [Fact]
-    public async Task DepositCycle_ShouldIncreaseInventoryCorrectly()
+    public async Task DepositCycleShouldIncreaseInventoryCorrectly()
     {
         // Arrange
         var inventory = _serviceProvider.GetRequiredService<Inventory>();
@@ -98,7 +98,7 @@ public class CliIntegrationTests
 
     /// <summary>出金時、在高不足の場合に適切なエラーメッセージが表示されることを確認します。</summary>
     [Fact]
-    public async Task Dispense_WithInsufficientFunds_ShouldShowError()
+    public async Task DispenseWithInsufficientFundsShouldShowError()
     {
         // Arrange: 在庫が空の状態
         var inventory = _serviceProvider.GetRequiredService<Inventory>();
@@ -113,7 +113,7 @@ public class CliIntegrationTests
 
     /// <summary>対話型シェル経由で一連の入金操作を行い、最終的に終了することをテストします。</summary>
     [Fact]
-    public async Task Shell_DepositWorkflow_ShouldCompleteAndExit()
+    public async Task ShellDepositWorkflowShouldCompleteAndExit()
     {
         // Arrange
         var inputs = new Queue<string>(new[] { "deposit 500", "fix-deposit", "end-deposit", "exit" });
@@ -143,7 +143,7 @@ public class CliIntegrationTests
 
     /// <summary>入金中に返却（Repay）を指示し、在庫が変化しないことを確認します。</summary>
     [Fact]
-    public async Task RepayDeposit_ShouldReturnCashCorrectly()
+    public async Task RepayDepositShouldReturnCashCorrectly()
     {
         // Arrange
         var inventory = _serviceProvider.GetRequiredService<Inventory>();
@@ -172,7 +172,7 @@ public class CliIntegrationTests
 
     /// <summary>入金中に一時停止と再開を試行します。</summary>
     [Fact]
-    public async Task PauseResumeDeposit_ShouldWorkCorrectly()
+    public async Task PauseResumeDepositShouldWorkCorrectly()
     {
         // Act: 入金開始
         await _dispatcher.DispatchAsync("deposit 1000");
@@ -192,7 +192,7 @@ public class CliIntegrationTests
 
     /// <summary>デバイスがジャム状態のときに入金を開始しようとしてエラーになることを確認します。</summary>
     [Fact]
-    public async Task BeginDeposit_WhenJammed_ShouldShowError()
+    public async Task BeginDepositWhenJammedShouldShowError()
     {
         // Arrange: ジャム状態にする
         var hardwareStatus = _serviceProvider.GetRequiredService<HardwareStatusManager>();
