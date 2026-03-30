@@ -12,8 +12,9 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class DeviceFacadeTests
 {
+    /// <summary>有効な引数を渡した際、すべてのプロパティが正しくセットされることを検証します。</summary>
     [Fact]
-    public void Constructor_WithValidArguments_ShouldSetProperties()
+    public void ConstructorWithValidArgumentsShouldSetProperties()
     {
         // Arrange
         var inventory = new Inventory();
@@ -59,8 +60,9 @@ public class DeviceFacadeTests
         facade.View.ShouldBeSameAs(view);
     }
 
+    /// <summary>コンストラクタに null を渡した際、ArgumentNullException がスローされることを検証します。</summary>
     [Fact]
-    public void Constructor_WithNullArgument_ShouldThrowArgumentNullException()
+    public void ConstructorWithNullArgumentShouldThrowArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() => new DeviceFacade(null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!));
     }

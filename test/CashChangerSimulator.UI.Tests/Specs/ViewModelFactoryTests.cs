@@ -9,14 +9,16 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class ViewModelFactoryTests
 {
+    /// <summary>コンストラクタに null を渡した際、ArgumentNullException がスローされることを検証します。</summary>
     [Fact]
-    public void Constructor_WithNullProvider_ShouldThrowArgumentNullException()
+    public void ConstructorWithNullProviderShouldThrowArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() => new ViewModelFactory(null!));
     }
 
+    /// <summary>DepositViewModel の作成コマンドが、DIコンテナからの解決を試みることを検証します。</summary>
     [Fact]
-    public void CreateDepositViewModel_ShouldResolveFromServiceProvider()
+    public void CreateDepositViewModelShouldResolveFromServiceProvider()
     {
         // Arrange
         var services = new ServiceCollection();

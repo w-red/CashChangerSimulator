@@ -26,8 +26,10 @@ using System.Windows.Controls;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+/// <summary>UI の主要なビューが XAML 例外なくロードできることを確認するスモークテストクラス。</summary>
 public class UISmokeTests
 {
+    /// <summary>すべての主要なビュー（MainWindow, Controls）が例外なくインスタンス化できることを検証します。</summary>
     [Fact]
     public void AllMajorViewsShouldLoadWithoutXamlException()
     {

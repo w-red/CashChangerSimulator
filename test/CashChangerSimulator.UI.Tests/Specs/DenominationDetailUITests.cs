@@ -63,23 +63,26 @@ public class DenominationDetailUITests : IClassFixture<CashChangerTestApp>
         return _dialog;
     }
 
+    /// <summary>金種詳細ダイアログが表示されることを検証します。</summary>
     [Fact(Timeout = 60000)]
-    public void DenominationDetailDialog_ShouldBeVisible()
+    public void DenominationDetailDialogShouldBeVisible()
     {
         var dialog = EnsureDialogOpen();
         dialog.ShouldNotBeNull();
     }
 
+    /// <summary>金種詳細ダイアログに枚数表示フィールドが含まれていることを検証します。</summary>
     [Fact(Timeout = 60000)]
-    public void DenominationDetailDialog_ShouldContainCountFields()
+    public void DenominationDetailDialogShouldContainCountFields()
     {
         var dialog = EnsureDialogOpen();
         var textBlocks = dialog.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
         textBlocks.Length.ShouldBeGreaterThanOrEqualTo(3);
     }
 
+    /// <summary>閉じるボタンをクリックした際、金種詳細ダイアログが正しく閉じられることを検証します。</summary>
     [Fact(Timeout = 60000)]
-    public void DenominationDetailDialog_CloseButton_ShouldDismissDialog()
+    public void DenominationDetailDialogCloseButtonShouldDismissDialog()
     {
         var dialog = EnsureDialogOpen();
         var closeButton = dialog.FindFirstDescendant(cf => cf.ByAutomationId("CloseButton"))?.AsButton();

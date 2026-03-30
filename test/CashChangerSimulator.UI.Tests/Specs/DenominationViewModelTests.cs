@@ -15,8 +15,9 @@ public class DenominationViewModelTests : IClassFixture<UIViewModelFixture>
         _fixture.Initialize();
     }
 
+    /// <summary>在庫が変更された際、各内訳プロパティ（リサイクル、回収、却下）が正しく更新されることを検証します。</summary>
     [Fact]
-    public void BreakdownProperties_ShouldUpdate_WhenInventoryChanges()
+    public void BreakdownPropertiesShouldUpdateWhenInventoryChanges()
     {
         // Arrange
         var inv = _fixture.Inventory;

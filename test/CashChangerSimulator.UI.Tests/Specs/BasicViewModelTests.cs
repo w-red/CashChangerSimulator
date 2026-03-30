@@ -17,8 +17,9 @@ namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class BasicViewModelTests
 {
+    /// <summary>DenominationViewModel が初期状態において正しい名称、金額、金種タイプを保持していることを検証します。</summary>
     [Fact]
-    public void DenominationViewModel_ShouldReflectCorrectState()
+    public void DenominationViewModelShouldReflectCorrectState()
     {
         // Arrange
         var key = new DenominationKey(1000, CurrencyCashType.Bill, "JPY");
@@ -47,8 +48,9 @@ public class BasicViewModelTests
         vm.IsDepositable.ShouldBeTrue(); // default
     }
 
+    /// <summary>DenominationViewModel を破棄した際、リソースが正しく解放されることを検証します。</summary>
     [Fact]
-    public void DenominationViewModel_Dispose_ShouldReleaseResources()
+    public void DenominationViewModelDisposeShouldReleaseResources()
     {
         // Arrange
         var key = new DenominationKey(1000, CurrencyCashType.Bill, "JPY");
@@ -77,8 +79,9 @@ public class BasicViewModelTests
         vm.Count.Value.ShouldBe(0);
     }
 
+    /// <summary>MSIServiceProvider が、登録されたサービスを正しく解決できることを検証します。</summary>
     [Fact]
-    public void MSIServiceProvider_Resolve_ShouldReturnRequiredService()
+    public void MSIServiceProviderResolveShouldReturnRequiredService()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -95,8 +98,9 @@ public class BasicViewModelTests
         result.ShouldBe(mockService.Object);
     }
 
+    /// <summary>DepositViewModel の入金ステータスが、初期状態で None であることを検証します。</summary>
     [Fact]
-    public void DepositViewModel_DepositStatus_ShouldReflectState()
+    public void DepositViewModelDepositStatusShouldReflectState()
     {
         // Arrange
         var inventory = new Inventory();
@@ -126,8 +130,9 @@ public class BasicViewModelTests
         vm.DepositStatus.Value.ShouldBe(CashDepositStatus.None);
     }
 
+    /// <summary>CurrencyMetadataProvider が、設定に応じた正しい通貨記号と通貨コードを返すことを検証します。</summary>
     [Fact]
-    public void CurrencyMetadataProvider_Symbol_ShouldReturnCorrectValue()
+    public void CurrencyMetadataProviderSymbolShouldReturnCorrectValue()
     {
         // Arrange
         var config = new ConfigurationProvider();
@@ -140,8 +145,9 @@ public class BasicViewModelTests
         metadata.CurrencyCode.ShouldBe("JPY");
     }
 
+    /// <summary>CurrencyMetadataProvider が、ユーロ(EUR)の金種名称を正しく生成できることを検証します。</summary>
     [Fact]
-    public void CurrencyMetadataProvider_GetDenominationName_EUR_ShouldWork()
+    public void CurrencyMetadataProviderGetDenominationNameEURShouldWork()
     {
         // Arrange
         var config = new ConfigurationProvider();
