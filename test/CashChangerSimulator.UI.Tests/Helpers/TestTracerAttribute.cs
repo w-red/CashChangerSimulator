@@ -15,6 +15,20 @@ public class TestTracerAttribute : BeforeAfterTestAttribute
 {
     private const string LogPath = @"C:\Logs\current_test.txt";
     private const string LogDir = @"C:\Logs";
+    private const string InitPath = @"C:\Logs\tracer_init.txt";
+
+    /// <summary>
+    /// コンストラクタで初期化ログを書き込み、属性の認識を確認します。
+    /// </summary>
+    public TestTracerAttribute()
+    {
+        try
+        {
+            if (!Directory.Exists(LogDir)) Directory.CreateDirectory(LogDir);
+            File.WriteAllText(InitPath, $"Tracer initialized at {DateTime.Now}");
+        }
+        catch { }
+    }
 
     /// <summary>
     /// テスト開始前に実行されるフック。
@@ -34,10 +48,12 @@ public class TestTracerAttribute : BeforeAfterTestAttribute
             using var sw = new StreamWriter(fs);
             sw.Write(test.TestDisplayName);
             sw.Flush();
+            fs.Flush(true); // OS の物理ディスクへの書き込みを強制
         }
-        catch
+        catch (Exception ex)
         {
-            // トレーサーの不具合でテストが落ちないよう、例外は無視する
+            // 標準出力にも出す（CIログでの追跡用）
+            Console.WriteLine($"[TestTracer Error] {ex.Message}");
         }
     }
 }
