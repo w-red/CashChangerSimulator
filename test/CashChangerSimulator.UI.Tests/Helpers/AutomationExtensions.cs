@@ -3,8 +3,10 @@ using FlaUI.Core.AutomationElements;
 
 namespace CashChangerSimulator.UI.Tests.Helpers;
 
+/// <summary>UI オートメーション要素の探索とデバッグ出力を補助する拡張メソッド群。</summary>
 public static class AutomationExtensions
 {
+    /// <summary>指定されたオートメーション要素以下の子要素ツリーを再帰的に走査し、StringBuilder に書式化して出力します。</summary>
     public static void CaptureElements(this AutomationElement element, int depth, StringBuilder sb)
     {
         if (depth > 8) return;
@@ -21,6 +23,7 @@ public static class AutomationExtensions
         catch { }
     }
 
+    /// <summary>指定されたオートメーション要素以下の子要素ツリーを再帰的に走査し、TextWriter に書式化して出力します。</summary>
     public static void CaptureElements(this AutomationElement element, int depth, System.IO.TextWriter writer)
     {
         var sb = new StringBuilder();

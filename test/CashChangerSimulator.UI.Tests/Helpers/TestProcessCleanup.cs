@@ -2,16 +2,12 @@ using System.Diagnostics;
 
 namespace CashChangerSimulator.UI.Tests.Helpers;
 
-/// <summary>
-/// テスト実行環境をクリーンニングするためのヘルパークラス。
-/// </summary>
+/// <summary>テスト実行環境をクリーンアップするためのヘルパークラス。</summary>
 public static class TestProcessCleanup
 {
     private const string ProcessName = "CashChangerSimulator.UI.Wpf";
 
-    /// <summary>
-    /// 実行中のすべてのシミュレータ関連プロセスを強制終了します。
-    /// </summary>
+    /// <summary>実行中のすべてのシミュレータ関連プロセスを強制終了します。</summary>
     public static void KillAllRunningProcesses()
     {
         // 開発・テスト対象のアプリ名のみをターゲットにする。

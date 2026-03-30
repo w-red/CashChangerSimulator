@@ -1,9 +1,7 @@
 namespace CashChangerSimulator.UI.Tests.Helpers;
 
+/// <summary>並列実行を無効化し、順次実行が必要なテストをグループ化するためのコレクション定義クラス。</summary>
 [CollectionDefinition("SequentialTests", DisableParallelization = true)]
 public class SequentialTestsCollection
 {
-    // This class has no code, and is never created. Its purpose is simply
-    // to be the place to apply [CollectionDefinition] and all the
-    // ICollectionFixture<> interfaces.
 }
