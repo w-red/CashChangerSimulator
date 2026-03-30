@@ -1,9 +1,9 @@
 using CashChangerSimulator.UI.Tests.Fixtures;
 using CashChangerSimulator.Core.Configuration;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core;
 using System.Diagnostics;
 using Shouldly;
-using CashChangerSimulator.Core;
 
 namespace CashChangerSimulator.UI.PerformanceTests;
 

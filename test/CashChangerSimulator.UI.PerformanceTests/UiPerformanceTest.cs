@@ -1,4 +1,5 @@
 using CashChangerSimulator.UI.Tests;
+using CashChangerSimulator.UI.Tests.Helpers;
 using CashChangerSimulator.UI.Tests.Specs;
 using FlaUI.Core.AutomationElements;
 using Shouldly;

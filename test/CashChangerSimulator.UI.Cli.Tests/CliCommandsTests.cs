@@ -217,7 +217,6 @@ public class CliCommandsTests
         _mockScriptService.Verify(s => s.RunScriptAsync("test.json"), Times.Once);
     }
 
-
     /// <summary>ConfigList コマンドが ConfigService.List を呼び出すことを検証します。</summary>
     [Fact]
     public void ConfigListShouldCallConfigService()

@@ -6,7 +6,6 @@ using FlaUI.Core.Tools;
 using System.IO;
 using Shouldly;
 
-
 namespace CashChangerSimulator.UI.DocumentationTests;
 
 /// <summary>FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。</summary>
