@@ -1,6 +1,7 @@
 using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Transactions;
 using CashChangerSimulator.UI.Tests.Fixtures;
+using CashChangerSimulator.UI.Tests.Helpers;
 using CashChangerSimulator.UI.Wpf.ViewModels;
 using Shouldly;
 using Moq;
@@ -10,6 +11,7 @@ using CashChangerSimulator.Core.Monitoring;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>InventoryViewModel の動作を検証するテスト集。</summary>
+[Collection("SequentialTests")]
 public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;
@@ -19,7 +21,7 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
     {
         _fixture = fixture;
         _fixture.Initialize();
-        
+
         // デフォルトの在庫を設定（TestConstants を使用）
         _fixture.SetConfigInitialCounts(
             ("C100", TestConstants.ConfigCount100),
@@ -32,9 +34,29 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
         );
     }
 
+    private void FillAllDenominations()
+    {
+        // [STABILITY] Fill all supported denominations to 10 units each to ensure 'Normal' state
+        // This avoids false-positives for "IsRecoveryHelpAvailable" due to Empty status.
+        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
+        {
+            _fixture.Inventory.SetCount(key, 10);
+        }
+    }
+
     private InventoryViewModel CreateViewModel()
     {
         return _fixture.CreateInventoryViewModel();
+    }
+
+    private async Task WaitUntil(Func<bool> condition, int timeoutMs = 2000)
+    {
+        var start = DateTime.Now;
+        while (!condition() && (DateTime.Now - start).TotalMilliseconds < timeoutMs)
+        {
+            await Task.Delay(10);
+        }
+        condition().ShouldBeTrue($"Condition was not met within {timeoutMs}ms");
     }
 
     /// <summary>初期状態がプロバイダーから提供された金種を持っていることを検証します。</summary>
@@ -183,22 +205,25 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
     /// <summary>デバイスの各状態プロパティがハードウェアの状態変化に追従することを検証します。</summary>
     [Fact]
-    public void PropertyChangesShouldReflectHardwareStatus()
+    public async Task PropertyChangesShouldReflectHardwareStatus()
     {
         // Assemble
         var vm = CreateViewModel();
 
         // Act & Assert (Overlap)
         _fixture.Hardware.SetOverlapped(true);
+        await WaitUntil(() => vm.IsOverlapped.CurrentValue);
         vm.IsOverlapped.CurrentValue.ShouldBeTrue();
 
         // Act & Assert (DeviceError)
         _fixture.Hardware.SetDeviceError(1);
+        await WaitUntil(() => vm.IsDeviceError.CurrentValue);
         vm.IsDeviceError.CurrentValue.ShouldBeTrue();
         vm.CurrentErrorCode.CurrentValue.ShouldBe(1);
 
         // Act & Assert (Connected)
         _fixture.Hardware.SetConnected(false);
+        await WaitUntil(() => !vm.IsConnected.CurrentValue);
         vm.IsConnected.CurrentValue.ShouldBeFalse();
     }
 
@@ -221,7 +246,7 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
     [Theory]
     [InlineData(nameof(UIViewModelFixture.CashChanger.SimulateOpenException))]
     [InlineData(nameof(UIViewModelFixture.CashChanger.SimulateCloseException))]
-    public void DeviceCommandsShouldHandleExceptions(string exceptionFlag)
+    public async Task DeviceCommandsShouldHandleExceptions(string exceptionFlag)
     {
         // Arrange
         var vm = CreateViewModel();
@@ -242,6 +267,7 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
         {
             vm.CloseCommand.Execute(Unit.Default);
         }
+        await WaitUntil(() => vm.IsDeviceError.CurrentValue);
 
         // Assert
         vm.IsDeviceError.CurrentValue.ShouldBeTrue();
@@ -269,21 +295,19 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
     /// <summary>ジャム発生時にリカバリヘルプが利用可能になることを検証します。</summary>
     [Fact]
-    public void IsRecoveryHelpAvailableShouldBeTrueWhenJammed()
+    public async Task IsRecoveryHelpAvailableShouldBeTrueWhenJammed()
     {
         // Arrange
+        FillAllDenominations(); // [STABILITY] Ensure normal state for other denominations
         var vm = CreateViewModel();
-        // すべての金種を補充して正常状態にする
-        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
-        {
-            _fixture.Inventory.SetCount(key, 10);
-        }
         
         _fixture.Hardware.SetJammed(false);
+        await WaitUntil(() => !vm.IsRecoveryHelpAvailable.CurrentValue);
         vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeFalse();
 
         // Act
         _fixture.Hardware.SetJammed(true);
+        await WaitUntil(() => vm.IsRecoveryHelpAvailable.CurrentValue);
 
         // Assert
         vm.IsRecoveryHelpAvailable.CurrentValue.ShouldBeTrue();
@@ -291,20 +315,16 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
     /// <summary>在庫が空の時にリカバリヘルプが利用可能になることを検証します。</summary>
     [Fact]
-    public void IsRecoveryHelpAvailableShouldBeTrueWhenEmpty()
+    public async Task IsRecoveryHelpAvailableShouldBeTrueWhenEmpty()
     {
         // Arrange
-        // すべての金種を十分な量（Normal以上）補充して正常状態にする
-        foreach (var key in _fixture.MetadataProvider.SupportedDenominations)
-        {
-            _fixture.Inventory.SetCount(key, 120); // NearLimit(100) 以上の値を指定
-        }
-        
+        FillAllDenominations();
         var vm = CreateViewModel();
 
         // Act
         // 特定の金種を空（0枚）にする
         _fixture.Inventory.SetCount(TestConstants.Key100, 0);
+        await WaitUntil(() => vm.IsRecoveryHelpAvailable.CurrentValue);
 
         // Assert
         // 空になったことでヘルプが必要（True）になることを確認
