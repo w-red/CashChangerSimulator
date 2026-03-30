@@ -201,4 +201,11 @@ public partial class CliCommands(
 
         _console.Write(table);
     }
+
+    /// <summary>未知のコマンドが入力されたときにメッセージを表示します。</summary>
+    /// <param name="command">入力されたコマンド名。</param>
+    public virtual void Unknown(string command)
+    {
+        _console.MarkupLine(_L["messages.unknown_command", command]);
+    }
 }

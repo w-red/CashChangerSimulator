@@ -81,8 +81,15 @@ public class CliCommandDispatcher(CliCommands commands) : ICliCommandDispatcher
                 if (parts.Length > 1 && bool.TryParse(parts[1], out var removed))
                     _commands.SetBoxRemoved(removed);
                 break;
+            case "export-history":
+                if (parts.Length > 1)
+                    _commands.ExportHistory(parts[1]);
+                break;
             case "help":
                 _commands.Help();
+                break;
+            default:
+                _commands.Unknown(command);
                 break;
         }
 

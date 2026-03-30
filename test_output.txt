@@ -1,0 +1,25 @@
+  復元対象のプロジェクトを決定しています...
+  復元対象のすべてのプロジェクトは最新です。
+  Scanning XAML files in C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src...
+  
+  [SUCCESS] No known XAML issues found.
+  CashChangerSimulator.Core -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Core\bin\Debug\net10.0\CashChangerSimulator.Core.dll
+  CashChangerSimulator.Device -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\bin\Debug\net10.0-windows\CashChangerSimulator.Device.dll
+  CashChangerSimulator.UI.Cli -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.UI.Cli\bin\Debug\net10.0-windows\CashChangerSimulator.UI.Cli.dll
+  CashChangerSimulator.UI.Wpf -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.UI.Wpf\bin\Debug\net10.0-windows\CashChangerSimulator.UI.Wpf.dll
+  CashChangerSimulator.Tests -> C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\bin\Debug\net10.0-windows\CashChangerSimulator.Tests.dll
+C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\bin\Debug\net10.0-windows\CashChangerSimulator.Tests.dll (.NETCoreApp,Version=v10.0) のテスト実行
+合計 1 個のテスト ファイルが指定されたパターンと一致しました。
+[xUnit.net 00:00:01.51]     CashChangerSimulator.Tests.Cli.ExhaustiveCliTests.CliCommands_HandleAsyncError_AllBranches [FAIL]
+  失敗 CashChangerSimulator.Tests.Cli.ExhaustiveCliTests.CliCommands_HandleAsyncError_AllBranches [269 ms]
+  エラー メッセージ:
+   Microsoft.PointOfService.PosControlException : Device is not open.
+  スタック トレース:
+     at CashChangerSimulator.Device.Coordination.StandardLifecycleHandler.set_DeviceEnabled(Boolean value) in C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\Coordination\StandardLifecycleHandler.cs:line 38
+   at CashChangerSimulator.Device.Coordination.LifecycleManager.set_DeviceEnabled(Boolean value) in C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\Coordination\LifecycleManager.cs:line 44
+   at CashChangerSimulator.Device.SimulatorCashChanger.set_DeviceEnabled(Boolean value) in C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\src\CashChangerSimulator.Device\SimulatorCashChanger.cs:line 80
+   at CashChangerSimulator.Tests.Cli.ExhaustiveCliTests.CliCommands_HandleAsyncError_AllBranches() in C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\test\CashChangerSimulator.Tests\Cli\ExhaustiveCliTests.cs:line 171
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+失敗!   -失敗:     1、合格:     0、スキップ:     0、合計:     1、期間: 282 ms - CashChangerSimulator.Tests.dll (net10.0)
