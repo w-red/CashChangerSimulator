@@ -1,9 +1,14 @@
-﻿<Configuration>
+<Configuration>
   <MappedFolders>
     <MappedFolder>
       <HostFolder>C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\scripts\SandboxRunner</HostFolder>
       <SandboxFolder>C:\SandboxShared</SandboxFolder>
       <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>C:\Users\ITI202301003_User\source\repos\w-red\CashChangerSimulator\logs</HostFolder>
+      <SandboxFolder>C:\Logs</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
