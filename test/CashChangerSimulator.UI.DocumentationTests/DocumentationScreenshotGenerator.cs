@@ -9,9 +9,7 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.DocumentationTests;
 
-/// <summary>
-/// FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。
-/// </summary>
+/// <summary>FlaUI を使用して、ドキュメント用の高品質なスクリーンショットを自動生成するテストクラス。</summary>
 [Collection("SequentialTests")]
 [Trait("Category", "ManualOnly")] // CIや一括テスト実行時には除外するためのカテゴリ
 public class DocumentationScreenshotGenerator : IDisposable
@@ -39,18 +37,14 @@ public class DocumentationScreenshotGenerator : IDisposable
         }
     }
 
-    /// <summary>
-    /// 主要な画面をライトテーマでキャプチャする。
-    /// </summary>
+    /// <summary>主要な画面をライトテーマでキャプチャする。</summary>
     [Fact]
     public void GenerateLightModeScreenshots()
     {
         CaptureScreenshotsForTheme("Light");
     }
 
-    /// <summary>
-    /// 主要な画面をダークテーマでキャプチャする。
-    /// </summary>
+    /// <summary>主要な画面をダークテーマでキャプチャする。</summary>
     [Fact]
     public void GenerateDarkModeScreenshots()
     {
