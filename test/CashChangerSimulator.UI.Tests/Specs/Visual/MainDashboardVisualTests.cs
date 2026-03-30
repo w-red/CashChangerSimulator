@@ -14,6 +14,8 @@ public class MainDashboardVisualTests
         var mainWindow = app.MainWindow;
         
         Assert.NotNull(mainWindow);
+        mainWindow.Focus();
+        mainWindow.SetForeground();
 
         // ウィンドウの初期描画が完全に終わるよう少し待機
         await Task.Delay(1500, TestContext.Current.CancellationToken);
