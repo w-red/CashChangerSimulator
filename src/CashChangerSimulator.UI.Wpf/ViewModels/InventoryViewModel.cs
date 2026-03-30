@@ -117,12 +117,8 @@ public class InventoryViewModel : IDisposable
         _dispatcher = dispatcher;
 
         // Ensure UI context for reactive updates ONLY when running in a real WPF application context.
-        var isWpf = System.Windows.Application.Current != null;
-        var dispatcherContext = System.Windows.Application.Current?.Dispatcher;
-        var syncContext = isWpf ? (SynchronizationContext.Current ?? (dispatcherContext != null ? new DispatcherSynchronizationContext(dispatcherContext) : null)) : null;
-
         Observable<T> Sync<T>(Observable<T> observable) => 
-            (isWpf && syncContext != null) ? observable.ObserveOn(syncContext) : observable;
+            System.Windows.Application.Current != null ? observable.ObserveOn(SynchronizationContext.Current) : observable;
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix.ToBindableReactiveProperty("").AddTo(_disposables);
         CurrencySuffix = _metadataProvider.SymbolSuffix.ToBindableReactiveProperty("").AddTo(_disposables);
