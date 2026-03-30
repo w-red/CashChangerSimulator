@@ -3,6 +3,8 @@ using CashChangerSimulator.UI.Wpf.ViewModels;
 using R3;
 using Shouldly;
 using System.Windows.Input;
+using Moq;
+using CashChangerSimulator.Core.Configuration;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
@@ -124,10 +126,11 @@ public class SettingsViewModelTests : IClassFixture<UIViewModelFixture>
         // Act
         vm.ResetToDefaultCommand.Execute(Unit.Default);
 
-        // Assert: デフォルト値に戻っていること (NearEmpty=5, NearFull=90, Full=100)
-        vm.NearEmpty.Value.ShouldBe(5);
-        vm.NearFull.Value.ShouldBe(90);
-        vm.Full.Value.ShouldBe(100);
+        // Assert: デフォルト値に戻っていること (NearEmpty=50, NearFull=100, Full=150)
+        // ※ JPY インベントリのデフォルト設定値（SimulatorConfiguration.cs の初期値）に準拠します。
+        vm.NearEmpty.Value.ShouldBe(50);
+        vm.NearFull.Value.ShouldBe(100);
+        vm.Full.Value.ShouldBe(150);
     }
 
     /// <summary>SaveCommand が実行された時に、プロバイダーと設定が更新されることを検証します。</summary>
@@ -138,6 +141,12 @@ public class SettingsViewModelTests : IClassFixture<UIViewModelFixture>
         using var vm = CreateViewModel();
         bool reloadFired = false;
         using var _ = _fixture.ConfigProvider.Reloaded.Subscribe(_ => reloadFired = true);
+        _fixture.SettingsServiceMock
+            .Setup(x => x.SaveConfig(It.IsAny<SimulatorConfiguration>()))
+            .Callback<SimulatorConfiguration>(c => 
+            {
+                _fixture.ConfigProvider.Update(c);
+            });
 
         // Act
         vm.NearEmpty.Value = 3;
@@ -145,6 +154,7 @@ public class SettingsViewModelTests : IClassFixture<UIViewModelFixture>
         vm.Full.Value = 9;
         
         vm.SaveCommand.Execute(Unit.Default);
+        _fixture.SettingsServiceMock.Verify(x => x.SaveConfig(It.IsAny<SimulatorConfiguration>()), Times.Once);
 
         // Assert
         vm.SaveSucceeded.Value.ShouldBeTrue();

@@ -114,7 +114,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             var el = advWindow.FindFirstDescendant(cf => cf.ByAutomationId("JamIndicatorText"));
             if (el != null && !el.IsOffscreen) return el;
             return null;
-        }, TimeSpan.FromSeconds(15)).Result;
+        }, UITestTimings.RetryLongTimeout).Result;
         
         jamIndicator.ShouldNotBeNull("JamIndicator should be visible after simulation");
 

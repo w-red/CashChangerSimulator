@@ -22,7 +22,6 @@ public class StateConflictTest : IAsyncLifetime
     {
         _fixture.Initialize();
 
-
         var facade = new DeviceFacade(
             _fixture.Inventory,
             _fixture.Manager,

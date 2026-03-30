@@ -1,7 +1,11 @@
 using CashChangerSimulator.Core.Configuration;
+using CashChangerSimulator.Core.Managers;
 using CashChangerSimulator.Core.Models;
+using CashChangerSimulator.Core.Monitoring;
 using CashChangerSimulator.Core.Services;
+using CashChangerSimulator.UI.Wpf.Services;
 using CashChangerSimulator.UI.Wpf.ViewModels;
+using Moq;
 using R3;
 using Shouldly;
 using System.IO;
@@ -38,10 +42,12 @@ public class SettingsIntegrationTest
         var inventory = new Inventory();
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
+        var mockSettings = new Mock<ISettingsOperationService>();
 
         using var vm = new SettingsViewModel(
             configProvider,
             monitorsProvider,
+            mockSettings.Object,
             metadataProvider);
 
         // Act: 値を変更
@@ -78,10 +84,12 @@ public class SettingsIntegrationTest
         var inventory = new Inventory();
         var metadataProvider = new CurrencyMetadataProvider(configProvider);
         var monitorsProvider = new MonitorsProvider(inventory, configProvider, metadataProvider);
+        var mockSettings = new Mock<ISettingsOperationService>();
 
         using var vm = new SettingsViewModel(
             configProvider,
             monitorsProvider,
+            mockSettings.Object,
             metadataProvider);
 
         // Act: テーマを Light に変更

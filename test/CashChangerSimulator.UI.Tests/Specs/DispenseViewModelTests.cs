@@ -29,7 +29,6 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
         );
     }
 
-
     private DispenseViewModel CreateViewModel(BindableReactiveProperty<bool>? isInDepositMode = null)
     {
         return _fixture.CreateDispenseViewModel(isInDepositMode);

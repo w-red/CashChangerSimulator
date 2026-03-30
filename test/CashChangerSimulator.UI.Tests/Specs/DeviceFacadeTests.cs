@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using Moq;
 using Shouldly;
 
-
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 public class DeviceFacadeTests

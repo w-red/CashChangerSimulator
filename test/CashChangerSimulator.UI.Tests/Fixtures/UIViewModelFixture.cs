@@ -39,6 +39,7 @@ public class UIViewModelFixture : IDisposable
     public Mock<IDepositOperationService> DepositServiceMock { get; private set; } = null!;
     public Mock<IDispenseOperationService> DispenseServiceMock { get; private set; } = null!;
     public Mock<IInventoryOperationService> InventoryServiceMock { get; private set; } = null!;
+    public Mock<ISettingsOperationService> SettingsServiceMock { get; private set; } = null!;
     public IServiceProvider ServiceProvider => _serviceProvider ??= CreateServiceProvider();
     public IViewModelFactory ViewModelFactory => ServiceProvider.GetRequiredService<IViewModelFactory>();
     private IServiceProvider? _serviceProvider;
@@ -88,6 +89,7 @@ public class UIViewModelFixture : IDisposable
         DepositServiceMock = new Mock<IDepositOperationService>();
         DispenseServiceMock = new Mock<IDispenseOperationService>();
         InventoryServiceMock = new Mock<IInventoryOperationService>();
+        SettingsServiceMock = new Mock<ISettingsOperationService>();
 
         if (useRealScriptService)
         {
@@ -238,6 +240,7 @@ public class UIViewModelFixture : IDisposable
         services.AddSingleton<IDepositOperationService, DepositOperationService>();
         services.AddSingleton<IDispenseOperationService, DispenseOperationService>();
         services.AddSingleton<IInventoryOperationService, InventoryOperationService>();
+        services.AddSingleton(SettingsServiceMock.Object);
         
         services.AddSingleton<IViewModelFactory, ViewModelFactory>();
         services.AddSingleton<MainViewModel>();
@@ -317,7 +320,7 @@ public class UIViewModelFixture : IDisposable
     /// <summary>検証用の SettingsViewModel を生成します。</summary>
     internal SettingsViewModel CreateSettingsViewModel()
     {
-        return new SettingsViewModel(ConfigProvider, Monitors, MetadataProvider);
+        return new SettingsViewModel(ConfigProvider, Monitors, SettingsServiceMock.Object, MetadataProvider);
     }
 
     public void Dispose()

@@ -30,13 +30,12 @@ public class AdvancedSimulationViewModelTests : IClassFixture<UIViewModelFixture
     {
         // Arrange
         var vm = CreateViewModel();
-        _fixture.CashChanger.RealTimeDataEnabled = false;
- 
+
         // Act
         vm.IsRealTimeDataEnabled.Value = true;
- 
+
         // Assert
-        _fixture.CashChanger.RealTimeDataEnabled.ShouldBeTrue();
+        _fixture.InventoryServiceMock.Verify(s => s.SetRealTimeDataEnabled(true), Times.Once);
     }
 
     /// <summary>有効なJSON形式の文字列が入力された場合、実行コマンドが有効状態になることを検証します。</summary>
