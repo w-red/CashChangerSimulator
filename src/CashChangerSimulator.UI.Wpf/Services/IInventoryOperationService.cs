@@ -29,4 +29,8 @@ public interface IInventoryOperationService
 
     /// <summary>デバイスエラーの状態をシミュレートします。</summary>
     void SimulateDeviceError();
+
+    /// <summary>リアルタイムデータ送信（RealTimeDataEnabled）の有効・無効を切り替えます。</summary>
+    /// <param name="enabled">有効にする場合は true、無効にする場合は false。</param>
+    void SetRealTimeDataEnabled(bool enabled);
 }

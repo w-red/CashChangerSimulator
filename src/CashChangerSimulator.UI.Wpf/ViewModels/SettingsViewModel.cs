@@ -4,6 +4,7 @@ using CashChangerSimulator.Core.Models;
 using CashChangerSimulator.Core.Services;
 using Microsoft.Extensions.Logging;
 using R3;
+using CashChangerSimulator.UI.Wpf.Services;
 using System.Collections.ObjectModel;
 using ZLogger;
 
@@ -18,6 +19,7 @@ public class SettingsViewModel : IDisposable
 {
     private readonly ConfigurationProvider _configProvider;
     private readonly MonitorsProvider _monitorsProvider;
+    private readonly ISettingsOperationService _settingsService;
     private readonly CurrencyMetadataProvider _metadataProvider;
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly CompositeDisposable _disposables = [];
@@ -81,14 +83,17 @@ public class SettingsViewModel : IDisposable
     public SettingsViewModel(
         ConfigurationProvider configProvider,
         MonitorsProvider monitorsProvider,
+        ISettingsOperationService settingsService,
         CurrencyMetadataProvider metadataProvider)
     {
         ArgumentNullException.ThrowIfNull(configProvider);
         ArgumentNullException.ThrowIfNull(monitorsProvider);
+        ArgumentNullException.ThrowIfNull(settingsService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
 
         _configProvider = configProvider;
         _monitorsProvider = monitorsProvider;
+        _settingsService = settingsService;
         _metadataProvider = metadataProvider;
         _logger = LogProvider.CreateLogger<SettingsViewModel>();
 
@@ -227,12 +232,7 @@ public class SettingsViewModel : IDisposable
             };
         }
 
-        ConfigurationLoader.Save(config);
-        _configProvider.Reload();
-
-        _monitorsProvider.UpdateThresholdsFromConfig(config);
-
-        _logger.ZLogInformation($"Simulator configuration saved and reloaded.");
+        _settingsService.SaveConfig(config);
 
         SaveSucceeded.Value = true;
     }
@@ -240,8 +240,7 @@ public class SettingsViewModel : IDisposable
     /// <summary>設定をデフォルト値（初期値）に戻す。</summary>
     private void ResetToDefault()
     {
-        var defaultConfig = new SimulatorConfiguration();
-        defaultConfig.System.CurrencyCode = CurrencyCode.Value;
+        var defaultConfig = _settingsService.GetDefaultConfig(CurrencyCode.Value);
         LoadFromConfig(defaultConfig);
     }
 

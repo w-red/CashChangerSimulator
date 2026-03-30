@@ -147,17 +147,20 @@ public class AdvancedSimulationViewModel : IDisposable
         IsRealTimeDataEnabled = new BindableReactiveProperty<bool>(facade.Changer.RealTimeDataEnabled).AddTo(_disposables);
         
         IsRealTimeDataEnabled
-            .Skip(1) // Skip initial sync during construction
+            // .Skip(1) // Remove Skip(1) to ensure initial sync if needed, but in CTOR we usually have the current value.
+            // Actually, we want to skip initial sync to avoid redundant call during CTOR because we already set it in property.
+            // But if we want to BE SURE, we can keep it or remove it.
+            // In the test, we want vm.IsRealTimeDataEnabled.Value = true; to trigger the service.
+            .Skip(1) 
             .Subscribe(enabled => {
-                try { _facade.Changer.RealTimeDataEnabled = enabled; }
-                catch (Exception ex) { ScriptError.Value = $"RTD Error: {ex.Message}"; }
+                _inventoryOperationService.SetRealTimeDataEnabled(enabled);
             })
             .AddTo(_disposables);
 
         ResetErrorCommand.Subscribe(_ => _inventoryOperationService.ResetError());
         SimulateJamCommand.Subscribe(_ => _inventoryOperationService.SimulateJam());
         SimulateOverlapCommand.Subscribe(_ => _inventoryOperationService.SimulateOverlap());
-        SimulateDeviceErrorCommand.Subscribe(_ => _facade.Status.SetDeviceError(999, 0));
+        SimulateDeviceErrorCommand.Subscribe(_ => _inventoryOperationService.SimulateDeviceError());
         ClearScriptInputCommand.Subscribe(_ => ScriptInput.Value = string.Empty);
         CloseCommand = new ReactiveCommand<Unit>().AddTo(_disposables);
 
@@ -272,7 +275,7 @@ public class AdvancedSimulationViewModel : IDisposable
     public void Dispose()
     {
         // Explicitly disable event generation before disposal to prevent SDK exceptions
-        _facade.Changer.RealTimeDataEnabled = false;
+        _inventoryOperationService.SetRealTimeDataEnabled(false);
         _disposables.Dispose();
         GC.SuppressFinalize(this);
     }

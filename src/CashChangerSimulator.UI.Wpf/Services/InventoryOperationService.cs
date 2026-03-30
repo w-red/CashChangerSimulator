@@ -131,4 +131,17 @@ public class InventoryOperationService : IInventoryOperationService
     {
         _facade.Status.SetDeviceError((int)ErrorCode.Failure);
     }
+
+    /// <inheritdoc/>
+    public void SetRealTimeDataEnabled(bool enabled)
+    {
+        try
+        {
+            _facade.Changer.RealTimeDataEnabled = enabled;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex, $"Failed to set RealTimeDataEnabled to {enabled}");
+        }
+    }
 }
