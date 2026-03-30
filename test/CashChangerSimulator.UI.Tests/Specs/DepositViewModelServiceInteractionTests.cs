@@ -16,8 +16,9 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
         _fixture.Reset();
     }
 
+    /// <summary>入金開始コマンドが、対応するサービスメソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void BeginDepositCommand_ShouldCallService()
+    public void BeginDepositCommandShouldCallService()
     {
         // Arrange
         var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
@@ -30,8 +31,9 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
         _fixture.DepositServiceMock.Verify(s => s.BeginDeposit(), Times.Once);
     }
 
+    /// <summary>計数終了（確定）コマンドが、対応するサービスメソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void FixDepositCommand_ShouldCallService()
+    public void FixDepositCommandShouldCallService()
     {
         // Arrange
         var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
@@ -46,8 +48,9 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
         _fixture.DepositServiceMock.Verify(s => s.FixDeposit(), Times.Once);
     }
 
+    /// <summary>収納コマンドが、対応するサービスメソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void StoreDepositCommand_ShouldCallService()
+    public void StoreDepositCommandShouldCallService()
     {
         // Arrange
         var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);

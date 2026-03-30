@@ -15,8 +15,9 @@ public class DispenseViewModelServiceInteractionTests : IClassFixture<UIViewMode
         _fixture.Reset();
     }
 
+    /// <summary>出金コマンドが、対応するサービスメソッドを正確な金額で呼び出すことを検証します。</summary>
     [Fact]
-    public void DispenseCommand_ShouldCallService()
+    public void DispenseCommandShouldCallService()
     {
         // Arrange
         var vm = _fixture.CreateDispenseViewModel(dispenseService: _fixture.DispenseServiceMock.Object);

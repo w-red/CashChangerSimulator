@@ -39,8 +39,9 @@ public class DispenseOperationServiceTests
         _service = new DispenseOperationService(_mockFacade.Object, _mockNotify.Object, _mockLogger.Object, _configProvider);
     }
 
+    /// <summary>指定金額の出金処理が、正確にファサードの出金メソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void DispenseCash_ShouldCallFacade()
+    public void DispenseCashShouldCallFacade()
     {
         // Act
         _service.DispenseCash(100m);
@@ -49,8 +50,9 @@ public class DispenseOperationServiceTests
         _mockFacade.Verify(f => f.Dispense.DispenseChangeAsync(100m, true, It.IsAny<Action<ErrorCode, int>>(), It.IsAny<string>()), Times.Once);
     }
 
+    /// <summary>金種指定のバルク出金処理が、正確にファサードの出金メソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void ExecuteBulkDispense_ShouldCallFacade()
+    public void ExecuteBulkDispenseShouldCallFacade()
     {
         // Arrange
         var counts = new Dictionary<DenominationKey, int> { { new DenominationKey(100, CurrencyCashType.Bill), 1 } };

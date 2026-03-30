@@ -36,8 +36,9 @@ public class DepositOperationServiceTests
         _service = new DepositOperationService(_mockFacade.Object, _mockNotify.Object, _mockLogger.Object);
     }
 
+    /// <summary>入金開始メソッドが、正確にファサードの BeginDeposit を呼び出すことを検証します。</summary>
     [Fact]
-    public void BeginDeposit_ShouldCallFacade()
+    public void BeginDepositShouldCallFacade()
     {
         // Act
         _service.BeginDeposit();
@@ -46,8 +47,9 @@ public class DepositOperationServiceTests
         _mockFacade.Verify(f => f.Deposit.BeginDeposit(), Times.Once);
     }
 
+    /// <summary>入金開始時に POS 例外が発生した場合、適切に通知サービスが呼び出されることを検証します。</summary>
     [Fact]
-    public void BeginDeposit_ShouldHandlePosControlException()
+    public void BeginDepositShouldHandlePosControlException()
     {
         // Arrange
         var mockDeposit = new Mock<DepositController>(new Inventory(), new HardwareStatusManager(), (CashChangerManager)null!, (ConfigurationProvider)null!);
