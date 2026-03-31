@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using Shouldly;
@@ -53,7 +54,22 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 6. Verify total decreased (Check on Main Window)
-        Retry.WhileTrue(() => totalAmountLabel != null && ParseAmount(totalAmountLabel.Text) == initialAmount, UITestTimings.RetryLongTimeout);
+        // Wait for the amount to change with a short delay in each iteration to avoid UIA spam
+        var success = Retry.WhileTrue(() => 
+        {
+            if (totalAmountLabel == null) return true;
+            try 
+            {
+                return ParseAmount(totalAmountLabel.Text) == initialAmount;
+            }
+            catch (COMException)
+            {
+                // UI might be temporarily busy
+                return true; 
+            }
+        }, UITestTimings.RetryLongTimeout, TimeSpan.FromMilliseconds(500)).Success;
+        
+        success.ShouldBeTrue("Total amount did not change after dispense.");
         decimal finalAmount = ParseAmount(totalAmountLabel!.Text);
         finalAmount.ShouldBeLessThan(initialAmount);
     }
@@ -80,7 +96,18 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         busyIndicator.ShouldNotBeNull();
 
         // Wait for completion (Return to Idle)
-        Retry.WhileTrue(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")) != null, UITestTimings.RetryLongTimeout);
+        // Check with explicit interval to reduce COM pressure
+        Retry.WhileTrue(() => 
+        {
+            try
+            {
+                return dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")) != null;
+            }
+            catch (COMException)
+            {
+                return true; // Assume busy and retry
+            }
+        }, UITestTimings.RetryLongTimeout, TimeSpan.FromMilliseconds(500)).Success.ShouldBeTrue("Dispensing activity did not complete.");
     }
 
     /// <summary>エラー状態（ジャム等）の際にコントロールが無効化されることを検証する。</summary>

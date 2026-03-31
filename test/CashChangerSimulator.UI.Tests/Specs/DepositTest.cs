@@ -68,6 +68,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var depositWindow = OpenDepositTerminal(window);
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
         beginButton.SmartClick();
+        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
         bulkButton.SmartClick();
@@ -141,24 +142,28 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         }
         jamButton.SmartClick();
 
-        var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK", TimeSpan.FromSeconds(20))?.AsButton();
-        if (bulkButton == null)
+        // 状態が Error に切り替わったことを確認
+        // Verify state switched to Error
+        var errorView = FindElement(depositWindow, "DepositErrorView", "ERROR", TimeSpan.FromSeconds(20));
+        errorView.ShouldNotBeNull("DepositErrorView was not found after clicking JamButton.");
+
+        var resetButton = FindElement(depositWindow, "DepositErrorResetButton", "RESET", TimeSpan.FromSeconds(20))?.AsButton();
+        if (resetButton == null)
         {
-            UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_BulkButtonMissing");
-            bulkButton.ShouldNotBeNull("BulkInsertButton not found");
+            UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_ResetButtonMissing");
+            resetButton.ShouldNotBeNull("DepositErrorResetButton not found in ErrorView.");
         }
-        Retry.WhileTrue(() => bulkButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Bulk button should be disabled during error.");
-
-        var fixButton = FindElement(depositWindow, "FixDepositButton", "FINISH")?.AsButton();
-        Retry.WhileTrue(() => fixButton != null && fixButton.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Fix button should be disabled during error.");
-
-        var resetButton = FindElement(depositWindow, "ActiveResetErrorButton", "RESET")?.AsButton();
-        resetButton.ShouldNotBeNull();
-        resetButton.IsEnabled.ShouldBeTrue();
+        resetButton.IsEnabled.ShouldBeTrue("Reset button should be enabled in Error state.");
         resetButton.SmartClick();
-        Thread.Sleep(500);
 
-        bulkButton.IsEnabled.ShouldBeTrue();
+        // ActiveView に戻ったことを確認
+        // Verify returned to ActiveView
+        var activeView = FindElement(depositWindow, "DepositActiveView", "ACTIVE", TimeSpan.FromSeconds(20));
+        activeView.ShouldNotBeNull("Failed to return to DepositActiveView after clearing error.");
+        
+        var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK", TimeSpan.FromSeconds(20))?.AsButton();
+        bulkButton.ShouldNotBeNull("BulkInsertButton not found after returning to Active state.");
+        bulkButton.IsEnabled.ShouldBeTrue("Bulk button should be enabled after clearing error.");
     }
 
     /// <summary>メインウィンドウから入金ウィンドウを探して開く。</summary>
@@ -191,18 +196,19 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     private void FillBulkInsert(Window depositWindow, string quantity, int denomIndex = 0)
     {
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
+        bulkButton.ShouldNotBeNull("BulkInsertButton (BULK) was not found in the ActiveView of DepositWindow. Check if the view transition occurred.");
         bulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
-        dialog.ShouldNotBeNull();
+        dialog.ShouldNotBeNull("BulkAmountInputWindow did not appear after clicking the BulkInsertButton.");
 
         var textBoxes = UiTestRetry.Find(() => 
         {
             var all = dialog.FindAllDescendants(cf => cf.ByAutomationId("BulkQuantityBox"));
             return all.Length > denomIndex ? all : null;
         }, UITestTimings.RetryLongTimeout);
-        textBoxes.ShouldNotBeNull();
+        textBoxes.ShouldNotBeNull("BulkQuantityBox textboxes not found in the BulkAmountInputWindow.");
         
         var targetTextBox = textBoxes[denomIndex].AsTextBox();
         targetTextBox.Text = quantity;
