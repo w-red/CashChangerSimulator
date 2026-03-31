@@ -249,7 +249,7 @@
                         Grid.Column="0"
                         Command="{Binding SimulateJamCommand}"
                         ToolTip="{StaticResource ToolTipSimulateJam}"
-                        AutomationProperties.AutomationId="SimulateJamButton">
+                        AutomationProperties.AutomationId="ActiveSimulateJamButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{StaticResource Jam}" VerticalAlignment="Center"/>
@@ -272,7 +272,7 @@
                         Grid.Column="1"
                         Command="{Binding SimulateOverlapCommand}"
                         ToolTip="{StaticResource ToolTipSimulateOverlap}"
-                        AutomationProperties.AutomationId="SimulateOverlapButton">
+                        AutomationProperties.AutomationId="ActiveSimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{StaticResource Overlap}" VerticalAlignment="Center"/>
@@ -295,7 +295,7 @@
                         Grid.Column="2"
                         Command="{Binding SimulateDeviceErrorCommand}"
                         ToolTip="{StaticResource ToolTipSimulateError}"
-                        AutomationProperties.AutomationId="SimulateDeviceErrorButton">
+                        AutomationProperties.AutomationId="ActiveSimulateDeviceErrorButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{StaticResource Error}" VerticalAlignment="Center"/>

@@ -30,11 +30,11 @@
             </Border>
             <!-- Test Markers: Always in the UIA tree, but hidden from users -->
             <Label AutomationProperties.AutomationId="JamErrorIndicator_State" 
-                   Visibility="Visible" Opacity="0" Width="1" Height="1"
-                   IsEnabled="{Binding IsJammed.Value}"/>
+                    Visibility="Visible" Opacity="0" Width="1" Height="1"
+                    IsEnabled="{Binding IsJammed.Value}"/>
             <Label AutomationProperties.AutomationId="OverlapErrorIndicator_State" 
-                   Visibility="Visible" Opacity="0" Width="1" Height="1"
-                   IsEnabled="{Binding IsOverlapped.Value}"/>
+                    Visibility="Visible" Opacity="0" Width="1" Height="1"
+                    IsEnabled="{Binding IsOverlapped.Value}"/>
 
             <!-- Jam Error Indicator: Visible only when jammed -->
             <Border Background="{DynamicResource App.Brush.Jam}" 
@@ -79,26 +79,57 @@
                 <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
             </Button>
 
-            <ToggleButton IsChecked="{Binding IsJammed.Value, Mode=OneWay}"
-                          Command="{Binding SimulateJamCommand}"
-                          AutomationProperties.AutomationId="SimulateJamButton"
-                          ToolTip="{StaticResource ToolTipSimulateJam}"
-                          Margin="0,0,8,0">
-                <ToggleButton.Style>
-                    <Style TargetType="ToggleButton" BasedOn="{StaticResource HeaderIconToggleButtonStyle}">
+            <!-- Refactored simulation buttons to standard Button for UI Automation stability (Invoke pattern) -->
+            <Button AutomationProperties.AutomationId="HeaderSimulateJamButton"
+                    Command="{Binding SimulateJamCommand}"
+                    ToolTip="{StaticResource SimulateJam}"
+                    Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
                         <Style.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource WarningBrush}" />
-                                <Setter Property="Foreground" Value="Black" />
-                            </Trigger>
+                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource App.Brush.Warning}" />
+                                <Setter Property="Foreground" Value="{DynamicResource App.Brush.WarningForeground}" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ToggleButton.Style>
-                <materialDesign:PackIcon Kind="CarBrakeAlert" />
-                <materialDesign:ToggleButtonAssist.OnContent>
-                    <materialDesign:PackIcon Kind="Alert" />
-                </materialDesign:ToggleButtonAssist.OnContent>
-            </ToggleButton>
+                </Button.Style>
+                <materialDesign:PackIcon Kind="AlertCircle" Width="22" Height="22"/>
+            </Button>
+
+            <Button AutomationProperties.AutomationId="HeaderSimulateOverlapButton"
+                    Command="{Binding SimulateOverlapCommand}"
+                    ToolTip="{StaticResource SimulateOverlap}"
+                    Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource App.Brush.Warning}" />
+                                <Setter Property="Foreground" Value="{DynamicResource App.Brush.WarningForeground}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <materialDesign:PackIcon Kind="LayersTriple" Width="22" Height="22"/>
+            </Button>
+
+            <Button AutomationProperties.AutomationId="HeaderSimulateDeviceErrorButton"
+                    Command="{Binding SimulateDeviceErrorCommand}"
+                    ToolTip="{StaticResource ToolTipSimulateError}"
+                    Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource App.Brush.Warning}" />
+                                <Setter Property="Foreground" Value="{DynamicResource App.Brush.WarningForeground}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <materialDesign:PackIcon Kind="AlertCircleOutline" Width="22" Height="22"/>
+            </Button>
 
             <Button Style="{StaticResource HeaderIconButtonStyle}"
                     Command="{Binding OpenSettingsCommand}"
