@@ -101,7 +101,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         {
             try
             {
-                return dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")) != null;
+                var indicator = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator"));
+                Thread.Sleep(500);
+                return indicator != null;
             }
             catch (COMException)
             {
