@@ -49,6 +49,7 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         var storeButton = FindElement(depositWindow, "StoreDepositButton", "STORE")?.AsButton();
+        storeButton.ShouldNotBeNull("StoreDepositButton was not found in the deposit terminal window.");
         if (storeButton.Patterns.Invoke.IsSupported) storeButton.Patterns.Invoke.Pattern.Invoke();
         else storeButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
