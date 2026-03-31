@@ -38,20 +38,47 @@
                     <Button AutomationProperties.AutomationId="DepositWindowMark" Opacity="0.01" Width="1" Height="1" IsHitTestVisible="False" Focusable="False" VerticalAlignment="Top" HorizontalAlignment="Left" />
                 </StackPanel>
 
-                <!-- Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="ContentTemplate" Value="{StaticResource DepositIdleTemplate}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsInDepositMode.Value}" Value="True">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource DepositActiveTemplate}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
+                    <Grid>
+                        <views:DepositIdleView AutomationProperties.AutomationId="DepositIdleView">
+                            <views:DepositIdleView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DepositUIState.Idle}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DepositIdleView.Style>
+                        </views:DepositIdleView>
+
+                        <views:DepositActiveView AutomationProperties.AutomationId="DepositActiveView">
+                            <views:DepositActiveView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DepositUIState.Active}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DepositActiveView.Style>
+                        </views:DepositActiveView>
+
+                        <views:DepositErrorView AutomationProperties.AutomationId="DepositErrorView">
+                            <views:DepositErrorView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DepositUIState.Error}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DepositErrorView.Style>
+                        </views:DepositErrorView>
+                    </Grid>
                 </ScrollViewer>
             </Grid>
         </Border>

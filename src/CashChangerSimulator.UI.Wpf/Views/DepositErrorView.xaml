@@ -1,0 +1,69 @@
+<UserControl x:Class="CashChangerSimulator.UI.Wpf.Views.DepositErrorView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:CashChangerSimulator.UI.Wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:DepositViewModel}"
+             d:DesignHeight="300" d:DesignWidth="400">
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40">
+        <materialDesign:PackIcon Kind="AlertCircle" Width="64" Height="64" Foreground="{DynamicResource App.Brush.Error}" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+        <TextBlock Text="{StaticResource DepositError}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource App.Brush.Error}" HorizontalAlignment="Center"/>
+        <TextBlock Text="{StaticResource HardwareCheckRequired}" FontSize="14" Foreground="{DynamicResource MaterialDesign.Brush.OnSurfaceVariant}" HorizontalAlignment="Center" Margin="0,12"/>
+        
+        <Button Command="{Binding ResetErrorCommand}" 
+                AutomationProperties.AutomationId="DepositErrorResetButton"
+                Style="{StaticResource ErrorResetButtonStyle}" Margin="0,16" Height="44">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="Refresh" Margin="0,0,8,0" />
+                <TextBlock Text="{StaticResource ClearError}" FontSize="14"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Simulation Buttons (Available even in error view to allow clearing) -->
+        <Border Margin="0,24,0,0" Padding="0,16,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Opacity="0.5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="SimulateJamButton"
+                        Grid.Column="0"
+                        Command="{Binding SimulateJamCommand}"
+                        AutomationProperties.AutomationId="ErrorViewSimulateJamButton"
+                        Style="{StaticResource SimulationErrorButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Jam}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="SimulateOverlapButton"
+                        Grid.Column="1"
+                        Command="{Binding SimulateOverlapCommand}"
+                        AutomationProperties.AutomationId="ErrorViewSimulateOverlapButton"
+                        Style="{StaticResource SimulationErrorButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="LayersTripleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Overlap}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="SimulateErrorButton"
+                        Grid.Column="2"
+                        Command="{Binding SimulateDeviceErrorCommand}"
+                        AutomationProperties.AutomationId="ErrorViewSimulateDeviceErrorButton"
+                        Style="{StaticResource SimulationErrorButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Error}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>
