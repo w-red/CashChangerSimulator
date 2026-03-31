@@ -9,6 +9,7 @@ using CashChangerSimulator.Core.Configuration;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>SettingsViewModel のバリデーションとコマンドの動作を検証するテスト。</summary>
+[Collection("SequentialTests")]
 public class SettingsViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

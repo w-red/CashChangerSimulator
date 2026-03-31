@@ -12,6 +12,7 @@ using CashChangerSimulator.UI.Wpf.Services;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>DispenseViewModel の動作を検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

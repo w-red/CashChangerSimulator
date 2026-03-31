@@ -13,9 +13,12 @@ using CashChangerSimulator.Core.Managers;
 
 using Spectre.Console;
 
+using Xunit;
+
 namespace CashChangerSimulator.UI.Cli.Tests;
 
-/// <summary>CLI コマンド経由でコアロジック（Device/Core）の動作を検証する統合テスト。</summary>
+/// <summary>CLI アプリケーションの統合動作を検証するためのテストクラス。</summary>
+[Collection("SequentialTests")]
 public class CliIntegrationTests
 {
     private readonly IServiceProvider _serviceProvider;

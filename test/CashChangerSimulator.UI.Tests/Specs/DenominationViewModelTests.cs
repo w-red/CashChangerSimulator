@@ -5,6 +5,7 @@ using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
+[Collection("SequentialTests")]
 public class DenominationViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

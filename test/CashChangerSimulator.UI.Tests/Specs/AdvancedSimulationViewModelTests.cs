@@ -8,6 +8,7 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>AdvancedSimulationViewModel の動作を検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class AdvancedSimulationViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

@@ -6,6 +6,7 @@ using R3;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>DepositViewModel と IDepositOperationService の相互作用を検証するテスト。</summary>
+[Collection("SequentialTests")]
 public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

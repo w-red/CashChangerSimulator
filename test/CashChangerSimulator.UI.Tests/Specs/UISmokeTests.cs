@@ -24,9 +24,12 @@ using CashChangerSimulator.UI.Wpf.Converters;
 using System.IO.Packaging;
 using System.Windows.Controls;
 
+using Xunit;
+
 namespace CashChangerSimulator.UI.Tests.Specs;
 
-/// <summary>UI の主要なビューが XAML 例外なくロードできることを確認するスモークテストクラス。</summary>
+/// <summary>UI の基本動作と画面遷移の煙突テスト（Smoke Test）を検証するクラス。</summary>
+[Collection("SequentialTests")]
 public class UISmokeTests
 {
     /// <summary>すべての主要なビュー（MainWindow, Controls）が例外なくインスタンス化できることを検証します。</summary>

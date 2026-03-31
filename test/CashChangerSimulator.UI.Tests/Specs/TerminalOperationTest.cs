@@ -15,9 +15,12 @@ using Moq;
 using R3;
 using Shouldly;
 
+using Xunit;
+
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>ターミナル画面の操作コントロール制御（CanOperate）を検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class TerminalOperationTest
 {
     private readonly HardwareStatusManager _hardwareManager;
@@ -152,16 +155,24 @@ public class TerminalOperationTest
 
         // Act: Simulate Overlap
         _facade.Status.SetOverlapped(true);
-        // Assert
-        vm.CanOperate.Value.ShouldBeFalse();
+        // Assert: Allow for reactive propagation delay
+        WaitUntil(() => vm.CanOperate.Value == false, "CanOperate should be False after error");
 
         // Act: Reset
         _facade.Status.ResetError();
         // Assert
-        vm.CanOperate.Value.ShouldBeTrue();
+        WaitUntil(() => vm.CanOperate.Value == true, "CanOperate should be True after reset");
+    }
 
-        // Act & Assert for Busy requires mocking DispenseController status change
-        // Since it's a mock, we manually change property if it's setup to do so, or just verify the CombineLatest logic.
+    private static void WaitUntil(Func<bool> condition, string message, int timeoutMs = 2000)
+    {
+        var start = DateTime.Now;
+        while (!condition())
+        {
+            if ((DateTime.Now - start).TotalMilliseconds > timeoutMs)
+                throw new Shouldly.ShouldAssertException(message);
+            Thread.Sleep(10);
+        }
     }
 
     /// <summary>入金 ViewModel の各コマンドの実行可能状態がエラー状態を正しく反映することを検証します。</summary>

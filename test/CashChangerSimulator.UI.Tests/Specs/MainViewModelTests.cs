@@ -1,9 +1,11 @@
+using CashChangerSimulator.UI.Tests.Helpers;
 using CashChangerSimulator.UI.Tests.Fixtures;
 using Shouldly;
 
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>MainViewModel の初期化と基本的な動作を検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class MainViewModelTests : IDisposable
 {
     private readonly UIViewModelFixture _fixture;

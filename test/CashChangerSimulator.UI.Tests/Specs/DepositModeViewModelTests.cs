@@ -11,6 +11,7 @@ using Shouldly;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>入金モードの ViewModel 動作をシミュレートして検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class DepositModeViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

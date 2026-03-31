@@ -124,7 +124,8 @@ public class BasicViewModelTests
             new BindableReactiveProperty<bool>(false),
             new Mock<IDepositOperationService>().Object,
             new Mock<IInventoryOperationService>().Object,
-            metadata);
+            metadata,
+            mockDispatcher.Object);
 
         // Act & Assert
         vm.DepositStatus.Value.ShouldBe(CashDepositStatus.None);

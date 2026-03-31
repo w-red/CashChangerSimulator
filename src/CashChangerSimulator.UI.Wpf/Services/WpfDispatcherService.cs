@@ -28,6 +28,18 @@ public class WpfDispatcherService : IDispatcherService
         }
     }
 
+    public void SafeInvokeAsync(Action action)
+    {
+        if (_dispatcher != null)
+        {
+            _dispatcher.BeginInvoke(action);
+        }
+        else
+        {
+            action();
+        }
+    }
+
     public Task InvokeAsync(Action action)
     {
         if (_dispatcher != null)

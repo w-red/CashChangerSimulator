@@ -8,6 +8,7 @@ using System.Windows.Input;
 namespace CashChangerSimulator.UI.Tests.Specs;
 
 /// <summary>BulkAmountInputViewModel の動作を検証するテストクラス。</summary>
+[Collection("SequentialTests")]
 public class BulkInputViewModelTests : IClassFixture<UIViewModelFixture>
 {
     private readonly UIViewModelFixture _fixture;

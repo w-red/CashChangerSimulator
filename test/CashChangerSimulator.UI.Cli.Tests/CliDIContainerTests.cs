@@ -4,9 +4,12 @@ using CashChangerSimulator.UI.Cli.Services;
 using CashChangerSimulator.Device;
 using Shouldly;
 
+using Xunit;
+
 namespace CashChangerSimulator.UI.Cli.Tests;
 
 /// <summary>CliDIContainer のサービス登録機能を検証するためのテストクラス。</summary>
+[Collection("SequentialTests")]
 public class CliDIContainerTests
 {
     /// <summary>全ての必須サービスが DI コンテナに登録されていることを検証します。</summary>
