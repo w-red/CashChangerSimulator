@@ -4,13 +4,13 @@
     <Color x:Key="PrimaryColor">#BB86FC</Color>
     <Color x:Key="SecondaryColor">#03DAC6</Color>
     <Color x:Key="BackgroundColor">#121212</Color>
-    <Color x:Key="SurfaceColor">#343434</Color> <!-- [REFINE] Slightly lighter black for buttons/cards per user request -->
+    <Color x:Key="SurfaceColor">#2A2A2A</Color> <!-- [REFINE] Darker for better immersion / より没入感のある暗さ -->
     <Color x:Key="OnSurfaceColor">#E0E0E0</Color>
     <Color x:Key="OnSurfaceVariantColor">#A0A0A0</Color>
-    <Color x:Key="OutlineColor">#444444</Color>
-    <Color x:Key="SurfaceVariantColor">#2C2C2C</Color>
-    <Color x:Key="SurfaceContainerHighColor">#3D3D3D</Color>
-    <Color x:Key="InventoryTileBackgroundColor">#1A1A1A</Color> <!-- Even darker for better contrast per user request -->
+    <Color x:Key="OutlineColor">#404040</Color>
+    <Color x:Key="SurfaceVariantColor">#1F1F1F</Color> <!-- [REFINE] Darker variant / より暗いバリアント -->
+    <Color x:Key="SurfaceContainerHighColor">#252525</Color> <!-- [REFINE] Reducer brightness for cards / カードの明るさを抑制 -->
+    <Color x:Key="InventoryTileBackgroundColor">#121212</Color> <!-- Even darker for better contrast / コントラスト向上のためさらに暗く -->
     <Color x:Key="WarningColor">#FFAB40</Color>
     <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency -->
 

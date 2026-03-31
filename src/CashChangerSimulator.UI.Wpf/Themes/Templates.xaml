@@ -169,16 +169,19 @@
                             HorizontalAlignment="Right"
                             Margin="0,2,0,0">
                             <Border
-                                Background="{DynamicResource WarningBrush}"
+                                Background="{DynamicResource App.Brush.Warning}"
                                 Visibility="{Binding IsRecyclable, Converter={StaticResource InvertedVisibilityConv}}"
                                 CornerRadius="2"
                                 Padding="4,1"
-                                Margin="0,0,4,0">
-                                <TextBlock
-                                    Text="{StaticResource BadgeCollection}"
-                                    Foreground="Black"
-                                    FontSize="9"
-                                    FontWeight="Black" />
+                                Margin="0,0,4,0"
+                                MaxWidth="70">
+                                <Viewbox Stretch="Uniform">
+                                    <TextBlock
+                                        Text="{StaticResource BadgeCollection}"
+                                        Foreground="Black"
+                                        FontSize="9"
+                                        FontWeight="Black" />
+                                </Viewbox>
                             </Border>
                             <TextBlock
                                 Text="{Binding Status.Value}"
