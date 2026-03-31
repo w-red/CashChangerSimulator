@@ -39,6 +39,8 @@
     <Style TargetType="Button" x:Key="PrimaryButtonStyle" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Padding" Value="24,8"/>
         <Setter Property="Height" Value="40"/>
@@ -47,8 +49,6 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                <Setter Property="BorderThickness" Value="1"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -61,11 +61,11 @@
         <Setter Property="Background" Value="#E53935"/>
         <Setter Property="BorderBrush" Value="#E53935"/>
         <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="Foreground" Value="#E53935"/>
-                <Setter Property="BorderBrush" Value="#E53935"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -73,7 +73,7 @@
     <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernFlatButtonStyle}">
         <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Container}"/>
         <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnPrimary.Container}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary.Container}"/>
         <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
         <Style.Triggers>
@@ -89,6 +89,7 @@
         <Setter Property="Background" Value="{DynamicResource App.Brush.Warning}"/>
         <Setter Property="Foreground" Value="{DynamicResource App.Brush.WarningForeground}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Warning}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="20"/>
         <Setter Property="Padding" Value="12,4"/>
         <Setter Property="Height" Value="32"/>
@@ -97,8 +98,6 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource App.Brush.WarningForeground}"/>
                 <Setter Property="Foreground" Value="{DynamicResource App.Brush.Warning}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Warning}"/>
-                <Setter Property="BorderThickness" Value="1"/>
             </Trigger>
         </Style.Triggers>
     </Style>
