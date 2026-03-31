@@ -36,7 +36,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 3. Open Bulk Dispense Window
         var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", "BULK")?.AsButton();
-        showBulkButton.SmartClick();
+        if (showBulkButton.Patterns.Invoke.IsSupported) showBulkButton.Patterns.Invoke.Pattern.Invoke();
+        else showBulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Find the new dialog window
@@ -50,7 +51,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 5. Execute
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
-        executeButton.SmartClick();
+        if (executeButton.Patterns.Invoke.IsSupported) executeButton.Patterns.Invoke.Pattern.Invoke();
+        else executeButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
         // 6. Verify total decreased (Check on Main Window)
@@ -89,7 +91,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 2. Click Dispense
         var dispenseButton = FindElement(dispenseWindow, "DispenseButton", null)?.AsButton();
-        dispenseButton.SmartClick();
+        if (dispenseButton.Patterns.Invoke.IsSupported) dispenseButton.Patterns.Invoke.Pattern.Invoke();
+        else dispenseButton.SmartClick();
 
         // 3. Verify Busy state appears on terminal
         var busyIndicator = UiTestRetry.Find(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispensingIndicator")), UITestTimings.RetryShortTimeout);
@@ -138,8 +141,9 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         showBulkButton!.IsEnabled.ShouldBeTrue();
 
         // Simulate Jam
-        var simulateJamButton = FindElement(dispenseWindow, "SimulateJamButton", null)?.AsButton();
-        simulateJamButton.SmartClick();
+        var simulateJamButton = FindElement(dispenseWindow, "DispenseSimulateJamButton", null)?.AsButton();
+        if (simulateJamButton.Patterns.Invoke.IsSupported) simulateJamButton.Patterns.Invoke.Pattern.Invoke();
+        else simulateJamButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         // Verify disabled state
@@ -150,7 +154,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         // Reset Error
         var resetErrorButton = FindElement(dispenseWindow, "DispenseErrorResetButton", null)?.AsButton();
         resetErrorButton.ShouldNotBeNull("DispenseErrorResetButton not found");
-        resetErrorButton.SmartClick();
+        if (resetErrorButton.Patterns.Invoke.IsSupported) resetErrorButton.Patterns.Invoke.Pattern.Invoke();
+        else resetErrorButton.SmartClick();
         
         // [STABILITY] Wait for transition back to Idle view
         Retry.WhileFalse(() => {
@@ -177,7 +182,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         mainWindow.ShouldNotBeNull();
         var launchButton = UiTestRetry.Find(() => mainWindow!.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDispenseButton"))?.AsButton(), UITestTimings.RetryLongTimeout);
         launchButton.ShouldNotBeNull();
-        launchButton.SmartClick();
+        if (launchButton.Patterns.Invoke.IsSupported) launchButton.Patterns.Invoke.Pattern.Invoke();
+        else launchButton.SmartClick();
 
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
         var dispenseWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DispenseWindow", timeout: UITestTimings.RetryLongTimeout);

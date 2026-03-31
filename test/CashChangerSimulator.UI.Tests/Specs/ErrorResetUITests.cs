@@ -36,16 +36,16 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => {
             var modeText = window.FindFirstDescendant(cf => cf.ByAutomationId("ModeIndicatorText"))?.AsLabel();
             return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
-        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state in GlobalReset test");
 
         // 念のため画面が表示されるのを待つ
-        var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsButton();
-        sidebarJamBtn.ShouldNotBeNull("Sidebar SimulateJamButton not found");
+        var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HeaderSimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsToggleButton();
+        sidebarJamBtn.ShouldNotBeNull("Header SimulateJamButton not found");
 
-        // Act: Sidebar の Jam ボタンを押してエラー状態にする
-        var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
-        jamBtnElement.ShouldNotBeNull("SimulateJamButton found for jamming");
-        jamBtnElement.SmartClick();
+        // Act: Header の Jam ボタンを Invoke してエラー状態にする
+        var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("HeaderSimulateJamButton"))?.AsButton();
+        jamBtnElement.ShouldNotBeNull("HeaderSimulateJamButton found for jamming");
+        jamBtnElement.Patterns.Invoke.Pattern.Invoke();
 
         // [STABILITY] 状態がプロパティおよびリセットボタンに反映されるのを待機
         Retry.WhileFalse(() => {
@@ -80,10 +80,11 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         resetBtn.Patterns.Invoke.Pattern.Invoke();
 
         // 状態が自動的に Off になるのを待機する（手動で ToggleButton を操作すると逆に再ジャムする可能性があるため）
+        // 状態が自動的に Off になるのを待機する（ヘッダー等は ViewModel から反映される）
         Retry.WhileFalse(() => {
-            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsToggleButton();
-            return btn == null || btn.ToggleState != ToggleState.On;
-        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("SimulateJamButton should be unchecked after reset via ViewModel");
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator == null || !indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(15)).Success.ShouldBeTrue("JamErrorIndicator_State should be disabled after reset");
 
         // Assert: エラー状態が解消されたことを確認
         Retry.WhileFalse(() => {
@@ -114,13 +115,10 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
             return modeText != null && (modeText.Text == "IDLE" || modeText.Text == "待機中");
         }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Device did not enter IDLE state");
 
-        var sidebarJamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(10)).Result?.AsButton();
-        sidebarJamBtn.ShouldNotBeNull();
-
-        // Act: Simulate Jam
-        var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
-        jamBtnElement.ShouldNotBeNull();
-        jamBtnElement.SmartClick();
+        // Act: Header の Jam ボタンを Invoke してエラー状態にする
+        var jamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HeaderSimulateJamButton")), TimeSpan.FromSeconds(15)).Result?.AsButton();
+        jamBtn.ShouldNotBeNull("HeaderSimulateJamButton not found for GlobalReset test");
+        jamBtn.Patterns.Invoke.Pattern.Invoke();
 
         // [STABILITY] 状態が反映されるのを待機
         Retry.WhileFalse(() => {
@@ -140,10 +138,11 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         globalResetBtn.Patterns.Invoke.Pattern.Invoke();
 
         // 状態が自動的に Off になるのを待機する
+        // 状態が自動的に Off になるのを待機する
         Retry.WhileFalse(() => {
-            var btn = window.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsToggleButton();
-            return btn == null || btn.ToggleState != ToggleState.On;
-        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("SimulateJamButton should be unchecked after global reset via ViewModel");
+            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+            return indicator == null || !indicator.IsEnabled;
+        }, TimeSpan.FromSeconds(15)).Success.ShouldBeTrue("Jam state should be cleared after global reset");
 
         // Assert
         Retry.WhileFalse(() => {
@@ -223,11 +222,11 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         }
 
         // Act: 出金ウィンドウ内の Jam シミュレーションボタンをクリック
-        var sidebarJamBtn = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton();
-        sidebarJamBtn.ShouldNotBeNull("SimulateJamButton not found in dispense window");
+        var dispenseJamBtn = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseSimulateJamButton"))?.AsButton();
+        dispenseJamBtn.ShouldNotBeNull("DispenseSimulateJamButton not found in dispense window");
         
-        if (sidebarJamBtn.Patterns.Invoke.IsSupported) sidebarJamBtn.Patterns.Invoke.Pattern.Invoke();
-        else sidebarJamBtn.SmartClick();
+        if (dispenseJamBtn.Patterns.Invoke.IsSupported) dispenseJamBtn.Patterns.Invoke.Pattern.Invoke();
+        else dispenseJamBtn.SmartClick();
 
         // [STABILITY] Wait for error visual state to be fully loaded
         Retry.WhileNull(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")), TimeSpan.FromSeconds(20))

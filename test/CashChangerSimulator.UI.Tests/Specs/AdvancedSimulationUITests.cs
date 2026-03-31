@@ -49,7 +49,9 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         var openBtn = window.FindFirstDescendant("DeviceOpenButton");
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
-            openBtn.AsButton().SmartClick();
+            var btn = openBtn.AsButton();
+            if (btn.Patterns.Invoke.IsSupported) btn.Patterns.Invoke.Pattern.Invoke();
+            else btn.SmartClick();
         }
 
         // 接続完了まで待機
@@ -73,7 +75,8 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Thread.Sleep(500);
         
         // Ensure it's clicked. Try multiple ways if needed.
-        launchBtn.SmartClick();
+        if (launchBtn.AsButton().Patterns.Invoke.IsSupported) launchBtn.AsButton().Patterns.Invoke.Pattern.Invoke();
+        else launchBtn.AsButton().SmartClick();
         // ウィンドウを検索 (堅牢な共通ロジックを使用)
         var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", timeout: UITestTimings.RetryLongTimeout);
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
@@ -92,7 +95,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             Console.WriteLine("[WARNING] InventoryTiles did not appear within timeout.");
         }
 
-        var simulateJamBtnResult = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2));
+        var simulateJamBtnResult = Retry.WhileNull(() => advWindow.FindFirstDescendant(cf => cf.ByAutomationId("AdvancedSimulateJamButton")), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(2));
         var simulateJamBtn = simulateJamBtnResult.Result?.AsButton();
 
         if (simulateJamBtn == null)
@@ -101,12 +104,13 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
             var dump = new System.Text.StringBuilder();
             CaptureElements(advWindow, 0, dump);
             Console.WriteLine(dump.ToString());
-            throw new Exception($"SimulateJamButton not found in AdvancedSimulationWindow. Tree:\n{dump}");
+            throw new Exception($"AdvancedSimulateJamButton not found in AdvancedSimulationWindow. Tree:\n{dump}");
         }
 
         // Act: Simulate Jam
         simulateJamBtn.Focus();
-        simulateJamBtn.SmartClick();
+        if (simulateJamBtn.Patterns.Invoke.IsSupported) simulateJamBtn.Patterns.Invoke.Pattern.Invoke();
+        else simulateJamBtn.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         var jamIndicator = Retry.WhileNull(() => 
@@ -125,7 +129,8 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("ResetErrorButton should enable after jam");
 
         // Act: Reset
-        resetBtn.SmartClick();
+        if (resetBtn.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
+        else resetBtn.SmartClick();
 
         // Assert: Jam indicator should disappear (Visibility=Collapsed)
         Retry.WhileFalse(() => {

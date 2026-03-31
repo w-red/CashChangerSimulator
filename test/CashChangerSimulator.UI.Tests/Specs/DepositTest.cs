@@ -44,11 +44,13 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         UiTestRetry.Find(() => ParseAmount(currentDepositText.Text) == 5250 ? currentDepositText : null, TimeSpan.FromSeconds(5)).ShouldNotBeNull();
 
         var fixButton = FindElement(depositWindow, "FixDepositButton", "FINISH")?.AsButton();
-        fixButton.SmartClick();
+        if (fixButton.Patterns.Invoke.IsSupported) fixButton.Patterns.Invoke.Pattern.Invoke();
+        else fixButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         var storeButton = FindElement(depositWindow, "StoreDepositButton", "STORE")?.AsButton();
-        storeButton.SmartClick();
+        if (storeButton.Patterns.Invoke.IsSupported) storeButton.Patterns.Invoke.Pattern.Invoke();
+        else storeButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         var newTotalText = FindElement(window, "TotalAmountText", null)?.AsLabel();
@@ -71,7 +73,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
-        bulkButton.SmartClick();
+        if (bulkButton.Patterns.Invoke.IsSupported) bulkButton.Patterns.Invoke.Pattern.Invoke();
+        else bulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
@@ -86,7 +89,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         Thread.Sleep(100);
 
         var okButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
-        okButton.SmartClick();
+        if (okButton.Patterns.Invoke.IsSupported) okButton.Patterns.Invoke.Pattern.Invoke();
+        else okButton.SmartClick();
 
         var currentDepositText = FindElement(depositWindow, "CurrentDepositText", null)?.AsLabel();
         currentDepositText.ShouldNotBeNull();
@@ -106,12 +110,14 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         
         var depositWindow = OpenDepositTerminal(window);
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
-        beginButton.SmartClick();
+        if (beginButton.Patterns.Invoke.IsSupported) beginButton.Patterns.Invoke.Pattern.Invoke();
+        else beginButton.SmartClick();
 
         FillBulkInsert(depositWindow, "1000");
 
         var repayButton = FindElement(depositWindow, "RepayDepositButton", "RETURN")?.AsButton();
-        repayButton.SmartClick();
+        if (repayButton.Patterns.Invoke.IsSupported) repayButton.Patterns.Invoke.Pattern.Invoke();
+        else repayButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         // Window should close
@@ -128,19 +134,21 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         
         var depositWindow = OpenDepositTerminal(window);
         var beginButton = FindElement(depositWindow, "BeginDepositButton", "START")?.AsButton();
-        beginButton.SmartClick();
+        if (beginButton.Patterns.Invoke.IsSupported) beginButton.Patterns.Invoke.Pattern.Invoke();
+        else beginButton.SmartClick();
 
         // Wait for template to switch and UI to settle
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
         
-        var jamButton = UiTestRetry.Find(() => depositWindow.FindFirstDescendant(cf => cf.ByAutomationId("SimulateJamButton"))?.AsButton(), TimeSpan.FromSeconds(20));
+        var jamButton = UiTestRetry.Find(() => depositWindow.FindFirstDescendant(cf => cf.ByAutomationId("ActiveSimulateJamButton"))?.AsButton(), TimeSpan.FromSeconds(20));
         
         if (jamButton == null)
         {
             UiTestRetry.DumpAutomationTree(depositWindow, "ShouldDisableControls_JamButtonMissing");
-            throw new Exception("SimulateJamButton not found in DepositWindow. Check AutomationTree dump.");
+            throw new Exception("ActiveSimulateJamButton not found in DepositWindow. Check AutomationTree dump.");
         }
-        jamButton.SmartClick();
+        if (jamButton.Patterns.Invoke.IsSupported) jamButton.Patterns.Invoke.Pattern.Invoke();
+        else jamButton.SmartClick();
 
         // 状態が Error に切り替わったことを確認
         // Verify state switched to Error
@@ -154,7 +162,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
             resetButton.ShouldNotBeNull("DepositErrorResetButton not found in ErrorView.");
         }
         resetButton.IsEnabled.ShouldBeTrue("Reset button should be enabled in Error state.");
-        resetButton.SmartClick();
+        if (resetButton.Patterns.Invoke.IsSupported) resetButton.Patterns.Invoke.Pattern.Invoke();
+        else resetButton.SmartClick();
 
         // ActiveView に戻ったことを確認
         // Verify returned to ActiveView
@@ -174,7 +183,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var launchButton = UiTestRetry.Find(() => mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("LaunchDepositButton"))?.AsButton(), TimeSpan.FromSeconds(15)) as Button;
         launchButton.ShouldNotBeNull();
         
-        launchButton.SmartClick();
+        if (launchButton.Patterns.Invoke.IsSupported) launchButton.Patterns.Invoke.Pattern.Invoke();
+        else launchButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         var depositWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "DepositWindow", timeout: TimeSpan.FromSeconds(30), markerId: "DepositWindowMark");
@@ -197,7 +207,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
     {
         var bulkButton = FindElement(depositWindow, "BulkInsertButton", "BULK")?.AsButton();
         bulkButton.ShouldNotBeNull("BulkInsertButton (BULK) was not found in the ActiveView of DepositWindow. Check if the view transition occurred.");
-        bulkButton.SmartClick();
+        if (bulkButton.Patterns.Invoke.IsSupported) bulkButton.Patterns.Invoke.Pattern.Invoke();
+        else bulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
         var dialog = UiTestRetry.FindWindow(_app.Application, _app.Automation, "BulkAmountInputWindow", timeout: UITestTimings.RetryLongTimeout);
@@ -220,7 +231,8 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
         executeButton?.Focus();
         Thread.Sleep(100);
-        executeButton.SmartClick(timeoutMs: 1000);
+        if (executeButton.Patterns.Invoke.IsSupported) executeButton.Patterns.Invoke.Pattern.Invoke();
+        else executeButton.SmartClick(timeoutMs: 1000);
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
     }
 
