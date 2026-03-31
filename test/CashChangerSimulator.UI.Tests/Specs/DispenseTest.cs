@@ -36,7 +36,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 3. Open Bulk Dispense Window
         var showBulkButton = FindElement(dispenseWindow, "BulkDispenseShowButton", "BULK")?.AsButton();
-        if (showBulkButton.Patterns.Invoke.IsSupported) showBulkButton.Patterns.Invoke.Pattern.Invoke();
+        showBulkButton.ShouldNotBeNull();
+        if (showBulkButton!.Patterns.Invoke.IsSupported) showBulkButton.Patterns.Invoke.Pattern.Invoke();
         else showBulkButton.SmartClick();
         Thread.Sleep(UITestTimings.WindowPopupDelayMs);
 
@@ -51,7 +52,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 5. Execute
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
-        if (executeButton.Patterns.Invoke.IsSupported) executeButton.Patterns.Invoke.Pattern.Invoke();
+        executeButton.ShouldNotBeNull();
+        if (executeButton!.Patterns.Invoke.IsSupported) executeButton.Patterns.Invoke.Pattern.Invoke();
         else executeButton.SmartClick();
         Thread.Sleep(UITestTimings.LogicExecutionDelayMs);
 
@@ -91,7 +93,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // 2. Click Dispense
         var dispenseButton = FindElement(dispenseWindow, "DispenseButton", null)?.AsButton();
-        if (dispenseButton.Patterns.Invoke.IsSupported) dispenseButton.Patterns.Invoke.Pattern.Invoke();
+        dispenseButton.ShouldNotBeNull();
+        if (dispenseButton!.Patterns.Invoke.IsSupported) dispenseButton.Patterns.Invoke.Pattern.Invoke();
         else dispenseButton.SmartClick();
 
         // 3. Verify Busy state appears on terminal
@@ -142,7 +145,8 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
 
         // Simulate Jam
         var simulateJamButton = FindElement(dispenseWindow, "DispenseSimulateJamButton", null)?.AsButton();
-        if (simulateJamButton.Patterns.Invoke.IsSupported) simulateJamButton.Patterns.Invoke.Pattern.Invoke();
+        simulateJamButton.ShouldNotBeNull();
+        if (simulateJamButton!.Patterns.Invoke.IsSupported) simulateJamButton.Patterns.Invoke.Pattern.Invoke();
         else simulateJamButton.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
 
