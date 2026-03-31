@@ -104,7 +104,9 @@
     <system:String x:Key="Pause">一時停止</system:String>
     <system:String x:Key="Resume">再開</system:String>
     <system:String x:Key="Store">収納</system:String>
-    <system:String x:Key="Return">返却</system:String>
+    <system:String x:Key="StoreNoChange">入金終了 (釣銭無)</system:String>
+    <system:String x:Key="StoreWithChange">入金終了 (釣銭有)</system:String>
+    <system:String x:Key="Return">返金 (REPAY)</system:String>
 
     <!-- Footer Actions -->
     <system:String x:Key="CommitChanges">変更を保存</system:String>

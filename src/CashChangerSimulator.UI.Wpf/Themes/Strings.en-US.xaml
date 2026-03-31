@@ -104,7 +104,9 @@
     <system:String x:Key="Pause">PAUSE</system:String>
     <system:String x:Key="Resume">RESUME</system:String>
     <system:String x:Key="Store">STORE</system:String>
-    <system:String x:Key="Return">RETURN</system:String>
+    <system:String x:Key="StoreNoChange">FINISH DEPOSIT (NO CHANGE)</system:String>
+    <system:String x:Key="StoreWithChange">FINISH DEPOSIT (WITH CHANGE)</system:String>
+    <system:String x:Key="Return">REPAY</system:String>
 
     <!-- Footer Actions -->
     <system:String x:Key="CommitChanges">SAVE CHANGES</system:String>
@@ -154,6 +156,7 @@
     <system:String x:Key="ToolTipSimulateJam">Simulate mechanical jam</system:String>
     <system:String x:Key="ToolTipSimulateOverlap">Simulate overlap error</system:String>
     <system:String x:Key="ToolTipSimulateReject">Simulate reject</system:String>
+    <system:String x:Key="ToolTipSimulateError">Simulate device error</system:String>
     <system:String x:Key="ToolTipClearInput">Clear display</system:String>
     <system:String x:Key="ToolTipReplenishAll">Replenish all (set to default quantities)</system:String>
     <system:String x:Key="ToolTipCollectAll">Collect all (set to zero)</system:String>
