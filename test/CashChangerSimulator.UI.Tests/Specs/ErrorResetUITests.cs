@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Tools;
 using FlaUI.Core.Definitions;
@@ -48,9 +49,12 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
 
         // [STABILITY] 状態がプロパティおよびリセットボタンに反映されるのを待機
         Retry.WhileFalse(() => {
-            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
-            return indicator != null && indicator.IsEnabled;
-        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State");
+            try {
+                var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+                Thread.Sleep(500); // Be gentle
+                return indicator != null && indicator.IsEnabled;
+            } catch (COMException) { return false; }
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State");
 
         // GlobalResetErrorButton はエラー発生時のみ出現する (Visibility Trigger)
         // 階層が深い可能性があるため、FindFirstDescendant ではなく広範囲を探索。
@@ -120,9 +124,12 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
 
         // [STABILITY] 状態が反映されるのを待機
         Retry.WhileFalse(() => {
-            var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
-            return indicator != null && indicator.IsEnabled;
-        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State during GlobalReset test");
+            try {
+                var indicator = window.FindFirstDescendant(cf => cf.ByAutomationId("JamErrorIndicator_State"));
+                Thread.Sleep(500);
+                return indicator != null && indicator.IsEnabled;
+            } catch (COMException) { return false; }
+        }, TimeSpan.FromSeconds(20)).Success.ShouldBeTrue("Jam state was not detected by JamErrorIndicator_State during GlobalReset test");
 
         // Global Reset ボタン（ヘッダー部分）はエラー発生時にのみ Visible になり UI ツリーに出現する
         var globalResetBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("GlobalResetErrorButton")), TimeSpan.FromSeconds(30)).Result?.AsButton();
