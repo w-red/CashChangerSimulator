@@ -76,7 +76,7 @@ public class DepositModeViewModelTests : IClassFixture<UIViewModelFixture>
         _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusFixed", "FIXED"));
 
         // End
-        _mainViewModel.Deposit.StoreDepositCommand.Execute(Unit.Default);
+        _mainViewModel.Deposit.StoreDepositNoChangeCommand.Execute(Unit.Default);
         _mainViewModel.Deposit.CurrentModeName.CurrentValue.ShouldContain(ResourceHelper.GetAsString("StatusIdle", "IDLE"));
     }
 

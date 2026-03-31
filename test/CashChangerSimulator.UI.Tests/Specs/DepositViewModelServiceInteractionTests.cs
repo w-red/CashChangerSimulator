@@ -50,7 +50,7 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
 
     /// <summary>収納コマンドが、対応するサービスメソッドを呼び出すことを検証します。</summary>
     [Fact]
-    public void StoreDepositCommandShouldCallService()
+    public void StoreDepositNoChangeCommandShouldCallService()
     {
         // Arrange
         var vm = _fixture.CreateDepositViewModel(depositService: _fixture.DepositServiceMock.Object);
@@ -59,7 +59,7 @@ public class DepositViewModelServiceInteractionTests : IClassFixture<UIViewModel
         vm.IsDepositFixed.Value = true;
 
         // Act
-        vm.StoreDepositCommand.Execute(Unit.Default);
+        vm.StoreDepositNoChangeCommand.Execute(Unit.Default);
 
         // Assert
         _fixture.DepositServiceMock.Verify(s => s.EndDeposit(CashDepositAction.NoChange), Times.Once);
