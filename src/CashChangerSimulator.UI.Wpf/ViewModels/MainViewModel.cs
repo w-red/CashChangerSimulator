@@ -94,8 +94,25 @@ public class MainViewModel : IDisposable
             Deposit.IsInDepositMode,
             () => Inventory.Denominations)
             .AddTo(_disposables);
+            
+        // Ensure UI context for cross-ViewModel synchronization
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
 
-        Dispense.IsBusy.Subscribe(busy => isDispenseBusy.Value = busy).AddTo(_disposables);
+        Dispense.IsBusy
+            .Subscribe(busy => 
+            {
+                if (isDispenseBusy.IsDisposed) return;
+                
+                if (dispatcher != null && !dispatcher.CheckAccess())
+                {
+                    dispatcher.InvokeAsync(() => { if (!isDispenseBusy.IsDisposed) isDispenseBusy.Value = busy; });
+                }
+                else
+                {
+                    isDispenseBusy.Value = busy;
+                }
+            })
+            .AddTo(_disposables);
 
         AdvancedSimulation = _viewModelFactory.CreateAdvancedSimulationViewModel(_configProvider).AddTo(_disposables);
 
@@ -108,8 +125,8 @@ public class MainViewModel : IDisposable
         // [REMOVED] HotStart logic moved to InitializeAsync for startup stability.
 
         // Ensure UI context even if SynchronizationContext.Current is null (e.g. during DI resolve)
-        var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
-        var syncContext = System.Threading.SynchronizationContext.Current ?? new System.Windows.Threading.DispatcherSynchronizationContext(dispatcher);
+        var currentDispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        var syncContext = System.Threading.SynchronizationContext.Current ?? new System.Windows.Threading.DispatcherSynchronizationContext(currentDispatcher);
 
         GlobalModeName = _facade.Status.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>

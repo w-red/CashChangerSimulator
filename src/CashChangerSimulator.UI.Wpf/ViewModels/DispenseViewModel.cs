@@ -126,9 +126,16 @@ public class DispenseViewModel : IDisposable
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
 
-        // Ensure UI context for reactive updates ONLY when running in a real WPF application context.
-        Observable<T> Sync<T>(Observable<T> observable) =>
-            System.Windows.Application.Current != null ? observable.ObserveOn(System.Threading.SynchronizationContext.Current!) : observable;
+        // Ensure UI context for reactive updates. Use Dispatcher SynchronizationContext if available.
+        Observable<T> Sync<T>(Observable<T> observable)
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                return observable.ObserveOn(new System.Windows.Threading.DispatcherSynchronizationContext(dispatcher));
+            }
+            return observable;
+        }
 
         // --- Hardware State Observables ---
 
@@ -146,7 +153,7 @@ public class DispenseViewModel : IDisposable
         Status = new BindableReactiveProperty<CashDispenseStatus>(_facade.Dispense.Status).AddTo(_disposables);
         StatusName = new BindableReactiveProperty<string>(ResourceHelper.GetAsString("Status" + _facade.Dispense.Status.ToString(), _facade.Dispense.Status.ToString())).AddTo(_disposables);
 
-        _facade.Dispense.Changed
+        Sync(_facade.Dispense.Changed)
             .Subscribe(_ =>
             {
                 Status.Value = _facade.Dispense.Status;
@@ -154,14 +161,14 @@ public class DispenseViewModel : IDisposable
             })
             .AddTo(_disposables);
 
-        IsBusy = Status
-            .Select(s => s == CashDispenseStatus.Busy)
+        IsBusy = Sync(Status
+            .Select(s => s == CashDispenseStatus.Busy))
             .ToBindableReactiveProperty(_facade.Dispense.Status == CashDispenseStatus.Busy)
             .AddTo(_disposables);
 
         // --- UI State Strategy ---
 
-        CurrentState = Status
+        CurrentState = Sync(Status
             .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (status, jammed, overlapped, devErr) =>
             {
                 if (status == CashDispenseStatus.Error || jammed || overlapped || devErr)
@@ -169,7 +176,7 @@ public class DispenseViewModel : IDisposable
                 if (status == CashDispenseStatus.Busy)
                     return DispenseUIState.Busy;
                 return DispenseUIState.Idle;
-            })
+            }))
             .ToBindableReactiveProperty(
                 (_facade.Dispense.Status == CashDispenseStatus.Error || _facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value || _facade.Status.IsDeviceError.Value) 
                     ? DispenseUIState.Error 
@@ -177,8 +184,8 @@ public class DispenseViewModel : IDisposable
             )
             .AddTo(_disposables);
 
-        CanOperate = IsBusy
-            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, _isInDepositMode, (busy, jammed, overlapped, devErr, deposit) => !busy && !jammed && !overlapped && !devErr && !deposit)
+        CanOperate = Sync(IsBusy
+            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, _isInDepositMode, (busy, jammed, overlapped, devErr, deposit) => !busy && !jammed && !overlapped && !devErr && !deposit))
             .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.Value && !IsOverlapped.Value && !IsDeviceError.Value && !_isInDepositMode.Value)
             .AddTo(_disposables);
 
