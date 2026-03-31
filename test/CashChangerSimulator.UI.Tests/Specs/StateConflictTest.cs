@@ -39,6 +39,7 @@ public class StateConflictTest : IAsyncLifetime
         var services = new ServiceCollection();
         services.AddSingleton(facade);
         services.AddSingleton<IDeviceFacade>(facade);
+        services.AddSingleton<IDispatcherService>(new ImmediateDispatcherService());
         services.AddSingleton(_fixture.ConfigProvider);
         services.AddSingleton(_fixture.MetadataProvider);
         services.AddSingleton(_fixture.MockNotify.Object); // Ensure mock is used

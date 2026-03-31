@@ -11,6 +11,12 @@ public class ImmediateDispatcherService : IDispatcherService
         action();
     }
 
+    /// <summary>アクションを即座に実行します。</summary>
+    public void SafeInvokeAsync(Action action)
+    {
+        action();
+    }
+
     /// <summary>アクションを即座に実行し、完了済みのタスクを返します。</summary>
     public Task InvokeAsync(Action action)
     {

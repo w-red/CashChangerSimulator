@@ -26,7 +26,7 @@ public static class TestServiceCollectionExtensions
 
         AddSingletonIfNotRegistered<IViewModelFactory, ViewModelFactory>(services);
         AddSingletonIfNotRegistered<IDepositOperationService, DepositOperationService>(services);
-        AddSingletonIfNotRegistered<IDispatcherService, WpfDispatcherService>(services);
+        AddSingletonIfNotRegistered<IDispatcherService, ImmediateDispatcherService>(services);
         AddSingletonIfNotRegistered<IDispenseOperationService, DispenseOperationService>(services);
         AddSingletonIfNotRegistered<IInventoryOperationService, InventoryOperationService>(services);
 
