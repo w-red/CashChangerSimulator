@@ -62,6 +62,10 @@ internal partial class DepositWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        if (DataContext is DepositViewModel vm)
+        {
+            vm.HandleWindowClosed();
+        }
         _disposables.Dispose();
         base.OnClosed(e);
     }

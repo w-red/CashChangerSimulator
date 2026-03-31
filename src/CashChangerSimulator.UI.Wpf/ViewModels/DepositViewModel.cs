@@ -6,6 +6,7 @@ using CashChangerSimulator.UI.Wpf.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.PointOfService;
 using R3;
+using ZLogger;
 
 namespace CashChangerSimulator.UI.Wpf.ViewModels;
 
@@ -107,8 +108,11 @@ public class DepositViewModel : IDisposable
     /// <summary>入金を確定するコマンド。</summary>
     public ReactiveCommand<Unit> FixDepositCommand { get; }
 
-    /// <summary>確定した入金を収納するコマンド。</summary>
-    public ReactiveCommand<Unit> StoreDepositCommand { get; }
+    /// <summary>確定した入金を収納（釣銭無）するコマンド。</summary>
+    public ReactiveCommand<Unit> StoreDepositNoChangeCommand { get; }
+
+    /// <summary>確定した入金を収納（釣銭有）するコマンド。</summary>
+    public ReactiveCommand<Unit> StoreDepositWithChangeCommand { get; }
 
     /// <summary>入金をキャンセル（返却）するコマンド。</summary>
     public ReactiveCommand<Unit> CancelDepositCommand { get; }
@@ -184,9 +188,9 @@ public class DepositViewModel : IDisposable
         RequiredAmountInput = new BindableReactiveProperty<string>("").AddTo(_disposables);
 
         // Deposit State Observables
-        IsInDepositMode = new BindableReactiveProperty<bool>(_facade.Deposit.IsDepositInProgress && !_facade.Deposit.IsFixed).AddTo(_disposables);
+        IsInDepositMode = new BindableReactiveProperty<bool>(_facade.Deposit.IsDepositInProgress).AddTo(_disposables);
         _facade.Deposit.Changed
-            .Subscribe(_ => IsInDepositMode.Value = _facade.Deposit.IsDepositInProgress && !_facade.Deposit.IsFixed)
+            .Subscribe(_ => IsInDepositMode.Value = _facade.Deposit.IsDepositInProgress)
             .AddTo(_disposables);
 
         CurrentDepositAmount = new BindableReactiveProperty<decimal>(_facade.Deposit.DepositAmount).AddTo(_disposables);
@@ -292,10 +296,15 @@ public class DepositViewModel : IDisposable
             .ToReactiveCommand<Unit>().AddTo(_disposables);
         FixDepositCommand.Subscribe(_ => _depositService.FixDeposit());
 
-        StoreDepositCommand = IsDepositFixed
+        StoreDepositNoChangeCommand = IsDepositFixed
             .CombineLatest(IsJammed, IsOverlapped, (fixed_, jammed, overlapped) => fixed_ && !jammed && !overlapped)
             .ToReactiveCommand<Unit>().AddTo(_disposables);
-        StoreDepositCommand.Subscribe(_ => _depositService.EndDeposit(CashDepositAction.NoChange));
+        StoreDepositNoChangeCommand.Subscribe(_ => _depositService.EndDeposit(CashDepositAction.NoChange));
+
+        StoreDepositWithChangeCommand = IsDepositFixed
+            .CombineLatest(IsJammed, IsOverlapped, RemainingAmount, (fixed_, jammed, overlapped, remaining) => fixed_ && !jammed && !overlapped && remaining == 0)
+            .ToReactiveCommand<Unit>().AddTo(_disposables);
+        StoreDepositWithChangeCommand.Subscribe(_ => _depositService.EndDeposit(CashDepositAction.Change));
 
         CancelDepositCommand = IsInDepositMode
             .CombineLatest(IsJammed, IsOverlapped, (mode, jammed, overlapped) => mode && !jammed && !overlapped)
@@ -394,6 +403,22 @@ public class DepositViewModel : IDisposable
 
         await _depositService.ExecuteQuickDepositAsync(targetAmount, denominations.Select(d => d.Key));
         QuickDepositAmountInput.Value = "";
+    }
+
+    /// <summary>
+    /// ウィンドウが閉じられた際のクリーンアップ処理を行います。
+    /// </summary>
+    public void HandleWindowClosed()
+    {
+        if (IsInDepositMode.Value)
+        {
+            _logger.ZLogInformation($"Window closed during deposit. Ending session as NoChange.");
+            if (!IsDepositFixed.Value)
+            {
+                _depositService.FixDeposit();
+            }
+            _depositService.EndDeposit(CashDepositAction.NoChange);
+        }
     }
 
     /// <inheritdoc/>
