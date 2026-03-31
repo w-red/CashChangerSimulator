@@ -82,6 +82,18 @@ public class MainViewModel : IDisposable
         CurrencySuffix = metadataProvider.SymbolSuffix;
         var isDispenseBusy = new BindableReactiveProperty<bool>(false).AddTo(_disposables);
 
+        // Ensure UI context for reactive updates. Always observe on the UI thread context
+        // to prevent threading exceptions when sources fire from background threads.
+        Observable<T> Sync<T>(Observable<T> observable)
+        {
+            var context = System.Threading.SynchronizationContext.Current 
+                ?? (System.Windows.Application.Current?.Dispatcher != null 
+                    ? new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher) 
+                    : null);
+
+            return context != null ? observable.ObserveOn(context) : observable;
+        }
+
         // Sub-ViewModels
         Inventory = _viewModelFactory.CreateInventoryViewModel(_configProvider).AddTo(_disposables);
 
@@ -95,22 +107,11 @@ public class MainViewModel : IDisposable
             () => Inventory.Denominations)
             .AddTo(_disposables);
             
-        // Ensure UI context for cross-ViewModel synchronization
-        var dispatcher = System.Windows.Application.Current?.Dispatcher;
-
-        Dispense.IsBusy
+        Sync(Dispense.IsBusy)
             .Subscribe(busy => 
             {
                 if (isDispenseBusy.IsDisposed) return;
-                
-                if (dispatcher != null && !dispatcher.CheckAccess())
-                {
-                    dispatcher.InvokeAsync(() => { if (!isDispenseBusy.IsDisposed) isDispenseBusy.Value = busy; });
-                }
-                else
-                {
-                    isDispenseBusy.Value = busy;
-                }
+                isDispenseBusy.Value = busy;
             })
             .AddTo(_disposables);
 
@@ -118,48 +119,31 @@ public class MainViewModel : IDisposable
 
         CurrentUIMode = new BindableReactiveProperty<UIMode>(configProvider.Config.System.UIMode).AddTo(_disposables);
 
-        configProvider.Reloaded
+        Sync(configProvider.Reloaded)
             .Subscribe(_ => CurrentUIMode.Value = configProvider.Config.System.UIMode)
             .AddTo(_disposables);
 
-        // [REMOVED] HotStart logic moved to InitializeAsync for startup stability.
-
-        // Ensure UI context even if SynchronizationContext.Current is null (e.g. during DI resolve)
-        var currentDispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
-        var syncContext = System.Threading.SynchronizationContext.Current ?? new System.Windows.Threading.DispatcherSynchronizationContext(currentDispatcher);
-
-        GlobalModeName = _facade.Status.IsConnected
+        GlobalModeName = Sync(_facade.Status.IsConnected
             .CombineLatest(Deposit.CurrentModeName, Dispense.StatusName, (isConnected, depositMode, dispenseMode) =>
             {
                 var idleStr = ResourceHelper.GetAsString("StatusIdle", "IDLE");
-                var busyStr = ResourceHelper.GetAsString("StatusBusy", "Busy"); // Localized key for "Busy" exists as "Busy"
+                var busyStr = ResourceHelper.GetAsString("StatusBusy", "Busy");
                 
                 return !isConnected
                     ? ResourceHelper.GetAsString("DeviceClosed", "CLOSED")
-                    : (dispenseMode == busyStr || dispenseMode == "Busy") // Support both for safety
+                    : (dispenseMode == busyStr || dispenseMode == "Busy")
                     ? ResourceHelper.GetAsString("Dispensing", "DISPENSING") : depositMode;
-            })
-            .ObserveOn(syncContext)
-            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value
-                ? ResourceHelper.GetAsString("StatusIdle", "IDLE")
-                : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
+            }))
+            .ToBindableReactiveProperty(_facade.Status.IsConnected.Value ? Deposit.CurrentModeName.Value : ResourceHelper.GetAsString("DeviceClosed", "CLOSED"))
             .AddTo(_disposables);
 
-        OpenDepositCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
+        OpenDepositCommand = Sync(_facade.Status.IsConnected).ToReactiveCommand().AddTo(_disposables);
         OpenDepositCommand.Subscribe(_ =>
         {
-            if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
-            {
-                _facade.Notify.ShowWarning(
-                    ResourceHelper.GetAsString("ErrorCannotOpenTerminalInError", "Cannot open terminal while in error state."),
-                    ResourceHelper.GetAsString("Warn", "Warning"));
-                return;
-            }
-
             _facade.View.ShowDepositWindow(Deposit, () => Inventory.Denominations);
-        });
+        }).AddTo(_disposables);
 
-        OpenDispenseCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
+        OpenDispenseCommand = Sync(_facade.Status.IsConnected).ToReactiveCommand().AddTo(_disposables);
         OpenDispenseCommand.Subscribe(_ =>
         {
             if (_facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value)
@@ -171,13 +155,13 @@ public class MainViewModel : IDisposable
             }
 
             _facade.View.ShowDispenseWindow(Dispense, () => Inventory.Denominations);
-        });
+        }).AddTo(_disposables);
 
-        OpenAdvancedSimulationCommand = _facade.Status.IsConnected.ObserveOn(syncContext).ToReactiveCommand().AddTo(_disposables);
+        OpenAdvancedSimulationCommand = Sync(_facade.Status.IsConnected).ToReactiveCommand().AddTo(_disposables);
         OpenAdvancedSimulationCommand.Subscribe(_ =>
         {
             _facade.View.ShowAdvancedSimulationWindow(AdvancedSimulation);
-        });
+        }).AddTo(_disposables);
     }
 
     /// <inheritdoc/>
