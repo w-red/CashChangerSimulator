@@ -12,6 +12,8 @@ namespace CashChangerSimulator.UI.Wpf.ViewModels;
 /// `DispenseController` および `CashChangerManager` と連携し、指定金額や金種構成による払い出しを実行します。
 /// 在庫合計の監視や、払い出しコマンドのバリデーション（在庫不足チェック等）を担当します。
 /// </remarks>
+public enum DispenseUIState { Idle, Busy, Error }
+
 public class DispenseViewModel : IDisposable
 {
     private readonly IDeviceFacade _facade;
@@ -51,16 +53,19 @@ public class DispenseViewModel : IDisposable
     public IEnumerable<DenominationViewModel> Denominations { get; }
 
     /// <summary>ジャムが発生しているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsJammed { get; }
+    public BindableReactiveProperty<bool> IsJammed { get; }
 
     /// <summary>重なりエラーが発生しているかどうか。</summary>
-    public ReadOnlyReactiveProperty<bool> IsOverlapped { get; }
+    public BindableReactiveProperty<bool> IsOverlapped { get; }
 
     /// <summary>操作可能かどうか（エラーがなく、ビジーでない状態）。</summary>
     public BindableReactiveProperty<bool> CanOperate { get; }
 
     /// <summary>デバイスエラーが発生しているかどうか。</summary>
     public BindableReactiveProperty<bool> IsDeviceError { get; }
+
+    /// <summary>現在のビジュアル状態（Idle, Busy, Error）。</summary>
+    public BindableReactiveProperty<DispenseUIState> CurrentState { get; }
 
     // --- Commands ---
 
@@ -121,16 +126,20 @@ public class DispenseViewModel : IDisposable
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
 
+        // Ensure UI context for reactive updates ONLY when running in a real WPF application context.
+        Observable<T> Sync<T>(Observable<T> observable) =>
+            System.Windows.Application.Current != null ? observable.ObserveOn(System.Threading.SynchronizationContext.Current!) : observable;
+
         // --- Hardware State Observables ---
-        
-        IsJammed = _facade.Status.IsJammed.ObserveOnCurrentSynchronizationContext()
-            .ToReadOnlyReactiveProperty().AddTo(_disposables);
-            
-        IsOverlapped = _facade.Status.IsOverlapped.ObserveOnCurrentSynchronizationContext()
-            .ToReadOnlyReactiveProperty().AddTo(_disposables);
-            
-        IsDeviceError = _facade.Status.IsDeviceError.ObserveOnCurrentSynchronizationContext()
-            .ToBindableReactiveProperty().AddTo(_disposables);
+
+        IsDeviceError = Sync(_facade.Status.IsDeviceError.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsDeviceError.Value).AddTo(_disposables);
+
+        IsJammed = Sync(_facade.Status.IsJammed.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsJammed.Value).AddTo(_disposables);
+
+        IsOverlapped = Sync(_facade.Status.IsOverlapped.AsObservable())
+            .ToBindableReactiveProperty(_facade.Status.IsOverlapped.Value).AddTo(_disposables);
 
         // --- State Mapping ---
 
@@ -150,12 +159,27 @@ public class DispenseViewModel : IDisposable
             .ToBindableReactiveProperty(_facade.Dispense.Status == CashDispenseStatus.Busy)
             .AddTo(_disposables);
 
-        IsJammed = _facade.Status.IsJammed.ToReadOnlyReactiveProperty().AddTo(_disposables);
-        IsOverlapped = _facade.Status.IsOverlapped.ToReadOnlyReactiveProperty().AddTo(_disposables);
+        // --- UI State Strategy ---
+
+        CurrentState = Status
+            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (status, jammed, overlapped, devErr) =>
+            {
+                if (status == CashDispenseStatus.Error || jammed || overlapped || devErr)
+                    return DispenseUIState.Error;
+                if (status == CashDispenseStatus.Busy)
+                    return DispenseUIState.Busy;
+                return DispenseUIState.Idle;
+            })
+            .ToBindableReactiveProperty(
+                (_facade.Dispense.Status == CashDispenseStatus.Error || _facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value || _facade.Status.IsDeviceError.Value) 
+                    ? DispenseUIState.Error 
+                    : (_facade.Dispense.Status == CashDispenseStatus.Busy ? DispenseUIState.Busy : DispenseUIState.Idle)
+            )
+            .AddTo(_disposables);
 
         CanOperate = IsBusy
-            .CombineLatest(IsJammed, IsOverlapped, _isInDepositMode, (busy, jammed, overlapped, deposit) => !busy && !jammed && !overlapped && !deposit)
-            .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.CurrentValue && !IsOverlapped.CurrentValue && !_isInDepositMode.Value)
+            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, _isInDepositMode, (busy, jammed, overlapped, devErr, deposit) => !busy && !jammed && !overlapped && !devErr && !deposit)
+            .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.Value && !IsOverlapped.Value && !IsDeviceError.Value && !_isInDepositMode.Value)
             .AddTo(_disposables);
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
@@ -233,7 +257,7 @@ public class DispenseViewModel : IDisposable
 
         ResetErrorCommand = Status
             .Select(s => s == CashDispenseStatus.Error)
-            .CombineLatest(_facade.Status.IsJammed, _facade.Status.IsOverlapped, IsDeviceError, (err, jammed, overlapped, devErr) => err || jammed || overlapped || devErr)
+            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (err, jammed, overlapped, devErr) => err || jammed || overlapped || devErr)
             .ToReactiveCommand()
             .AddTo(_disposables);
 
