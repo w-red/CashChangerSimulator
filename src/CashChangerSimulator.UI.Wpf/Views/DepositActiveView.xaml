@@ -23,8 +23,9 @@
                     <StackPanel DockPanel.Dock="Left">
                         <TextBlock Text="{StaticResource RequiredAmountLabel}" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2"/>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Margin="0,0,4,0"/>
-                            <TextBlock Text="{Binding RequiredAmountInput.Value, StringFormat={}{0:N0}}" 
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Margin="0,0,4,0"
+                                       Style="{StaticResource AmountPrefixHiddenOnZeroStyle}"/>
+                            <TextBlock Style="{StaticResource RequiredAmountValueStyle}"
                                        FontSize="32" FontWeight="Bold"
                                        VerticalAlignment="Center"
                                        AutomationProperties.AutomationId="RequiredAmountText"/>
@@ -35,8 +36,10 @@
                     <StackPanel DockPanel.Dock="Right">
                         <TextBlock Text="{StaticResource RemainingAmountLabel}" FontSize="10" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2" HorizontalAlignment="Right"/>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Foreground="{DynamicResource App.Brush.AccentError}"/>
-                            <TextBlock Text="{Binding RemainingAmount.Value, StringFormat={}{0:N0}}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource App.Brush.AccentError}"/>
+                            <TextBlock Text="{Binding CurrencyPrefix.Value}" FontSize="32" VerticalAlignment="Center" Opacity="0.7" Foreground="{DynamicResource App.Brush.AccentError}"
+                                       Style="{StaticResource AmountPrefixHiddenOnZeroStyle}"/>
+                            <TextBlock Style="{StaticResource RemainingAmountValueStyle}"
+                                       FontSize="32" FontWeight="Bold" Foreground="{DynamicResource App.Brush.AccentError}"/>
                         </StackPanel>
                     </StackPanel>
                 </DockPanel>
@@ -147,52 +150,57 @@
             </Button>
         </StackPanel>
 
-        <!-- Pause/Resume/Store/Return -->
-        <Grid Margin="0,8,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0">
-                <!-- Pause/Resume -->
-                <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
-                    <Button x:Name="PauseDepositButton" Style="{StaticResource SecondaryButtonStyle}" 
-                            Command="{Binding PauseDepositCommand}"
-                            Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
-                            Margin="4" Height="40"
-                            AutomationProperties.AutomationId="PauseDepositButton">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Pause" Margin="0,0,8,0"/>
-                            <TextBlock Text="{StaticResource Pause}" FontSize="12" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="ResumeDepositButton" Style="{StaticResource PrimaryButtonStyle}" 
-                            Command="{Binding ResumeDepositCommand}"
-                            Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
-                            Margin="4" Height="40"
-                            AutomationProperties.AutomationId="ResumeDepositButton">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Play" Margin="0,0,8,0"/>
-                            <TextBlock Text="{StaticResource Resume}"/>
-                        </StackPanel>
-                    </Button>
-                </Grid>
-
-                <!-- Store (Fixed state) -->
-                <Button x:Name="StoreDepositButton"
-                        Style="{StaticResource PrimaryButtonStyle}" 
-                        Command="{Binding StoreDepositCommand}"
-                        Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}"
-                        Margin="4" Height="44" AutomationProperties.AutomationId="StoreDepositButton">
+        <!-- Action Buttons Area -->
+        <StackPanel Margin="0,8,0,0">
+            <!-- Control actions (Pause/Resume) -->
+            <Grid Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource InvertedVisibilityConv}}">
+                <Button x:Name="PauseDepositButton" Style="{StaticResource SecondaryButtonStyle}" 
+                        Command="{Binding PauseDepositCommand}"
+                        Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource InvertedVisibilityConv}}"
+                        Margin="4" Height="40"
+                        AutomationProperties.AutomationId="PauseDepositButton">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Wallet" Margin="0,0,8,0" />
-                        <TextBlock Text="{StaticResource Store}" FontSize="14"/>
+                        <materialDesign:PackIcon Kind="Pause" Margin="0,0,8,0"/>
+                        <TextBlock Text="{StaticResource Pause}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
-            </StackPanel>
+                <Button x:Name="ResumeDepositButton" Style="{StaticResource PrimaryButtonStyle}" 
+                        Command="{Binding ResumeDepositCommand}"
+                        Visibility="{Binding IsDepositPaused.Value, Converter={StaticResource VisibilityConv}}"
+                        Margin="4" Height="40"
+                        AutomationProperties.AutomationId="ResumeDepositButton">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Play" Margin="0,0,8,0"/>
+                        <TextBlock Text="{StaticResource Resume}"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
 
-            <StackPanel Grid.Column="1">
+            <!-- Finish/End Actions Area -->
+            <StackPanel Margin="0,4,0,0">
+                <!-- Store (Fixed state) -->
+                <StackPanel Visibility="{Binding IsDepositFixed.Value, Converter={StaticResource VisibilityConv}}">
+                    <Button x:Name="StoreNoChangeButton"
+                            Style="{StaticResource PrimaryButtonStyle}" 
+                            Command="{Binding StoreDepositNoChangeCommand}"
+                            Margin="4" Height="44" AutomationProperties.AutomationId="StoreNoChangeButton">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Wallet" Margin="0,0,8,0" />
+                            <TextBlock Text="{StaticResource StoreNoChange}" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="StoreWithChangeButton"
+                            Style="{StaticResource PrimaryButtonStyle}" 
+                            Command="{Binding StoreDepositWithChangeCommand}"
+                            Margin="4,0,4,4" Height="44" AutomationProperties.AutomationId="StoreWithChangeButton">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CashMultiple" Margin="0,0,8,0" />
+                            <TextBlock Text="{StaticResource StoreWithChange}" FontSize="12" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Common Return button -->
                 <Button x:Name="RepayDepositButton" Style="{StaticResource SecondaryButtonStyle}" 
                         Command="{Binding CancelDepositCommand}"
                         Foreground="IndianRed"
@@ -203,21 +211,23 @@
                         <TextBlock Text="{StaticResource Return}" FontSize="12" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
-                <!-- RESET ERROR during active session -->
-                <Button x:Name="ActiveResetErrorButton" Command="{Binding ResetErrorCommand}"
-                        Content="{StaticResource ResetError}"
-                        Margin="4" Height="40"
-                        AutomationProperties.AutomationId="ActiveResetErrorButton">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
+            </StackPanel>
+
+            <!-- RESET ERROR during active session -->
+            <Button x:Name="ActiveResetErrorButton" Command="{Binding ResetErrorCommand}"
+                    Content="{StaticResource ResetError}"
+                    Margin="4" Height="40"
+                    AutomationProperties.AutomationId="ActiveResetErrorButton">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
                                 <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
                                     <Setter Property="Visibility" Value="Visible" />
                                 </DataTrigger>
@@ -225,8 +235,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-            </StackPanel>
-        </Grid>
+        </StackPanel>
 
         <!-- Simulation Actions (Bottom) -->
         <Border Margin="0,24,0,0" Padding="0,16,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Opacity="0.5">
@@ -239,6 +248,7 @@
                 <Button x:Name="SimulateJamButton"
                         Grid.Column="0"
                         Command="{Binding SimulateJamCommand}"
+                        ToolTip="{StaticResource ToolTipSimulateJam}"
                         AutomationProperties.AutomationId="SimulateJamButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
@@ -261,6 +271,7 @@
                 <Button x:Name="SimulateOverlapButton"
                         Grid.Column="1"
                         Command="{Binding SimulateOverlapCommand}"
+                        ToolTip="{StaticResource ToolTipSimulateOverlap}"
                         AutomationProperties.AutomationId="SimulateOverlapButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="LayersTripleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
@@ -287,7 +298,7 @@
                         AutomationProperties.AutomationId="SimulateDeviceErrorButton">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="ERR" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource Error}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource SimulationErrorButtonStyle}">
