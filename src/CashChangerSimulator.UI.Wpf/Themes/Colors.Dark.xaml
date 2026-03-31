@@ -12,7 +12,7 @@
     <Color x:Key="SurfaceContainerHighColor">#252525</Color> <!-- [REFINE] Reducer brightness for cards / カードの明るさを抑制 -->
     <Color x:Key="InventoryTileBackgroundColor">#121212</Color> <!-- Even darker for better contrast / コントラスト向上のためさらに暗く -->
     <Color x:Key="WarningColor">#FFAB40</Color>
-    <Color x:Key="WarningForegroundColor">#FFFFFF</Color> <!-- [REFINE] White for badge consistency -->
+    <Color x:Key="WarningForegroundColor">#1F1F1F</Color>
 
     <SolidColorBrush x:Key="App.Brush.Close.Background" Color="#333333" />
     <SolidColorBrush x:Key="App.Brush.Close.Foreground" Color="White" />
