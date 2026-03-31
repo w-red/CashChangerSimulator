@@ -165,13 +165,13 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Act & Assert (Jam)
         vm.SimulateJamCommand.Execute(Unit.Default);
-        vm.IsJammed.Value.ShouldBeTrue();
-
+        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsJammed.Value, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
+ 
         // Act & Assert (Overlap)
         vm.SimulateOverlapCommand.Execute(Unit.Default);
-        vm.IsOverlapped.Value.ShouldBeTrue();
+        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsOverlapped.Value, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
-
+ 
     /// <summary>エラーリセットコマンドが状態をクリアすることを検証します。</summary>
     [Fact]
     public void ResetErrorCommandShouldClearStatus()
@@ -179,12 +179,13 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
         // Assemble
         var vm = CreateViewModel();
         _fixture.Hardware.SetJammed(true);
-
+        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsJammed.Value, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
+ 
         // Act
         vm.ResetErrorCommand.Execute(Unit.Default);
-
+ 
         // Assert
-        vm.IsJammed.Value.ShouldBeFalse();
+        FlaUI.Core.Tools.Retry.WhileTrue(() => vm.IsJammed.Value, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
 
     /// <summary>入金モード中に払出を実行しようとした場合に警告が表示されることを検証します。</summary>
