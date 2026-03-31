@@ -45,7 +45,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Header の Jam ボタンを Invoke してエラー状態にする
         var jamBtnElement = window.FindFirstDescendant(cf => cf.ByAutomationId("HeaderSimulateJamButton"))?.AsButton();
         jamBtnElement.ShouldNotBeNull("HeaderSimulateJamButton found for jamming");
-        jamBtnElement.Patterns.Invoke.Pattern.Invoke();
+        jamBtnElement!.Patterns.Invoke.Pattern.Invoke();
 
         // [STABILITY] 状態がプロパティおよびリセットボタンに反映されるのを待機
         Retry.WhileFalse(() => {
@@ -77,7 +77,8 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => jamIndicator.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("JamErrorIndicator_State should be enabled when jammed");
 
         // Act: Reset ボタンをクリック
-        resetBtn.Patterns.Invoke.Pattern.Invoke();
+        resetBtn.ShouldNotBeNull();
+        resetBtn!.Patterns.Invoke.Pattern.Invoke();
 
         // 状態が自動的に Off になるのを待機する（手動で ToggleButton を操作すると逆に再ジャムする可能性があるため）
         // 状態が自動的に Off になるのを待機する（ヘッダー等は ViewModel から反映される）
@@ -118,7 +119,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // Act: Header の Jam ボタンを Invoke してエラー状態にする
         var jamBtn = Retry.WhileNull(() => window.FindFirstDescendant(cf => cf.ByAutomationId("HeaderSimulateJamButton")), TimeSpan.FromSeconds(15)).Result?.AsButton();
         jamBtn.ShouldNotBeNull("HeaderSimulateJamButton not found for GlobalReset test");
-        jamBtn.Patterns.Invoke.Pattern.Invoke();
+        jamBtn!.Patterns.Invoke.Pattern.Invoke();
 
         // [STABILITY] 状態が反映されるのを待機
         Retry.WhileFalse(() => {
@@ -135,7 +136,8 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => globalResetBtn.IsEnabled, TimeSpan.FromSeconds(5)).Success.ShouldBeTrue("GlobalResetErrorButton should be enabled when jammed");
 
         // Act: Click Global Reset (Using Invoke for stability)
-        globalResetBtn.Patterns.Invoke.Pattern.Invoke();
+        globalResetBtn.ShouldNotBeNull();
+        globalResetBtn!.Patterns.Invoke.Pattern.Invoke();
 
         // 状態が自動的に Off になるのを待機する
         // 状態が自動的に Off になるのを待機する
@@ -181,7 +183,8 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         // 有効になるまで待機
         Retry.WhileFalse(() => launchDispenseBtn != null && launchDispenseBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("LaunchDispenseButton was not enabled");
         
-        if (launchDispenseBtn.Patterns.Invoke.IsSupported) launchDispenseBtn.Patterns.Invoke.Pattern.Invoke();
+        launchDispenseBtn.ShouldNotBeNull();
+        if (launchDispenseBtn!.Patterns.Invoke.IsSupported) launchDispenseBtn.Patterns.Invoke.Pattern.Invoke();
         else launchDispenseBtn.SmartClick();
 
         // 出金ウィンドウを待機 (デスクトップおよびメインウィンドウの直系から検索)
@@ -225,7 +228,7 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         var dispenseJamBtn = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseSimulateJamButton"))?.AsButton();
         dispenseJamBtn.ShouldNotBeNull("DispenseSimulateJamButton not found in dispense window");
         
-        if (dispenseJamBtn.Patterns.Invoke.IsSupported) dispenseJamBtn.Patterns.Invoke.Pattern.Invoke();
+        if (dispenseJamBtn!.Patterns.Invoke.IsSupported) dispenseJamBtn.Patterns.Invoke.Pattern.Invoke();
         else dispenseJamBtn.SmartClick();
 
         // [STABILITY] Wait for error visual state to be fully loaded
