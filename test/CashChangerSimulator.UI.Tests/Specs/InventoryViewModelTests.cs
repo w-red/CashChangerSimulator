@@ -180,7 +180,9 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
         vm.RecentTransactions.Clear();
         
         // Act
-        for (int i = 0; i < 60; i++)
+        // [STABILITY] 60 records can be heavy in some CI environments due to UI notifications.
+        // 55 records are sufficient to verify the 50-item limit.
+        for (int i = 0; i < 55; i++)
         {
             var entry = new TransactionEntry(DateTimeOffset.Now, TransactionType.Deposit, i * 100, new Dictionary<DenominationKey, int>());
             _fixture.History.Add(entry);
@@ -188,7 +190,7 @@ public class InventoryViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Assert
         vm.RecentTransactions.Count.ShouldBe(50);
-        vm.RecentTransactions.First().Amount.ShouldBe(5900); // 最新が先頭
+        vm.RecentTransactions.First().Amount.ShouldBe(5400); // 最新が先頭
     }
 
     /// <summary>グリッドの幅割合が正しく計算されることを検証します。</summary>
