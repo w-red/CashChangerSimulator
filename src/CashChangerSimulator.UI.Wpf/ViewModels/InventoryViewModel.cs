@@ -28,9 +28,9 @@ public class InventoryViewModel : IDisposable
     private readonly CompositeDisposable _disposables = [];
 
     /// <summary>通貨の接頭辞（例: ￥）。</summary>
-    public BindableReactiveProperty<string> CurrencyPrefix { get; }
+    public BindableReactiveProperty<string> CurrencyPrefix { get; } = default!;
     /// <summary>通貨の接尾辞。</summary>
-    public BindableReactiveProperty<string> CurrencySuffix { get; }
+    public BindableReactiveProperty<string> CurrencySuffix { get; } = default!;
 
     /// <summary>紙幣金種のリスト。</summary>
     public ObservableCollection<DenominationViewModel> BillDenominations { get; } = [];
@@ -116,9 +116,12 @@ public class InventoryViewModel : IDisposable
         _viewModelFactory = viewModelFactory;
         _dispatcher = dispatcher;
 
-        // Ensure UI context for reactive updates ONLY when running in a real WPF application context.
-        Observable<T> Sync<T>(Observable<T> observable) => 
-            System.Windows.Application.Current != null ? observable.ObserveOn(SynchronizationContext.Current) : observable;
+        // Ensure UI context for reactive updates. Always observe on the UI thread context
+        // to prevent threading exceptions when sources fire from background threads.
+        Observable<T> Sync<T>(Observable<T> observable)
+        {
+            return observable.ObserveOn(new CashChangerSimulator.UI.Wpf.Services.DispatcherServiceSynchronizationContext(_dispatcher));
+        }
 
         CurrencyPrefix = _metadataProvider.SymbolPrefix.ToBindableReactiveProperty("").AddTo(_disposables);
         CurrencySuffix = _metadataProvider.SymbolSuffix.ToBindableReactiveProperty("").AddTo(_disposables);
@@ -190,11 +193,11 @@ public class InventoryViewModel : IDisposable
             _facade.View.ShowRecoveryHelpDialogAsync(this);
         });
 
-        _facade.Monitors.Changed
+        Sync(_facade.Monitors.Changed)
             .Subscribe(_ => SafeInvoke(InitializeDenominations))
             .AddTo(_disposables);
 
-        _facade.History.Added
+        Sync(_facade.History.Added)
             .Subscribe(entry => SafeInvoke(() =>
             {
                 RecentTransactions.Insert(0, entry);

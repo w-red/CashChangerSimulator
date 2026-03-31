@@ -21,6 +21,7 @@ public class DispenseViewModel : IDisposable
     private readonly IDispenseOperationService _dispenseService;
     private readonly IInventoryOperationService _inventoryService;
     private readonly BindableReactiveProperty<bool> _isInDepositMode;
+    private readonly IDispatcherService _dispatcher;
     private readonly CompositeDisposable _disposables = [];
 
     // --- State Properties ---
@@ -32,10 +33,10 @@ public class DispenseViewModel : IDisposable
     public BindableReactiveProperty<string> DispenseAmountInput { get; }
 
     /// <summary>通貨記号。</summary>
-    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencyPrefix { get; } = default!;
 
     /// <summary>通貨単位。</summary>
-    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; }
+    public ReadOnlyReactiveProperty<string> CurrencySuffix { get; } = default!;
 
     /// <summary>出金ステータス。</summary>
     public BindableReactiveProperty<CashDispenseStatus> Status { get; }
@@ -93,13 +94,6 @@ public class DispenseViewModel : IDisposable
     /// <summary>デバイスエラーをシミュレートするコマンド。</summary>
     public ReactiveCommand SimulateDeviceErrorCommand { get; }
 
-    /// <summary>必要なサービスを注入して <see cref="DispenseViewModel"/> を初期化します。</summary>
-    /// <param name="facade">デバイスとコア機能の Facade である <see cref="IDeviceFacade"/>。</param>
-    /// <param name="configProvider">アプリケーション設定を提供する <see cref="ConfigurationProvider"/>。</param>
-    /// <param name="isInDepositMode">現在入金モード中かどうかを示す反応型プロパティ。</param>
-    /// <param name="getDenominations">利用可能な金種 ViewModel のリストを取得する関数。</param>
-    /// <param name="notifyService">ユーザーへの通知を行うサービス。</param>
-    /// <param name="metadataProvider">通貨の表示形式（記号など）を提供するプロバイダー。</param>
     public DispenseViewModel(
         IDeviceFacade facade,
         ConfigurationProvider configProvider,
@@ -107,7 +101,8 @@ public class DispenseViewModel : IDisposable
         Func<IEnumerable<DenominationViewModel>> getDenominations,
         IDispenseOperationService dispenseService,
         IInventoryOperationService inventoryService,
-        CurrencyMetadataProvider metadataProvider)
+        CurrencyMetadataProvider metadataProvider,
+        IDispatcherService dispatcher)
     {
         ArgumentNullException.ThrowIfNull(facade);
         ArgumentNullException.ThrowIfNull(configProvider);
@@ -116,12 +111,14 @@ public class DispenseViewModel : IDisposable
         ArgumentNullException.ThrowIfNull(dispenseService);
         ArgumentNullException.ThrowIfNull(inventoryService);
         ArgumentNullException.ThrowIfNull(metadataProvider);
+        ArgumentNullException.ThrowIfNull(dispatcher);
 
         _facade = facade;
         _configProvider = configProvider;
         _isInDepositMode = isInDepositMode;
         _dispenseService = dispenseService;
         _inventoryService = inventoryService;
+        _dispatcher = dispatcher;
 
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
@@ -130,12 +127,7 @@ public class DispenseViewModel : IDisposable
         // to prevent threading exceptions when sources fire from background threads.
         Observable<T> Sync<T>(Observable<T> observable)
         {
-            var syncContext = System.Threading.SynchronizationContext.Current 
-                ?? (System.Windows.Application.Current?.Dispatcher != null 
-                    ? new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher) 
-                    : null);
-
-            return syncContext != null ? observable.ObserveOn(syncContext) : observable;
+            return observable.ObserveOn(new CashChangerSimulator.UI.Wpf.Services.DispatcherServiceSynchronizationContext(_dispatcher));
         }
 
         // --- Hardware State Observables ---
@@ -162,14 +154,14 @@ public class DispenseViewModel : IDisposable
             })
             .AddTo(_disposables);
 
-        IsBusy = Sync(Status
-            .Select(s => s == CashDispenseStatus.Busy))
+        IsBusy = Status
+            .Select(s => s == CashDispenseStatus.Busy)
             .ToBindableReactiveProperty(_facade.Dispense.Status == CashDispenseStatus.Busy)
             .AddTo(_disposables);
 
         // --- UI State Strategy ---
 
-        CurrentState = Sync(Status
+        CurrentState = Status
             .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, (status, jammed, overlapped, devErr) =>
             {
                 if (status == CashDispenseStatus.Error || jammed || overlapped || devErr)
@@ -177,7 +169,7 @@ public class DispenseViewModel : IDisposable
                 if (status == CashDispenseStatus.Busy)
                     return DispenseUIState.Busy;
                 return DispenseUIState.Idle;
-            }))
+            })
             .ToBindableReactiveProperty(
                 (_facade.Dispense.Status == CashDispenseStatus.Error || _facade.Status.IsJammed.Value || _facade.Status.IsOverlapped.Value || _facade.Status.IsDeviceError.Value) 
                     ? DispenseUIState.Error 
@@ -185,19 +177,19 @@ public class DispenseViewModel : IDisposable
             )
             .AddTo(_disposables);
 
-        CanOperate = Sync(IsBusy
-            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, _isInDepositMode, (busy, jammed, overlapped, devErr, deposit) => !busy && !jammed && !overlapped && !devErr && !deposit))
+        CanOperate = IsBusy
+            .CombineLatest(IsJammed, IsOverlapped, IsDeviceError, _isInDepositMode, (busy, jammed, overlapped, devErr, deposit) => !busy && !jammed && !overlapped && !devErr && !deposit)
             .ToBindableReactiveProperty(!IsBusy.Value && !IsJammed.Value && !IsOverlapped.Value && !IsDeviceError.Value && !_isInDepositMode.Value)
             .AddTo(_disposables);
 
         DispensingAmount = new BindableReactiveProperty<decimal>(0m).AddTo(_disposables);
 
         TotalAmount = new BindableReactiveProperty<decimal>(_facade.Inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode)).AddTo(_disposables);
-        _facade.Inventory.Changed
+        Sync(_facade.Inventory.Changed)
             .Subscribe(_ =>
             {
                 var total = _facade.Inventory.CalculateTotal(_configProvider.Config.System.CurrencyCode);
-                _facade.Dispatcher.SafeInvoke(() => TotalAmount.Value = total);
+                TotalAmount.Value = total;
             })
             .AddTo(_disposables);
 
