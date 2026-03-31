@@ -222,12 +222,15 @@ public class ErrorResetUITests : IClassFixture<CashChangerTestApp>
         if (sidebarJamBtn.Patterns.Invoke.IsSupported) sidebarJamBtn.Patterns.Invoke.Pattern.Invoke();
         else sidebarJamBtn.SmartClick();
 
+        // [STABILITY] Wait for error visual state to be fully loaded
+        Retry.WhileNull(() => dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")), TimeSpan.FromSeconds(20))
+            .Success.ShouldBeTrue("DispenseErrorResetButton did not appear");
+
         // エラー解消ボタンを探す (オーバーレイまたは通常ビュー内のリセットボタン)
         var overlayResetBtn = Retry.WhileNull(() => 
-            dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")) ??
-            dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("ResetErrorButton")), 
+            dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseErrorResetButton")), 
             TimeSpan.FromSeconds(15)).Result?.AsButton();
-        overlayResetBtn.ShouldNotBeNull("Dispense reset button not found (DispenseErrorResetButton or ResetErrorButton)");
+        overlayResetBtn.ShouldNotBeNull("Dispense reset button not found (DispenseErrorResetButton)");
 
         // Act: Overlay の Reset をクリック
         overlayResetBtn.SmartClick();

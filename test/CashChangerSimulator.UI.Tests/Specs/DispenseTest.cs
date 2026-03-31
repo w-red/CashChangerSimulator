@@ -119,9 +119,20 @@ public class DispenseTest : IClassFixture<CashChangerTestApp>
         showBulkButton!.IsEnabled.ShouldBeFalse();
 
         // Reset Error
-        var resetErrorButton = FindElement(dispenseWindow, "ResetErrorButton", null)?.AsButton();
+        var resetErrorButton = FindElement(dispenseWindow, "DispenseErrorResetButton", null)?.AsButton();
+        resetErrorButton.ShouldNotBeNull("DispenseErrorResetButton not found");
         resetErrorButton.SmartClick();
-        Thread.Sleep(UITestTimings.UiTransitionDelayMs);
+        
+        // [STABILITY] Wait for transition back to Idle view
+        Retry.WhileFalse(() => {
+            var box = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"));
+            return box != null && box.IsEnabled;
+        }, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("DispenseBox did not become enabled after reset");
+
+        // Re-find elements because the view was swapped
+        dispenseBox = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseBox"))?.AsTextBox();
+        dispenseButton = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("DispenseButton"))?.AsButton();
+        showBulkButton = dispenseWindow.FindFirstDescendant(cf => cf.ByAutomationId("BulkDispenseShowButton"))?.AsButton();
 
         // Verify enabled state
         dispenseBox!.IsEnabled.ShouldBeTrue();
