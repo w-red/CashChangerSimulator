@@ -126,15 +126,16 @@ public class DispenseViewModel : IDisposable
         CurrencyPrefix = metadataProvider.SymbolPrefix;
         CurrencySuffix = metadataProvider.SymbolSuffix;
 
-        // Ensure UI context for reactive updates. Use Dispatcher SynchronizationContext if available.
+        // Ensure UI context for reactive updates. Always observe on the UI thread context
+        // to prevent threading exceptions when sources fire from background threads.
         Observable<T> Sync<T>(Observable<T> observable)
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null && !dispatcher.CheckAccess())
-            {
-                return observable.ObserveOn(new System.Windows.Threading.DispatcherSynchronizationContext(dispatcher));
-            }
-            return observable;
+            var syncContext = System.Threading.SynchronizationContext.Current 
+                ?? (System.Windows.Application.Current?.Dispatcher != null 
+                    ? new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher) 
+                    : null);
+
+            return syncContext != null ? observable.ObserveOn(syncContext) : observable;
         }
 
         // --- Hardware State Observables ---
