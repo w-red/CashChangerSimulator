@@ -81,9 +81,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         firstTextBox.ShouldNotBeNull();
         firstTextBox.Text = "3";
         Thread.Sleep(100);
-        firstTextBox.Focus();
-        FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
-        Thread.Sleep(500);
+        // firstTextBox.Focus();
+        // FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
+        Thread.Sleep(100);
 
         var okButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
         okButton.SmartClick();
@@ -213,9 +213,9 @@ public class DepositTest : IClassFixture<CashChangerTestApp>
         var targetTextBox = textBoxes[denomIndex].AsTextBox();
         targetTextBox.Text = quantity;
         Thread.Sleep(500);
-        targetTextBox.Focus();
-        FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
-        Thread.Sleep(500);
+        // targetTextBox.Focus();
+        // FlaUI.Core.Input.Keyboard.Type(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
+        Thread.Sleep(100);
 
         var executeButton = FindElement(dialog, "BulkConfirmButton", "OK")?.AsButton();
         executeButton?.Focus();
