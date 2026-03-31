@@ -50,7 +50,8 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         if (openBtn != null && !openBtn.IsOffscreen && openBtn.IsEnabled)
         {
             var btn = openBtn.AsButton();
-            if (btn.Patterns.Invoke.IsSupported) btn.Patterns.Invoke.Pattern.Invoke();
+            btn.ShouldNotBeNull();
+            if (btn!.Patterns.Invoke.IsSupported) btn.Patterns.Invoke.Pattern.Invoke();
             else btn.SmartClick();
         }
 
@@ -75,8 +76,10 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Thread.Sleep(500);
         
         // Ensure it's clicked. Try multiple ways if needed.
-        if (launchBtn.AsButton().Patterns.Invoke.IsSupported) launchBtn.AsButton().Patterns.Invoke.Pattern.Invoke();
-        else launchBtn.AsButton().SmartClick();
+        var launchBtnAsButton = launchBtn.AsButton();
+        launchBtnAsButton.ShouldNotBeNull();
+        if (launchBtnAsButton!.Patterns.Invoke.IsSupported) launchBtnAsButton.Patterns.Invoke.Pattern.Invoke();
+        else launchBtnAsButton.SmartClick();
         // ウィンドウを検索 (堅牢な共通ロジックを使用)
         var advWindow = UiTestRetry.FindWindow(_app.Application, _app.Automation, "AdvancedSimulationWindow", timeout: UITestTimings.RetryLongTimeout);
         advWindow.ShouldNotBeNull("Advanced Simulation window should be open.");
@@ -108,7 +111,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         }
 
         // Act: Simulate Jam
-        simulateJamBtn.Focus();
+        simulateJamBtn!.Focus();
         if (simulateJamBtn.Patterns.Invoke.IsSupported) simulateJamBtn.Patterns.Invoke.Pattern.Invoke();
         else simulateJamBtn.SmartClick();
         Thread.Sleep(UITestTimings.UiTransitionDelayMs);
@@ -129,7 +132,7 @@ public class AdvancedSimulationUITests : IClassFixture<CashChangerTestApp>
         Retry.WhileFalse(() => resetBtn.IsEnabled, TimeSpan.FromSeconds(10)).Success.ShouldBeTrue("ResetErrorButton should enable after jam");
 
         // Act: Reset
-        if (resetBtn.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
+        if (resetBtn!.Patterns.Invoke.IsSupported) resetBtn.Patterns.Invoke.Pattern.Invoke();
         else resetBtn.SmartClick();
 
         // Assert: Jam indicator should disappear (Visibility=Collapsed)
