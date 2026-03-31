@@ -43,8 +43,8 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Assert
         vm.TotalAmount.Value.ShouldBe(100 * 100 + 1000 * 100);
-        vm.IsBusy.CurrentValue.ShouldBeFalse();
-        vm.Status.CurrentValue.ShouldBe(CashDispenseStatus.Idle);
+        vm.IsBusy.Value.ShouldBeFalse();
+        vm.Status.Value.ShouldBe(CashDispenseStatus.Idle);
     }
 
     /// <summary>出金金額入力のバリデーションロジックを検証します。</summary>
@@ -153,7 +153,7 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
         vm.DispenseCommand.Execute(Unit.Default);
         
         // Assert
-        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsDeviceError.CurrentValue, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
+        FlaUI.Core.Tools.Retry.WhileFalse(() => vm.IsDeviceError.Value, TimeSpan.FromSeconds(2)).Success.ShouldBeTrue();
     }
 
     /// <summary>シミュレーションコマンドがハードウェアの状態を正しく変化させることを検証します。</summary>
@@ -165,11 +165,11 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
 
         // Act & Assert (Jam)
         vm.SimulateJamCommand.Execute(Unit.Default);
-        vm.IsJammed.CurrentValue.ShouldBeTrue();
+        vm.IsJammed.Value.ShouldBeTrue();
 
         // Act & Assert (Overlap)
         vm.SimulateOverlapCommand.Execute(Unit.Default);
-        vm.IsOverlapped.CurrentValue.ShouldBeTrue();
+        vm.IsOverlapped.Value.ShouldBeTrue();
     }
 
     /// <summary>エラーリセットコマンドが状態をクリアすることを検証します。</summary>
@@ -184,7 +184,7 @@ public class DispenseViewModelTests : IClassFixture<UIViewModelFixture>
         vm.ResetErrorCommand.Execute(Unit.Default);
 
         // Assert
-        vm.IsJammed.CurrentValue.ShouldBeFalse();
+        vm.IsJammed.Value.ShouldBeFalse();
     }
 
     /// <summary>入金モード中に払出を実行しようとした場合に警告が表示されることを検証します。</summary>
