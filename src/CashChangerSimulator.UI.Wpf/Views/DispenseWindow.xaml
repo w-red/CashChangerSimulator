@@ -35,23 +35,48 @@
                                FontWeight="Black"/>
                 </StackPanel>
 
-                <!-- Content -->
+                <!-- Content Switching via Visibility (Fixed for UI Automation Stability) -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="ContentTemplate" Value="{StaticResource DispenseIdleTemplate}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding StatusName.Value}" Value="Busy">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource DispenseBusyTemplate}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding StatusName.Value}" Value="Error">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource DispenseErrorTemplate}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
+                    <Grid>
+                        <views:DispenseIdleView AutomationProperties.AutomationId="DispenseIdleView">
+                            <views:DispenseIdleView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DispenseUIState.Idle}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DispenseIdleView.Style>
+                        </views:DispenseIdleView>
+
+                        <views:DispenseBusyView AutomationProperties.AutomationId="DispenseBusyView">
+                            <views:DispenseBusyView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DispenseUIState.Busy}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DispenseBusyView.Style>
+                        </views:DispenseBusyView>
+
+                        <views:DispenseErrorView AutomationProperties.AutomationId="DispenseErrorView">
+                            <views:DispenseErrorView.Style>
+                                <Style TargetType="UserControl">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentState.Value}" Value="{x:Static vm:DispenseUIState.Error}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </views:DispenseErrorView.Style>
+                        </views:DispenseErrorView>
+                    </Grid>
                 </ScrollViewer>
             </Grid>
         </Border>
