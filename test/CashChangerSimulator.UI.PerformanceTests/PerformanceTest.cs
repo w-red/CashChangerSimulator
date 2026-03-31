@@ -11,8 +11,8 @@ using System.IO;
 namespace CashChangerSimulator.UI.PerformanceTests;
 
 /// <summary>パフォーマンス測定のためのテストクラス。</summary>
-/// <param name="output">テスト出力ヘルパー。</param>
-/// <summary>Test class for providing PerformanceTest functionality.</summary>
+/// <remarks>大量取引やロギングのオーバーヘッドを検証します。</remarks>
+[Collection("SequentialTests")]
 public class PerformanceTest(ITestOutputHelper output)
 {
     /// <summary>大量取引時のパフォーマンスを検証する。</summary>

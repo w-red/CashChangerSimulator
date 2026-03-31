@@ -9,9 +9,8 @@ using FlaUI.Core.Tools;
 
 namespace CashChangerSimulator.UI.PerformanceTests;
 
-/// <summary>
-/// ZLogger等の連携時に、大量のトランザクションがUIの応答性に深刻な影響を与えないかを検証するUIパフォーマンステスト。
-/// </summary>
+/// <summary>大量トランザクション実行時の UI 応答性を検証するテスト。</summary>
+/// <remarks>ZLogger 等の連携時に、大量のトランザクションが UI の応答性に深刻な影響を与えないかを検証します。</remarks>
 [Collection("SequentialTests")]
 public class UiPerformanceTest : IDisposable
 {

@@ -82,34 +82,21 @@
             </StackPanel>
         </Button>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
-            <Button x:Name="ResetErrorButton" Command="{Binding ResetErrorCommand}"
-                    Content="{StaticResource ResetError}"
-                    AutomationProperties.AutomationId="ResetErrorButton"
-                    FontSize="10" Padding="8,2"
-                    Margin="0,0,8,0">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button x:Name="SimulateJamButton" Style="{StaticResource SimulationErrorButtonStyle}" 
-                    Command="{Binding SimulateJamCommand}"
-                    Content="{StaticResource SimulateJam}"
-                    AutomationProperties.AutomationId="SimulateJamButton"
-                    FontSize="10" Padding="8,2"/>
-        </StackPanel>
+        <!-- Footer (Simulations) -->
+        <Border Margin="0,32,0,0" Padding="0,16,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesign.Brush.Outline}" Opacity="0.5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="SimulateOverlapButton" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateOverlapCommand}"
+                        Content="{StaticResource Overlap}"
+                        AutomationProperties.AutomationId="SimulateOverlapButton"
+                        FontSize="10" Padding="12,2"
+                        Margin="0,0,8,0"/>
+                <Button x:Name="SimulateJamButton" Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateJamCommand}"
+                        Content="{StaticResource Jam}"
+                        AutomationProperties.AutomationId="SimulateJamButton"
+                        FontSize="10" Padding="12,2"/>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

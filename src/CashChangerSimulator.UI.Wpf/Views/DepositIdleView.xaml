@@ -43,41 +43,8 @@
             </StackPanel>
         </Button>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
-            <Button Command="{Binding ResetErrorCommand}"
-                    Content="{StaticResource ResetError}"
-                    AutomationProperties.AutomationId="ResetErrorButton"
-                    FontSize="10" Padding="8,2"
-                    Margin="0,0,8,0" Cursor="Hand">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource ErrorResetButtonStyle}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsJammed.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsOverlapped.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsDeviceError.Value}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button Style="{StaticResource SimulationErrorButtonStyle}" 
-                    Command="{Binding SimulateOverlapCommand}"
-                    Content="{StaticResource SimulateOverlap}"
-                    AutomationProperties.AutomationId="IdleSimulateOverlapButton"
-                    FontSize="10" Padding="8,2"
-                    Margin="0,0,8,0"/>
-            <Button Style="{StaticResource SimulationErrorButtonStyle}" 
-                    Command="{Binding SimulateJamCommand}"
-                    FontSize="10" Padding="8,2"
-                    AutomationProperties.AutomationId="IdleSimulateJamButton"
-                    Content="{StaticResource SimulateJam}"/>
-        </StackPanel>
+        <TextBlock Text="{StaticResource AutoCalcDenoms}" 
+                   FontSize="10" Opacity="0.4" HorizontalAlignment="Center" Margin="0,8,0,0"/>
 
         <Separator Background="#1AFFFFFF" Margin="0,24"/>
 
@@ -112,7 +79,25 @@
                 <materialDesign:PackIcon Kind="Flash" Width="20" Height="20"/>
             </Button>
         </Grid>
-        <TextBlock Text="{StaticResource AutoCalcDenoms}" 
-                   FontSize="10" Opacity="0.4" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+
+        <!-- Footer (Simulations) -->
+        <Border Style="{StaticResource SimulationFooterBorderStyle}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateOverlapCommand}"
+                        Content="{StaticResource Overlap}"
+                        AutomationProperties.AutomationId="IdleSimulateOverlapButton"
+                        Margin="0,0,8,0"/>
+                <Button Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateJamCommand}"
+                        AutomationProperties.AutomationId="IdleSimulateJamButton"
+                        Content="{StaticResource Jam}"
+                        Margin="0,0,8,0"/>
+                <Button Style="{StaticResource SimulationErrorButtonStyle}" 
+                        Command="{Binding SimulateDeviceErrorCommand}"
+                        AutomationProperties.AutomationId="IdleSimulateErrorButton"
+                        Content="{StaticResource Error}"/>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

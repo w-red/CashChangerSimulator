@@ -163,7 +163,7 @@ public class DocumentationScreenshotGenerator : IDisposable
         }
         else
         {
-            if (window != null) window.Focus();
+            window?.Focus();
             FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.RETURN);
             // After RETURN, wait a bit and escape
             Thread.Sleep(500);

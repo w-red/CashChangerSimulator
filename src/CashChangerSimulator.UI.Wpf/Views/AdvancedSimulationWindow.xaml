@@ -42,67 +42,14 @@
             <!-- Content -->
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/> <!-- Simulation Controls -->
-                    <RowDefinition Height="Auto"/> <!-- Scripting -->
+                    <RowDefinition Height="Auto"/> <!-- Scripting Area -->
                     <RowDefinition Height="*"/>    <!-- Status lists -->
+                    <RowDefinition Height="Auto"/> <!-- Simulation Controls (Moved from top) -->
                 </Grid.RowDefinitions>
                 
-                <!-- Simulation Controls -->
-                <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
-                    <StackPanel>
-                        <TextBlock Text="{StaticResource ErrorSimulationTitle}" Style="{StaticResource MaterialDesignTitleLargeTextBlock}" Margin="0,0,0,16"/>
-                        
-                        <WrapPanel Orientation="Horizontal">
-                            <Button Content="{StaticResource SimulateJam}" 
-                                    Command="{Binding SimulateJamCommand}"
-                                    AutomationProperties.AutomationId="SimulateJamButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="{DynamicResource App.Brush.Jam}" BorderBrush="{DynamicResource App.Brush.Jam}"
-                                    Margin="0,0,8,8"/>
-                            <Button Content="{StaticResource SimulateOverlap}" 
-                                    Command="{Binding SimulateOverlapCommand}"
-                                    AutomationProperties.AutomationId="SimulateOverlapButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="{DynamicResource App.Brush.Overlap}" BorderBrush="{DynamicResource App.Brush.Overlap}"
-                                    Margin="0,0,8,8"/>
-                            <Button Content="{StaticResource SimulateDeviceError}" 
-                                    Command="{Binding SimulateDeviceErrorCommand}"
-                                    AutomationProperties.AutomationId="SimulateDeviceErrorButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="{DynamicResource App.Brush.Warning}" BorderBrush="{DynamicResource App.Brush.Warning}" Foreground="Black"
-                                    Margin="0,0,8,8"/>
-                            <Button Content="{StaticResource Reset}" 
-                                    Command="{Binding ResetErrorCommand}"
-                                    AutomationProperties.AutomationId="ResetErrorButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Margin="0,0,8,8"/>
-                        </WrapPanel>
-
-                        <!-- Status Display -->
-                        <StackPanel Margin="0,16,0,0">
-                            <materialDesign:Chip Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="{DynamicResource App.Brush.Jam}" Foreground="White" Margin="0,4">
-                                <materialDesign:Chip.Icon>
-                                    <materialDesign:PackIcon Kind="AlertCircle"/>
-                                </materialDesign:Chip.Icon>
-                                <TextBlock Text="{StaticResource StatusJamDetected}" AutomationProperties.AutomationId="JamIndicatorText"/>
-                            </materialDesign:Chip>
-                            
-                            <materialDesign:Chip Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="{DynamicResource App.Brush.Overlap}" Foreground="White" Margin="0,4">
-                                <TextBlock Text="{StaticResource StatusOverlapDetected}" AutomationProperties.AutomationId="OverlapIndicatorText"/>
-                            </materialDesign:Chip>
-                            
-                            <materialDesign:Chip Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
-                                               Background="{DynamicResource App.Brush.Warning}" Foreground="Black" Margin="0,4">
-                                <TextBlock Text="{StaticResource StatusDeviceError}" AutomationProperties.AutomationId="DeviceErrorIndicatorText"/>
-                            </materialDesign:Chip>
-                        </StackPanel>
-                    </StackPanel>
-                </materialDesign:Card>
 
                 <!-- Scripting Area -->
-                <materialDesign:Card Grid.Row="1" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
+                <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
                     <StackPanel>
                         <TextBlock Text="{StaticResource ScriptExecutionTitle}" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,8"/>
                         <TextBox x:Name="ScriptInputTextBox" 
@@ -121,7 +68,7 @@
                 </materialDesign:Card>
 
                 <!-- Lists -->
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="1" Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -157,6 +104,58 @@
                         </StackPanel>
                     </materialDesign:Card>
                 </Grid>
+
+                <!-- Simulation Controls (Bottom-aligned) -->
+                <materialDesign:Card Grid.Row="2" Padding="16" Background="{DynamicResource MaterialDesign.Brush.SurfaceContainerHigh}">
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource ErrorSimulationTitle}" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,12"/>
+
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="{StaticResource Jam}" 
+                                    Command="{Binding SimulateJamCommand}"
+                                    AutomationProperties.AutomationId="SimulateJamButton"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="0,0,8,8"/>
+                            <Button Content="{StaticResource Overlap}" 
+                                    Command="{Binding SimulateOverlapCommand}"
+                                    AutomationProperties.AutomationId="SimulateOverlapButton"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="0,0,8,8"/>
+                            <Button Content="{StaticResource Error}" 
+                                    Command="{Binding SimulateDeviceErrorCommand}"
+                                    AutomationProperties.AutomationId="SimulateDeviceErrorButton"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    ToolTip="{StaticResource ToolTipSimulateError}"
+                                    Margin="0,0,8,8"/>
+                            <Button Content="{StaticResource Reset}" 
+                                    Command="{Binding ResetErrorCommand}"
+                                    AutomationProperties.AutomationId="ResetErrorButton"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Margin="0,0,8,8"/>
+                        </WrapPanel>
+
+                        <!-- Status Display -->
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                            <materialDesign:Chip Visibility="{Binding IsJammed.Value, Converter={StaticResource BoolToVis}}"
+                                               Background="{DynamicResource App.Brush.Jam}" Foreground="White" Margin="0,0,8,0">
+                                <materialDesign:Chip.Icon>
+                                    <materialDesign:PackIcon Kind="AlertCircle"/>
+                                </materialDesign:Chip.Icon>
+                                <TextBlock Text="{StaticResource StatusJamDetected}" AutomationProperties.AutomationId="JamIndicatorText"/>
+                            </materialDesign:Chip>
+
+                            <materialDesign:Chip Visibility="{Binding IsOverlapped.Value, Converter={StaticResource BoolToVis}}"
+                                               Background="{DynamicResource App.Brush.Overlap}" Foreground="White" Margin="0,0,8,0">
+                                <TextBlock Text="{StaticResource StatusOverlapDetected}" AutomationProperties.AutomationId="OverlapIndicatorText"/>
+                            </materialDesign:Chip>
+
+                            <materialDesign:Chip Visibility="{Binding IsDeviceError.Value, Converter={StaticResource BoolToVis}}"
+                                               Background="{DynamicResource App.Brush.Warning}" Foreground="Black" Margin="0,0,8,0">
+                                <TextBlock Text="{StaticResource StatusDeviceError}" AutomationProperties.AutomationId="DeviceErrorIndicatorText"/>
+                            </materialDesign:Chip>
+                        </StackPanel>
+                    </StackPanel>
+                </materialDesign:Card>
             </Grid>
 
             <!-- Footer -->
