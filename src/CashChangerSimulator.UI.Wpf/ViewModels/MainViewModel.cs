@@ -107,7 +107,7 @@ public class MainViewModel : IDisposable
             () => Inventory.Denominations)
             .AddTo(_disposables);
             
-        Sync(Dispense.IsBusy)
+        Dispense.IsBusy
             .Subscribe(busy => 
             {
                 if (isDispenseBusy.IsDisposed) return;
