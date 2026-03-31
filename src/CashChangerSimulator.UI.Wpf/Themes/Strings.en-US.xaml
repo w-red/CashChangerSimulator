@@ -85,6 +85,7 @@
     <system:String x:Key="QuickDispense">QUICK DISPENSE</system:String>
     <system:String x:Key="BulkDispense">BULK DISPENSE</system:String>
     <system:String x:Key="DispenseError">DISPENSE ERROR</system:String>
+    <system:String x:Key="DepositError">DEPOSIT ERROR</system:String>
     <system:String x:Key="HardwareCheckRequired">Please check the hardware.</system:String>
     <system:String x:Key="ClearError">CLEAR ERROR</system:String>
     <system:String x:Key="ResetError">RESET ERROR</system:String>

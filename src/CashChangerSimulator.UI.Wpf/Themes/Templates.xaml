@@ -396,24 +396,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="DepositErrorTemplate">
-        <Grid>
-            <!-- DepositErrorView does not exist yet. Only showing reset button for now if ever used. -->
-            <Border
-                Style="{StaticResource CardStyle}"
-                Background="{DynamicResource MaterialDesign.Brush.SurfaceVariant}"
-                Margin="0,0,0,16"
-                Padding="12">
-                <Button
-                    Content="{StaticResource ResetError}"
-                    Command="{Binding ResetErrorCommand}"
-                    Style="{StaticResource ErrorResetButtonStyle}"
-                    Padding="30,10"
-                    FontSize="18"
-                    FontWeight="Bold"
-                    VerticalAlignment="Bottom"
-                    HorizontalAlignment="Center"/>
-            </Border>
-        </Grid>
+        <views:DepositErrorView />
     </DataTemplate>
 
     <DataTemplate x:Key="DepositIdleTemplate">

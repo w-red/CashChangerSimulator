@@ -47,8 +47,8 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
-                <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.OnPrimary}"/>
             </Trigger>
         </Style.Triggers>
     </Style>

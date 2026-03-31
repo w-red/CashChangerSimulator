@@ -85,6 +85,7 @@
     <system:String x:Key="QuickDispense">クイック出金</system:String>
     <system:String x:Key="BulkDispense">一括出金</system:String>
     <system:String x:Key="DispenseError">出金エラー</system:String>
+    <system:String x:Key="DepositError">入金エラー</system:String>
     <system:String x:Key="HardwareCheckRequired">ハードウェアを確認してください。</system:String>
     <system:String x:Key="ClearError">エラー解除</system:String>
     <system:String x:Key="ResetError">エラー解除</system:String>
